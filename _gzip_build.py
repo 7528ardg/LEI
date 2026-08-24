@@ -1,4 +1,22 @@
-<!DOCTYPE html>
+# -*- coding: utf-8 -*-
+"""gzip 版主文件构建：三大系统 gzip 压缩内嵌，运行时 DecompressionStream 解压，显著减小文件体积提升加载"""
+import gzip
+import base64
+import io
+import os
+
+SOURCES = {
+    'quiz': u'_work\\广州刷题.html',
+    'performance': u'_work\\广州综合绩效评定测试系统1.0(3).html',
+    'beauty': u'_work\\美妆销售话术生成系统.html',
+}
+OUTS = [
+    u'spring-assistant.html',
+    u'index.html',
+    u'春秋·广州分队全能助手.html',
+]
+
+TEMPLATE = u'''<!DOCTYPE html>
 <html lang="zh-CN" data-theme="light">
 <head>
 <meta charset="UTF-8">
@@ -9,7 +27,7 @@
 <meta name="apple-mobile-web-app-title" content="春秋全能助手">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="application-name" content="春秋·广州分队全能助手">
-<meta name="description" content="春秋航空广州分队综合管理平台 - 刷题·绩效·美妆话术（快速拆分版）">
+<meta name="description" content="春秋航空广州分队综合管理平台 - 刷题·绩效·美妆话术 全功能单文件版">
 <meta name="format-detection" content="telephone=no">
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <title>春秋航空 · 广州分队全能助手</title>
@@ -62,11 +80,13 @@ body{font-family:var(--font-sans);background:var(--bg);color:var(--text);min-hei
 .sys-spinner{width:44px;height:44px;border:4px solid var(--primary-soft);border-top-color:var(--primary);border-radius:50%;animation:spin .8s linear infinite;}
 .sys-loader .sl-text{font-size:.85rem;color:var(--text2);font-weight:500;}
 @keyframes spin{to{transform:rotate(360deg);}}
-/* ===== 平板/手机 ===== */
+/* ===== 平板优化（721-1100px） ===== */
 @media(min-width:721px) and (max-width:1100px){
   .topbar{padding:0 14px;gap:10px;}
   .brand-name{font-size:.95rem;}
   .mod-tab{padding:8px 12px;font-size:.82rem;gap:6px;}
+  .sys-area{top:calc(3px + var(--topbar-h));}
+  .toast-container{top:70px;}
 }
 @media(max-width:720px){
   .brand-name{font-size:.9rem;}
@@ -132,15 +152,37 @@ body{font-family:var(--font-sans);background:var(--bg);color:var(--text);min-hei
 <div class="toast-container" id="toastContainer"></div>
 
 <script>
-/* ===================== 拆分版：按需加载三大模块 ===================== */
-const MOD_SRC = {
-  quiz: 'quiz.html',
-  performance: 'performance.html',
-  beauty: 'beauty.html'
+/* ===================== 三大系统完整功能数据（gzip 压缩 base64 内嵌，运行时解压） ===================== */
+const MODULES = {
+  quiz: "__B64_quiz__",
+  performance: "__B64_performance__",
+  beauty: "__B64_beauty__"
 };
-const _loaded = {};
-let currentMod = null;
 
+/* ===================== 解码引擎（gzip 解压；兼容未压缩旧数据回退） ===================== */
+const _frames = {};
+function _b64ToBytes(b64){
+  const bin = atob(b64);
+  const bytes = new Uint8Array(bin.length);
+  for(let i=0;i<bin.length;i++) bytes[i] = bin.charCodeAt(i);
+  return bytes;
+}
+async function _b64ToHtml(b64){
+  const bytes = _b64ToBytes(b64);
+  // gzip 数据头部：0x1f 0x8b
+  if(bytes[0] === 0x1f && bytes[1] === 0x8b){
+    try{
+      const ds = new DecompressionStream('gzip');
+      const stream = new Blob([bytes]).stream().pipeThrough(ds);
+      const ab = await new Response(stream).arrayBuffer();
+      return new TextDecoder('utf-8').decode(ab);
+    }catch(e){ /* 若解压失败回退原文解码 */ }
+  }
+  return new TextDecoder('utf-8').decode(bytes);
+}
+
+/* ===================== 模块切换（懒加载 + 缓存 + 解压） ===================== */
+let currentMod = null;
 function switchModule(id){
   currentMod = id;
   document.querySelectorAll('.mod-tab').forEach(b => b.classList.toggle('active', b.dataset.mod===id));
@@ -148,23 +190,24 @@ function switchModule(id){
   const wrap = document.getElementById('wrap-'+id);
   wrap.classList.add('active');
 
-  if(!_loaded[id]){
+  if(!_frames[id]){
     const loader = document.getElementById('loader-'+id);
     const frame = document.getElementById('frame-'+id);
-    if(loader) loader.classList.remove('hidden');
-    frame.onload = function(){
-      _loaded[id] = true;
-      if(loader) loader.classList.add('hidden');
-      try{
-        const doc = frame.contentDocument;
-        const t = document.documentElement.getAttribute('data-theme');
-        if(doc && doc.documentElement) doc.documentElement.setAttribute('data-theme', t);
-      }catch(e){}
-    };
-    frame.onerror = function(){
-      if(loader) loader.querySelector('.sl-text').textContent = '模块加载失败，请刷新重试';
-    };
-    frame.src = MOD_SRC[id];
+    _b64ToHtml(MODULES[id]).then(function(html){
+      if(loader) loader.classList.remove('hidden');
+      frame.srcdoc = html;
+      frame.onload = function(){
+        if(loader) loader.classList.add('hidden');
+        try{
+          const doc = frame.contentDocument;
+          const t = document.documentElement.getAttribute('data-theme');
+          if(doc && doc.documentElement) doc.documentElement.setAttribute('data-theme', t);
+        }catch(e){}
+      };
+    }).catch(function(e){
+      console.error('模块加载失败:', id, e);
+      if(loader) loader.querySelector('.sl-text').textContent = '加载失败，请刷新重试';
+    });
   }
 }
 
@@ -176,7 +219,7 @@ function applyTheme(t){
   const btn = document.getElementById('themeBtn');
   btn.textContent = t==='dark' ? '🌙' : '☀️';
   ['quiz','performance','beauty'].forEach(id=>{
-    const f = document.getElementById('frame-'+id);
+    const f = _frames[id];
     if(f && f.contentDocument){
       try{ f.contentDocument.documentElement.setAttribute('data-theme', t); }catch(e){}
     }
@@ -216,3 +259,22 @@ switchModule('quiz');
 </script>
 </body>
 </html>
+'''
+
+def build():
+    t = TEMPLATE
+    for key, path in SOURCES.items():
+        raw = io.open(path, 'rb').read()
+        gz = gzip.compress(raw, 9)
+        b64 = base64.b64encode(gz).decode('ascii')
+        ph = '__B64_{}__'.format(key)
+        assert ph in t, 'placeholder missing ' + ph
+        t = t.replace(ph, b64)
+        print('{}: raw {:.2f}MB -> gz {:.2f}MB'.format(key, len(raw)/1048576.0, len(gz)/1048576.0))
+    for out in OUTS:
+        with io.open(out, 'w', encoding='utf-8') as f:
+            f.write(t)
+        print('写出', out, '{:.2f}MB'.format(os.path.getsize(out)/1048576.0))
+
+if __name__ == '__main__':
+    build()
