@@ -9236,9 +9236,11 @@ function isOnbDone(){
 }
 
 let onbIndex = 0;
+let _onbPrevScrollY = 0;   // 记录进入引导前的滚动位置（修复 iPad 引导结束后页面停留在半屏、开始按钮不可见）
 function startOnboarding(force){
   if(!force && isOnbDone()) return;
   onbIndex = 0;
+  _onbPrevScrollY = window.scrollY || 0;
   // 启动引导时隐藏"重看引导"按钮（避免与引导同时显示造成 UI 重叠）
   const replayBtn = document.getElementById('replayOnb');
   if(replayBtn) replayBtn.style.display = 'none';
@@ -9511,6 +9513,8 @@ function endOnboarding(){
     if(btn) btn.style.display = 'none';
   }catch(e){}
   setTimeout(()=>{ try{ toast('🎉 引导完成，祝飞行愉快！','success'); }catch(e){} }, 300);
+  // 恢复滚动位置，避免引导结束后页面停留在半屏（iPad 上开始按钮被滚出视口、误以为无法点击）
+  try{ window.scrollTo(0, _onbPrevScrollY || 0); }catch(e){}
 }
 // 重新观看引导
 function replayOnboarding(){

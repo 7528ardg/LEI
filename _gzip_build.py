@@ -6,14 +6,12 @@ import io
 import os
 
 SOURCES = {
-    'quiz': u'_work\\广州刷题.html',
-    'performance': u'_work\\广州综合绩效评定测试系统1.0(3).html',
-    'beauty': u'_work\\美妆销售话术生成系统.html',
+    'quiz': u'quiz.html',
+    'performance': u'performance.html',
+    'beauty': u'beauty.html',
 }
 OUTS = [
     u'spring-assistant.html',
-    u'index.html',
-    u'春秋·广州分队全能助手.html',
 ]
 
 TEMPLATE = u'''<!DOCTYPE html>
