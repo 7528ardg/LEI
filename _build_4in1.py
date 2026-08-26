@@ -1,4 +1,18 @@
-<!DOCTYPE html>
+# -*- coding: utf-8 -*-
+"""重建「春秋·广州分队全能助手（5合1）」离线单文件（5模块 gzip 内嵌）（临时工具，用后可删）"""
+import gzip, base64, io, os
+
+BASE = r'c:\Users\Admin\Desktop\融合版'
+SOURCES = {
+    'quiz': u'quiz.html',
+    'performance': u'performance.html',
+    'beauty': u'beauty.html',
+    'risk': u'risk-lite.html',
+    'daily': u'daily.html',
+}
+OUT = u'春秋·广州分队全能助手（4合1）.html'
+
+TEMPLATE = u'''<!DOCTYPE html>
 <html lang="zh-CN" data-theme="light">
 <head>
 <meta charset="UTF-8">
@@ -9,10 +23,10 @@
 <meta name="apple-mobile-web-app-title" content="春秋全能助手">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="application-name" content="春秋·广州分队全能助手">
-<meta name="description" content="春秋航空广州分队综合管理平台 - 刷题·绩效·美妆话术（快速拆分版）">
+<meta name="description" content="春秋航空广州分队综合管理平台 - 刷题·绩效·美妆话术·风险预警·日常问题 五合一单文件版">
 <meta name="format-detection" content="telephone=no">
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
-<title>春秋航空 · 广州分队全能助手</title>
+<title>春秋航空 · 广州分队全能助手（5合1）</title>
 <style>
 :root{
   --font-sans:-apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei",sans-serif;
@@ -62,7 +76,6 @@ body{font-family:var(--font-sans);background:var(--bg);color:var(--text);min-hei
 .sys-spinner{width:44px;height:44px;border:4px solid var(--primary-soft);border-top-color:var(--primary);border-radius:50%;animation:spin .8s linear infinite;}
 .sys-loader .sl-text{font-size:.85rem;color:var(--text2);font-weight:500;}
 @keyframes spin{to{transform:rotate(360deg);}}
-/* ===== 平板/手机 ===== */
 @media(min-width:721px) and (max-width:1100px){
   .topbar{padding:0 14px;gap:10px;}
   .brand-name{font-size:.95rem;}
@@ -142,28 +155,49 @@ body{font-family:var(--font-sans);background:var(--bg);color:var(--text);min-hei
 <div class="toast-container" id="toastContainer"></div>
 
 <script>
-/* ===================== 拆分版：按需加载三大模块 ===================== */
-const MOD_SRC = {
-  quiz: 'quiz.html',
-  performance: 'performance.html',
-  beauty: 'beauty.html',
-  risk: 'risk-lite.html',
-  daily: 'daily.html'
+/* ===================== 四大系统完整功能数据（gzip 压缩 base64 内嵌，运行时解压） ===================== */
+const MODULES = {
+  quiz: "__B64_quiz__",
+  performance: "__B64_performance__",
+  beauty: "__B64_beauty__",
+  risk: "__B64_risk__",
+  daily: "__B64_daily__"
 };
-const _loaded = {};
-const _modScroll = {};
-let currentMod = null;
 
+/* ===================== 解码引擎（gzip 解压；兼容未压缩旧数据回退） ===================== */
+const _frames = {};
+function _b64ToBytes(b64){
+  const bin = atob(b64);
+  const bytes = new Uint8Array(bin.length);
+  for(let i=0;i<bin.length;i++) bytes[i] = bin.charCodeAt(i);
+  return bytes;
+}
+async function _b64ToHtml(b64){
+  const bytes = _b64ToBytes(b64);
+  if(bytes[0] === 0x1f && bytes[1] === 0x8b){
+    try{
+      const ds = new DecompressionStream('gzip');
+      const stream = new Blob([bytes]).stream().pipeThrough(ds);
+      const ab = await new Response(stream).arrayBuffer();
+      return new TextDecoder('utf-8').decode(ab);
+    }catch(e){}
+  }
+  return new TextDecoder('utf-8').decode(bytes);
+}
+
+/* ===================== 模块切换（懒加载 + 缓存 + 解压） ===================== */
+let currentMod = null;
+const _modScroll = {};
 function switchModule(id){
   if(currentMod === id) return; // 点击当前模块不重进，避免触发 display 切换导致移动端滚动位置丢失
 
   // 记录当前模块的内部滚动位置
   if(currentMod){
-    const f = document.getElementById('frame-'+currentMod);
+    const _f = document.getElementById('frame-'+currentMod);
     try{
-      if(f && f.contentDocument){
-        const sc = f.contentDocument.querySelector('.main-scroll-container');
-        _modScroll[currentMod] = sc ? sc.scrollTop : (f.contentWindow ? f.contentWindow.scrollY : 0);
+      if(_f && _f.contentDocument){
+        const _sc = _f.contentDocument.querySelector('.main-scroll-container');
+        _modScroll[currentMod] = _sc ? _sc.scrollTop : (_f.contentWindow ? _f.contentWindow.scrollY : 0);
       }
     }catch(e){}
   }
@@ -174,42 +208,43 @@ function switchModule(id){
   const wrap = document.getElementById('wrap-'+id);
   wrap.classList.add('active');
 
-  if(!_loaded[id]){
+  if(!_frames[id]){
     const loader = document.getElementById('loader-'+id);
     const frame = document.getElementById('frame-'+id);
-    if(loader) loader.classList.remove('hidden');
-    frame.onload = function(){
-      _loaded[id] = true;
-      if(loader) loader.classList.add('hidden');
-      restoreModuleScroll(id);
+    _b64ToHtml(MODULES[id]).then(function(html){
+      if(loader) loader.classList.remove('hidden');
+      frame.srcdoc = html;
+      frame.onload = function(){
+        if(loader) loader.classList.add('hidden');
+        if(_modScroll[id] != null){
+          requestAnimationFrame(function(){
+            try{
+              const _sc = frame.contentDocument && frame.contentDocument.querySelector('.main-scroll-container');
+              if(_sc) _sc.scrollTop = _modScroll[id];
+              else if(frame.contentWindow) frame.contentWindow.scrollTo(0, _modScroll[id]);
+            }catch(e){}
+          });
+        }
+        try{
+          const doc = frame.contentDocument;
+          const t = document.documentElement.getAttribute('data-theme');
+          if(doc && doc.documentElement) doc.documentElement.setAttribute('data-theme', t);
+        }catch(e){}
+      };
+    }).catch(function(e){
+      console.error('模块加载失败:', id, e);
+      if(loader) loader.querySelector('.sl-text').textContent = '加载失败，请刷新重试';
+    });
+  } else if(_modScroll[id] != null){
+    const frame = document.getElementById('frame-'+id);
+    requestAnimationFrame(function(){
       try{
-        const doc = frame.contentDocument;
-        const t = document.documentElement.getAttribute('data-theme');
-        if(doc && doc.documentElement) doc.documentElement.setAttribute('data-theme', t);
+        const _sc = frame.contentDocument && frame.contentDocument.querySelector('.main-scroll-container');
+        if(_sc) _sc.scrollTop = _modScroll[id];
+        else if(frame.contentWindow) frame.contentWindow.scrollTo(0, _modScroll[id]);
       }catch(e){}
-    };
-    frame.onerror = function(){
-      if(loader) loader.querySelector('.sl-text').textContent = '模块加载失败，请刷新重试';
-    };
-    frame.src = MOD_SRC[id];
-  } else {
-    restoreModuleScroll(id);
+    });
   }
-}
-
-// 恢复模块内部滚动位置（移动端 display 显隐可能重置滚动，此处兜底）
-function restoreModuleScroll(id){
-  if(_modScroll[id] == null) return;
-  const f = document.getElementById('frame-'+id);
-  requestAnimationFrame(function(){
-    try{
-      if(f && f.contentDocument){
-        const sc = f.contentDocument.querySelector('.main-scroll-container');
-        if(sc) sc.scrollTop = _modScroll[id];
-        else if(f.contentWindow) f.contentWindow.scrollTo(0, _modScroll[id]);
-      }
-    }catch(e){}
-  });
 }
 
 /* ===================== 主题 ===================== */
@@ -220,12 +255,13 @@ function applyTheme(t){
   const btn = document.getElementById('themeBtn');
   btn.textContent = t==='dark' ? '🌙' : '☀️';
   ['quiz','performance','beauty','risk','daily'].forEach(id=>{
-    const f = document.getElementById('frame-'+id);
+    const f = frameObj(id);
     if(f && f.contentDocument){
       try{ f.contentDocument.documentElement.setAttribute('data-theme', t); }catch(e){}
     }
   });
 }
+function frameObj(id){ return document.getElementById('frame-'+id); }
 function cycleTheme(){
   hostTheme = hostTheme==='light' ? 'dark' : 'light';
   applyTheme(hostTheme);
@@ -260,3 +296,22 @@ switchModule('quiz');
 </script>
 </body>
 </html>
+'''
+
+def build():
+    t = TEMPLATE
+    for key, path in SOURCES.items():
+        raw = io.open(os.path.join(BASE, path), 'rb').read()
+        gz = gzip.compress(raw, 9)
+        b64 = base64.b64encode(gz).decode('ascii')
+        ph = '__B64_{}__'.format(key)
+        assert ph in t, 'placeholder missing ' + ph
+        t = t.replace(ph, b64)
+        print('{}: raw {:.2f}MB -> gz {:.2f}MB'.format(key, len(raw)/1048576.0, len(gz)/1048576.0))
+    out = os.path.join(BASE, OUT)
+    with io.open(out, 'w', encoding='utf-8') as f:
+        f.write(t)
+    print('写出', OUT, '{:.2f}MB'.format(os.path.getsize(out)/1048576.0))
+
+if __name__ == '__main__':
+    build()

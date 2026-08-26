@@ -1,4 +1,4 @@
-﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿<!DOCTYPE html>
+﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿<!DOCTYPE html>
 <html lang="zh-CN">
 <head>
     <meta charset="UTF-8">
@@ -14675,14 +14675,34 @@ productIntrosByCategory: {
             }
         ];
 
-        // 当前展开的话术套装ID
-        let expandedScriptSetId = null;
+        // 已折叠的话术套装ID集合（默认全部收起，可逐个展开/收起）
+        const collapsedScriptSetIds = new Set(curatedScriptSets.map(s => s.id));
 
         // 切换话术套装展开/折叠状态
         const toggleScriptSet = (setId) => {
             const mainContent = document.querySelector('.main-scroll-container');
             const scrollTop = mainContent ? mainContent.scrollTop : 0;
-            expandedScriptSetId = expandedScriptSetId === setId ? null : setId;
+            if (collapsedScriptSetIds.has(setId)) {
+                collapsedScriptSetIds.delete(setId);
+            } else {
+                collapsedScriptSetIds.add(setId);
+            }
+            render();
+            requestAnimationFrame(() => {
+                const newMainContent = document.querySelector('.main-scroll-container');
+                if (newMainContent) newMainContent.scrollTop = scrollTop;
+            });
+        };
+
+        // 全部收起 / 全部展开话术套装（保持滚动位置）
+        window.collapseAllScriptSets = function(collapse) {
+            const mainContent = document.querySelector('.main-scroll-container');
+            const scrollTop = mainContent ? mainContent.scrollTop : 0;
+            if (collapse) {
+                curatedScriptSets.forEach(s => collapsedScriptSetIds.add(s.id));
+            } else {
+                collapsedScriptSetIds.clear();
+            }
             render();
             requestAnimationFrame(() => {
                 const newMainContent = document.querySelector('.main-scroll-container');
@@ -17409,6 +17429,9 @@ const getRandomUnique = (arr, usedSet) => {
         };
 
         const render = () => {
+            // 记录渲染前的主滚动位置与顶部导航水平位置（render 会重建 DOM 导致滚动重置，需在重绘后恢复）
+            const _prevScroll = (document.querySelector('.main-scroll-container') || {}).scrollTop || 0;
+            const _prevNav = (() => { const n = document.querySelector('nav .overflow-x-auto'); return n ? n.scrollLeft : 0; })();
             const filtered = filterProducts();
             const grouped = groupByBrand(filtered);
             const sortedBrands = Object.keys(grouped).sort((a, b) => a.localeCompare(b, 'zh-CN'));
@@ -19315,9 +19338,9 @@ const getRandomUnique = (arr, usedSet) => {
 <div class="text-xs text-gray-500 bg-gray-50 rounded-lg p-2.5 leading-relaxed">💡 匹配后系统会按「护肤→彩妆→香氛→保健→酒类→纪念品」自然顺序自动排序，并在跨品类时插入衔接过渡句，避免护肤品与纪念品等"割裂"读感。</div>
 </div></div>`;
 
-html += `<div class="mb-6"><h3 class="text-lg font-bold text-gray-800 mb-3 flex items-center gap-2"><span>📚</span>精选话术套装</h3><div class="space-y-3">`;
+html += `<div class="mb-6"><div class="flex items-center justify-between mb-3"><h3 class="text-lg font-bold text-gray-800 flex items-center gap-2"><span>📚</span>精选话术套装</h3><div class="flex gap-2 shrink-0"><button onclick="collapseAllScriptSets(true)" class="px-3 py-1.5 bg-gray-100 hover:bg-gray-200 text-gray-600 rounded-lg text-xs font-medium transition-colors">🔽 全部收起</button><button onclick="collapseAllScriptSets(false)" class="px-3 py-1.5 bg-teal-50 hover:bg-teal-100 text-teal-600 rounded-lg text-xs font-medium transition-colors">🔼 全部展开</button></div></div><div class="space-y-3">`;
                     curatedScriptSets.forEach(function(set, idx) {
-                        const isExpanded = true;
+                        const isExpanded = !collapsedScriptSetIds.has(set.id);
                         html += `<div class="bg-white/95 backdrop-blur rounded-2xl shadow-lg border-2 border-${set.color}-200/50 overflow-hidden transition-all duration-300">`;
                         html += `<button onclick="toggleScriptSet('${set.id}')" class="w-full text-left p-4 flex items-center gap-3 hover:bg-${set.color}-50/50 transition-colors">`;
                         html += `<div class="flex-shrink-0 w-12 h-12 rounded-xl bg-gradient-to-br ${set.gradient} flex items-center justify-center text-2xl shadow-md">${set.icon}</div>`;
@@ -19975,6 +19998,25 @@ html += `<div class="mb-6"><h3 class="text-lg font-bold text-gray-800 mb-3 flex 
             }
 
             document.getElementById('app').innerHTML = html;
+
+            // 恢复主内容滚动位置：innerHTML 重建会重置滚动为 0，若原本有位置且被重置则恢复；
+            // 其它流程（锚点定位/生成后滚动）主动设置的滚动位置保持不受影响
+            if (_prevScroll > 0) {
+                requestAnimationFrame(() => {
+                    const _c = document.querySelector('.main-scroll-container');
+                    if (_c && _c.scrollTop === 0 && _c.scrollHeight > _c.clientHeight) {
+                        _c.scrollTop = Math.min(_prevScroll, _c.scrollHeight - _c.clientHeight);
+                    }
+                });
+            }
+            if (_prevNav > 0) {
+                requestAnimationFrame(() => {
+                    const _n = document.querySelector('nav .overflow-x-auto');
+                    if (_n && _n.scrollLeft === 0 && _n.scrollWidth > _n.clientWidth) {
+                        _n.scrollLeft = Math.min(_prevNav, _n.scrollWidth - _n.clientWidth);
+                    }
+                });
+            }
             
             // 恢复搜索框值、焦点和光标位置
             const newSearchInput = document.getElementById('search-input');

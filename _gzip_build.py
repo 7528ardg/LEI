@@ -9,6 +9,7 @@ SOURCES = {
     'quiz': u'quiz.html',
     'performance': u'performance.html',
     'beauty': u'beauty.html',
+    'daily': u'daily.html',
 }
 OUTS = [
     u'spring-assistant.html',
@@ -25,7 +26,7 @@ TEMPLATE = u'''<!DOCTYPE html>
 <meta name="apple-mobile-web-app-title" content="春秋全能助手">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="application-name" content="春秋·广州分队全能助手">
-<meta name="description" content="春秋航空广州分队综合管理平台 - 刷题·绩效·美妆话术 全功能单文件版">
+<meta name="description" content="春秋航空广州分队综合管理平台 - 刷题·绩效·美妆话术·日常问题 全功能单文件版">
 <meta name="format-detection" content="telephone=no">
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <title>春秋航空 · 广州分队全能助手</title>
@@ -120,6 +121,7 @@ body{font-family:var(--font-sans);background:var(--bg);color:var(--text);min-hei
     <button class="mod-tab active" data-mod="quiz" onclick="switchModule('quiz')">📚 培训考核</button>
     <button class="mod-tab" data-mod="performance" onclick="switchModule('performance')">📊 绩效管理</button>
     <button class="mod-tab" data-mod="beauty" onclick="switchModule('beauty')">💄 美妆话术</button>
+    <button class="mod-tab" data-mod="daily" onclick="switchModule('daily')">❓ 日常问题</button>
   </nav>
 
   <div class="actions">
@@ -145,6 +147,10 @@ body{font-family:var(--font-sans);background:var(--bg);color:var(--text);min-hei
     <div class="sys-loader" id="loader-beauty"><div class="sys-spinner"></div><div class="sl-text">正在进入 美妆话术 …</div></div>
     <iframe class="sys-frame" id="frame-beauty"></iframe>
   </div>
+  <div class="sys-wrap" id="wrap-daily">
+    <div class="sys-loader" id="loader-daily"><div class="sys-spinner"></div><div class="sl-text">正在进入 日常问题 …</div></div>
+    <iframe class="sys-frame" id="frame-daily"></iframe>
+  </div>
 </main>
 
 <div class="toast-container" id="toastContainer"></div>
@@ -154,7 +160,8 @@ body{font-family:var(--font-sans);background:var(--bg);color:var(--text);min-hei
 const MODULES = {
   quiz: "__B64_quiz__",
   performance: "__B64_performance__",
-  beauty: "__B64_beauty__"
+  beauty: "__B64_beauty__",
+  daily: "__B64_daily__"
 };
 
 /* ===================== 解码引擎（gzip 解压；兼容未压缩旧数据回退） ===================== */
@@ -181,7 +188,21 @@ async function _b64ToHtml(b64){
 
 /* ===================== 模块切换（懒加载 + 缓存 + 解压） ===================== */
 let currentMod = null;
+const _modScroll = {};
 function switchModule(id){
+  if(currentMod === id) return; // 点击当前模块不重进，避免触发 display 切换导致移动端滚动位置丢失
+
+  // 记录当前模块的内部滚动位置
+  if(currentMod){
+    const _f = document.getElementById('frame-'+currentMod);
+    try{
+      if(_f && _f.contentDocument){
+        const _sc = _f.contentDocument.querySelector('.main-scroll-container');
+        _modScroll[currentMod] = _sc ? _sc.scrollTop : (_f.contentWindow ? _f.contentWindow.scrollY : 0);
+      }
+    }catch(e){}
+  }
+
   currentMod = id;
   document.querySelectorAll('.mod-tab').forEach(b => b.classList.toggle('active', b.dataset.mod===id));
   document.querySelectorAll('.sys-wrap').forEach(w => w.classList.remove('active'));
@@ -196,6 +217,15 @@ function switchModule(id){
       frame.srcdoc = html;
       frame.onload = function(){
         if(loader) loader.classList.add('hidden');
+        if(_modScroll[id] != null){
+          requestAnimationFrame(function(){
+            try{
+              const _sc = frame.contentDocument && frame.contentDocument.querySelector('.main-scroll-container');
+              if(_sc) _sc.scrollTop = _modScroll[id];
+              else if(frame.contentWindow) frame.contentWindow.scrollTo(0, _modScroll[id]);
+            }catch(e){}
+          });
+        }
         try{
           const doc = frame.contentDocument;
           const t = document.documentElement.getAttribute('data-theme');
@@ -205,6 +235,15 @@ function switchModule(id){
     }).catch(function(e){
       console.error('模块加载失败:', id, e);
       if(loader) loader.querySelector('.sl-text').textContent = '加载失败，请刷新重试';
+    });
+  } else if(_modScroll[id] != null){
+    const frame = document.getElementById('frame-'+id);
+    requestAnimationFrame(function(){
+      try{
+        const _sc = frame.contentDocument && frame.contentDocument.querySelector('.main-scroll-container');
+        if(_sc) _sc.scrollTop = _modScroll[id];
+        else if(frame.contentWindow) frame.contentWindow.scrollTo(0, _modScroll[id]);
+      }catch(e){}
     });
   }
 }
@@ -216,7 +255,7 @@ function applyTheme(t){
   document.documentElement.setAttribute('data-theme', t);
   const btn = document.getElementById('themeBtn');
   btn.textContent = t==='dark' ? '🌙' : '☀️';
-  ['quiz','performance','beauty'].forEach(id=>{
+  ['quiz','performance','beauty','daily'].forEach(id=>{
     const f = _frames[id];
     if(f && f.contentDocument){
       try{ f.contentDocument.documentElement.setAttribute('data-theme', t); }catch(e){}

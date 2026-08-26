@@ -1,0 +1,570 @@
+<!DOCTYPE html>
+<html lang="zh-CN" data-theme="light">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<meta name="theme-color" content="#148453">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="日常问题">
+<meta name="format-detection" content="telephone=no">
+<title>日常问题 · 春秋全能助手</title>
+<style>
+:root{
+  --font-sans:-apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei",sans-serif;
+  --primary:#148453;--primary-dark:#0C5F3A;--primary-light:#3E9E79;
+  --primary-soft:#E8F3EE;--primary-mist:#F4F9F6;
+  --gold:#F5B800;--gold-soft:#FEF6DC;
+  --danger:#C62828;--danger-soft:#FDE7E7;
+  --grad-primary:linear-gradient(135deg,#148453 0%,#1FA56A 100%);
+  --bg:#F5F8F6;--bg-card:#fff;--text:#0F2A1F;--text2:#5A6F65;--text3:#9DB0A6;
+  --border:#E5EDE9;--shadow:0 4px 14px rgba(20,132,83,.10);--shadow-lg:0 12px 32px rgba(20,132,83,.14);
+}
+html[data-theme="dark"]{
+  --bg:#0F1A14;--bg-card:#162420;--text:#E8F3EE;--text2:#8FA89C;--text3:#4A6358;--border:#1E3A2C;
+  --primary-soft:#1A3D2A;--primary-mist:#142E22;--danger-soft:#2A1616;--gold-soft:#2A2410;
+}
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+body{font-family:var(--font-sans);background:var(--bg);color:var(--text);min-height:100vh;transition:background .3s,color .3s;}
+button{font-family:var(--font-sans);cursor:pointer;}
+input{font-family:var(--font-sans);}
+
+/* ===== 顶部 ===== */
+.livery-stripe{height:3px;background:linear-gradient(90deg,#148453 0%,#4FA86C 18%,#8FC85C 35%,#C9D745 52%,#F5B800 68%,#F08A00 85%,#E64A19 100%);}
+.topbar{position:sticky;top:0;z-index:50;background:var(--bg-card);border-bottom:1px solid var(--border);
+  display:flex;align-items:center;gap:10px;padding:12px 18px;transition:background .3s;backdrop-filter:blur(20px);}
+.t-title{display:flex;align-items:center;gap:8px;font-size:1.05rem;font-weight:800;color:var(--primary);white-space:nowrap;}
+.t-title .ic{width:30px;height:30px;border-radius:9px;background:var(--grad-primary);color:#fff;display:flex;align-items:center;justify-content:center;font-size:1rem;flex-shrink:0;}
+.t-count{font-size:.72rem;font-weight:600;color:var(--text2);background:var(--primary-soft);padding:3px 10px;border-radius:12px;white-space:nowrap;}
+.t-sub{margin-left:auto;font-size:.74rem;color:var(--text3);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+
+/* ===== 容器 ===== */
+.wrap{max-width:860px;margin:0 auto;padding:14px 14px 60px;}
+
+/* ===== 搜索区 ===== */
+.search-box{display:flex;gap:8px;box-shadow:var(--shadow-lg);border-radius:16px;padding:8px;background:var(--bg-card);border:1px solid var(--border);transition:border-color .2s,box-shadow .2s;}
+.search-box:focus-within{border-color:var(--primary);box-shadow:0 0 0 3px rgba(20,132,83,.15);}
+.search-box input{flex:1;border:none;outline:none;background:transparent;font-size:.98rem;color:var(--text);padding:8px 10px;min-width:0;}
+.search-box input::placeholder{color:var(--text3);}
+.search-btn{border:none;background:var(--grad-primary);color:#fff;font-size:.9rem;font-weight:700;border-radius:11px;padding:8px 20px;transition:transform .15s,box-shadow .2s;box-shadow:var(--shadow);}
+.search-btn:active{transform:scale(.96);}
+.hot{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-top:12px;}
+.hot .lbl{font-size:.72rem;color:var(--text3);font-weight:600;}
+.tag{font-size:.76rem;font-weight:600;color:var(--text2);background:var(--bg-card);border:1px solid var(--border);padding:4px 12px;border-radius:14px;transition:all .15s;}
+.tag:hover{border-color:var(--primary);color:var(--primary);background:var(--primary-mist);}
+.tag.on{background:var(--primary);color:#fff;border-color:var(--primary);}
+
+/* ===== 分类 ===== */
+.cats{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px;}
+.cat{font-size:.82rem;font-weight:700;color:var(--text2);background:var(--bg-card);border:1px solid var(--border);padding:6px 14px;border-radius:10px;transition:all .15s;}
+.cat:hover,.cat.on{background:var(--primary);color:#fff;border-color:var(--primary);}
+.cat small{font-weight:600;opacity:.75;margin-left:3px;}
+
+/* ===== 结果信息 ===== */
+.res-info{margin:16px 0 10px;font-size:.8rem;color:var(--text2);display:flex;align-items:center;gap:8px;min-height:20px;}
+.res-info .hl{color:var(--primary);font-weight:800;}
+.res-info .clear{font-size:.74rem;color:var(--primary);background:var(--primary-soft);border:none;padding:3px 10px;border-radius:10px;font-weight:600;}
+
+/* ===== 问答列表 ===== */
+.group-title{display:flex;align-items:center;gap:8px;font-size:.86rem;font-weight:800;color:var(--primary);margin:18px 2px 8px;}
+.group-title::after{content:'';flex:1;height:1px;background:var(--border);}
+.qa{background:var(--bg-card);border:1px solid var(--border);border-radius:14px;margin-bottom:10px;overflow:hidden;transition:box-shadow .2s,border-color .2s;}
+.qa:hover{box-shadow:var(--shadow);}
+.qa.open{border-color:var(--primary);box-shadow:var(--shadow-lg);}
+.qa-head{display:flex;align-items:center;gap:10px;padding:13px 14px;cursor:pointer;user-select:none;}
+.qa-q{flex:1;font-size:.92rem;font-weight:700;line-height:1.5;min-width:0;}
+.qa-meta{display:flex;align-items:center;gap:6px;flex-shrink:0;}
+.badge{font-size:.64rem;font-weight:700;padding:2px 8px;border-radius:9px;color:#fff;white-space:nowrap;}
+.badge.sales{background:#148453;}.badge.deliver{background:#1E88E5;}.badge.inflight{background:#6D4EC2;}.badge.sick{background:#E8590C;}.badge.invoice{background:#B8860B;}
+.qa-src{font-size:.66rem;color:var(--text3);background:var(--primary-mist);padding:2px 7px;border-radius:8px;white-space:nowrap;}
+.chev{width:22px;height:22px;flex-shrink:0;color:var(--text2);transition:transform .25s;display:flex;align-items:center;justify-content:center;}
+.qa.open .chev{transform:rotate(180deg);color:var(--primary);}
+.qa-body{display:none;padding:2px 16px 16px;border-top:1px dashed var(--border);}
+.qa.open .qa-body{display:block;animation:fadeIn .25s;}
+@keyframes fadeIn{from{opacity:0;transform:translateY(-4px);}to{opacity:1;transform:none;}}
+.ans{font-size:.87rem;line-height:1.85;color:var(--text);}
+.ans p{margin:8px 0;}
+.ans ul{margin:8px 0 8px 20px;list-style:none;}
+.ans ul li{position:relative;padding-left:16px;margin:5px 0;}
+.ans ul li::before{content:'';position:absolute;left:0;top:.72em;width:6px;height:6px;border-radius:2px;background:var(--primary-light);}
+.ans strong{color:var(--primary-dark);}
+html[data-theme="dark"] .ans strong{color:#7FD4B0;}
+.ans .box{border-radius:11px;padding:10px 13px;margin:10px 0;font-size:.84rem;line-height:1.8;}
+.ans .tip{background:var(--primary-soft);color:var(--primary-dark);}
+html[data-theme="dark"] .ans .tip{color:#8FD9B6;}
+.ans .warn{background:var(--danger-soft);color:var(--danger);}
+.ans .gold{background:var(--gold-soft);color:#8a6d00;}
+.ans table{width:100%;border-collapse:collapse;margin:10px 0;font-size:.78rem;}
+.ans table th{background:var(--primary-soft);color:var(--primary-dark);font-weight:700;}
+.ans table th,.ans table td{border:1px solid var(--border);padding:6px 8px;text-align:left;vertical-align:top;}
+.ans table tr:nth-child(even) td{background:var(--primary-mist);}
+.ans mark{background:#FFE374;color:#5c4600;border-radius:3px;padding:0 2px;}
+html[data-theme="dark"] .ans mark{background:#8a7300;color:#ffe374;}
+.imgs{display:flex;flex-direction:column;gap:10px;margin:12px 0 4px;}
+.fig{border:1px solid var(--border);border-radius:12px;overflow:hidden;background:var(--bg-card);cursor:zoom-in;transition:box-shadow .2s;}
+.fig img{width:100%;display:block;max-height:340px;object-fit:contain;}
+.fig figcaption{font-size:.72rem;color:var(--text2);background:var(--primary-mist);padding:6px 10px;line-height:1.6;}
+.fig:active{transform:scale(.995);}
+.fig .zoom-hint{float:right;font-size:.62rem;color:var(--text3);margin-left:6px;}
+
+/* ===== 空状态 ===== */
+.empty{text-align:center;padding:46px 20px;color:var(--text3);}
+.empty .e-ic{font-size:2.4rem;margin-bottom:10px;}
+.empty .e-t{font-weight:700;color:var(--text2);font-size:.95rem;margin-bottom:6px;}
+.empty .e-s{font-size:.8rem;line-height:1.9;}
+
+/* ===== 底部 ===== */
+.foot{margin-top:26px;padding:16px 0 10px;border-top:1px solid var(--border);text-align:center;font-size:.7rem;color:var(--text3);line-height:2;}
+
+/* ===== 灯箱 ===== */
+.lightbox{position:fixed;inset:0;z-index:200;background:rgba(8,20,14,.88);display:none;align-items:center;justify-content:center;flex-direction:column;padding:20px;backdrop-filter:blur(4px);}
+.lightbox.show{display:flex;animation:lbIn .2s;}
+@keyframes lbIn{from{opacity:0;}to{opacity:1;}}
+.lightbox img{max-width:100%;max-height:78vh;border-radius:12px;box-shadow:0 20px 60px rgba(0,0,0,.5);}
+.lightbox .lb-cap{margin-top:14px;color:#E8F3EE;font-size:.85rem;max-width:640px;text-align:center;line-height:1.7;}
+.lightbox .lb-close{position:absolute;top:18px;right:18px;width:40px;height:40px;border-radius:50%;background:rgba(255,255,255,.14);color:#fff;border:none;font-size:1.15rem;display:flex;align-items:center;justify-content:center;}
+.lightbox .lb-close:active{transform:scale(.92);}
+.hidden{display:none !important;}
+@media(max-width:560px){
+  .topbar{padding:10px 14px;}
+  .t-sub{display:none;}
+  .search-btn{padding:8px 14px;}
+  .fig img{max-height:260px;}
+}
+</style>
+</head>
+<body>
+<div class="livery-stripe"></div>
+
+<header class="topbar">
+  <div class="t-title"><span class="ic">❓</span>日常问题</div>
+  <span class="t-count" id="totalCount">– 条知识点</span>
+  <span class="t-sub">销售 · 配送 · 病假 · 电子发票 速查</span>
+</header>
+
+<div class="wrap">
+
+  <!-- 搜索 -->
+  <div class="search-box">
+    <input id="q" type="search" placeholder="输入关键字，如：转账 / 病假材料 / 开票 / WIFI / 销转保" autocomplete="off" enterkeyhint="search">
+    <button class="search-btn" id="searchBtn">搜索</button>
+  </div>
+  <div class="hot" id="hotBar"></div>
+
+  <!-- 分类 -->
+  <div class="cats" id="catBar"></div>
+
+  <!-- 结果信息 -->
+  <div class="res-info" id="resInfo"></div>
+
+  <!-- 列表 -->
+  <div id="list"></div>
+
+  <div class="foot">
+    ✈️ 资料整理自：4份OJT销售培训PPT、《销售和病假资料》及管理手册细则（2026.08 整理）<br>
+    知识点为速查摘要，涉及标准流程的细节请以培训材料与手册原文为准 · 离线可用
+  </div>
+</div>
+
+<!-- 灯箱 -->
+<div class="lightbox" id="lightbox">
+  <button class="lb-close" id="lbClose">✕</button>
+  <img id="lbImg" alt="">
+  <div class="lb-cap" id="lbCap"></div>
+</div>
+
+<script>
+"use strict";
+
+/* ================= 图片资源（构建时注入 base64） ================= */
+const IMG = __IMG_DATA__;
+
+/* ================= 知识库数据 ================= */
+const CATS = [
+  {id:'all', name:'全部', ic:'🗂️'},
+  {id:'sales', name:'销售收款', ic:'💰'},
+  {id:'deliver', name:'配送系统', ic:'📦'},
+  {id:'inflight', name:'机上销售', ic:'✈️'},
+  {id:'sick', name:'病假管理', ic:'🏥'},
+  {id:'invoice', name:'电子发票', ic:'🧾'}
+];
+const HOT = ['转账附言','现金缴存','病假材料','SMP占位','开电子发票','WIFI订单','销转保','退税退款','医疗观察期','值班经理'];
+
+const DATA = [
+/* ============ 💰 销售收款 ============ */
+{id:'s1',cat:'sales',hot:true,src:'4月OJT / 汇总',q:'销售收款方式有什么要求？',
+ t:['收款','人民币','外币','免税品','跨境','结算'],
+ a:`<ul>
+   <li><strong>免税品：仅收人民币</strong>，不收外币。</li>
+   <li>现货餐饮、纪念品、跨境商品：可收<strong>人民币或外币</strong>。</li>
+   </ul>
+   <div class="box tip">💡 请根据商品品类区分收款币种，避免结算时出现差错。</div>`},
+{id:'s2',cat:'sales',hot:true,src:'4月OJT / 汇总',q:'转账有哪些要求？转账附言格式怎么写？',
+ t:['转账','附言','账号','财务','错误'],
+ a:`<ul>
+   <li>由<strong>乘务长</strong>或其指定乘务员进行转账，收款户名为<strong>春秋航空股份有限公司</strong>。</li>
+   <li>发现转账错误，<strong>立即联系销售组</strong>，协调财务处理。</li>
+   <li>转账附言需写明<strong>日期 + 航班号 + 金额用途</strong>，示例：<code>3-28 9C8523 补10元</code>。</li>
+   <li>转账同样须在降落后 <strong>24 小时内</strong>完成；金额不足或信息不完整扣转账人 2 分，经提醒仍未完成乘务长扣 5 分。</li>
+   </ul>
+   <div class="imgs"><figure class="fig" onclick="openLb('m04z1')"><img data-k="m04z1"><figcaption>📄 转账明细示例：附言=日期+航班号+金额（3-28 9C8523 补10元）<span class="zoom-hint">点击放大</span></figcaption></figure></div>`},
+{id:'s3',cat:'sales',hot:true,src:'4月OJT / 汇总',q:'现金缴存时限与扣分规定？',
+ t:['现金缴存','缴存','24小时','扣分','业务质量'],
+ a:`<ul>
+   <li>登录销售系统的人员须在航班降落后 <strong>24 小时内</strong>完成<strong>现金缴存</strong>。</li>
+   <li>未按时缴存或金额不足：操作人扣业务质量分 <strong>2 分</strong>，乘务长和 4 号位各扣 <strong>1 分</strong>。</li>
+   <li>转账同样须 <strong>24 小时内</strong>完成，金额不足或信息不完整扣转账人 2 分；经提醒仍未完成，乘务长扣 5 分。</li>
+   </ul>
+   <div class="box warn">⚠️ 未按时缴存 / 转账将被扣分，超额跨过时限请第一时间报备销售组。</div>`},
+{id:'s4',cat:'sales',hot:false,src:'5月OJT',q:'销售业务平时去哪儿学习？',
+ t:['学习','培训','专题','课程','29项'],
+ a:`<ul>
+   <li>入口：<strong>我的培训 → 专题 → 客舱销售专题</strong>。</li>
+   <li>在线业务学习材料目前共 <strong>29 项</strong>（客舱销售专题页显示 45 门课），含单个知识点讲解、每月 OJT 销售培训内容等。</li>
+   <li>180 / 186 飞机商品存放要求，也可在 SMP 客舱销售培训专题中学习。</li>
+   </ul>
+   <div class="imgs"><figure class="fig" onclick="openLb('m05x1')"><img data-k="m05x1"><figcaption>📱 专题列表：客舱销售专题入口<span class="zoom-hint">点击放大</span></figcaption></figure></div>`},
+
+/* ============ 📦 配送系统 ============ */
+{id:'d1',cat:'deliver',hot:true,src:'4月OJT / 汇总表',q:'配送系统「备注」怎么用？()',
+ t:['备注','库存差异','销售错误','预售','现货','报备'],
+ a:`遇到以下情况时，在配送系统中填备注说明即可，<strong>无需再电话总库报备</strong>：
+   <table><tr><th>报备项目</th><th>系统操作</th><th>建议备注格式</th></tr>
+   <tr><td>原库存 / 补仓数据有差异</td><td>更改错误的库存数据</td><td>XX商品原库存/补仓数量不符，系统与四联单已手动修改。</td></tr>
+   <tr><td>销售数据录入错误</td><td>更改错误的销售数量</td><td>XX商品销售数据错误，系统已手动修改。</td></tr>
+   <tr><td>现货误做预售 / 预售误做现货</td><td>更正销售数量</td><td>XX商品预售，误操作成现货订单 / XX商品现货销售，误操作成预售订单，已联系客舱销售组修改。</td></tr>
+   </table>
+   <div class="box tip">💡 图上为配送系统「备注信息」填写窗口（航前/航后均可用）。</div>
+   <div class="imgs"><figure class="fig" onclick="openLb('m04b1')"><img data-k="m04b1"><figcaption>📱 配送系统「备注信息(选填)」填写窗口<span class="zoom-hint">点击放大</span></figcaption></figure></div>`},
+{id:'d2',cat:'deliver',hot:true,src:'5月OJT',q:'配送系统里数量不对，分别改哪个字段？',
+ t:['数量','原库存','配送','补仓','销售','修订','损耗'],
+ a:`按数据来源选择修改入口，不要改错列：
+   <ul>
+   <li><strong>原库存</strong>：与实际情况不符时修改（如退回机供品）。</li>
+   <li><strong>配送</strong>：与推送数据不符时修改。</li>
+   <li><strong>补仓</strong>：与推送数据不符时修改。</li>
+   <li><strong>销售</strong>：销售系统上传后点「获取销售」获得；数量不对 → 检查订单，<strong>重新上传并获取</strong>，或手工更改。</li>
+   <li><strong>修订</strong>：用于非销售损耗（UM 使用、销毁破损/变质食品等）。<span class="warn-text">注意：修订中的「销毁」选项不适用于纪念品！</span></li>
+   </ul>
+   <div class="box gold">📌 历史教训：将商品退回给机供品时，应修改「原库存」数据，不要使用其他选项修改，否则会导致修订数据异常被处罚。</div>
+   <div class="imgs"><figure class="fig" onclick="openLb('m05p1')"><img data-k="m05p1"><figcaption>📱 配送系统（机供品配送）操作界面<span class="zoom-hint">点击放大</span></figcaption></figure></div>`},
+{id:'d3',cat:'deliver',hot:false,src:'5月OJT',q:'航班任务的操作步骤是什么？',
+ t:['航前确认','获取销售','四联单','航后完成','照片'],
+ a:`按顺序完成以下四步：
+   <ul>
+   <li>① <strong>航前确认</strong>：实时库存与机上实际商品数量一致后操作；航前确认后如需修改，退回配送系统主页清除缓存重做航班。</li>
+   <li>② <strong>获取销售</strong>：销售系统上传后点击，用于读取销售数据。</li>
+   <li>③ <strong>上传四联单照片</strong>：上传清晰四联单照片；如有商品销毁，一并上传销毁照片。</li>
+   <li>④ <strong>航后完成</strong>：实时库存与实际商品数量一致后操作。</li>
+   </ul>
+   <div class="box tip">💡 建议使用乘务长 IPAD 在航后讲评阶段核查上传结果。</div>`},
+{id:'d4',cat:'deliver',hot:true,src:'7月OJT / 手册3.5.7.6',q:'「修订」功能更新后能干什么？销转保 / 保转销怎么操作？',
+ t:['修订','销转保','保转销','航后','破损','变质','销毁'],
+ a:`<ul>
+   <li>配送系统原有「修订」列已拆分为 <strong>「销转保」</strong>和<strong>「保转销」</strong>两列。</li>
+   <li>入口：<strong>机供品配送（乘务）新</strong>。</li>
+   <li>销转保可选择对应内容；如有销毁的食品，选择<strong>「破损变质」</strong>并填写内容。</li>
+   <li>航班结算（手册 3.5.7.6）：由 <strong>4 号位乘务员</strong>负责，商品归类码放 → 清点填写交接清单「回收」栏并核对系统销售 → 特殊项目(尊享飞/网上餐食/UM)在「备注」列标注并用「销转保」→ 破损变质商品用「销毁」并航后拍照 → 核算数量金额区分付款方式 → 铅封登记 → 分段上传销售 → 获取销售数 → 实时库存一致后航后完成 → 航后拍照上传交接清单与销毁商品照片。</li>
+   </ul>
+   <div class="imgs"><figure class="fig" onclick="openLb('m07k1')"><img data-k="m07k1"><figcaption>📱 「机供品配送(乘务)新」应用入口<span class="zoom-hint">点击放大</span></figcaption></figure>
+   <figure class="fig" onclick="openLb('m04j1')"><img data-k="m04j1"><figcaption>📄 客舱服务规范 3.5.7.6 航班结算流程原图（4号位责任）<span class="zoom-hint">点击放大</span></figcaption></figure></div>`},
+{id:'d5',cat:'deliver',hot:false,src:'4月OJT / 汇总表',q:'临时更换飞机，配送系统怎么操作？',
+ t:['换机','临时换飞机','四联单','总库'],
+ a:`按「原飞机 / 新飞机」分别处理：
+   <table><tr><th>飞机</th><th>销售情况</th><th>四联单</th><th>配送系统</th><th>备注</th></tr>
+   <tr><td>原飞机</td><td>未销售</td><td>无需操作</td><td>无需操作</td><td>—</td></tr>
+   <tr><td>原飞机</td><td>已销售</td><td>正常填写，拍照备用，四联单留在机上，与后续乘务组沟通</td><td>暂不操作</td><td>需与总库报备</td></tr>
+   <tr><td>新飞机</td><td>—</td><td>正常填写</td><td>①登机后清除缓存，更新任务，获取新飞机数量；②航前确认；③获取销售时剔除原飞机销售数量；④保证实时库存与实际一致，再做航后完成；⑤上传两架飞机四联单</td><td>—</td></tr>
+   </table>
+   <div class="box tip">💡 遇临时换机任务会拆分，主动清除缓存、更新任务信息、获取新的航班任务。</div>`},
+{id:'d6',cat:'deliver',hot:false,src:'5月OJT',q:'航后讲评阶段要核查哪些内容？',
+ t:['航后讲评','核查','四联单','金额','照片时间'],
+ a:`航后讲评阶段，乘务长务必用 IPAD 核实操作结果：
+   <ul>
+   <li>航班状态为<strong>「已完成」</strong>。</li>
+   <li>电子四联单无异常数据：原库存、配送、补仓、销售正常，修订正确，<strong>实时库存与实际相符</strong>。</li>
+   <li>上传照片有<strong>拍照时间和上传时间</strong>。</li>
+   <li>四联单总金额：货品金额、优惠券金额（负数）、金额总计填写正确。</li>
+   </ul>
+   <div class="box warn">⚠️ 案例警示：因网络断开、忘记操作航后完成等导致后续航班受影响 —— 乘务长必须核查到位，该补的补、该改的改、该联系的及时联系！</div>`},
+{id:'d7',cat:'deliver',hot:false,src:'5月OJT',q:'配送系统有哪些历史教训案例？',
+ t:['教训','替代机组餐','颈枕','分享','个人热点','网络'],
+ a:`<ul>
+   <li><strong>替代机组餐只能使用餐饮类商品</strong>，不得使用纪念品；曾有班组用机上纪念品替代机组餐，当班乘务组受到处罚。</li>
+   <li>退回<strong>颈枕</strong>等物品给机供品时，应修改<strong>「原库存」</strong>数据，不要用其他选项，否则修订数据异常。</li>
+   <li>案例一：4 号位航后连<strong>个人热点</strong>进入客舱清洁，远离设备网络范围，自以为操作完成未检查，影响后续航班。</li>
+   <li>案例二：落地较晚，4 号位到酒店后忙于核对机供品数量，<strong>忘记操作航后完成</strong>，航后讲评也未核实，影响后续航班。</li>
+   </ul>
+   <div class="imgs"><figure class="fig" onclick="openLb('m05s1')"><img data-k="m05s1"><figcaption>📱 案例：#任务列表页面「超时完成/未完成」核查<span class="zoom-hint">点击放大</span></figcaption></figure></div>`},
+{id:'d8',cat:'deliver',hot:false,src:'4月OJT / 通报',q:'机上商品怎么摆放？摆放混乱会怎么处理？',
+ t:['商品管理','摆放','清点','通报','扣分'],
+ a:`<ul>
+   <li>严格执行手册内的工作要求，商品<strong>归类码放</strong>在指定的餐车和备份箱中（《客舱服务规范》0007 · 3.5.7.6 航班结算）。</li>
+   <li>摆放时考虑避免挤压、摩擦、污损、碰撞等导致的商品损耗；便于清点。</li>
+   <li>违规处理：商品乱放（食品饮料与纪念品混放、散乱放置）→ 当事人各扣<strong>业务质量分 5 分</strong>（依据管理手册 6.7.9.2），乘务长未尽监督提醒职责一并处理。</li>
+   </ul>
+   <div class="imgs"><figure class="fig" onclick="openLb('m04g1')"><img data-k="m04g1"><figcaption>📄 销售类(2026)12号 文件：近期销售问题处理通报<span class="zoom-hint">点击放大</span></figcaption></figure>
+   <figure class="fig" onclick="openLb('m04g2')"><img data-k="m04g2"><figcaption>📄 通报附照片证据：违规摆放与正确做法、扣分处理<span class="zoom-hint">点击放大</span></figcaption></figure></div>`},
+
+/* ============ ✈️ 机上销售 ============ */
+{id:'i1',cat:'inflight',hot:true,src:'7月OJT',q:'WIFI 航班怎么销售？有哪些注意事项？',
+ t:['WIFI','网络','CH-Admin','结束销售','现金'],
+ a:`<ul>
+   <li>销售系统须为 <strong>V2.6.3 及以上</strong>版本，才有 WIFI 订单功能（操作手册已上传至风险沙盘）。</li>
+   <li>先连接 <strong>CH-Admin</strong> 网络，再点击桌面扫码的「<strong>结束销售</strong>」，即可开始接收 WIFI 订单。</li>
+   <li>上传销售数据时，<strong>断开 WIFI 网络</strong>，连接正常网络。</li>
+   <li>WIFI 订单：先完成服务，再点击「配送」；WIFI 订单的「现金收款」<strong>单独</strong>进行现金缴存。</li>
+   </ul>`},
+{id:'i2',cat:'inflight',hot:true,src:'7月OJT / 汇总表',q:'免税品入境有什么限量规定？',
+ t:['免税','入境','烟酒','限量','CIQ'],
+ a:`参照《免税烟酒涉及入境 CIQ 限量表》，春秋中免在每个配送免税品烟草的航班上均配送一张<strong>纸质表格</strong>，便于客舱乘务员查验；入境不能携带烟草的航班，销售系统已<strong>限制销售</strong>。
+   <table><tr><th>入境国家/地区</th><th>年龄</th><th>酒精类商品</th><th>烟草类商品（仅列销售产品）</th></tr>
+   <tr><td>中国</td><td>≥18岁</td><td>酒类1.5升（港澳0.75升）</td><td>400支（约2条）；港澳200支（约1条），短期第二次入境仅40支</td></tr>
+   <tr><td>日本</td><td>≥20岁</td><td>每瓶760ml，≤3瓶</td><td>200支（约1条）</td></tr>
+   <tr><td>韩国/泰国/越南/蒙古/柬埔寨</td><td>≥19/18岁</td><td>1升</td><td>200支（约1条）</td></tr>
+   <tr><td>马来西亚/新加坡</td><td>≥18岁</td><td>1升</td><td>烟草产品均需缴税</td></tr>
+   </table>`},
+{id:'i3',cat:'inflight',hot:false,src:'8月OJT',q:'组合类商品怎么销售？',
+ t:['组合商品','套餐','销售'],
+ a:`组合类商品销售操作请<strong>按系统指引</strong>进行，销售系统中按组合类目下单即可，具体规则以系统界面提示为准。</div>`},
+{id:'i4',cat:'inflight',hot:false,src:'8月OJT',q:'地面/桌面扫码订单可以开票吗？',
+ t:['扫码','开票','发票','电子发票','小票'],
+ a:`<ul>
+   <li><strong>桌面扫码订单支持自助开票</strong>（机上销售环节）。</li>
+   <li>补充：<strong>地面扫码订单可通过小程序直接开具电子发票</strong>，无需到柜台排队办理。</li>
+   </ul>
+   <div class="box tip">💡 开票相关内容详见「🧾 电子发票」分类条目。</div>`},
+{id:'i5',cat:'inflight',hot:true,src:'8月OJT',q:'航班现货销售退款的流程是什么？',
+ t:['退款','退货','现金','原路','审核'],
+ a:`退款按以下流程处理：
+   <ul>
+   <li>① 乘务员发起退货退款 → ② 收回商品 → ③ 点击订单或订单中某一商品的「<strong>退款</strong>」按钮 → ④ 上传销售数据（配送系统：获取销售，修正销售数量） → ⑤ 提交后台审核（审核约需 <strong>1~2 天</strong>）。</li>
+   <li>⑥ 判断是否现金收款：<strong>现金</strong> → 现金退还旅客；<strong>非现金</strong>（扫码/卡） → 原路退回旅客。</li>
+   </ul>
+   <div class="imgs"><figure class="fig" onclick="openLb('m08t1')"><img data-k="m08t1"><figcaption>📊 航班现货销售退款流程原图：现金→现场退 / 其他→原路退，审核1~2天<span class="zoom-hint">点击放大</span></figcaption></figure></div>`},
+{id:'i6',cat:'inflight',hot:false,src:'7月OJT',q:'近期机上商品有什么变化？',
+ t:['新品','乐事','薯片','积木','上架'],
+ a:`近期商品变化：
+   <ul>
+   <li>乐事薯片 <strong>新包装</strong>上架。</li>
+   <li>有即将上架的新品。</li>
+   <li>两款积木对比（新老包装或款式差异）。</li>
+   </ul>
+   <div class="imgs"><figure class="fig" onclick="openLb('m07s1')"><img data-k="m07s1"><figcaption>🥔 乐事薯片新包装<span class="zoom-hint">点击放大</span></figcaption></figure>
+   <figure class="fig" onclick="openLb('m07s2')"><img data-k="m07s2"><figcaption>🆕 即将上架的新品<span class="zoom-hint">点击放大</span></figcaption></figure>
+   <figure class="fig" onclick="openLb('m07s3')"><img data-k="m07s3"><figcaption>🧱 两款积木对比图<span class="zoom-hint">点击放大</span></figcaption></figure></div>`},
+
+/* ============ 🏥 病假管理 ============ */
+{id:'k1',cat:'sick',hot:true,src:'手册3.1.7.7.1 / 汇总',q:'请病假需要准备哪些材料？',
+ t:['病假','材料','挂号','病历','病假证明','公章','SMP占位'],
+ a:`<ul>
+   <li>病假准备材料为本人<strong>挂号证明、病历、病假证明</strong>；弄虚作假按<strong>旷工</strong>处理，必要时配合到公司指定医院复查。</li>
+   <li>需配合<strong>护士台敲医院公章</strong>，无公章属<strong>无效证件</strong>。</li>
+   <li><strong>请病假开始天数必须与 SMP 病假占位一致</strong>：如 SMP 占位 2026.8.26–2026.8.31，则医生病假建议休息必须从 <strong>8.26</strong> 写起，不得从 27 号写，否则违规。</li>
+   <li>完整单据包括：<strong>药费单原件、病假证明原件、病历记录本复印件、挂号单原件</strong>。</li>
+   </ul>`},
+{id:'k2',cat:'sick',hot:false,src:'手册3.1.10.12.3',q:'病假申请流程是怎样的？',
+ t:['病假','申请','流程','航医','SMP'],
+ a:`<ul>
+   <li>第一时间以<strong>电话或现场</strong>形式通知<strong>航医</strong>，同时在 SMP「<strong>请假管理</strong>」中提交申请流程。</li>
+   <li>提交后需关注<strong>流程批复状态</strong>，批复完成才表示请假成功。</li>
+   <li>请假时已开病假单 → 提交流程同时附上；未开具 → 提交流程后 <strong>24 小时内</strong>单独上传。</li>
+   </ul>`},
+{id:'k3',cat:'sick',hot:true,src:'手册3.1.10.12.3',q:'请病假后需要向谁报备（值班经理/AOC电话）？',
+ t:['报备','值班经理','AOC','航班调整','电话'],
+ a:`<ul>
+   <li>请假时间距离航班签到 <strong>12 小时内（含12小时）</strong>或 <strong>20:00 后</strong>请假的：航医批复后，<strong>主动致电值班经理报备</strong>，由值班经理通知 <strong>AOC 专员（乘务）</strong>进行航班调整。</li>
+   <li>值班经理电话：<strong>18017321071</strong>；AOC 专员（乘务）：<strong>32315814</strong>。</li>
+   <li>请假时间距航班签到 <strong>3 小时以内</strong>的，还需及时向<strong>所属分队</strong>报备。</li>
+   </ul>
+   <div class="box warn">⚠️ 记得两处都要报：航医批复后致电值班经理，3 小时内再报分队。</div>`},
+{id:'k4',cat:'sick',hot:true,src:'手册3.1.10.12.3',q:'病假单据最晚什么时候交？逾期怎么办？',
+ t:['上交','时限','5个日历日','30日','月末','逾期'],
+ a:`<ul>
+   <li>原则上不晚于请假后 <strong>5 个日历日</strong>将病假单据上交总部。</li>
+   <li>特殊情况无法按节点上交：最晚在<strong>每月 30 日</strong>上交上月 26 日–本月 25 日的病假单（挂号单原件、药费单原件、病假证明原件、病历记录本复印件）。</li>
+   <li>逾期未交：加扣日常管理分 <strong>10 分</strong>，并按<strong>旷工</strong>处理。</li>
+   <li>示例：11月6日的病假单，最晚需在 <strong>11月30日</strong> 提交。</li>
+   </ul>`},
+{id:'k5',cat:'sick',hot:true,src:'手册 / 汇总',q:'病假如何扣分？航班生产积分怎么算？',
+ t:['扣分','航班生产积分','违规病假','500'],
+ a:`<ul>
+   <li>航班签到时间 <strong>3 小时以上</strong>提出的病假：第一天扣航班生产积分 <strong>100 分</strong>，之后每增加一天加扣 <strong>50 分</strong>（单次连续病假扣分 <strong>500 分封顶</strong>）。</li>
+   <li><strong>怀孕、护产假、丧假、工伤</strong>除外。</li>
+   <li>违规病假（航班签到时间 <strong>3 小时以内</strong>提出）：在病假基础上加扣航班生产积分 <strong>100 分</strong>。</li>
+   <li>通知备上航班后请假者，再加扣 <strong>200 积分</strong>。</li>
+   </ul>
+   <div class="box warn">⚠️ 违规/超时提交病假单据还会叠加扣日常管理分，务必按节点操作。</div>`},
+{id:'k6',cat:'sick',hot:false,src:'手册3.1.10.11.1',q:'哪些假期不计入病假范围？',
+ t:['婚假','产假','哺乳','工伤','年休','探亲','疗养'],
+ a:`空勤人员<strong>人流、丧假、婚嫁、产假、哺乳假、护产假、工伤、年休假、探亲假、疗养假</strong>均不记录于病假范围内，按公司相关文件考勤。</div>`},
+{id:'k7',cat:'sick',hot:true,src:'手册 / 分队关注',q:'医疗观察期是什么？怎么申请恢复飞行？',
+ t:['医疗观察','恢复飞行','航医','体检','观察期'],
+ a:`<ul>
+   <li>康复后联系<strong>航医</strong>，申请恢复飞行资质。</li>
+   <li>民航医院体检暂不符合飞行要求、但常规医院已治愈：立即向<strong>分部</strong>提出申请，附<strong>民航医院不合格证明</strong>和<strong>常规医院治愈证明</strong>；分队长将材料及《医疗观察期通知单》邮件发送航医评估，综合管理处按航医回复确认并系统备注。</li>
+   <li>医疗观察期阶段：<strong>无需提交病假单</strong>，分队跟踪后续恢复与重新体检事宜。</li>
+   <li>原则上医疗观察期<strong>不往前追溯</strong>，锁班日期以表单日期为准；航医评估未通过的，病假单需按原病假日期<strong>连续提交</strong>。</li>
+   </ul>`},
+{id:'k8',cat:'sick',hot:false,src:'手册 / 汇总',q:'续病假怎么办？',
+ t:['续假','新流程','反馈航医'],
+ a:`<ul>
+   <li><strong>续病假视为新流程</strong>，需重新发起申请。</li>
+   <li>病假<strong>提前结束</strong>或<strong>日期不一致</strong>时，立即反馈航医。</li>
+   </ul>`},
+{id:'k9',cat:'sick',hot:false,src:'手册',q:'病假期间工资怎么算？',
+ t:['工资','待遇','跨月','分月'],
+ a:`<ul>
+   <li>病假期间工资待遇按<strong>政府企业职工疾病休假工资规定</strong>执行。</li>
+   <li>连续病假时间<strong>跨月度</strong>的，分月计算。</li>
+   </ul>`},
+{id:'k10',cat:'sick',hot:false,src:'手册/综合行政',q:'非空勤人员及单据接收有什么规定？',
+ t:['非空勤','24小时','行政专员','月初复核','推送'],
+ a:`<ul>
+   <li>非空勤员工需在提出病假后 <strong>24 小时内</strong>将病假单据交至综合管理处。</li>
+   <li>综合行政专员于<strong>工作日收取</strong>病假单据，并在<strong>月初</strong>完成复核。</li>
+   <li>分队需关注 SMP 内的病假推送信息，持续监控病假人员情况。</li>
+   </ul>`},
+
+/* ============ 🧾 电子发票 ============ */
+{id:'n1',cat:'invoice',hot:true,src:'8月OJT / 新增',q:'扫码订单如何开具电子发票？',
+ t:['发票','开票','电子发票','小程序','扫码','地面'],
+ a:`<ul>
+   <li>机上<strong>桌面扫码订单支持自助开票</strong>。</li>
+   <li>补充新增：<strong>地面扫码订单可通过小程序直接开具电子发票</strong>，无需柜台排队。</li>
+   </ul>
+   <div class="box tip">💡 开票是基于订单关联的，先确认订单渠道（地面扫码单 / 机上桌面扫码单），再进入对应小程序开票。</div>`}
+];
+
+/* ================= 渲染 ================= */
+const $ = s => document.querySelector(s);
+const totalEl = $('#totalCount');
+let kw = '', cat = 'all';
+
+function esc(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
+function initImgs(){
+  const imgs = document.querySelectorAll('img[data-k]');
+  imgs.forEach(im=>{ const k = im.getAttribute('data-k'); if(IMG && IMG[k]) im.src = IMG[k]; });
+}
+function catMeta(id){ const c = CATS.find(x=>x.id===id); return c; }
+
+function renderHot(){
+  $('#hotBar').innerHTML = '<span class="lbl">热门：</span>' + HOT.map(h=>`<button class="tag" onclick="setKeyword('${esc(h)}')">${h}</button>`).join('');
+}
+function renderCats(){
+  const cnt = {}; DATA.forEach(d=>cnt[d.cat]=(cnt[d.cat]||0)+1);
+  $('#catBar').innerHTML = CATS.map(c=>c.id==='all'
+    ? `<button class="cat on" id="cat_all" onclick="setCat('all')">🗂️ ${c.name}<small>${DATA.length}</small></button>`
+    : `<button class="cat" id="cat_${c.id}" onclick="setCat('${c.id}')">${c.ic} ${c.name}<small>${cnt[c.id]||0}</small></button>`).join('');
+}
+function setCat(id){ cat = id; document.querySelectorAll('.cat').forEach(b=>b.classList.remove('on')); const el = document.getElementById('cat_'+id); if(el) el.classList.add('on'); applyFilter(); }
+function setKeyword(k){ $('#q').value = k; $('#q').focus(); doSearch(); }
+function toggleQA(id){
+  const el = document.getElementById('qa_'+id);
+  if(!el) return;
+  const open = el.classList.contains('open');
+  document.querySelectorAll('.qa.open').forEach(x=>x.classList.remove('open'));
+  if(!open){ el.classList.add('open'); const body = el.querySelector('.qa-body'); if(body) initImgs(); }
+}
+
+/* ---------- 模糊匹配：包含 + 子序列 + 同音纠正 ---------- */
+const HOMO = {'帐':'账','正':'账','兆':'缴','交':'缴','付':'附','张':'账','完':'皖','申':'身','身':'申','抵':'递','滇':'颠','综':'总','总':'综','恼':'道','到':'道'};
+function norm(s){ return s.toLowerCase().replace(/\s+/g,''); }
+function containsSeq(hay, q){ // 子序列匹配（容忍缺字/错序输入）
+  let i=0; for(let j=0;j<hay.length && i<q.length;j++){ if(hay[j]===q[i]) i++; }
+  return i===q.length;
+}
+function homonorm(s){
+  let out='';
+  for(const ch of s){ out += (HOMO[ch]||ch); }
+  return out;
+}
+function searchScore(e){
+  const qn = norm(kw);
+  if(!qn) return 0;
+  const hayQ = norm(e.q), hayA = norm(e.a), hayT = norm((e.t||[]).join('')), hayC = norm(catMeta(e.cat).name);
+  let endText=false;
+  if(hayQ.includes(qn) || hayT.includes(qn) || hayC.includes(qn)) return 100;
+  if(hayA.includes(qn)) return 60;
+  if(containsSeq(hayT, qn) || containsSeq(hayQ, qn) || containsSeq(hayC, qn)) return 40;
+  if(containsSeq(hayA, qn)) return 25;
+  // 同音纠正再试
+  const hq = homonorm(qn), hQ = homonorm(hayQ), hA = homonorm(hayA), hT = homonorm(hayT);
+  if(hQ.includes(hq) || hT.includes(hq) || hC_inc(hq)) return 50;
+  if(hA.includes(hq)) return 30;
+  return 0;
+  function hC_inc(hq){ return homonorm(norm(catMeta(e.cat).name)).includes(hq); }
+}
+function mark(s){ if(!kw) return s; const qn=norm(kw); const idx=s.toLowerCase().indexOf(qn); if(idx<0) return s; if(qn.length===0) return s; return s.slice(0,idx)+'<mark>'+s.slice(idx,idx+qn.length)+'</mark>'+s.slice(idx+qn.length); }
+
+function cardHtml(e){
+  const c = catMeta(e.cat);
+  const srcLabel = e.src||'';
+  return `<div class="qa" id="qa_${e.id}">
+    <div class="qa-head" onclick="toggleQA('${e.id}')">
+      <div class="qa-q">${mark(e.q)}${e.hot?'':''}</div>
+      <div class="qa-meta"><span class="badge ${e.cat}">${c.ic} ${c.name}</span><span class="qa-src">${srcLabel}</span></div>
+      <span class="chev">▾</span>
+    </div>
+    <div class="qa-body"><div class="ans">${e.a}</div></div>
+  </div>`;
+}
+function applyFilter(){
+  let list = DATA.slice();
+  let matched = [];
+  if(kw){ list.forEach(e=>{ const sc = searchScore(e); if(sc>0) matched.push({e,sc}); }); matched.sort((a,b)=>b.sc-a.sc); list = matched.map(m=>m.e); }
+  if(cat!=='all'){ if(kw){ list = list.filter(e=>e.cat===cat); } else { list = DATA.filter(e=>e.cat===cat); } }
+
+  const wrap = $('#list');
+  if(!list.length){
+    $('#resInfo').innerHTML = (kw?`未找到与「<span class="hl">${esc(kw)}</span>」匹配的知识点`:'暂无内容') + `<button class="clear" onclick="clearAll()">清空</button>`;
+    wrap.innerHTML = `<div class="empty"><div class="e-ic">🕵️</div><div class="e-t">没有找到相关知识点</div><div class="e-s">试试热门标签，或换个关键词（如：转账 / 公章 / 销转保 / 航医）。<br>支持模糊匹配，输入「zhuan」可搜「转账」类内容。</div></div>`;
+    return;
+  }
+  // 分组渲染
+  let html = '';
+  if(!kw){
+    CATS.forEach(c=>{
+      if(c.id==='all') return;
+      const items = list.filter(e=>e.cat===c.id);
+      if(!items.length) return;
+      html += `<div class="group-title">${c.ic} ${c.name}</div>` + items.map(cardHtml).join('');
+    });
+  } else {
+    html = list.map(cardHtml).join('');
+  }
+  wrap.innerHTML = html;
+  $('#resInfo').innerHTML = (kw
+    ? `搜索「<span class="hl">${esc(kw)}</span>」共命中 <span class="hl">${list.length}</span> 条` + (cat!=='all'?` ＋ 分类【${catMeta(cat).name}】`:'') + `<button class="clear" onclick="clearAll()">清空</button>`
+    : (cat==='all' ? '' : `分类：${catMeta(cat).ic} ${catMeta(cat).name}（${list.length} 条）`));
+}
+function clearAll(){ $('#q').value=''; kw=''; cat='all'; document.querySelectorAll('.cat').forEach(b=>b.classList.remove('on')); const el=document.getElementById('cat_all'); if(el) el.classList.add('on'); applyFilter(); }
+function doSearch(){ kw = $('#q').value.trim(); applyFilter(); }
+
+/* ---------- 灯箱 ---------- */
+function openLb(k){
+  if(!IMG || !IMG[k]) return;
+  $('#lbImg').src = IMG[k];
+  const fig = document.querySelector(`img[data-k="${k}"]`);
+  $('#lbCap').textContent = fig && fig.parentElement && fig.parentElement.querySelector('figcaption') ? fig.parentElement.querySelector('figcaption').textContent.replace('点击放大','') : '';
+  $('#lightbox').classList.add('show');
+  document.body.style.overflow = 'hidden';
+}
+function closeLb(){ $('#lightbox').classList.remove('show'); document.body.style.overflow=''; }
+$('#lbClose').addEventListener('click', closeLb);
+$('#lightbox').addEventListener('click', e=>{ if(e.target.id==='lightbox') closeLb(); });
+document.addEventListener('keydown', e=>{ if(e.key==='Escape') closeLb(); });
+
+/* ---------- 搜索事件 ---------- */
+let deb = null;
+$('#q').addEventListener('input', function(){ clearTimeout(deb); deb=setTimeout(doSearch,150); });
+$('#q').addEventListener('keydown', e=>{ if(e.key==='Enter') doSearch(); });
+$('#searchBtn').addEventListener('click', doSearch);
+
+/* ---------- 启动 ---------- */
+totalEl.textContent = DATA.length + ' 条知识点';
+renderHot();
+renderCats();
+clearAll();
+</script>
+</body>
+</html>
