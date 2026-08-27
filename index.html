@@ -99,6 +99,7 @@ body{font-family:var(--font-sans);background:var(--bg);color:var(--text);min-hei
   </div>
 
   <nav class="module-tabs" id="moduleTabs">
+    <button class="mod-tab" data-mod="qa" onclick="switchModule('qa')">💬 你问我答</button>
     <button class="mod-tab active" data-mod="quiz" onclick="switchModule('quiz')">📚 培训考核</button>
     <button class="mod-tab" data-mod="performance" onclick="switchModule('performance')">📊 绩效管理</button>
     <button class="mod-tab" data-mod="beauty" onclick="switchModule('beauty')">💄 美妆话术</button>
@@ -118,6 +119,10 @@ body{font-family:var(--font-sans);background:var(--bg);color:var(--text);min-hei
 </header>
 
 <main class="sys-area" id="sysArea">
+  <div class="sys-wrap" id="wrap-qa">
+    <div class="sys-loader" id="loader-qa"><div class="sys-spinner"></div><div class="sl-text">正在进入 你问我答 …</div></div>
+    <iframe class="sys-frame" id="frame-qa"></iframe>
+  </div>
   <div class="sys-wrap active" id="wrap-quiz">
     <div class="sys-loader" id="loader-quiz"><div class="sys-spinner"></div><div class="sl-text">正在进入 培训考核 …</div></div>
     <iframe class="sys-frame" id="frame-quiz"></iframe>
@@ -149,6 +154,7 @@ body{font-family:var(--font-sans);background:var(--bg);color:var(--text);min-hei
 <script>
 /* ===================== 拆分版：按需加载三大模块 ===================== */
 const MOD_SRC = {
+  qa: 'qa.html',
   quiz: 'quiz.html',
   performance: 'performance.html',
   beauty: 'beauty.html',
@@ -162,6 +168,7 @@ let currentMod = null;
 
 // ===== 内嵌模式样式：隐藏各模块自带顶栏/侧栏，避免"双导航栏"（模块单独打开时仍保留自己的导航） =====
 const EMBED_CSS = {
+  qa: '.livery-stripe,header.topbar{display:none!important}',
   quiz: '.livery-stripe,.topbar{display:none!important}.sidebar{top:0!important;height:100vh!important}.main{margin-top:0!important}',
   performance: '.module-nav{display:none!important}',
   daily: '.livery-stripe,header.topbar{display:none!important}',
@@ -251,7 +258,7 @@ function applyTheme(t){
   document.documentElement.setAttribute('data-theme', t);
   const btn = document.getElementById('themeBtn');
   btn.textContent = t==='dark' ? '🌙' : '☀️';
-  ['quiz','performance','beauty','risk','daily','manual'].forEach(id=>{
+  ['qa','quiz','performance','beauty','risk','daily','manual'].forEach(id=>{
     const f = document.getElementById('frame-'+id);
     if(f && f.contentDocument){
       try{ f.contentDocument.documentElement.setAttribute('data-theme', t); }catch(e){}
@@ -282,6 +289,14 @@ function updateNetworkStatus(){
   if(navigator.onLine){ el.classList.remove('offline'); txt.textContent='在线'; }
   else { el.classList.add('offline'); txt.textContent='离线'; }
 }
+
+/* ===================== 模块间跳转（你问我答板块内跳转到其他板块） ===================== */
+window.addEventListener('message', function(e){
+  const d = e.data;
+  if(d && d.type === 'spring-switch' && MOD_SRC[d.module]){
+    switchModule(d.module);
+  }
+});
 
 /* ===================== 启动 ===================== */
 applyTheme('light');

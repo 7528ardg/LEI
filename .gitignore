@@ -1,0 +1,15 @@
+# 临时/调试产物
+.tmp_*
+__check_*
+.DS_Store
+
+# 离线大文件（站点不需要，避免撑爆仓库）
+*.pptx
+*.docx
+*.pdf
+*.xlsx
+
+# 手册解析临时文本与图片素材（qa.html 已内嵌知识库）
+docs/manual_parse/
+docs/manual_imgs/
+docs/med_img/

@@ -6,6 +6,7 @@ import io
 import os
 
 SOURCES = {
+    'qa': u'qa.html',
     'quiz': u'quiz.html',
     'performance': u'performance.html',
     'beauty': u'beauty.html',
@@ -121,6 +122,7 @@ body{font-family:var(--font-sans);background:var(--bg);color:var(--text);min-hei
   </div>
 
   <nav class="module-tabs" id="moduleTabs">
+    <button class="mod-tab" data-mod="qa" onclick="switchModule('qa')">💬 你问我答</button>
     <button class="mod-tab active" data-mod="quiz" onclick="switchModule('quiz')">📚 培训考核</button>
     <button class="mod-tab" data-mod="performance" onclick="switchModule('performance')">📊 绩效管理</button>
     <button class="mod-tab" data-mod="beauty" onclick="switchModule('beauty')">💄 美妆话术</button>
@@ -141,6 +143,10 @@ body{font-family:var(--font-sans);background:var(--bg);color:var(--text);min-hei
 </header>
 
 <main class="sys-area" id="sysArea">
+  <div class="sys-wrap" id="wrap-qa">
+    <div class="sys-loader" id="loader-qa"><div class="sys-spinner"></div><div class="sl-text">正在进入 你问我答 …</div></div>
+    <iframe class="sys-frame" id="frame-qa"></iframe>
+  </div>
   <div class="sys-wrap active" id="wrap-quiz">
     <div class="sys-loader" id="loader-quiz"><div class="sys-spinner"></div><div class="sl-text">正在进入 培训考核 …</div></div>
     <iframe class="sys-frame" id="frame-quiz"></iframe>
@@ -176,6 +182,7 @@ body{font-family:var(--font-sans);background:var(--bg);color:var(--text);min-hei
 <script>
 /* ===================== 三大系统完整功能数据（gzip 压缩 base64 内嵌，运行时解压） ===================== */
 const MODULES = {
+  qa: "__B64_qa__",
   quiz: "__B64_quiz__",
   performance: "__B64_performance__",
   beauty: "__B64_beauty__",
@@ -214,6 +221,7 @@ const _modScroll = {};
 /* ===== 内嵌模式样式：隐藏各模块自带的顶栏/侧栏，避免"双导航栏" =====
    （模块 Standalone 打开时仍保留自己的导航；嵌入全能助手时由外壳注入 CSS 隐藏） */
 const EMBED_CSS = {
+  qa: '.livery-stripe,header.topbar{display:none!important}',
   quiz: '.livery-stripe,.topbar{display:none!important}.sidebar{top:0!important;height:100vh!important}.main{margin-top:0!important;min-height:100vh!important}@media(max-width:720px){.topbar{display:flex!important;position:fixed!important;top:8px!important;right:8px!important;left:auto!important;width:auto!important;height:auto!important;padding:0!important;background:transparent!important;border:none!important;box-shadow:none!important;gap:0!important;z-index:130!important}.topbar>*{display:none!important}.topbar>.hamburger{display:flex!important;width:40px!important;height:40px!important;align-items:center!important;justify-content:center!important;border:1px solid #E5EDE9!important;background:#fff!important;box-shadow:0 2px 10px rgba(0,0,0,.15)!important}}',
   performance: '.module-nav{display:none!important}.module-content{margin-top:0!important;padding-top:16px!important}',
   daily: '.livery-stripe,header.topbar{display:none!important}',
@@ -305,7 +313,7 @@ function applyTheme(t){
   document.documentElement.setAttribute('data-theme', t);
   const btn = document.getElementById('themeBtn');
   btn.textContent = t==='dark' ? '🌙' : '☀️';
-  ['quiz','performance','beauty','medical','daily','manual','report'].forEach(id=>{
+  ['qa','quiz','performance','beauty','medical','daily','manual','report'].forEach(id=>{
     const f = _frames[id];
     if(f && f.contentDocument){
       try{ f.contentDocument.documentElement.setAttribute('data-theme', t); }catch(e){}
@@ -336,6 +344,14 @@ function updateNetworkStatus(){
   if(navigator.onLine){ el.classList.remove('offline'); txt.textContent='在线'; }
   else { el.classList.add('offline'); txt.textContent='离线'; }
 }
+
+/* ===================== 模块间跳转（你问我答板块内跳转到其他板块） ===================== */
+window.addEventListener('message', function(e){
+  const d = e.data;
+  if(d && d.type === 'spring-switch' && MODULES[d.module] !== undefined){
+    switchModule(d.module);
+  }
+});
 
 /* ===================== 启动 ===================== */
 applyTheme('light');
