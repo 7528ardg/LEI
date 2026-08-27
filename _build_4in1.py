@@ -11,6 +11,7 @@ SOURCES = {
     'risk': u'risk-lite.html',
     'daily': u'daily.html',
     'manual': u'manual.html',
+    'report': u'report.html',
 }
 OUT = u'春秋·广州分队全能助手（4合1）.html'
 
@@ -121,6 +122,7 @@ body{font-family:var(--font-sans);background:var(--bg);color:var(--text);min-hei
     <button class="mod-tab" data-mod="risk" onclick="switchModule('risk')">⚠️ 风险预警</button>
     <button class="mod-tab" data-mod="daily" onclick="switchModule('daily')">❓ 日常问题</button>
     <button class="mod-tab" data-mod="manual" onclick="switchModule('manual')">📕 手册奖惩</button>
+    <button class="mod-tab" data-mod="report" onclick="switchModule('report')">🗂 事件报告</button>
   </nav>
 
   <div class="actions">
@@ -162,6 +164,10 @@ body{font-family:var(--font-sans);background:var(--bg);color:var(--text);min-hei
     <div class="sys-loader" id="loader-manual"><div class="sys-spinner"></div><div class="sl-text">正在进入 手册奖惩 …</div></div>
     <iframe class="sys-frame" id="frame-manual"></iframe>
   </div>
+  <div class="sys-wrap" id="wrap-report">
+    <div class="sys-loader" id="loader-report"><div class="sys-spinner"></div><div class="sl-text">正在进入 事件报告 …</div></div>
+    <iframe class="sys-frame" id="frame-report"></iframe>
+  </div>
 </main>
 
 <div class="toast-container" id="toastContainer"></div>
@@ -175,7 +181,8 @@ const MODULES = {
   medical: "__B64_medical__",
   risk: "__B64_risk__",
   daily: "__B64_daily__",
-  manual: "__B64_manual__"
+  manual: "__B64_manual__",
+  report: "__B64_report__"
 };
 
 /* ===================== 解码引擎（gzip 解压；兼容未压缩旧数据回退） ===================== */
@@ -210,6 +217,7 @@ const EMBED_CSS = {
   performance: '.module-nav{display:none!important}.module-content{margin-top:0!important;padding-top:16px!important}',
   daily: '.livery-stripe,header.topbar{display:none!important}',
   manual: 'header.top .t-top{display:none!important}header.top{position:static!important}.menu{position:static!important;top:auto!important}',
+  report: '.top .t-title{display:none!important}.top{position:static!important}.menu{position:static!important;top:auto!important}',
   beauty: '',
   medical: '',
   risk: '.topbar{display:none!important}.layout{height:100vh!important}.layout.with-banner{height:calc(100vh - 42px)!important}'
@@ -297,7 +305,7 @@ function applyTheme(t){
   document.documentElement.setAttribute('data-theme', t);
   const btn = document.getElementById('themeBtn');
   btn.textContent = t==='dark' ? '🌙' : '☀️';
-  ['quiz','performance','beauty','medical','risk','daily','manual'].forEach(id=>{
+  ['quiz','performance','beauty','medical','risk','daily','manual','report'].forEach(id=>{
     const f = frameObj(id);
     if(f && f.contentDocument){
       try{ f.contentDocument.documentElement.setAttribute('data-theme', t); }catch(e){}

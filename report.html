@@ -1,0 +1,285 @@
+<!DOCTYPE html>
+<html lang="zh-CN" data-theme="light">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<meta name="theme-color" content="#148453">
+<title>事件报告 · 流程速查</title>
+<style>
+:root{--primary:#148453;--primary-dark:#0C5F3A;--gold:#F5B800;--danger:#E64A19;--blue:#2563EB;--purple:#7C3AED;--grad:linear-gradient(135deg,#148453 0%,#1FA56A 100%);--bg:#F5F8F6;--card:#fff;--text:#0F2A1F;--text2:#5A6F65;--text3:#B5C2BC;--border:#E5EDE9;--primary-soft:#E8F3EE;--danger-soft:#FEE7DE;--gold-soft:#FEF6DC;--blue-soft:#E0F0F6;--shadow:0 4px 14px rgba(20,132,83,.10)}
+html[data-theme="dark"]{--bg:#0F1A14;--card:#162420;--text:#E8F3EE;--text2:#8FA89C;--text3:#4A6358;--border:#1E3A2C;--primary-soft:#1A3D2A;--danger-soft:#3A1D1D;--gold-soft:#2A2410;--blue-soft:#16233C}
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei",sans-serif;background:var(--bg);color:var(--text);min-height:100vh;transition:background .3s,color .3s}
+.container{max-width:860px;margin:0 auto;padding:12px 14px 70px;-webkit-overflow-scrolling:touch}
+.top{position:sticky;top:0;z-index:50;background:var(--grad);color:#fff;padding:14px 16px 12px;box-shadow:0 4px 16px rgba(20,132,83,.18)}
+.t-title{font-size:1.06rem;font-weight:800;letter-spacing:.3px;margin-bottom:10px;display:flex;align-items:center;gap:8px}
+.t-title .logo{width:34px;height:34px;border-radius:10px;background:rgba(255,255,255,.18);display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0}
+.search{display:flex;gap:8px}
+.search input{flex:1;border:none;border-radius:10px;padding:10px 14px;font-size:.9rem;outline:none;background:rgba(255,255,255,.95);color:#1B2B23}
+.search button{border:none;border-radius:10px;padding:0 16px;background:rgba(255,255,255,.22);color:#fff;font-size:1rem;cursor:pointer}
+.menu{position:sticky;top:58px;z-index:40;display:flex;gap:6px;background:var(--card);padding:8px 12px;overflow-x:auto;scrollbar-width:none;border-bottom:1px solid var(--border)}
+.menu::-webkit-scrollbar{display:none}
+.m-tab{flex-shrink:0;padding:7px 13px;border-radius:18px;border:1px solid var(--border);background:var(--card);color:var(--text2);font-size:.8rem;font-weight:600;cursor:pointer;transition:all .2s}
+.m-tab.active{background:var(--grad);color:#fff;border-color:transparent;box-shadow:0 4px 12px rgba(20,132,83,.25)}
+.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;padding:12px 14px;background:var(--card);border-bottom:1px solid var(--border)}
+.stat{text-align:center}
+.stat b{display:block;font-size:1.15rem;color:var(--primary);font-weight:800}
+.stat span{font-size:.66rem;color:var(--text2)}
+.filters{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:12px;margin:12px 0}
+.f-label{font-size:.68rem;color:var(--text2);margin-bottom:6px;display:flex;justify-content:space-between;align-items:center}
+.chips{display:flex;flex-wrap:wrap;gap:6px}
+.chip{padding:5px 12px;border-radius:14px;border:1px solid var(--border);background:var(--bg);font-size:.76rem;color:var(--text2);cursor:pointer;transition:all .15s}
+.chip:hover{border-color:var(--primary);color:var(--primary)}
+.chip.active{background:var(--primary-soft);border-color:var(--primary);color:var(--primary);font-weight:700}
+.ev{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:14px;margin-bottom:12px;box-shadow:var(--shadow)}
+.ev-head{display:flex;align-items:flex-start;gap:8px;flex-wrap:wrap}
+.ev-title{font-size:.95rem;font-weight:800;color:var(--text);flex:1;min-width:200px}
+.ev-title em{font-style:normal;background:var(--gold-soft);color:#C99300;border-radius:4px;padding:0 3px}
+.ev-badges{display:flex;gap:5px;flex-wrap:wrap}
+.badge{font-size:.66rem;padding:2px 8px;border-radius:10px;font-weight:700}
+.b-cat{background:var(--blue-soft);color:var(--blue)}
+.b-src{background:var(--primary-soft);color:var(--primary)}
+.b-risk{background:var(--danger-soft);color:var(--danger)}
+.flow{margin-top:10px;display:flex;flex-direction:column;gap:8px}
+.step{border:1px solid var(--border);border-radius:10px;overflow:hidden}
+.step-head{display:flex;align-items:center;gap:6px;padding:7px 10px;font-size:.78rem;font-weight:800;background:var(--primary-soft);color:var(--primary-dark)}
+.step-head .ic{width:22px;height:22px;border-radius:50%;background:var(--grad);color:#fff;display:flex;align-items:center;justify-content:center;font-size:.7rem;flex-shrink:0}
+.step-body{padding:8px 10px;font-size:.8rem;line-height:1.7;color:var(--text2)}
+.step-body li{margin-left:16px}
+.step-body strong{color:var(--text)}
+.step-body .k{font-weight:700;color:var(--primary)}
+.ded{margin-top:10px;background:var(--danger-soft);border:1px dashed var(--danger);border-radius:10px;padding:8px 10px;font-size:.76rem}
+.ded .d-title{font-weight:800;color:var(--danger);margin-bottom:4px}
+.ded li{margin-left:16px;line-height:1.6;color:var(--text2)}
+.ded strong{color:var(--danger)}
+.hotbar{display:flex;gap:6px;flex-wrap:wrap;margin:8px 0 4px}
+.hot{font-size:.72rem;padding:3px 10px;border-radius:12px;background:var(--primary-soft);color:var(--primary);cursor:pointer;border:1px solid transparent}
+.hot:hover{border-color:var(--primary)}
+.empty{text-align:center;padding:48px 16px;color:var(--text3)}
+.empty .e-ic{font-size:3rem;display:block;margin-bottom:10px}
+footer{color:var(--text3);font-size:.68rem;text-align:center;line-height:1.8;padding:20px 10px 8px;border-top:1px dashed var(--border);margin-top:16px}
+</style>
+</head>
+<body>
+<div class="top">
+  <div class="t-title"><span class="logo">🗂</span><span>事件报告 · 完整流程速查</span></div>
+  <div class="search">
+    <input id="kw" placeholder="搜索：事件 / 关键词 / 章节号（如 3.6.5.4）…" autocomplete="off">
+    <button onclick="doSearch()">🔍</button>
+  </div>
+</div>
+<div class="stats">
+  <div class="stat"><b id="st-n">0</b><span>报告流程</span></div>
+  <div class="stat"><b id="st-cat">0</b><span>事件分类</span></div>
+  <div class="stat"><b id="st-ded">0</b><span>关联扣分项</span></div>
+  <div class="stat"><b id="st-phone">6</b><span>报告渠道</span></div>
+</div>
+<div class="menu" id="menu">
+  <button class="m-tab active" data-v="all">🗂 全部流程</button>
+  <button class="m-tab" data-v="hot">🔥 高频重点</button>
+  <button class="m-tab" data-v="phone">📞 报告渠道</button>
+</div>
+<div id="app" class="container"></div>
+
+<script>
+/* ============ 数据：节选《客舱乘务员手册》01.10 相关章节整理 ============ */
+const EVENTS = [
+/* ==================== 医学事件 ==================== */
+{ id:'med', cat:'医学事件', hot:true, src:'手册 3.6.3',
+  kws:['紧急医学','医学事件','伤病','旅客突发','急救','疾病','死亡','公共卫生','传染病','疑似传染病','失能','报告单'],
+  title:'飞行中旅客紧急医学事件报告流程',
+  flow:[
+    {ph:'📝 过程·处置与报告', items:[
+      '乘务员立即<strong>报告乘务长</strong>；乘务长及时将情况及处置<strong>报告机长</strong>。',
+      '在机上实施急救，维持生命体征；涉及传染病按 3.6.3.3 突发公共卫生事件处置（隔离区、消毒、专用洗手间等）。',
+      '填写<strong>《飞行中旅客紧急医学事件报告单》</strong>；详细记录：事件发生时间、航段、事件具体情况、涉及人员（姓名/座位/地址）及<strong>至少一名见证旅客</strong>信息、处置过程。',
+      '疑似传染病：同时记录同排及<strong>前后三排</strong>旅客姓名/性别/年龄/联系方式/航班号/座位号。'
+    ]},
+    {ph:'🤝 交接·上报', items:[
+      '航段结束后，乘务长<strong>立即</strong>报告<strong>客舱部值班经理与航空医师</strong>，并将报告单<strong>拍照</strong>发送。',
+      '航班结束后，上报<strong>SQM系统</strong>（必须将报告单作为<strong>附件上传</strong>）；纸质版交驻点航空医师；驻点无航医则交<strong>分队资料箱</strong>并同步分队。',
+      '驻外航班：先立即上报+截图发送值班经理/航医，回驻点后再办理单据交接。',
+      '机上情况需与地面交接时，按<strong>《机上事件与地面交接单》</strong>填写并落地完成交接。'
+    ]},
+    {ph:'✅ 闭环·归档', items:[
+      '使用应急医疗设备物品/药品（血压计、体温计除外）的，填写<strong>《应急医疗设备和药品使用知情同意书》</strong>并与报告单一同装订。',
+      '<strong>《飞行中旅客紧急医学事件报告单》须保存 24 个月</strong>。',
+      '事件记录做到事实准确、闭环可追溯；涉及失能机组按 3.6.4 同时办理航空卫生不安全事件报告。'
+    ]}
+  ],
+  ded:[
+    '未按规定上报不安全事件 → <strong>扣安全质量分 5 分</strong>（6.7.9.1 信息报告）',
+    '信息迟报、漏报 → <strong>扣 10 分</strong>；谎报、瞒报 → <strong>扣 20 分</strong>（6.7.9.1）',
+    '未及时发现和处置机上不安全事件和特殊情况 → <strong>扣 10 分</strong>（6.7.9.1）',
+    '在SQM系统有效报告自身问题/有效信息 → 分别<strong>加 1/2 分</strong>（6.7.9.1 奖励）'
+  ]},
+{ id:'health', cat:'医学事件', hot:true, src:'手册 3.6.4',
+  kws:['航空卫生','卫生不安全','机组失能','食物中毒','药物影响','急症','猝死','突发疾病','外伤','航医'],
+  title:'航空卫生不安全事件（机组）信息报告',
+  flow:[
+    {ph:'📝 过程·识别', items:[
+      '范围：机组成员因受伤、患病/疑似患病、食物中毒、药物影响或死亡造成<strong>突发失能</strong>或飞行不正常；非值勤期地面突发严重外伤、意识丧失、身体失控、非正常死亡/猝死及突发公共卫生事件。'
+    ]},
+    {ph:'🤝 交接·报告', items:[
+      '非值勤期：本人或部门领导/当日值班经理<strong>立即报告航空医师</strong>（021-32315893 / 18017321073）。',
+      '运行中：乘务长<strong>立刻报告机长</strong> → 机长报告<strong>公司AOC</strong> → AOC通过座席系统报告航空医师及总值班领导。',
+      '航班结束后，乘务长<strong>第一时间</strong>上报<strong>SQM系统</strong>和航空医师。'
+    ]},
+    {ph:'✅ 闭环·内容', items:[
+      '报告内容须含：发生时间/地点；事件描述（航班、症状、时间线）；涉及空勤人员数量；人员信息（姓名、工种）；已采取措施（应急处置/调查/善后/重大舆情处置）。'
+    ]}
+  ],
+  ded:[
+    '未按规定上报不安全事件 → <strong>扣安全质量分 5 分</strong>（6.7.9.1 信息报告）',
+    '信息迟报、漏报 → <strong>扣 10 分</strong>；谎报、瞒报 → <strong>扣 20 分</strong>（6.7.9.1）'
+  ]},
+/* ==================== 安全/安保类事件 ==================== */
+{ id:'safety5', cat:'安全类', hot:true, src:'手册 3.6.5.4.2',
+  kws:['滑梯放出','滑梯包脱落','客舱释压','烟雾','火警','紧急撤离','危险品事故','机上事件报告单','SQM','24小时','安全保卫质量处','(a)','(b)','(c)','(d)','(e)'],
+  title:'机上事件（a）-（e）类（滑梯/释压/烟雾火警/撤离/危险品）报告',
+  flow:[
+    {ph:'📝 过程·处置', items:[
+      '此类包括：<strong>滑梯放出/滑梯包脱落、客舱释压、客舱烟雾/火警、紧急撤离、危险品事故</strong>。',
+      '按对应应急处置程序先处置并确保安全，同时按 3.6.5.1 上报：乘务员→乘务长→机长，紧急时可越级但事后告知乘务长。'
+    ]},
+    {ph:'🤝 交接·上报', items:[
+      '发生此类事件，<strong>乘务长填写《春秋航空股份有限公司机上事件报告单》</strong>。',
+      '航班结束后，乘务长<strong>第一时间上报SQM</strong>并报告当日部门值班经理/公司值班手机，同时记录到<strong>“智慧客舱”</strong>。',
+      '<strong>航后 24 小时内</strong>将《机上事件报告单》上交<strong>客舱服务部安全保卫质量处</strong>。'
+    ]},
+    {ph:'✅ 闭环·核查归档', items:[
+      '客舱服务部值班经理接报后第一时间上报<strong>公司安全监察部/保卫部</strong>及部门领导，协同当事人与安全保卫质量处<strong>调查核实</strong>。',
+      '相关单据由安全保卫质量处<strong>保存 24 个日历月</strong>，并由安全监察部/保卫部向局方报告。'
+    ]}
+  ],
+  ded:[
+    '未按规定填报记录/信息报告机上不安全事件 → 按“信息报告”类扣罚并进入差错认定（6.7.9.1 / 6.7.9.2）',
+    '信息迟报、漏报 → <strong>扣 10 分</strong>；谎报、瞒报 → <strong>扣 20 分</strong>（6.7.9.1）',
+    '弄虚作假、伪造证据、隐瞒事实等严重不诚信 → <strong>扣 60 分并退回人力资源部</strong>（6.7.9.1 诚信作风）',
+    '同类事件未按程序处置形成一般/严重差错 → 按差错标准<strong>扣 20/40 分</strong>（6.7.9.1 通项）'
+  ]},
+{ id:'safety_other', cat:'安全类', hot:false, src:'手册 3.6.5.4.3',
+  kws:['非法干扰','劫机','机闹','扰乱行为','行李落下','餐车滑出','颠簸受伤','危险品携带','中止旅行','押解','遣返','驾驶舱门','违规进入驾驶舱','刀具','拾获危险品','退票后乘机','安保','(f)','(g)','(h)','(p)'],
+  title:'非法干扰 / 扰乱 / “机闹”及（f）-（p）类事件报告',
+  flow:[
+    {ph:'📝 过程·上报', items:[
+      '类别：非法干扰行为、扰乱行为和“机闹”行为，以及餐车/储物柜滑出、行李落下致伤、颠簸致损、危险品携带、机票证照类（中途停止旅行/退票后乘机）、安保设施故障、旅客携带刀具、拾获危险品等其他安保类事件。',
+      '发生上述事件，<strong>乘务长在条件允许的情况下立即上报</strong>当日部门值班经理或公司各部门值班手机。'
+    ]},
+    {ph:'🤝 交接·记录', items:[
+      '<strong>第一时间上报 SQM</strong>，并将事件记录在<strong>“智慧客舱”</strong>中。',
+      '按需填写《机上事件报告单》（涉及（a）-（e）类的部分适用）。'
+    ]},
+    {ph:'✅ 闭环', items:[
+      '保留现场证据与当事人/目击者信息，配合部门调查核实，单据按规定归档。'
+    ]}
+  ],
+  ded:[
+    '未按规定上报不安全事件 → <strong>扣 5 分</strong>；迟报漏报 → <strong>扣 10 分</strong>；谎报瞒报 → <strong>扣 20 分</strong>（6.7.9.1）',
+    '对扰乱/机闹处置不当造成后果或影响 → 按行为后果对照 6.7.9.1 条款扣罚'
+  ]},
+/* ==================== 信息报告通则 ==================== */
+{ id:'info', cat:'信息报告', hot:true, src:'手册 3.5.3.4',
+  kws:['爆炸物','危险物品','劫持','行为人','暗语','暗号','双向转递','可疑行为','信息报告','机长'],
+  title:'发现危险物品 / 劫持等异常事件的信息报告',
+  flow:[
+    {ph:'📝 过程·上报', items:[
+      '旅客声称有爆炸物或辨识疑似危险物品、事态性质变化后，客舱机组应<strong>迅速报告机长</strong>。',
+      '掌握事件基本情况与进展，<strong>迅速、准确、简明</strong>向机长报告：(a)行为人/被劫持人基本情况（人数/性别/年龄/国籍/位号/体貌/精神状态/工具/手段）；(b)所属或声称组织、有无航空知识、动机目的；(c)当前情况（位置/是否进入驾驶舱/伤亡/损坏/措施/燃油/降落机场）；(d)不能明语报告时使用<strong>暗语暗号</strong>。'
+    ]},
+    {ph:'🤝 交接·协同', items:[
+      '航空安全员现场处置中，客舱机组与机长及航空安全员做好<strong>信息双向转递</strong>。',
+      '对旅客可疑行为/可疑物品保持警惕，任何威吓与异常<strong>立即向机长和航空安全员报告</strong>。'
+    ]},
+    {ph:'✅ 闭环', items:[
+      '全程按应急处置预案协同配合，落地后按规定完成事件报告单/SQM 上报与调查配合。'
+    ]}
+  ],
+  ded:[
+    '未按规定进行信息报告或填报记录 → 按信息报告类条款<strong>扣 5-20 分</strong>（6.7.9.1）'
+  ]},
+/* ==================== 通用要求 ==================== */
+{ id:'common', cat:'通用要求', hot:true, src:'手册 3.6.5.1 / 3.6.5.3 / 3.6.5.5',
+  kws:['基本要求','报告方式','春秋之家','安全报告','智慧客舱','风险沙盘','值班手机','值班经理','AOC','安监','保卫','电话','报告要求','完整','准确','目击者'],
+  title:'机上事件报告·通用方式与要求',
+  flow:[
+    {ph:'📝 过程·上报链路', items:[
+      '任何时间段发生异常/事件：乘务员向<strong>乘务长</strong>报告，乘务长<strong>尽快报告机长</strong>；紧急情况下可<strong>越级报告机长</strong>，越级后尽快告知乘务长。'
+    ]},
+    {ph:'🤝 交接·报告渠道', items:[
+      '① 春秋之家 app →<strong>“安全报告”</strong>（等同于 SQM）；② 春秋之家 PRO app →<strong>“智慧客舱”→“风险沙盘”</strong>（等同于 SQM）；③ 值班经理电话报告。',
+      '值班电话：客舱部值班 18017321071；安监部值班 17717356347；保卫部值班 18017321082；AOC 021-32315801；航空医师 021-32315893 / 18017321073。'
+    ]},
+    {ph:'✅ 闭环·报告要求', items:[
+      '报告详细陈述事件、导致原因与采取的措施，注意<strong>时间、地点、旅客姓名/地址、目击者信息、人员受伤情况</strong>。',
+      '报告<strong>准确完整</strong>，只记录事件事实，避免有损任何人的评论。'
+    ]}
+  ],
+  ded:[
+    '未按规定上报不安全事件 → <strong>扣 5 分</strong>；迟报漏报 → <strong>扣 10 分</strong>；谎报瞒报 → <strong>扣 20 分</strong>（6.7.9.1 信息报告）',
+    '同类问题年度内重复发生（90 日内第 3 次）→ 按原分值 <strong>1.5-2 倍</strong>扣罚（6.7.9.1 其他规定）'
+  ]}
+];
+
+/* ============ 报告渠道 ============ */
+const PHONES = [
+  {d:'客舱部 值班手机', n:'18017321071', tag:'事件/运行上报'},
+  {d:'安监部 值班手机', n:'17717356347', tag:'安全/差错上报'},
+  {d:'保卫部 值班手机', n:'18017321082', tag:'安保/非法干扰'},
+  {d:'AOC 运行中心', n:'021-32315801', tag:'机长上报通道'},
+  {d:'航空医师', n:'021-32315893', tag:'卫生/医学事件'},
+  {d:'航空医师 手机', n:'18017321073', tag:'卫生/医学事件'}
+];
+
+/* ============ 渲染 ============ */
+const $ = id => document.getElementById(id);
+let state = { v:'all', kw:'' };
+const CATS = [...new Set(EVENTS.map(e=>e.cat))];
+function esc(s){ return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+function hl(s){ if(!state.kw) return s; const k=state.kw.toLowerCase(); let o=s; try{ o = s.replace(new RegExp('('+k.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')+')','gi'), '<em>$1</em>'); }catch(e){} return o; }
+function phonesHtml(){
+  return '<div class="ev"><div class="ev-head"><div class="ev-title">📞 报告联系渠道（手册 3.6.5.3）</div></div><div class="flow">' +
+    PHONES.map(p=>'<div class="step"><div class="step-head"><span class="ic">☎</span>'+esc(p.d)+'</div><div class="step-body"><strong style="font-size:1rem;color:var(--primary)">'+esc(p.n)+'</strong><br><span class="k">用途：</span>'+esc(p.tag)+'</div></div>').join('') +
+    '</div></div>';
+}
+function evHtml(e){
+  const flow = e.flow.map(f=>'<div class="step"><div class="step-head"><span class="ic">'+(f.ph.slice(0,1))+'</span>'+esc(f.ph)+'</div><div class="step-body"><ul>'+f.items.map(it=>'<li>'+hl(it)+'</li>').join('')+'</ul></div></div>').join('');
+  const ded = e.ded ? '<div class="ded"><div class="d-title">⚠️ 遗漏/违反流程 · 关联扣分（参见📕手册奖惩）</div><ul>' + e.ded.map(d=>'<li>'+hl(d)+'</li>').join('') + '</ul></div>' : '';
+  const date=(new Date()).toJSON().slice(0,10);
+  return '<div class="ev" data-id="'+e.id+'"><div class="ev-head"><div class="ev-title">'+hl(e.title)+'</div><div class="ev-badges"><span class="badge b-cat">'+esc(e.cat)+'</span><span class="badge b-src">'+esc(e.src)+'</span>'+(e.hot?'<span class="badge b-risk">🔥 高频</span>':'')+'</div></div><div class="flow">'+flow+'</div>'+ded+'</div>';
+}
+function hotHtml(){
+  const kws=[];
+  EVENTS.forEach(e=>e.kws.forEach(k=>{ if(kws.indexOf(k)<0 && k.length>1) kws.push(k); }));
+  return '<div class="hotbar">' + kws.slice(0,20).map(k=>'<span class="hot" onclick="setKw(\''+k.replace(/'/g,"\\'")+'\')">'+k+'</span>').join('') + '</div>';
+}
+function render(){
+  let list = EVENTS;
+  if(state.kw){
+    const k=state.kw.toLowerCase();
+    list = list.filter(e=>{
+      const hay = (e.title+' '+e.cat+' '+e.kws.join(' ')+' '+e.src+' '+(e.flow.map(f=>f.ph+' '+f.items.join(' ')).join(' '))).toLowerCase();
+      return hay.indexOf(k)>=0;
+    });
+  }
+  if(list.length===0 && state.kw){
+    $('app').innerHTML = hotHtml()+'<div class="empty"><span class="e-ic">🕵️</span><div class="e-t">没有找到匹配流程</div><div class="e-s">换个关键词试试：如“滑梯 / 医学 / 移交 / 交接 / 报告单 / SQM”。</div></div>';
+    return;
+  }
+  const body = (state.v==='phone') ? phonesHtml()
+    : list.filter(e=>state.v!=='hot' || e.hot).map(evHtml).join('');
+  $('app').innerHTML = hotHtml() + body;
+  $('st-n').textContent = EVENTS.length;
+  $('st-cat').textContent = CATS.length;
+  $('st-ded').textContent = EVENTS.reduce((s,e)=>s+(e.ded?e.ded.length:0),0);
+}
+function doSearch(){ state.kw=$('kw').value.trim(); render(); }
+function setKw(k){ $('kw').value=k; state.kw=k; render(); }
+document.querySelectorAll('.m-tab').forEach(b=>{
+  b.onclick=()=>{ document.querySelectorAll('.m-tab').forEach(x=>x.classList.remove('active')); b.classList.add('active'); state.v=b.dataset.v; render(); };
+});
+$('kw').addEventListener('keydown',e=>{ if(e.key==='Enter') doSearch(); });
+render();
+</script>
+</body>
+</html>
