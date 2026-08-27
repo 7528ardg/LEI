@@ -1,0 +1,640 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>手册奖惩 · 春秋航空广州分队</title>
+<style>
+*,::before,::after{box-sizing:border-box;margin:0;padding:0}
+html{font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei",sans-serif;line-height:1.6;-webkit-text-size-adjust:100%}
+:root{
+  --primary:#148453;--primary-dark:#0C5F3A;--primary-soft:#E8F3EE;--primary-mist:#F4F9F6;
+  --gold:#B8860B;--gold-soft:#FDF4D7;--danger:#D64545;--danger-soft:#FDECEC;
+  --blue:#2563EB;--blue-soft:#EAF1FE;--purple:#7C3AED;--purple-soft:#F1EBFE;
+  --bg:#F5F8F6;--card:#fff;--text:#1B2B23;--text2:#5A6F65;--text3:#9DB0A8;--border:#E5EDE9;
+  --grad:linear-gradient(135deg,#148453 0%,#1FA56A 100%);
+}
+html[data-theme="dark"]{--bg:#0F1A14;--card:#162420;--text:#E8F3EE;--text2:#8FA89C;--text3:#4A6358;--border:#1E3A2C;--primary-soft:#1A3D2A;--primary-mist:#142E22;--gold-soft:#2A2410;--danger-soft:#3A1D1D;--blue-soft:#16233C;--purple-soft:#241636;--shadow-c:rgba(0,0,0,.4)}
+body{background:var(--bg);color:var(--text);min-height:100vh;transition:background .3s,color .3s}
+.main-scroll-container{max-width:860px;margin:0 auto;padding:12px 14px 70px;-webkit-overflow-scrolling:touch}
+/* 顶栏 */
+.top{position:sticky;top:0;z-index:50;background:var(--grad);color:#fff;padding:14px 16px 12px;box-shadow:0 4px 16px rgba(20,132,83,.18)}
+.t-top{display:flex;align-items:center;gap:10px;margin-bottom:10px}
+.t-logo{width:38px;height:38px;border-radius:12px;background:rgba(255,255,255,.18);display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0}
+.t-title{font-size:1.06rem;font-weight:800;letter-spacing:.3px}
+.t-sub{font-size:.7rem;opacity:.85;margin-top:1px}
+.search{display:flex;gap:8px}
+.search input{flex:1;border:none;border-radius:10px;padding:10px 14px;font-size:.9rem;outline:none;background:rgba(255,255,255,.95);color:#1B2B23}
+.search button{border:none;border-radius:10px;padding:0 16px;background:rgba(255,255,255,.22);color:#fff;font-size:1rem;cursor:pointer}
+/* 统计 */
+.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;padding:12px 14px;background:var(--card);border-bottom:1px solid var(--border)}
+.stat{text-align:center}
+.stat b{display:block;font-size:1.15rem;color:var(--primary);font-weight:800}
+.stat span{font-size:.66rem;color:var(--text2)}
+/* 菜单 */
+.menu{position:sticky;top:116px;z-index:40;display:flex;gap:6px;background:var(--bg-card,var(--card));padding:8px 12px;overflow-x:auto;scrollbar-width:none;border-bottom:1px solid var(--border);backdrop-filter:blur(10px);background:rgba(255,255,255,.0)}
+.menu::-webkit-scrollbar{display:none}
+.m-tab{flex-shrink:0;padding:8px 14px;border-radius:18px;border:1px solid var(--border);background:var(--card);color:var(--text2);font-size:.82rem;font-weight:600;cursor:pointer;transition:all .2s;font-family:inherit}
+.m-tab.active{background:var(--grad);color:#fff;border-color:transparent;box-shadow:0 4px 12px rgba(20,132,83,.25)}
+/* 视图 */
+.view{display:none}
+.view.active{display:block;animation:fade .25s}
+@keyframes fade{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+.sec-title{display:flex;align-items:center;gap:8px;font-size:.98rem;font-weight:800;color:var(--text);margin:18px 4px 10px}
+.sec-title::before{content:'';width:4px;height:16px;border-radius:2px;background:var(--grad)}
+/* 过滤器 */
+.filters{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:12px;margin:12px 0}
+.f-group{margin-bottom:10px}
+.f-group:last-child{margin-bottom:0}
+.f-label{font-size:.68rem;color:var(--text2);margin-bottom:6px;display:flex;justify-content:space-between;align-items:center}
+.f-cnt{color:var(--text3);font-weight:500}
+.chips{display:flex;flex-wrap:wrap;gap:6px}
+.chip{padding:5px 12px;border-radius:14px;border:1px solid var(--border);background:var(--bg);font-size:.76rem;color:var(--text2);cursor:pointer;transition:all .15s;font-family:inherit}
+.chip:hover{border-color:var(--primary);color:var(--primary)}
+.chip.active{background:var(--primary-soft);border-color:var(--primary);color:var(--primary);font-weight:700}
+.chip.hot{background:var(--gold-soft);border-color:#E4C45C;color:#8a6d00}
+html[data-theme="dark"] .chip.hot{color:#E4C45C}
+.selects{display:flex;gap:8px}
+.selects select{flex:1;border:1px solid var(--border);border-radius:10px;padding:8px 6px;font-size:.78rem;background:var(--card);color:var(--text);outline:none}
+/* 规则卡片 */
+.rules{display:flex;flex-direction:column;gap:10px}
+.rule{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:12px 14px;transition:box-shadow .2s;position:relative}
+.rule.hit{border-color:var(--primary);box-shadow:0 0 0 1px var(--primary)}
+.rule .r-head{display:flex;align-items:flex-start;gap:10px}
+.score-badge{flex-shrink:0;min-width:44px;text-align:center;padding:4px 8px;border-radius:10px;font-size:.9rem;font-weight:800;color:#fff;line-height:1.2}
+.score-badge small{display:block;font-size:.55rem;font-weight:600;opacity:.9}
+.s-add{background:var(--grad)}
+.s-sub{background:#168247}
+.s-mid{background:#C77D0B}
+.s-high{background:#D64545}
+.rule .r-body{flex:1;min-width:0}
+.rule .r-text{font-size:.85rem;color:var(--text);line-height:1.62}
+.rule.clamped .r-text{display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden}
+.rule .r-act{display:flex;align-items:center;gap:6px;margin-top:8px;flex-wrap:wrap}
+.tag{display:inline-flex;align-items:center;gap:3px;font-size:.66rem;padding:2px 8px;border-radius:9px;background:var(--primary-mist);color:var(--primary);font-weight:600}
+.tag.ref{background:var(--blue-soft);color:var(--blue)}
+.tag.obj{background:#F5F0FF;color:var(--purple)}
+html[data-theme="dark"] .tag.obj{background:var(--purple-soft)}
+.tag.range{background:var(--gold-soft);color:#8a6d00}
+html[data-theme="dark"] .tag.range{color:#E4C45C}
+.rule .expand{margin-left:auto;border:none;background:none;color:var(--text3);font-size:.68rem;cursor:pointer;padding:4px;font-family:inherit}
+.rule .fav{margin-left:4px;border:none;background:none;font-size:1rem;cursor:pointer;padding:2px 4px;opacity:.55;transition:all .15s}
+.rule .fav.on{opacity:1;transform:scale(1.15)}
+.empty{text-align:center;color:var(--text3);padding:36px 0;font-size:.85rem}
+/* 分数说明卡 */
+.score-card{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:14px;margin-bottom:10px}
+.score-card .s-name{display:flex;align-items:center;gap:8px;font-weight:800;font-size:.92rem}
+.score-card .s-ico{width:26px;height:26px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:.8rem;color:#fff;flex-shrink:0}
+.score-card p{font-size:.8rem;color:var(--text2);line-height:1.66;margin-top:6px}
+.score-card ul{list-style:none;margin-top:6px}
+.score-card li{font-size:.78rem;color:var(--text2);padding:3px 0 3px 16px;position:relative;line-height:1.6}
+.score-card li::before{content:'•';color:var(--primary);position:absolute;left:2px;font-weight:800}
+/* 阈值卡 */
+.throw{display:flex;flex-wrap:wrap;gap:8px;margin-top:4px}
+.th{display:flex;flex-direction:column;align-items:flex-start;gap:2px;background:var(--card);border:1px solid var(--border);border-left:3px solid var(--danger);border-radius:10px;padding:8px 12px;min-width:150px;flex:1}
+html[data-theme="dark"] .th{background:var(--card)}
+.th b{font-size:.95rem;color:var(--danger);font-weight:800}
+.th span{font-size:.7rem;color:var(--text2)}
+.th.pri{border-left-color:var(--primary)}
+.th.pri b{color:var(--primary)}
+/* 晋级降级卡 */
+.p-card{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:14px;margin-bottom:10px}
+.p-card .p-title{display:flex;align-items:center;gap:8px;font-weight:800;font-size:.92rem;flex-wrap:wrap}
+.p-card .p-title .em{font-size:.66rem;padding:2px 8px;border-radius:9px;font-weight:700}
+.em.red{background:var(--danger-soft);color:var(--danger)}
+.em.green{background:var(--primary-soft);color:var(--primary)}
+.em.blue{background:var(--blue-soft);color:var(--blue)}
+.em.gold{background:var(--gold-soft);color:#8a6d00}
+html[data-theme="dark"] .em.gold{color:#E4C45C}
+.p-card ul{list-style:none;margin-top:8px}
+.p-card li{font-size:.8rem;color:var(--text2);padding:3px 0 3px 18px;position:relative;line-height:1.62}
+.p-card li::before{content:'▸';color:var(--primary);position:absolute;left:2px;font-weight:700}
+.p-card li b{color:var(--text);font-weight:700}
+.p-card .ref-tag{margin-top:8px;display:inline-block}
+.ladder{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:14px;margin-bottom:10px;display:flex;flex-direction:column;gap:2px}
+.ladder .step{display:flex;align-items:center;gap:10px;padding:7px 10px;border-radius:10px;background:var(--primary-mist);font-size:.82rem;font-weight:700;color:var(--primary);position:relative}
+.ladder .step:not(:last-child)::after{content:'↓';position:absolute;right:10px;color:var(--text3);font-size:.7rem}
+.ladder .step.s-pass{background:var(--primary-soft)}
+.ladder .step span{font-weight:500;color:var(--text2);font-size:.7rem;margin-left:auto}
+/* footer */
+footer{color:var(--text3);font-size:.68rem;text-align:center;line-height:1.8;padding:22px 10px 8px;margin-top:16px;border-top:1px dashed var(--border)}
+footer b{color:var(--text2)}
+@media(max-width:600px){.stats b{font-size:1rem}.th{min-width:130px}}
+</style>
+</head>
+<body>
+<header class="top">
+  <div class="t-top">
+    <div class="t-logo">📕</div>
+    <div>
+      <div class="t-title">手册奖惩 · 奖惩升级速查</div>
+      <div class="t-sub">《客舱服务部管理手册》01.14（2026.05.27生效）· 数据整理自手册全文</div>
+    </div>
+  </div>
+  <div class="search">
+    <input id="kw" placeholder="搜索：关键词 / 条款号(如 6.7.9.3.4) / 具体行为(如 迟到、酒测)…" autocomplete="off">
+    <button onclick="doSearch()">🔍</button>
+  </div>
+</header>
+<div class="stats">
+  <div class="stat"><b id="st-rules">0</b><span>奖惩条款</span></div>
+  <div class="stat"><b id="st-types">8</b><span>分数类型</span></div>
+  <div class="stat"><b id="st-promo">28</b><span>晋级降级规则</span></div>
+  <div class="stat"><b id="st-fav">0</b><span>已收藏</span></div>
+</div>
+<nav class="menu" id="menu">
+  <button class="m-tab active" data-v="query">🔍 扣分查询</button>
+  <button class="m-tab" data-v="scores">📊 分数说明</button>
+  <button class="m-tab" data-v="promo">🚀 晋级降级</button>
+  <button class="m-tab" data-v="fav">⭐ 我的收藏</button>
+</nav>
+<main class="main-scroll-container">
+
+  <!-- ============ 扣分查询 ============ -->
+  <section class="view active" id="view-query">
+    <div class="filters">
+      <div class="f-group">
+        <div class="f-label">事件分类 <span class="f-cnt" id="f-cat-cnt"></span></div>
+        <div class="chips" id="chips-cat"></div>
+      </div>
+      <div class="f-group">
+        <div class="f-label">分数类型</div>
+        <div class="chips" id="chips-st"></div>
+      </div>
+      <div class="f-group">
+        <div class="f-label">适用对象</div>
+        <div class="chips" id="chips-obj"></div>
+      </div>
+      <div class="f-group">
+        <div class="f-label">加分 / 扣分</div>
+        <div class="chips" id="chips-t"></div>
+      </div>
+      <div class="f-group selects">
+        <select id="sortSel">
+          <option value="rel">按 相关/默认 排序</option>
+          <option value="desc">按扣分值 从高到低</option>
+          <option value="add">加分项 优先显示</option>
+          <option value="sec">按手册章节 排序</option>
+        </select>
+        <button style="flex:0 0 auto;border:none;border-radius:10px;background:var(--primary-soft);color:var(--primary);padding:6px 14px;font-size:.78rem;font-weight:700;cursor:pointer;font-family:inherit" onclick="resetFilters()">重置</button>
+      </div>
+    </div>
+    <div class="rules" id="rules"></div>
+    <div class="empty" id="no-result" style="display:none">未找到匹配条款，换个关键词试试～</div>
+  </section>
+
+  <!-- ============ 分数说明 ============ -->
+  <section class="view" id="view-scores">
+    <div class="sec-title">各类分数定义与使用方法</div>
+    <div id="scoreCards"></div>
+    <div class="sec-title">🚨 关键扣分值速查（重点记忆）</div>
+    <div class="throw" id="throws"></div>
+    <div class="sec-title">累计扣分红线汇总</div>
+    <div class="throw" id="throws2"></div>
+    <div class="sec-title">申诉与公示（6.7.7）</div>
+    <div class="p-card" id="appealCard"></div>
+  </section>
+
+  <!-- ============ 晋级降级 ============ -->
+  <section class="view" id="view-promo">
+    <div class="sec-title">业务等级体系（6.8.5）</div>
+    <div class="ladder" id="ladder"></div>
+    <div class="sec-title">🚀 晋升条件</div>
+    <div id="promoCards"></div>
+    <div class="sec-title">📝 晋级 / 恢复考试规则（6.8.6.3）</div>
+    <div class="p-card" id="examCard"></div>
+    <div class="sec-title">📉 降级规定</div>
+    <div id="demoteCards"></div>
+    <div class="sec-title">乘务长资质暂停 · 降级 · 解聘（8.20）</div>
+    <div class="p-card" id="p820card"></div>
+    <div class="sec-title">↩️ 恢复等级（6.8.8）</div>
+    <div id="recoverCards"></div>
+    <div class="sec-title">合同 · 转岗 · 辞退红线</div>
+    <div id="exitCards"></div>
+  </section>
+
+  <!-- ============ 收藏 ============ -->
+  <section class="view" id="view-fav">
+    <div class="sec-title">我的收藏（本地保存）</div>
+    <div class="rules" id="favs"></div>
+    <div class="empty" id="fav-empty" style="display:none">还没有收藏条款，在「扣分查询」中点击 ☆ 收藏</div>
+  </section>
+
+  <footer>
+    <b>数据说明：</b>本板块内容整理自《客舱服务部管理手册》01.14 版（2026.05.27 生效），
+    覆盖第 6.7 奖惩管理、6.8 业务等级管理、5.4/5.5 乘务长/教员管理、8.20 乘务长暂停降级解聘、
+    8.15 绩效管理、4.26 安全绩效积分等章节。<br>
+    条文中“扣/加 X 分”以纸质手册及乘务门户（CC 系统）公示的最新版本为准；整理内容如与手册原文不符，以手册为准。
+  </footer>
+</main>
+
+<script>
+/* ===================== 数据 ===================== */
+const MANUAL_RULES = [{"cat":"安全运行","sub":"颠簸","st":["安全质量分"],"obj":["乘务长"],"scores":["10"],"text":"乘务长客舱机组准备会未对颠簸防范、处置内容进行强调和复习，造成后果或影响，扣乘务长安全质量分10分","ref":"6.7.9.1"},{"cat":"安全运行","sub":"颠簸","st":["安全质量分"],"obj":["乘务长"],"scores":["10"],"text":"机组准备会或每段航班上客前，乘务长未主动向飞行机组了解航班颠簸情况，造成后果或影响，扣乘务长安全质量分10分","ref":"6.7.9.1"},{"cat":"安全运行","sub":"颠簸","st":["安全质量分"],"obj":["乘务长","乘务员"],"scores":["10"],"text":"起飞后未到20分钟，乘务员起身工作或为旅客提供服务的，造成后果或影响，扣责任人及乘务长安全质量分10分","ref":"6.7.9.1"},{"cat":"安全运行","sub":"颠簸","st":["安全质量分"],"obj":["乘务长"],"scores":["10"],"text":"乘务长未根据航程中的颠簸情况，及时调整客舱服务程序，造成后果或影响，扣乘务长安全质量分10分","ref":"6.7.9.1"},{"cat":"安全运行","sub":"颠簸","st":["安全质量分"],"obj":["乘务长"],"scores":["10"],"text":"航程中未重点关注老人、儿童、特殊旅客或未对站立的旅客、排队等待/正在使用洗手间的旅客对其进行安全提示，造成后果或影响，扣责任人及乘务长安全质量分10分","ref":"6.7.9.1"},{"cat":"安全运行","sub":"颠簸","st":["安全质量分"],"obj":[],"scores":["10"],"text":"未按照要求规范操作门帘或颠簸时未固定门帘观察客舱情况，造成后果或影响，扣责任人安全质量分10分","ref":"6.7.9.1"},{"cat":"安全运行","sub":"颠簸","st":["安全质量分"],"obj":[],"scores":["10"],"text":"未按照驾驶舱发出的信号做出颠簸应对，造成后果或影响，扣责任人安全质量分10分","ref":"6.7.9.1"},{"cat":"安全运行","sub":"颠簸","st":["安全质量分"],"obj":[],"scores":["10"],"text":"飞机起飞、下降或遇有颠簸时，未及时进行广播和按照规定落实客舱安全检查项目，造成后果或影响，扣责任人安全质量分10分","ref":"6.7.9.1"},{"cat":"安全运行","sub":"颠簸","st":["安全质量分"],"obj":["乘务员"],"scores":["10"],"text":"系好安全带灯熄灭或得到颠簸结束的指令后，乘务员未巡视检查客舱，造成后果或影响，扣安全质量分10分","ref":"6.7.9.1"},{"cat":"安全运行","sub":"颠簸","st":["安全质量分"],"obj":["乘务长"],"scores":["10"],"text":"未落实颠簸防范或处置工作程序和要求的，造成后果或影响，扣责任人及乘务长安全质量分10分","ref":"6.7.9.1"},{"cat":"安全运行","sub":"颠簸","st":["安全质量分"],"obj":[],"scores":["10"],"text":"起飞、下降及滑行期间或“系好安全带信号灯”亮时，仍为旅客提供服务或未在座位上坐好，并系好安全带，造成后果或影响，扣安全质量分10分","ref":"6.7.9.1"},{"cat":"安全运行","sub":"颠簸","st":["安全质量分"],"obj":["乘务长","乘务员"],"scores":["4"],"text":"发现乘务员对于颠簸防范相关要求未落实执行，对责任人开具罚单的，经调查核实后给予乘务长加安全质量分4分的奖励","ref":"6.7.9.1"},{"cat":"安全运行","sub":"舱门","st":["安全质量分"],"obj":[],"scores":["10"],"text":"人为责任原因造成旅客误动舱门盖板或触发驾驶舱警告的，扣责任人安全质量分10分","ref":"6.7.9.1"},{"cat":"安全运行","sub":"舱门","st":["安全质量分"],"obj":[],"scores":["10"],"text":"舱门操作未落实双人制，造成后果或影响，扣责任人安全质量分10分","ref":"6.7.9.1"},{"cat":"安全运行","sub":"舱门","st":["安全质量分"],"obj":["乘务长"],"scores":["10"],"text":"乘务长在条件允许情况下，未按规定对后舱开门操作进行监督的，造成后果或影响，扣安全质量分10分","ref":"6.7.9.1"},{"cat":"安全运行","sub":"舱门","st":["安全质量分"],"obj":[],"scores":["10"],"text":"未按出口座位旅客评估规定和要求执行，造成后果或影响，扣安全质量分10分","ref":"6.7.9.1"},{"cat":"安全运行","sub":"舱门","st":["安全质量分"],"obj":[],"scores":["10"],"text":"未切实履行前后服务间/翼上出口的监控职责，造成旅客在飞行过程中误动前、后舱门把手/翼上出口盖板的，或其他后果或影响，扣责任人安全质量分10分","ref":"6.7.9.1"},{"cat":"安全运行","sub":"舱门","st":["安全质量分"],"obj":[],"scores":["10"],"text":"违反机门操作规定或代操作或未履行应急滑梯监控职责，造成后果或影响，扣责任人安全质量分10分","ref":"6.7.9.1"},{"cat":"安全运行","sub":"舱门","st":["安全质量分"],"obj":["乘务长","乘务员"],"scores":["4"],"text":"发现乘务员的舱门操作或监控问题，对责任人开具罚单的，经调查核实后给予乘务长加安全质量分4分的奖励","ref":"6.7.9.1"},{"cat":"安全运行","sub":"起火/冒烟","st":["安全质量分"],"obj":[],"scores":["10"],"text":"未对烤箱油渍进行检查或发现油渍未采取相关措施，造成后果或影响，扣安全质量分10分","ref":"6.7.9.1"},{"cat":"安全运行","sub":"起火/冒烟","st":["安全质量分"],"obj":[],"scores":["10"],"text":"机上烤箱存放非加热食品、物品，造成后果或影响，扣安全质量分10分","ref":"6.7.9.1"},{"cat":"安全运行","sub":"起火/冒烟","st":["安全质量分"],"obj":[],"scores":["10"],"text":"未进行禁用电子设备广播，造成后果或影响，扣安全质量分10分","ref":"6.7.9.1"},{"cat":"安全运行","sub":"起火/冒烟","st":["安全质量分"],"obj":[],"scores":["10"],"text":"安全检查、客舱巡视时，未发现或制止违规使用电子设备旅客，造成后果或影响，扣安全质量分10分","ref":"6.7.9.1"},{"cat":"安全运行","sub":"起火/冒烟","st":["安全质量分"],"obj":[],"scores":["10"],"text":"值勤期间携带或使用充电宝或可充电的手机壳，造成后果或影响，扣安全质量分10分","ref":"6.7.9.1"},{"cat":"安全运行","sub":"起火/冒烟","st":["安全质量分"],"obj":[],"scores":["10"],"text":"使用机载电源为自己或旅客的电子设备进行充电，造成后果或影响，扣安全质量分10分","ref":"6.7.9.1"},{"cat":"安全运行","sub":"起火/冒烟","st":["安全质量分"],"obj":[],"scores":["10"],"text":"未及时发现并制止旅客抽吸香烟行为，造成后果或影响，扣责任人安全质量分10分","ref":"6.7.9.1"},{"cat":"安全运行","sub":"起火/冒烟","st":["安全质量分"],"obj":[],"scores":["10"],"text":"未按手册规定要求处置发烫的锂电池设备，造成后果或影响，扣安全质量分10分","ref":"6.7.9.1"},{"cat":"安全运行","sub":"证照","st":["安全质量分"],"obj":["安全员","乘务员"],"scores":["10"],"text":"航前未检查或检查不仔细导致未携带飞行必备的有效证件（乘务员训练合格证、体检合格证、空勤登机证、航空安全员执照等）、飞行文件、业务资料或装具等，进入航空器，或其他后果或影响，扣责任人安全质量分10分","ref":"6.7.9.1"},{"cat":"安全运行","sub":"证照","st":["安全质量分"],"obj":[],"scores":["10"],"text":"漏带、丢失有关文件、票证、非飞行必备资料或未完成交接手续的，造成后果或影响，扣安全质量分10分；遗失有价票证的，责任人还须按票证金额进行赔偿","ref":"6.7.9.1"},{"cat":"安全运行","sub":"证照","st":["安全质量分"],"obj":[],"scores":["10"],"text":"值勤期间，因自身原因拿错箱包，造成证件失控，或其他后果或影响，扣责任人安全质量分10分","ref":"6.7.9.1"},{"cat":"安全运行","sub":"证照","st":["安全质量分"],"obj":[],"scores":["10"],"text":"遗失执行国际/地区航线所需相关证件，造成后果或影响，扣安全质量分10分","ref":"6.7.9.1"},{"cat":"安全运行","sub":"证照","st":["安全质量分"],"obj":["乘务员"],"scores":["10"],"text":"遗失客舱乘务员训练合格证的，造成后果或影响，扣责任人安全质量分10分，罚款500元。如影响航班准点率，还需根据通项条款进行扣罚","ref":"6.7.9.1"},{"cat":"安全运行","sub":"证照","st":["安全质量分"],"obj":["安全员"],"scores":["10"],"text":"空勤登机证或航空安全员执照失控，造成后果或影响，扣责任人安全质量分10分","ref":"6.7.9.1"},{"cat":"安全运行","sub":"证照","st":["安全质量分"],"obj":[],"scores":["10"],"text":"《航空安保应急预案》失控，造成后果或影响，扣责任人安全质量分10分","ref":"6.7.9.1"},{"cat":"安全运行","sub":"证照","st":["安全质量分"],"obj":["乘务员"],"scores":["2"],"text":"乘务员在领取飞行必备相关证件时，须当场对所领取证件信息进行检查与确认，如有疑问或错误信息，必须现场提出，同时按照信息报告要求进行主动报告的，给予加安全质量分2分的奖励","ref":"6.7.9.1"},{"cat":"安全运行","sub":"证照","st":["安全质量分"],"obj":["乘务长"],"scores":["10"],"text":"乘务长在航前检查组员证件时，发现组员飞行必备证件信息错误或失效，造成临时更换人员或其他后果或影响，扣责任人安全质量分10分","ref":"6.7.9.1"},{"cat":"安全运行","sub":"证照","st":["安全质量分"],"obj":[],"scores":["10"],"text":"未经许可和批准，擅自办理护照、港澳通行证等签注，造成证件信息与系统信息不符，且造成后果或影响，如影响航班或临时换人，扣责任人安全质量分10分","ref":"6.7.9.1"},{"cat":"安全运行","sub":"证照","st":["安全质量分"],"obj":[],"scores":["10"],"text":"违规使用空勤登机证、机场控制区通行证和其他空防证件，造成后果或影响，扣责任人安全质量分10分","ref":"6.7.9.1"},{"cat":"安全运行","sub":"证照","st":["安全质量分"],"obj":[],"scores":["6","10"],"text":"违规使用门禁卡，造成门禁卡失效的，扣责任人安全质量分6分，并按照机场罚款要求进行现金处罚；如造成门禁卡遗失或其他后果或影响，扣责任人安全质量分10分，并按照机场罚款要求进行现金处罚","ref":"6.7.9.1"},{"cat":"安全运行","sub":"证照","st":["安全质量分"],"obj":[],"scores":[],"text":"如影响航班准点率，还需根据通项条款进行扣罚","ref":"6.7.9.1"},{"cat":"安全运行","sub":"P章/派工","st":["安全质量分"],"obj":[],"scores":[],"text":"计划排班或者航班调整违反规定导致空勤人员的飞行时间、飞行值勤期和休息期超过规定要求，扣生产派遣处责任人300-1000元；造成严重影响的，扣生产派遣处责任人300-1000元","ref":"6.7.9.1"},{"cat":"安全运行","sub":"P章/派工","st":["安全质量分"],"obj":["乘务长","安全员","乘务员"],"scores":["10"],"text":"乘务长未对航线勤务派遣等级掌握，导致航线乘务员/安全员配备数量不满足派遣等级要求，在签到后发现且在关门前配齐的，造成后果或影响，扣安全质量分10分","ref":"6.7.9.1"},{"cat":"安全运行","sub":"P章/派工","st":["安全质量分"],"obj":[],"scores":["2"],"text":"主动向报告反馈自身飞行时间、飞行值勤期、休息期问题，经调查核实后，对报告人加安全质量分2分奖励","ref":"6.7.9.1"},{"cat":"安全运行","sub":"酒测","st":["安全质量分"],"obj":[],"scores":["20"],"text":"值勤/驻外期间违规饮酒，扣责任人安全质量分20分","ref":"6.7.9.1"},{"cat":"安全运行","sub":"酒测","st":["安全质量分"],"obj":[],"scores":["40"],"text":"在有酒测设备的站点未按规定进行酒测，且执行航班的，造成不良影响扣责任人安全质量分40分","ref":"6.7.9.1"},{"cat":"安全运行","sub":"酒测","st":["安全质量分"],"obj":["教员","乘务员"],"scores":["10","5","20","40"],"text":"未按要求进行酒测的，扣安全质量分10分签到前15分钟未禁食，或食用/饮用/服用/使用影响酒测读数的食品/饮料/药物，造成第一次酒测有数值，扣责任人安全质量分5分，第二次酒测数值小于(呼出气体浓度)0.01克/210升(等同于血液浓度10毫克/100毫升)，扣责任人安全质量分20分，第三次酒测超出公司标准，扣安全质量分40分。客舱乘务员(含教员)在训练签到前(酒测数值小于呼出气体浓度)0.01克/210升(等同于血液浓度10毫克/100毫升)，扣责任人安全质量分20分;第二次酒测超出公司标准，扣安全质量分40分","ref":"6.7.9.1"},{"cat":"安全运行","sub":"酒测","st":["安全质量分"],"obj":[],"scores":["10"],"text":"违反饮酒相关规定的（非驻外期间），如被发现在签到前24小时/48小时（高原机场）前饮用酒精或含酒精饮料，取消其第二天航班派遣任务，并扣安全质量分10分。涉及过夜航班运行调整，按照“被拉下航班”情况累计扣罚（即还需增加日常管理分扣分和航班生产积分扣罚）","ref":"6.7.9.1"},{"cat":"安全运行","sub":"酒测","st":["安全质量分"],"obj":[],"scores":["10"],"text":"违反其他酒精测试其他相关管理规定的，造成后果或影响，扣安全质量分10分","ref":"6.7.9.1"},{"cat":"安全运行","sub":"酒测","st":["安全质量分"],"obj":["乘务员"],"scores":["5"],"text":"发现其他乘务员有违规饮酒行为按规报告的，经调查核实后，给予报告人加安全质量分5分","ref":"6.7.9.1"},{"cat":"安全运行","sub":"驻外","st":["安全质量分"],"obj":[],"scores":["2"],"text":"驻外期间，进行每日SMP位置上传，当日需有上传记录。未上传扣责任人安全质量分2分/次","ref":"6.7.9.1"},{"cat":"安全运行","sub":"驻外","st":["安全质量分"],"obj":[],"scores":["10"],"text":"违反驻外管理规定，造成后果或影响，扣安全质量分10分","ref":"6.7.9.1"},{"cat":"安全运行","sub":"驻外","st":["安全质量分"],"obj":[],"scores":["10"],"text":"驻外期间，外出未按照规定请销假，造成后果或影响，扣安全质量分10分","ref":"6.7.9.1"},{"cat":"安全运行","sub":"驻外","st":["安全质量分"],"obj":[],"scores":["10"],"text":"驻外期间，次日中午12点前签到的，未在当地时间22:00以前回到酒店或22:00以后外出未报告的，造成后果或影响，扣责任人安全质量分10分；次日中午12点以后签到的，未在当地时间24:00以前回到酒店或24:00以后外出未报告的，造成后果或影响，扣责任人安全质量分10分","ref":"6.7.9.1"},{"cat":"安全运行","sub":"驻外","st":["安全质量分"],"obj":[],"scores":["10"],"text":"驻外期间，陌生人或其他无关人员留宿的，造成后果或影响，扣责任人安全质量分10分","ref":"6.7.9.1"},{"cat":"安全运行","sub":"驻外","st":["安全质量分"],"obj":[],"scores":["10"],"text":"驻外期间，参加影响人身安全的危险活动，造成后果或影响，扣责任人安全质量分10分","ref":"6.7.9.1"},{"cat":"安全运行","sub":"驻外","st":["安全质量分"],"obj":[],"scores":["10"],"text":"驻外期间，违反酒店相关规定，造成后果或影响，扣责任人安全质量分10分","ref":"6.7.9.1"},{"cat":"安全运行","sub":"驻外","st":["安全质量分"],"obj":["乘务长","乘务员"],"scores":["4"],"text":"发现乘务员违反驻外规定，并对责任人开具罚单的，给予乘务长加安全质量分4分的奖励","ref":"6.7.9.1"},{"cat":"安全运行","sub":"驻外","st":["安全质量分"],"obj":[],"scores":["10"],"text":"其他飞行中，由于人为原因不能正常履行岗位职责，但未丧失工作能力，造成后果或影响，扣责任人安全质量分10分","ref":"6.7.9.1"},{"cat":"安全运行","sub":"驻外","st":["安全质量分"],"obj":[],"scores":["10"],"text":"由于人数清点错误导致机上人员与飞行任务书、旅客舱单不符，造成后果或影响，扣安全质量分10分","ref":"6.7.9.1"},{"cat":"安全运行","sub":"驻外","st":["安全质量分"],"obj":[],"scores":["10"],"text":"由于其他人为责任原因未按规定执行导致机上人员与飞行任务书、旅客舱单不符，造成后果或影响，扣安全质量分10分","ref":"6.7.9.1"},{"cat":"安全运行","sub":"驻外","st":["安全质量分"],"obj":[],"scores":["10"],"text":"未发现机上客舱应急设备和安全文件不满足规定要求，造成后果或影响，扣责任人安全质量分10分","ref":"6.7.9.1"},{"cat":"安全运行","sub":"驻外","st":["安全质量分"],"obj":[],"scores":["10"],"text":"违反应急设备操作规程，造成后果或影响，扣责任人安全质量分10分","ref":"6.7.9.1"},{"cat":"安全运行","sub":"驻外","st":["安全质量分"],"obj":[],"scores":["10"],"text":"由于监管不力，造成氧气瓶、灭火器等机上应急设备设施在非紧急情况下被使用的，扣责任人安全质量分10分","ref":"6.7.9.1"},{"cat":"安全运行","sub":"驻外","st":["安全质量分"],"obj":[],"scores":["10"],"text":"误放应急广播或按错机上应急开关，造成后果或影响，扣责任人安全质量分10分","ref":"6.7.9.1"},{"cat":"安全运行","sub":"预先准备","st":["安全质量分"],"obj":[],"scores":["4"],"text":"未携带《飞行工作记录本》，扣责任人安全质量分4分","ref":"6.7.9.1"},{"cat":"安全运行","sub":"预先准备","st":["安全质量分"],"obj":[],"scores":["2","5"],"text":"《飞行工作记录本》填写不全，扣责任人安全质量分2分，缺失内容超过5日及以上的，扣安全质量分5分","ref":"6.7.9.1"},{"cat":"安全运行","sub":"预先准备","st":["安全质量分"],"obj":[],"scores":["2","6"],"text":"PED中未下载现行有效版本的手册、电子设备检查单，扣责任人安全质量分2分；造成后果或影响，扣安全质量分6分","ref":"6.7.9.1"},{"cat":"安全运行","sub":"预先准备","st":["安全质量分"],"obj":[],"scores":["2","10"],"text":"未按规定要求完成网上准备，扣责任人安全质量分2分；造成不良影响，扣安全质量分10分","ref":"6.7.9.1"},{"cat":"安全运行","sub":"预先准备","st":["安全质量分"],"obj":[],"scores":["1"],"text":"航前安全业务知识回答提问不合格，扣责任人安全质量分1分/项","ref":"6.7.9.1"},{"cat":"安全运行","sub":"直接准备","st":["安全质量分"],"obj":["乘务长"],"scores":["2","6"],"text":"客舱机组准备会内容不全、召开时间不满足规定时间，扣乘务长安全质量分2分；准备会时间严重不足，或讲无关内容，造成后果或影响，扣乘务长安全质量分6分","ref":"6.7.9.1"},{"cat":"安全运行","sub":"直接准备","st":["安全质量分"],"obj":[],"scores":[],"text":"客舱机组准备会期间组员开小差、嬉闹或做无关事宜，造成后果或影响，责任人安全质量分6分","ref":"6.7.9.1"},{"cat":"安全运行","sub":"直接准备","st":["安全质量分"],"obj":["乘务长"],"scores":["1"],"text":"准备会期间，组员箱包摆放错乱、无序，扣乘务长安全质量分1分","ref":"6.7.9.1"},{"cat":"安全运行","sub":"直接准备","st":["安全质量分"],"obj":[],"scores":["6"],"text":"会议结束后，未对准备室桌子周围进行检查，造成后果或影响，扣安全质量分6分","ref":"6.7.9.1"},{"cat":"安全运行","sub":"直接准备","st":["安全质量分"],"obj":[],"scores":["6"],"text":"未按规定时间同飞行机组召开机组协同会的，造成后果或影响，扣安全质量分6分","ref":"6.7.9.1"},{"cat":"安全运行","sub":"直接准备","st":["安全质量分"],"obj":["乘务长"],"scores":["6"],"text":"未核对飞行任务书或国际/地区运行相关单据，造成后果或影响，扣乘务长安全质量分6分","ref":"6.7.9.1"},{"cat":"安全运行","sub":"直接准备","st":["安全质量分"],"obj":[],"scores":["6"],"text":"上机后未按规范要求摆放箱包，造成后果或影响，扣安全质量分6分","ref":"6.7.9.1"},{"cat":"安全运行","sub":"直接准备","st":["安全质量分"],"obj":[],"scores":["6"],"text":"未按规定核对机供品，造成后果或影响，扣安全质量分6分","ref":"6.7.9.1"},{"cat":"安全运行","sub":"直接准备","st":["安全质量分"],"obj":[],"scores":["6"],"text":"为驾驶舱提供的服务用品摆放不规范，造成后果或影响，扣安全质量分6分","ref":"6.7.9.1"},{"cat":"安全运行","sub":"直接准备","st":["安全质量分"],"obj":[],"scores":["6"],"text":"未按规定进行客舱应急设备检查，或发现客舱应急设备不满足标准在起飞前未报告，造成后果或影响，扣责任人安全质量分6分","ref":"6.7.9.1"},{"cat":"安全运行","sub":"直接准备","st":["安全质量分"],"obj":[],"scores":["10"],"text":"未对责任区域进行航前、航后安保检查，或安保检查未发现外来物、遗留物，造成后果或影响，扣安全质量分10分","ref":"6.7.9.1"},{"cat":"安全运行","sub":"直接准备","st":["安全质量分"],"obj":[],"scores":["5","10","20"],"text":"上客前安保检查仔细，查获可疑物品，加安全质量分5分；经认定，及时发现可能发生的重大问题，加安全质量分10分；及时发现可能发生的重大问题且挽回损失的，加安全质量分20分","ref":"6.7.9.1"},{"cat":"安全运行","sub":"飞行实施","st":["安全质量分"],"obj":[],"scores":["10"],"text":"未按规定对舱单、旅客名单等单据信息进行核对确认，造成后果或影响，扣安全质量分10分","ref":"6.7.9.1"},{"cat":"安全运行","sub":"飞行实施","st":["安全质量分"],"obj":[],"scores":["10"],"text":"关门前未确认无关人员已下机，造成后果或影响，扣责任人安全质量分10分","ref":"6.7.9.1"},{"cat":"安全运行","sub":"飞行实施","st":["安全质量分"],"obj":[],"scores":["10"],"text":"未按照舱门操作要求进行舱门操作的，造成后果或影响，扣责任人安全质量分10分","ref":"6.7.9.1"},{"cat":"安全运行","sub":"飞行实施","st":["安全质量分"],"obj":[],"scores":["10"],"text":"未按要求对客舱视频监控航班进行视频拍摄（特殊原因提前进行报备的除外），造成后果或影响，扣安全质量分10分","ref":"6.7.9.1"},{"cat":"安全运行","sub":"飞行实施","st":["安全质量分"],"obj":[],"scores":["10"],"text":"手提行李确认不到位，未发现旅客行李包外侧有明显的松散物品，造成后果或影响，扣安全质量分10分","ref":"6.7.9.1"},{"cat":"安全运行","sub":"飞行实施","st":["安全质量分"],"obj":[],"scores":["10"],"text":"未按规定进行安全演示，造成后果或影响，扣安全质量分10分","ref":"6.7.9.1"},{"cat":"安全运行","sub":"飞行实施","st":["安全质量分"],"obj":[],"scores":["10"],"text":"起飞、下降及滑行期间或“系好安全带信号灯”亮时，仍为旅客提供服务或未在座位上坐好并系好安全带，造成后果或影响，扣责任人安全质量分10分","ref":"6.7.9.1"},{"cat":"安全运行","sub":"飞行实施","st":["安全质量分"],"obj":[],"scores":["10"],"text":"进出驾驶舱未及时锁闭驾驶舱门，造成后果或影响，扣安全质量分10分","ref":"6.7.9.1"},{"cat":"安全运行","sub":"飞行实施","st":["安全质量分"],"obj":[],"scores":["10"],"text":"双人制机组飞行时，未按规定进入驾驶舱，造成后果或影响，扣责任人安全质量分10分","ref":"6.7.9.1"},{"cat":"安全运行","sub":"飞行实施","st":["安全质量分"],"obj":[],"scores":["10"],"text":"值勤期间做与安全无关事宜，如睡岗、聊天、玩电子设备等行为，造成后果或影响，扣安全质量分10分","ref":"6.7.9.1"},{"cat":"安全运行","sub":"飞行实施","st":["安全质量分"],"obj":[],"scores":["10"],"text":"违反操作程序，造成旅客烫伤、砸伤及碰伤等伤害事件的，或其他后果或影响，扣责任人安全质量分10分","ref":"6.7.9.1"},{"cat":"安全运行","sub":"飞行实施","st":["安全质量分"],"obj":["乘务长"],"scores":["10"],"text":"未得到客梯车、廊桥操作人员许可，让旅客下机，造成后果或影响，扣乘务长安全质量分10分","ref":"6.7.9.1"},{"cat":"安全运行","sub":"飞行实施","st":["安全质量分"],"obj":[],"scores":["40"],"text":"在执行航班任务期间在机上抽烟（包括电子烟等其他类似烟），未达到征候及以上的，扣安全质量分40分","ref":"6.7.9.1"},{"cat":"安全运行","sub":"飞行实施","st":["安全质量分"],"obj":[],"scores":["10"],"text":"飞行过程中，大量旅客自行前后调整座位，未进行有效制止或未按载重平衡控制要求执行规定，造成后果或影响，扣责任人安全质量分10分","ref":"6.7.9.1"},{"cat":"安全运行","sub":"飞行实施","st":["安全质量分"],"obj":[],"scores":["10"],"text":"执行航班任务期间，未按相关规定的要求对旅客不安全的行为进行制止或劝阻，造成后果或影响，扣责任人安全质量分10分","ref":"6.7.9.1"},{"cat":"安全运行","sub":"飞行实施","st":["安全质量分"],"obj":[],"scores":["10"],"text":"在飞机滑行、起飞、下降阶段，对紧急出口、过道处堆放的行李物品，未按规定进行处置，造成后果或影响，扣责任人安全质量分10分","ref":"6.7.9.1"},{"cat":"安全运行","sub":"飞行实施","st":["安全质量分"],"obj":[],"scores":["40","20","10"],"text":"飞行中允许无关人员进入驾驶舱，扣责任人安全质量分40分违反操作规定，造成机上电器设备或飞机部件损坏或造成其他后果或影响，扣责任人安全质量分20分无特殊情况，在驾驶舱停留10分钟以上，造成后果或影响，扣责任人安全质量分10分","ref":"6.7.9.1"},{"cat":"安全运行","sub":"飞行实施","st":["安全质量分"],"obj":["乘务长","乘务员"],"scores":["10"],"text":"航班过站或地面等待期间，客舱乘务员私自下飞机，造成后果或影响，扣责任人安全质量分10分，乘务长安全质量分5分","ref":"6.7.9.1"},{"cat":"安全运行","sub":"飞行实施","st":["安全质量分"],"obj":[],"scores":["10"],"text":"在起飞前或着陆前，未按规定完成客舱安全检查的，造成后果或影响，扣安全质量分10分","ref":"6.7.9.1"},{"cat":"安全运行","sub":"飞行实施","st":["安全质量分"],"obj":[],"scores":["10"],"text":"航程中，未随时固定松散物品，如：锁闭餐车、备份箱、行李架，造成后果或影响，，扣安全质量分10分值勤期间，“捎买带”、携带海关禁止的物品或违反其他海关规定，造成后果或影响，扣责任人安全质量分10分","ref":"6.7.9.1"},{"cat":"安全运行","sub":"飞行实施","st":["安全质量分"],"obj":["乘务员"],"scores":["10"],"text":"因乘务员个人原因导致推迟旅客登机时间，或造成其他后果或影响，扣安全质量分10分","ref":"6.7.9.1"},{"cat":"安全运行","sub":"飞行实施","st":["安全质量分"],"obj":[],"scores":["10"],"text":"未按照机组人员健康管理及餐饮要求落实造成其他后果或影响，扣安全质量分10分","ref":"6.7.9.1"},{"cat":"安全运行","sub":"飞行实施","st":["安全质量分"],"obj":[],"scores":["10"],"text":"私自将应急撤离简令纸带下飞机者，一经查实，扣责任人安全质量分10分","ref":"6.7.9.1"},{"cat":"安全运行","sub":"航后讲评","st":["安全质量分"],"obj":["乘务长"],"scores":["6"],"text":"未按规定进行航后讲评的，造成后果或影响，扣乘务长安全质量分6分","ref":"6.7.9.1"},{"cat":"安全运行","sub":"航后讲评","st":["安全质量分"],"obj":["乘务长"],"scores":["6"],"text":"未按规定要求填写相关单据、未交接或未记录《工作流程管理》的，造成后果或影响，扣乘务长安全质量分6分","ref":"6.7.9.1"},{"cat":"安全运行","sub":"航后讲评","st":["安全质量分"],"obj":[],"scores":["6"],"text":"未按规定归还物品资料的，造成后果或影响，扣安全质量分6分","ref":"6.7.9.1"},{"cat":"安全运行","sub":"信息报告","st":["安全质量分"],"obj":[],"scores":["10"],"text":"提供错误的、或编造的、或未经核实的安全生产信息或数据，扣安全质量分10分","ref":"6.7.9.1"},{"cat":"安全运行","sub":"信息报告","st":["安全质量分"],"obj":[],"scores":["6"],"text":"未按规定检查和填写《客舱设备记录本》，造成后果或影响，扣安全质量分6分","ref":"6.7.9.1"},{"cat":"安全运行","sub":"信息报告","st":["安全质量分"],"obj":["乘务员"],"scores":["5","10","20","1","2","4"],"text":"未按规定上报不安全事件，扣责任人安全质量分5分；信息迟报、漏报的，扣责任人安全质量分10分；信息谎报、瞒报的，扣安全质量分20分未及时发现和处置机上发生的不安全事件和特殊情况，造成后果或影响，扣责任人安全质量分10分.客舱乘务员在SQM系统中报告有效自身问题并对责任人进行奖惩考核的，经部门评估后，对报告人加安全质量分1分/条客舱乘务员在SQM系统中报告的有效信息，由公司给予报告人奖励的，对报告人加安全质量分2分/条客舱乘务员在SQM系统中报告的有效信息，由公司给予部门安全绩效积分奖励的，对报告人加安全质量分4分/条","ref":"6.7.9.1"},{"cat":"安全运行","sub":"诚信作风","st":["安全质量分"],"obj":[],"scores":["20"],"text":"对航前饮酒、飞机内抽烟等行为，其他组员未制止，或包庇、纵容、知情不报的，扣罚安全质量分20分；扣罚金额按照当事责任人处罚金额的50%追责","ref":"6.7.9.1"},{"cat":"安全运行","sub":"诚信作风","st":["安全质量分"],"obj":[],"scores":["10","30","60"],"text":"拖延或不配合调查，扣责任人安全质量分10分；存在较大诚信行为的，扣安全质量分30分弄虚作假，伪造证据，隐瞒事实，严重不诚信的，扣责任人安全质量分60分，并退回人力资源部","ref":"6.7.9.1"},{"cat":"安全运行","sub":"诚信作风","st":["安全质量分"],"obj":[],"scores":["60"],"text":"私拿、私分、私送、私卖机上供应品或私吞机供品销售款，扣安全质量分60分，并退回人力资源部","ref":"6.7.9.1"},{"cat":"安全运行","sub":"诚信作风","st":["安全质量分"],"obj":[],"scores":["60"],"text":"伪造病假单据、出勤记录，涂改、伪造医疗证明及其他证明骗取假期，扣安全质量分60分，并退回人力资源部","ref":"6.7.9.1"},{"cat":"安全运行","sub":"诚信作风","st":["安全质量分"],"obj":[],"scores":["60"],"text":"利用公司资源牟取私利、受贿、索贿，扣安全质量分60分，并退回人力资源部","ref":"6.7.9.1"},{"cat":"安全运行","sub":"诚信作风","st":["安全质量分"],"obj":[],"scores":["60"],"text":"虚报、冒领公司钱款、财物、劳防用品，挪用或侵占公司或他人财物者等行为，扣安全质量分60分，并退回人力资源部","ref":"6.7.9.1"},{"cat":"安全运行","sub":"诚信作风","st":["安全质量分"],"obj":[],"scores":["60"],"text":"隐瞒事实真相，或作伪证、包庇他人，扣安全质量分60分","ref":"6.7.9.1"},{"cat":"安全运行","sub":"诚信作风","st":["安全质量分"],"obj":[],"scores":["40"],"text":"发生代替执行酒测程序或代刷卡行为的人员及被代替者双（多）方，扣安全质量分40分","ref":"6.7.9.1"},{"cat":"安全运行","sub":"诚信作风","st":["安全质量分"],"obj":[],"scores":["10"],"text":"培训/考核中徇私舞弊或考场作弊，扣安全质量分10分","ref":"6.7.9.1"},{"cat":"安全运行","sub":"诚信作风","st":["安全质量分"],"obj":[],"scores":["60"],"text":"触犯《安全管理程序手册》中的“安全质量底线”行为，扣责任人安全质量分60分，并退回人力资源部","ref":"6.7.9.1"},{"cat":"安全运行","sub":"信息安全","st":["安全质量分"],"obj":[],"scores":["10"],"text":"未按规定执行空防安全预警响应措施，造成后果或影响，，扣安全质量分10分","ref":"6.7.9.1"},{"cat":"安全运行","sub":"信息安全","st":["安全质量分"],"obj":[],"scores":["10"],"text":"违规获取/泄露旅客个人信息或空防安全保密信息（如：驾驶舱门密码、非法干扰、严重危害飞行安全行为处置程序、空防安全预警响应措施专机信息和国防科研生产保密物品运输信息等），扣责任人安全质量分10分","ref":"6.7.9.1"},{"cat":"安全运行","sub":"职业道德","st":["安全质量分"],"obj":[],"scores":["10"],"text":"在公司内部发生偷窃、搬弄是非等，造成后果或影响，扣安全质量分10分","ref":"6.7.9.1"},{"cat":"安全运行","sub":"职业道德","st":["安全质量分"],"obj":[],"scores":["20","40"],"text":"擅自变更监控系统的运行实际，干扰、妨碍监控系统的正常运行，扣安全质量分20分；造成严重影响，扣安全质量分40分发生涉毒、涉稳、加入非法团体或组织，扣安全质量分20分；造成严重影响，扣安全质量分40分发生涉黄、赌博、酒驾、诈骗、信息安全、不良舆论等治安事件，扣安全质量分20分；造成严重影响，扣安全质量分40分蓄意破坏公共或他人财物，扣安全质量分20分；造成严重影响，扣安全质量分40分蓄意破坏公共或他人财物，扣安全质量分20分；造成严重影响，扣安全质量分40分","ref":"6.7.9.1"},{"cat":"安全运行","sub":"其他规定","st":["安全质量分"],"obj":[],"scores":[],"text":"重复问题同一个人年度内重复发生第二次同样SOP执行问题，按该项扣罚安全质量分值的1.5倍扣罚","ref":"6.7.9.1"},{"cat":"安全运行","sub":"其他规定","st":["安全质量分"],"obj":[],"scores":[],"text":"同一个人90个日历日内重复发生三次同类事件，按该项扣罚积分的2倍执行","ref":"6.7.9.1"},{"cat":"安全运行","sub":"监督检查","st":["安全质量分"],"obj":[],"scores":["2","6"],"text":"部门进行监督检查（如航路检查、视频监察、现场检查等），发现的具违规不合格项，扣责任人安全质量分至少2分/项；局方、公司发现的违规不合格项，扣责任人安全质量分至少6分/项","ref":"6.7.9.1"},{"cat":"安全运行","sub":"通项","st":["安全质量分"],"obj":["乘务长"],"scores":["5","10","20"],"text":"乘务长对航班中的安全工作承担管理责任，如乘务长在航班中对于安全工作问题进行处置和管理，并及时进行SQM报告，部门将对乘务长按照相关条款进行加分（定性一般差错/偏差及以上事件的除外）。经调查核实乘务长未触发违规行为的，承担管理连带责任（不占差错指标），至少扣安全质量分5分/项；造成不良影响，扣安全质量分10分；造成严重影响，扣安全质量分20分乘务长在航班中严格管理，主动曝光、发现、及时制止组员不安全行为，并开具罚单的，给予乘务长加安全质量分2-5分","ref":"6.7.9.1"},{"cat":"安全运行","sub":"通项","st":["安全质量分"],"obj":[],"scores":["20","40"],"text":"对于以上违反手册规定或规程的操作行为，达到《安全管理程序手册》5.21.5.1.4客舱类红线样例标准的，一般差错/偏差事件，扣安全质量分20分，严重差错/偏差事件，扣安全质量分40分","ref":"6.7.9.1"},{"cat":"安全运行","sub":"通项","st":["安全质量分"],"obj":[],"scores":["5","40","60"],"text":"对于以上违反手册规定或规程的操作行为，未造成后果或影响的，扣责任人安全质量分2-5分；其他类似的违反手册规定或规程的操作行为，包括不限于：当局、公司及部门相关手册中明确规定或禁止的操作行为，扣责任人安全质量分6-40分；经公司或部门认定进入作风问题清单、作风控制清单的，对责任人扣罚10-60分","ref":"6.7.9.1"},{"cat":"安全运行","sub":"通项","st":["安全质量分"],"obj":[],"scores":["20"],"text":"加分其他经公司或部门评估后的其他加分事件，加安全质量分2-20分","ref":"6.7.9.1"},{"cat":"安全运行","sub":"通项","st":["安全质量分"],"obj":[],"scores":[],"text":"说明上表中所述造成的“后果”、“影响”等，均以安全保卫质量处评估后的结论为准","ref":"6.7.9.1"},{"cat":"服务规范","sub":"服务诚信","st":["业务质量分"],"obj":[],"scores":["40"],"text":"伪造事实骗取奖励的（如伪造旅客表扬等），一经查实，扣责任人业务质量分40分，并按公司员工手册进行处理。（按照公司员工手册交人力资源部处理）","ref":"6.7.9.2"},{"cat":"服务规范","sub":"服务诚信","st":["业务质量分"],"obj":["乘务长"],"scores":["30","15","40","20"],"text":"私拿、私分旅客财物、机供品或旅客遗失物品的，扣责任人业务质量分30分，扣乘务长业务质量分15分。如造成旅客有效投诉，扣责任人业务质量分40分，扣乘务长业务质量分20分。（此项为客舱服务严重差错）","ref":"6.7.9.2"},{"cat":"服务规范","sub":"服务诚信","st":["业务质量分"],"obj":["乘务长"],"scores":["30","15","40","20"],"text":"未按照公司规定的价格销售机上商品的，扣责任人业务质量分30分，扣乘务长业务质量分15分。如造成旅客有效投诉，扣责任人业务质量分40分，扣乘务长业务质量分20分。（此项为客舱服务严重差错）","ref":"6.7.9.2"},{"cat":"服务规范","sub":"服务诚信","st":["业务质量分"],"obj":["乘务长"],"scores":["30","15","40","20"],"text":"故意欺诈、虚假宣传、夸大销售的，扣责任人业务质量分30分，扣乘务长业务质量分15分。如造成旅客有效投诉，扣责任人业务质量分40分，扣乘务长业务质量分20分。（此项为客舱服务严重差错）","ref":"6.7.9.2"},{"cat":"服务规范","sub":"服务诚信","st":["业务质量分"],"obj":["乘务长"],"scores":["30","15","40","20"],"text":"欺骗旅客，或借口拒绝为旅客服务，扣责任人业务质量分30分，扣乘务长业务质量分15分。如造成旅客有效投诉，扣责任人业务质量分40分，扣乘务长业务质量分20分。（此项为客舱服务严重差错）","ref":"6.7.9.2"},{"cat":"服务规范","sub":"服务诚信","st":["业务质量分"],"obj":["乘务长"],"scores":["10","5","20"],"text":"故意掩盖、提供错误工号信息的，扣责任人业务质量分10分，扣乘务长业务质量分5分。如造成旅客有效投诉，扣责任人业务质量分20分，扣乘务长业务质量分10分。（此项为客舱服务严重差错）","ref":"6.7.9.2"},{"cat":"服务规范","sub":"服务诚信","st":["业务质量分"],"obj":["乘务长"],"scores":["30","15","40","20"],"text":"谎报、瞒报旅客提出的意见、投诉的，扣责任人业务质量分30分，扣乘务长业务质量分15分。如造成旅客有效投诉，扣责任人业务质量分40分，扣乘务长业务质量分20分","ref":"6.7.9.2"},{"cat":"服务规范","sub":"服务诚信","st":["业务质量分"],"obj":["乘务长"],"scores":["10","5","20"],"text":"不配合服务问题调查或阻挠、妨碍监察、调查人员的服务检查、调查工作正常开展的，扣责任人业务质量分10分，扣乘务长业务质量分5分。如造成旅客有效投诉，扣责任人业务质量分20分，扣乘务长业务质量分10分","ref":"6.7.9.2"},{"cat":"服务规范","sub":"服务诚信","st":["业务质量分"],"obj":["乘务长"],"scores":["30","15","40","20"],"text":"在旅客服务及处理旅客投诉中，弄虚作假、营私舞弊、谋取私利，扣责任人业务质量分30分，扣乘务长业务质量分15分。如造成旅客有效投诉，扣责任人业务质量分40分，扣乘务长业务质量分20分","ref":"6.7.9.2"},{"cat":"服务规范","sub":"职业素养","st":["业务质量分"],"obj":["乘务长"],"scores":["40","20"],"text":"值勤期间，嘲笑、谩骂或使用侮辱性/歧视性语言对待旅客/他人的，扣责任人业务质量分40分，扣乘务长业务质量分20分，并按照公司员工手册交人力资源部处理","ref":"6.7.9.2"},{"cat":"服务规范","sub":"职业素养","st":["业务质量分"],"obj":[],"scores":["10","20"],"text":"私下与旅客以任何形式进行联系的，视具体情节扣责任人业务质量分5-10分。如造成旅客有效投诉，扣责任人业务质量分20分","ref":"6.7.9.2"},{"cat":"服务规范","sub":"职业素养","st":["业务质量分"],"obj":["乘务长"],"scores":["30","15","40","20"],"text":"私用、泄露、出售或者非法向他人提供旅客隐私和信息，扣责任人业务质量分30分，扣乘务长业务质量分15分。如造成旅客有效投诉，扣责任人业务质量分40分，扣乘务长业务质量分20分。（此条为真情服务底线）","ref":"6.7.9.2"},{"cat":"服务规范","sub":"职业形象","st":["业务质量分"],"obj":["乘务长"],"scores":["3","5"],"text":"客舱机组未列队进场，违规者扣3分，当班乘务长扣业务质量分5分","ref":"6.7.9.2"},{"cat":"服务规范","sub":"职业形象","st":["业务质量分"],"obj":["乘务长","安全员","乘务员"],"scores":["2"],"text":"客舱乘务员/航空安全员执行航班任务、公司备份任务或加入机组（准备执行航班）时，仪容仪表必须符合《客舱服务规范》及相关通知通告要求，违者扣责任人和当班乘务长业务质量分2分","ref":"6.7.9.2"},{"cat":"服务规范","sub":"真情服务红线","st":["业务质量分"],"obj":["乘务长"],"scores":["5","3","10"],"text":"值勤期间仪容仪表不符合规定、无精打采、工作状态懒散，身着制服不注意言行规范的，扣责任人业务质量分5分，扣乘务长业务质量分3分。如造成旅客有效投诉，扣责任人业务质量分10分，扣乘务长业务质量分5分","ref":"6.7.9.2"},{"cat":"服务规范","sub":"真情服务红线","st":["业务质量分"],"obj":["乘务长"],"scores":["5","3","10"],"text":"不得使用“真麻烦”、“自己看”、“别问我”、“你怎么搞的”等服务忌语，应使用服务规范用语，勤用十字文明礼貌用语“您好、请、谢谢、对不起、再见”。未按上述规范操作的，扣责任人业务质量分5分，扣乘务长业务质量分3分。如造成旅客有效投诉，扣责任人业务质量分10分，扣乘务长业务质量分5分","ref":"6.7.9.2"},{"cat":"服务规范","sub":"真情服务红线","st":["业务质量分"],"obj":["乘务长"],"scores":["2","5","3"],"text":"航班操作台、工作区域脏乱，业务用品堆放杂乱，扣责任人业务质量分2分。如造成旅客有效投诉，扣责任人业务质量分5分，扣乘务长业务质量分3分","ref":"6.7.9.2"},{"cat":"服务规范","sub":"真情服务红线","st":["业务质量分"],"obj":["乘务长"],"scores":["5","3","10"],"text":"不得无视、忽略旅客提问和咨询，应面带笑容，做到及时接待、有问必答，由于其他工作原因无法立即为旅客服务时，应先向旅客致歉，请旅客稍等。未按上述规范操作的，扣责任人业务质量分5分，扣乘务长业务质量分3分。如造成旅客有效投诉，扣责任人业务质量分10分，扣乘务长业务质量分5分","ref":"6.7.9.2"},{"cat":"服务规范","sub":"真情服务红线","st":["业务质量分"],"obj":["乘务长"],"scores":["3","6","10"],"text":"上岗前未做好服务准备（业务用品、业务知识、航班信息等），未能及时向旅客提供预定的服务（餐食等）或回答旅客问询的，扣责任人业务质量分3分。造成旅客投诉的，扣除责任人业务质量分6分，扣乘务长业务质量分3分。扣乘务长业务质量分10分","ref":"6.7.9.2"},{"cat":"服务规范","sub":"真情服务红线","st":["业务质量分"],"obj":["乘务长"],"scores":["5","3","10"],"text":"接待旅客、送别旅客、工作过程中有旅客注目时，应与旅客微笑点头致意。未按上述规范操作的，扣责任人业务质量分5分，扣乘务长业务质量分3分。如造成旅客有效投诉，扣责任人业务质量分10分，扣乘务长业务质量分5分","ref":"6.7.9.2"},{"cat":"服务规范","sub":"真情服务红线","st":["业务质量分"],"obj":["乘务长"],"scores":["5","3","10"],"text":"旅客向工作人员致谢时不得面无表情、没有回应，应面带微笑、主动回应“不客气”、“感谢您选择春秋航空”、“祝您旅途愉快”等。未按上述规范操作的，扣责任人业务质量分5分，扣乘务长业务质量分3分。如造成旅客有效投诉，扣责任人业务质量分10分，扣乘务长业务质量分5分","ref":"6.7.9.2"},{"cat":"服务规范","sub":"真情服务红线","st":["业务质量分"],"obj":["乘务长"],"scores":["5","3","10"],"text":"请旅客协助、配合我们的工作，不得使用命令、要求的口气，应请字当头，即使是请旅客侧身让一下，也要致谢。未按上述规范操作的，扣责任人业务质量分5分，扣乘务长业务质量分3分。如造成旅客有效投诉，扣责任人业务质量分10分，扣乘务长业务质量分5分","ref":"6.7.9.2"},{"cat":"服务规范","sub":"真情服务红线","st":["业务质量分"],"obj":["乘务长"],"scores":["5","3","10"],"text":"服务工作存在缺陷，或无法满足旅客需求时，不得表现出理所当然的语气和态度，必须向旅客致以歉意“很抱歉”、“非常抱歉”、“非常不好意思”。未按上述规范操作的，扣责任人业务质量分5分，扣乘务长业务质量分3分。如造成旅客有效投诉，扣责任人业务质量分10分，扣乘务长业务质量分5分","ref":"6.7.9.2"},{"cat":"服务规范","sub":"真情服务红线","st":["业务质量分"],"obj":["乘务长"],"scores":["5","3","10"],"text":"与旅客沟通时，尤其是旅客描述不清晰、说话断断续续时，不得表现出不耐烦情绪、不得打断旅客，应耐心倾听，总结、重复旅客的语意，与旅客进行确认，做到有针对性地回复旅客，帮助旅客解决问题。未按上述规范操作的，扣责任人业务质量分5分，扣乘务长业务质量分3分。如造成旅客有效投诉，扣责任人业务质量分10分，扣乘务长业务质量分5分","ref":"6.7.9.2"},{"cat":"服务规范","sub":"真情服务红线","st":["业务质量分"],"obj":["乘务长"],"scores":["5","3","10"],"text":"指引时不得使用不规范手势，不得指引有误或不到位，应做到五指并拢，并短暂停留，不得一闪而过。未按上述规范操作的，扣责任人业务质量分5分，扣乘务长业务质量分3分。如造成旅客有效投诉，扣责任人业务质量分10分，扣乘务长业务质量分5分","ref":"6.7.9.2"},{"cat":"服务规范","sub":"真情服务红线","st":["业务质量分"],"obj":["乘务长"],"scores":["5","3","10"],"text":"在岗期间不得面无表情、表情麻木、不看旅客，与旅客沟通不仅是语言交流，更是表情、语气、态度、情感的交流，应与旅客保持目光交流，态度热情，吐字清晰，语气和缓，语速适中，播报广播时应放慢语速。未按上述规范操作的，扣责任人业务质量分5分，扣乘务长业务质量分3分。如造成旅客有效投诉，扣责任人业务质量分10分，扣乘务长业务质量分5分","ref":"6.7.9.2"},{"cat":"服务规范","sub":"真情服务红线","st":["业务质量分"],"obj":["乘务长"],"scores":["3","6"],"text":"当众行为不雅（如挖耳、抠鼻、剔牙、打哈欠不遮挡等）或化妆、补妆、整理制服、用餐、整理私人物品未注意回避旅客的，扣责任人业务质量分3分。造成旅客投诉的，扣除责任人业务质量分6分，扣乘务长业务质量分3分","ref":"6.7.9.2"},{"cat":"服务规范","sub":"真情服务红线","st":["业务质量分"],"obj":["乘务长"],"scores":["5","3"],"text":"旅客需要工作人员工号、姓名信息时，不得拒绝旅客。未按上述规范操作的，扣责任人业务质量分5分，扣乘务长业务质量分3分","ref":"6.7.9.2"},{"cat":"服务规范","sub":"真情服务红线","st":["业务质量分"],"obj":["乘务长"],"scores":["10","5"],"text":"如造成旅客有效投诉，扣责任人业务质量分10分，扣乘务长业务质量分5分","ref":"6.7.9.2"},{"cat":"服务规范","sub":"一般服务差错","st":["业务质量分"],"obj":["乘务长"],"scores":["10","5"],"text":"因人员过失造成公司经济损失或赔偿在人民币1万元（含）—10万元之间的。扣责任人业务质量分10分，扣乘务长业务质量分5分","ref":"6.7.9.2"},{"cat":"服务规范","sub":"一般服务差错","st":["业务质量分"],"obj":["乘务长"],"scores":["10","5"],"text":"依据《春秋航空网络舆情管理办法》，判定舆情级别达到蓝色预警的服务负面报道事件或行为。扣责任人业务质量分10分，扣乘务长业务质量分5分","ref":"6.7.9.2"},{"cat":"服务规范","sub":"一般服务差错","st":["业务质量分"],"obj":["乘务长"],"scores":["10","5"],"text":"由于人为原因，或补救措施不到位，造成服务产品（尊享飞除外）有效投诉。扣责任人业务质量分10分，扣乘务长业务质量分5分","ref":"6.7.9.2"},{"cat":"服务规范","sub":"一般服务差错","st":["业务质量分"],"obj":["乘务长"],"scores":["10","5"],"text":"给旅客提供的食物中存在明显不应有的异物，但未给旅客造成伤害的。扣责任人业务质量分10分，扣乘务长业务质量分5分","ref":"6.7.9.2"},{"cat":"服务规范","sub":"一般服务差错","st":["业务质量分"],"obj":["乘务长"],"scores":["10","5"],"text":"粗暴对待旅客，未使用规范服务语言或使用了服务禁语的。扣责任人业务质量分10分，扣乘务长业务质量分5分","ref":"6.7.9.2"},{"cat":"服务规范","sub":"严重服务差错","st":["业务质量分"],"obj":["乘务长"],"scores":["30","15"],"text":"因人员过失造成公司经济损失或赔偿在人民币10万（含）—20万元之间的。扣责任人业务质量分30分，扣乘务长业务质量分15分","ref":"6.7.9.2"},{"cat":"服务规范","sub":"严重服务差错","st":["业务质量分"],"obj":["乘务长"],"scores":["40","20"],"text":"如造成旅客有效投诉，扣责任人业务质量分40分，扣乘务长业务质量分20分","ref":"6.7.9.2"},{"cat":"服务规范","sub":"严重服务差错","st":["业务质量分"],"obj":["乘务长"],"scores":["30","15","40","20"],"text":"由于人为原因造成的服务质量问题、旅客投诉，或未按规定处理、回复，或投诉处理、回复质量差，被政府部门、行业主管单位等有关机构通报，影响民航局公布的公司服务质量排名的。扣责任人业务质量分30分，扣乘务长业务质量分15分。如造成旅客有效投诉，扣责任人业务质量分40分，扣乘务长业务质量分20分","ref":"6.7.9.2"},{"cat":"服务规范","sub":"严重服务差错","st":["业务质量分"],"obj":["乘务长"],"scores":["30","15","40","20"],"text":"依据《春秋航空网络舆情管理办法》，判定舆情级别达到红色、黄色预警的服务负面报道事件或行为。扣责任人业务质量分30分，扣乘务长业务质量分15分。如造成旅客有效投诉，扣责任人业务质量分40分，扣乘务长业务质量分20分","ref":"6.7.9.2"},{"cat":"服务规范","sub":"严重服务差错","st":["业务质量分"],"obj":["乘务长"],"scores":["30","15","40","20"],"text":"由于工作过失，导致特殊旅客（含老、弱、病、残、孕、无人陪伴儿童等）、尊享飞、金银卡旅客的信息传递、交接失误，服务衔接有误，造成有效投诉的。扣责任人业务质量分30分，扣乘务长业务质量分15分。如造成旅客有效投诉，扣责任人业务质量分40分，扣乘务长业务质量分20分","ref":"6.7.9.2"},{"cat":"服务规范","sub":"严重服务差错","st":["业务质量分"],"obj":["乘务长"],"scores":["30","15","40","20"],"text":"工作期间擅离职守、睡岗、与旅客发生争执，服务态度恶劣、与旅客或他人发生口角或肢体冲突的。扣责任人业务质量分30分，扣乘务长业务质量分15分。如造成旅客有效投诉，扣责任人业务质量分40分，扣乘务长业务质量分20分","ref":"6.7.9.2"},{"cat":"服务规范","sub":"严重服务差错","st":["业务质量分"],"obj":["乘务长"],"scores":["30","15","40","20"],"text":"提供给旅客的食物中存在明显不应有的异物，异物给旅客造成损害，且诊断因异物导致需要就医治疗，或提供的机供品、餐食、销售物品不在保质期内。扣责任人业务质量分30分，扣乘务长业务质量分15分。如造成旅客有效投诉，扣责任人业务质量分40分，扣乘务长业务质量分20分","ref":"6.7.9.2"},{"cat":"服务规范","sub":"服务意识","st":["业务质量分"],"obj":["乘务长"],"scores":["10","5"],"text":"未落实航班“首问责任制”，对旅客提出的疑问、咨询、意见、抱怨、投诉等推脱责任、回避问题、虚心接受问题，未耐心安抚和进行解释的，扣责任人业务质量分10分，扣乘务长业务质量分5分","ref":"6.7.9.2"},{"cat":"服务规范","sub":"服务意识","st":["业务质量分"],"obj":["乘务长"],"scores":["20","10"],"text":"如造成旅客有效投诉，扣责任人业务质量分20分，扣乘务长业务质量分10分","ref":"6.7.9.2"},{"cat":"服务规范","sub":"服务意识","st":["业务质量分"],"obj":["乘务长"],"scores":["10","5","20"],"text":"航班服务过程中无微笑、言语不规范或态度冷漠的，扣责任人业务质量分10分，扣乘务长业务质量分5分。造成旅客投诉的，扣除责任人业务质量分20分，扣乘务长业务质量分10分","ref":"6.7.9.2"},{"cat":"服务规范","sub":"服务意识","st":["业务质量分"],"obj":["乘务长"],"scores":["5","10"],"text":"遗漏承诺旅客的服务或实际提供的产品、服务与承诺的产品和服务条款不符的和自身原因漏送或送错供应品、旅客零钱未找，扣责任人业务质量分5分。造成旅客投诉的，扣除责任人业务质量分10分，扣乘务长业务质量分5分","ref":"6.7.9.2"},{"cat":"服务规范","sub":"服务意识","st":["业务质量分"],"obj":["乘务长"],"scores":["10","5","20"],"text":"旅客受伤、财物受损向客舱机组提出协助时，客舱机组推卸责任、未及时安抚旅客、协助处理的，扣责任人业务质量分10分，扣乘务长业务质量分5分。造成旅客投诉的，扣除责任人业务质量分20分，扣乘务长业务质量分10分","ref":"6.7.9.2"},{"cat":"服务规范","sub":"服务意识","st":["业务质量分"],"obj":["乘务长"],"scores":["5","10"],"text":"对旅客提出的合理要求未及时解答和处理，影响服务质量的，扣责任人业务质量分5分。如造成旅客有效投诉，扣责任人业务质量分10分，扣乘务长业务质量分5分","ref":"6.7.9.2"},{"cat":"服务规范","sub":"服务意识","st":["业务质量分"],"obj":["乘务长","乘务员"],"scores":["3","6"],"text":"对于涉及CIQ发放的航班，乘务员应主动为旅客发放CIQ相关表格，协助特殊旅客或需要帮助的旅客填写表格，及时回答旅客关于表格填写的各类问题并进行指导。未按上述规范操作的，扣责任人业务质量分3分。如造成旅客有效投诉，扣责任人业务质量分6分，扣乘务长业务质量分3分","ref":"6.7.9.2"},{"cat":"服务规范","sub":"服务规范","st":["业务质量分"],"obj":["乘务长"],"scores":["2","5"],"text":"客舱广播吐字不清晰，播报间断、不流利或播报内容错误，扣责任人业务质量分2分。如造成旅客有效投诉，扣责任人业务质量分5分，扣乘务长业务质量分2分","ref":"6.7.9.2"},{"cat":"服务规范","sub":"服务规范","st":["业务质量分"],"obj":["乘务长","乘务员"],"scores":["30","15","40","20"],"text":"因客舱乘务员自身原因导致尊享飞旅客未享受到尊享飞服务，影响客舱服务质量的，扣责任人业务质量分30分，扣乘务长业务质量分15分。如造成旅客有效投诉，扣责任人业务质量分40分，扣乘务长业务质量分20分","ref":"6.7.9.2"},{"cat":"服务规范","sub":"服务规范","st":["业务质量分"],"obj":["乘务长"],"scores":["30","15","40","20"],"text":"违反规定拒绝承运特殊旅客、人体捐献器官的，扣责任人业务质量分30分，扣乘务长业务质量分15分。如造成旅客有效投诉，扣责任人业务质量分40分，扣乘务长业务质量分20分","ref":"6.7.9.2"},{"cat":"服务规范","sub":"服务规范","st":["业务质量分"],"obj":["乘务长","乘务员"],"scores":["10","5","20"],"text":"乘务员在进行免税产品销售时，应准确地告知旅客各地海关须知及各类产品的购买限制，遗漏或误传目的地当地的海关须知信息，使旅客蒙受损失的，扣责任人业务质量分10分，扣乘务长业务质量分5分。如造成旅客有效投诉，扣责任人业务质量分20分，扣乘务长业务质量分10分","ref":"6.7.9.2"},{"cat":"服务规范","sub":"服务规范","st":["业务质量分"],"obj":["乘务长"],"scores":["10","20"],"text":"服务规范，乘务长发现服务问题不制止、不纠正、不管理的，扣乘务长业务质量分10分。如造成旅客有效投诉，扣乘务长业务质量分20分","ref":"6.7.9.2"},{"cat":"服务规范","sub":"服务规范","st":["业务质量分"],"obj":["乘务长"],"scores":["10","5"],"text":"旅客提出机上提供的餐食变质、有异物等，推卸责任，未致歉和安抚旅客情绪的，扣责任人业务质量分10分，扣乘务长业务质量分5分","ref":"6.7.9.2"},{"cat":"服务规范","sub":"服务规范","st":["业务质量分"],"obj":[],"scores":["5","10"],"text":"服务规范，遗漏服务程序影响服务质量或旅客感受度（除尊享飞服务），扣责任人业务质量分5分。被旅客有效投诉的，扣业务质量分10分","ref":"6.7.9.2"},{"cat":"服务规范","sub":"服务规范","st":["业务质量分"],"obj":["乘务长"],"scores":["5","3","10"],"text":"损坏、丢失替旅客保管的物品（责任人需负责处理及赔偿），扣责任人业务质量分5分，扣乘务长业务质量分3分。造成旅客投诉的，扣除责任人业务质量分10分，扣乘务长业务质量分5分","ref":"6.7.9.2"},{"cat":"服务规范","sub":"服务规范","st":["业务质量分"],"obj":["乘务长"],"scores":["5","3"],"text":"服务规范，因清点失误，漏带、错带销售物品、供应品而影响服务质量者，扣责任人业务质量分5分，扣乘务长业务质量分3分","ref":"6.7.9.2"},{"cat":"服务规范","sub":"服务规范","st":["业务质量分"],"obj":["乘务长"],"scores":["5","10"],"text":"服务规范，向尊享飞旅客问候、沟通时，未采用蹲跪式服务和姓氏服务，扣责任人业务质量分5分。造成旅客投诉的，扣除责任人业务质量分10分，扣乘务长业务质量分5分","ref":"6.7.9.2"},{"cat":"服务规范","sub":"服务规范","st":["业务质量分"],"obj":["乘务长","乘务员"],"scores":["30","15","40","20"],"text":"由于乘务员未按规定要求操作造成旅客被烫伤、砸伤、撞伤等被旅客有效投诉的，扣责任人业务质量分30分，扣乘务长业务质量分15分。造成旅客投诉的，扣除责任人业务质量分40分，扣乘务长业务质量分20分","ref":"6.7.9.2"},{"cat":"服务规范","sub":"服务规范","st":["业务质量分"],"obj":["乘务长"],"scores":["5","10"],"text":"因自身原因造成旅客衣物污损的（责任人还需负责处理及赔偿），扣责任人业务质量分5分。造成旅客投诉的，扣除责任人业务质量分10分，扣乘务长业务质量分5分","ref":"6.7.9.2"},{"cat":"服务规范","sub":"服务规范","st":["业务质量分"],"obj":["乘务长"],"scores":["5","3","10"],"text":"为旅客摆放手提行李时，挤压或安放于离旅客座位较远的行李架内，应观察旅客手提行李外侧袋是否有伞具等松散物件，提醒旅客放置手提行李内，并与旅客确认手提行李摆放的位置。未按上述规范操作的，扣责任人业务质量分5分，扣乘务长业务质量分3分。造成旅客投诉的，扣除责任人业务质量分10分，扣乘务长业务质量分5分","ref":"6.7.9.2"},{"cat":"服务规范","sub":"服务规范","st":["业务质量分"],"obj":["乘务长"],"scores":[],"text":"乘务长应对航班中的服务质量承担管理责任，乘务长在航班中及时对于服务质量问题进程积极处置和管理并得到旅客认可的，且航班中对于责任人开具罚单的，将不再扣罚乘务长（有效投诉及以上除外）","ref":"6.7.9.2"},{"cat":"服务规范","sub":"服务规范","st":["业务质量分"],"obj":["乘务长"],"scores":["20","10"],"text":"服务规范，产品介绍不严谨或有误，导致旅客对产品含义产生歧义，造成旅客有效投诉，扣责任人业务质量分20分，扣乘务长业务质量分10分","ref":"6.7.9.2"},{"cat":"服务规范","sub":"服务规范","st":["业务质量分"],"obj":["乘务长","乘务员"],"scores":["10","5","20"],"text":"乘务员未按国际（地区）航班要求，向旅客发放入境卡、申报单，影响旅客行程或被旅客、有关单位等有效投诉的，扣责任人业务质量分10分，扣乘务长业务质量分5分。如造成旅客有效投诉，扣责任人业务质量分20分，扣乘务长业务质量分10分","ref":"6.7.9.2"},{"cat":"服务规范","sub":"服务规范","st":["业务质量分"],"obj":["乘务长"],"scores":["10","5","20"],"text":"未按服务标准与手册要求提供服务、未按章操作或因工作失误，给旅客或公司造成经济损失或声誉的负面影响，尚未造成严重后果的，扣责任人业务质量分10分，扣乘务长业务质量分5分。如造成旅客有效投诉，扣责任人业务质量分20分，扣乘务长业务质量分10分","ref":"6.7.9.2"},{"cat":"服务规范","sub":"服务规范","st":["业务质量分"],"obj":["乘务长"],"scores":["40"],"text":"服务规范，其他类似的违反手册规程、文件或工作要求的操作行为，扣责任人及乘务长业务质量分5/10/20/40分","ref":"6.7.9.2"},{"cat":"服务规范","sub":"服务规范","st":["业务质量分"],"obj":["乘务长"],"scores":[],"text":"备注：1、当乘务长为主要责任人时，按照“责任人”的相关分值进行考核","ref":"6.7.9.2"},{"cat":"服务规范","sub":"服务规范","st":["业务质量分"],"obj":["乘务长","教员","学员"],"scores":[],"text":"若教员占号位，奖励：乘务长、教员、学员。处罚：乘务长、教员","ref":"6.7.9.2"},{"cat":"服务规范","sub":"服务规范","st":["业务质量分"],"obj":["教员","学员"],"scores":[],"text":"若教员不占号位，奖励：教员、学员。处罚：教员","ref":"6.7.9.2"},{"cat":"安全运行","sub":"飞行前","st":["安全质量分"],"obj":["乘务长"],"scores":["1","2"],"text":"航前检查对当日值班经理或乘务长的业务提问，回答不完整者，扣除安全质量分1分；完全不能回答的，扣除安全质量分2分","ref":"6.7.9.3.1"},{"cat":"安全运行","sub":"飞行前","st":["安全质量分"],"obj":[],"scores":["2"],"text":"客舱机组人员在客舱机组准备会及机组协同准备会时必须将移动电话设置在震动或无声状态，不接听与工作无关的电话，否则扣除安全质量分2分","ref":"6.7.9.3.1"},{"cat":"安全运行","sub":"飞行前","st":["安全质量分"],"obj":["乘务长","乘务员"],"scores":["20"],"text":"乘务长须带领组员按照《客舱乘务员手册》要求参加机组协同会，否则，扣除安全质量分20分","ref":"6.7.9.3.1"},{"cat":"安全运行","sub":"飞行实施","st":["业务质量分"],"obj":["乘务长","乘务员"],"scores":["5"],"text":"通项客舱乘务员因工作原因造成航班延误或其他后果，影响航班正点率的，扣责任客舱乘务员和当班乘务长业务质量分5分","ref":"6.7.9.3.2"},{"cat":"安全运行","sub":"飞行实施","st":["无"],"obj":["乘务长","乘务员"],"scores":["20","10"],"text":"客舱乘务员因自身原因（非工作相关原因）造成航班延误或其他后果，影响航班正点率的，扣责任人业务质量分20分。如当班乘务长负有主要管理责任，扣当班乘务长业务质量分10分，如当班乘务长不负有主要管理责任，则根据实际情况扣除0-10分的业务质量分","ref":"6.7.9.3.2"},{"cat":"安全运行","sub":"飞行实施","st":["无"],"obj":["乘务长","乘务员"],"scores":[],"text":"因客舱乘务员原因影响航班正点率，当班乘务长及责任人的现金扣罚标准按照当年运行类考核细则进行。现金奖惩","ref":"6.7.9.3.2"},{"cat":"安全运行","sub":"飞行实施","st":["安全质量分"],"obj":[],"scores":["5"],"text":"未按时登机/晚发车因自身原因未按时登机或导致机组车晚发车，扣安全质量分5分","ref":"6.7.9.3.2"},{"cat":"日常管理","sub":"工作流程管理","st":["业务质量分"],"obj":["乘务长"],"scores":["2"],"text":"未录入航班正常情况下，乘务长须在每个航段落地之后24小时内登陆IPAD智慧客舱录入“工作流程管理”内容，违者扣业务质量分2分。调机航班无需录入","ref":"6.7.9.3.3"},{"cat":"考勤休假","sub":"考勤管理","st":["无"],"obj":[],"scores":[],"text":"特定日期时，考勤管理中的航班生产积分、日常管理分加减分按双倍计算，特殊情况可经部门讨论后决定","ref":"6.7.9.3.4"},{"cat":"考勤休假","sub":"考勤管理","st":["无"],"obj":[],"scores":[],"text":"签到管理签到打卡以SMP“签到打卡”模块中显示的频次为准","ref":"6.7.9.3.4"},{"cat":"考勤休假","sub":"考勤管理","st":["日常管理分","航班生产积分"],"obj":["乘务员"],"scores":["7","100"],"text":"未执行航班由于乘务员自身原因(如所留电话号码有误，手机不通、不接)导致无法通知其航班变更情况，本人没有正常参加航班任务的客舱乘务员，扣除日常管理分7分，扣除航班生产积分100分","ref":"6.7.9.3.4"},{"cat":"考勤休假","sub":"考勤管理","st":["日常管理分"],"obj":["乘务员"],"scores":["7"],"text":"被拉下航班客舱乘务员因自身原因（如未携装具、证件、手册等）被拉下航班，按照误机处理，扣日常管理分7分，航班生产积分100分","ref":"6.7.9.3.4"},{"cat":"考勤休假","sub":"考勤管理","st":["日常管理分"],"obj":[],"scores":["5"],"text":"迟到按照SMP中公布的签到时间开始计算，在签到时间后5分钟内签到，按迟到处理，扣日常管理分5分","ref":"6.7.9.3.4"},{"cat":"考勤休假","sub":"考勤管理","st":["航班生产积分"],"obj":[],"scores":["50"],"text":"按照SMP中公布的签到时间开始计算，在签到时间后5分钟内签到，扣航班生产积分50分","ref":"6.7.9.3.4"},{"cat":"考勤休假","sub":"考勤管理","st":["日常管理分"],"obj":[],"scores":["5","50","7","100"],"text":"误机按照SMP中公布的签到时间开始计算，在签到时间5分钟以上3小时以内（含）签到，按误机处理，当日仍执行航班者，扣日常管理分5分，扣除航班生产积分50分。当日未再执行航班者，扣除日常管理分7分，扣除航班生产积分100分","ref":"6.7.9.3.4"},{"cat":"考勤休假","sub":"考勤管理","st":["日常管理分"],"obj":[],"scores":["10"],"text":"旷工按照SMP中公布的签到时间开始计算，在签到时间3小时以上的，或未打卡并在3小时以上未到达公司的，并记为旷工，扣日常管理分10分","ref":"6.7.9.3.4"},{"cat":"考勤休假","sub":"考勤管理","st":["日常管理分"],"obj":[],"scores":["10"],"text":"代打卡代打卡的，代打卡人与被代打卡人扣日常管理分10分","ref":"6.7.9.3.4"},{"cat":"考勤休假","sub":"考勤管理","st":["航班生产积分"],"obj":[],"scores":["100"],"text":"代打卡的，代打卡人与被代打卡人，扣航班生产积分100分","ref":"6.7.9.3.4"},{"cat":"考勤休假","sub":"考勤管理","st":["航班生产积分"],"obj":[],"scores":[],"text":"考勤执行航班任务和公司备份任务时，因系统或设备原因无法正常完成打卡的，需在签到时间前至当日值班经理处说明情况（未在签到时间前向值班经理说明情况，但未误机的，按迟到处理）。特殊情况由部门技评委商讨决定，并报部门总经理审批通过后执行","ref":"6.7.9.3.4"},{"cat":"考勤休假","sub":"考勤管理","st":["无"],"obj":[],"scores":[],"text":"交通事故因交通事故（仅限两车或两车以上、涉及人员严重受伤的交通事故）导致迟到或误机，本人如能够及时出示现场照片和提供警方出具的《道路交通事故认定书》复印件或车辆定损机构出具的《机动车物损交通事故损害赔偿协议书》复印件（保险公司报案号、保险理赔服务中心登记号、定损机构盖章必须齐全），可撤销迟到或误机的处理，按事假流程操作","ref":"6.7.9.3.4"},{"cat":"考勤休假","sub":"考勤管理","st":["日常管理分"],"obj":[],"scores":[],"text":"交通事故现场照片需于签到时间前传送至当日值班经理，相关证明需于次日中午12点前交至机组勤务保障室，未按要求提交照片或证明者，按迟到或误机处理","ref":"6.7.9.3.4"},{"cat":"考勤休假","sub":"考勤管理","st":["日常管理分"],"obj":["乘务员"],"scores":[],"text":"事故后，如客舱乘务员需要继续执行航班或执行备份任务，客舱乘务员应在事故后4小时内赶到公司，否则按旷工处理。如事故情况较严重或造成人员伤亡的，可经部门讨论后决定","ref":"6.7.9.3.4"},{"cat":"考勤休假","sub":"考勤管理","st":["日常管理分"],"obj":["乘务员"],"scores":[],"text":"因公搭机因公搭机至异地执行航班的客舱乘务员，需在AOC专员（乘务）通知的航班签到时间前签到，未按时签到或未签到的，按迟到或误机相关条款处理","ref":"6.7.9.3.4"},{"cat":"考勤休假","sub":"考勤管理","st":["日常管理分","航班生产积分"],"obj":[],"scores":["100","50"],"text":"病假在航班签到时间3小时以上提出的病假，第一天扣除航班生产积分100分，之后每增加一天，加扣50分。（本条要求不适用于怀孕、护产假、丧假、劳动损伤和工伤）","ref":"6.7.9.3.4"},{"cat":"考勤休假","sub":"考勤管理","st":["日常管理分"],"obj":[],"scores":["500"],"text":"单次连续病假（以“病情证明单”上开具的病假时间、病因是否连续为准）的航班生产积分扣分500分封顶","ref":"6.7.9.3.4"},{"cat":"考勤休假","sub":"考勤管理","st":["航班生产积分"],"obj":[],"scores":["100"],"text":"违规病假在航班签到时间3小时以内提出的病假为违规病假，在病假的基础上加扣航班生产积分100分（本条要求不适用于怀孕、护产假、丧假、劳动损伤和工伤）通知备上航班后请假者，按违规病假处理外，航班生产积分再加扣200积分","ref":"6.7.9.3.4"},{"cat":"考勤休假","sub":"考勤管理","st":["日常管理分"],"obj":[],"scores":["5","10"],"text":"病假单据病假单据（须在此次病假申请期限结束后的24小时内交至机组勤务保障室，未按时上交者，超过24小时至72小时（含）之间上交的加扣日常管理分5分，超过72小时以上未交的加扣日常管理分10分，并按旷工处理。若至每月30日仍未提交上月26日至本月25日的病假单据，则在原扣分基础上加扣10分，至下个月30日仍未提交的，再扣10分，以此类推，直至上交病假单据。病假单据包含以下内容：挂号单原件、药费单原件、病假证明原件、病历记录本复印件接到由民航医院出具的《航空人员体检鉴定结论通知书》和公司航医因面部痤疮、重大外伤（骨折、烧伤等）、严重突发疾病等原因开具的《临时停飞通知单》时，给予航班调整，考勤按病假记录，不作扣分","ref":"6.7.9.3.4"},{"cat":"考勤休假","sub":"考勤管理","st":["日常管理分"],"obj":[],"scores":[],"text":"暂停派遣空勤人员非身体原因暂停派遣期间，均需至部门上行政班，地面行政班的病事假管理按照执行航班要求执行。身体原因暂停派遣人员，由部门根据实际情况评估是否安排地面行政工作，如已安排地面工作后，病事假管理按照执行航班要求执行","ref":"6.7.9.3.4"},{"cat":"考勤休假","sub":"考勤管理","st":["日常管理分"],"obj":[],"scores":[],"text":"疗养假/年假自愿放弃疗养假/年休假人员，综合管理处根据《放弃假期申请单》内容，按照2分日常管理分/天进行奖励（每月录入）个人带薪假期（年假、育儿假）可按照实际病假天数进行抵扣，如用于抵扣的假期不能拆分，则需一次性抵扣完毕。（个人奖惩分申诉时提出）","ref":"6.7.9.3.4"},{"cat":"考勤休假","sub":"考勤管理","st":["无"],"obj":[],"scores":[],"text":"行政班考勤因“身体原因暂停派遣”期间，如到地面上行政班，则上班天数不计入非出勤天数。无","ref":"6.7.9.3.4"},{"cat":"考勤休假","sub":"考勤管理","st":["日常管理分"],"obj":[],"scores":["3","50"],"text":"非过夜国内计划外飞行且实际完成国内非过夜飞行任务的，加日常管理分3分。加航班生产积分50分","ref":"6.7.9.3.4"},{"cat":"考勤休假","sub":"考勤管理","st":["日常管理分"],"obj":[],"scores":["5","100"],"text":"过夜/国际/地区计划外飞行且实际完成涉及过夜或国际通宵航班的飞行任务，加日常管理分5分。加航班生产积分100分","ref":"6.7.9.3.4"},{"cat":"考勤休假","sub":"考勤管理","st":["日常管理分"],"obj":[],"scores":["3"],"text":"备份计划外至公司备份，加日常管理分3分，航班生产积分50分","ref":"6.7.9.3.4"},{"cat":"考勤休假","sub":"考勤管理","st":["日常管理分"],"obj":[],"scores":["20"],"text":"拒飞拒飞或编造不实理由推脱航班飞行任务的，扣日常管理分20分","ref":"6.7.9.3.4"},{"cat":"考勤休假","sub":"考勤管理","st":["航班生产积分"],"obj":[],"scores":["600"],"text":"拒飞或编造不实理由推脱航班飞行任务的，扣航班生产积分600分","ref":"6.7.9.3.4"},{"cat":"日常管理","sub":"住宿","st":["日常管理分"],"obj":[],"scores":["2"],"text":"违规住宿违规住宿造成公司实际经济损失，相关费用需由本人承担，并扣日常管理分2分","ref":"6.7.9.3.5"},{"cat":"日常管理","sub":"住宿","st":["日常管理分"],"obj":[],"scores":["2"],"text":"违规住宿未造成公司实际经济损失，但同类型问题重复发生第2次（含）以上的人员，扣日常管理分2分","ref":"6.7.9.3.5"},{"cat":"日常管理","sub":"住宿","st":["无"],"obj":[],"scores":[],"text":"违规住宿细则以综合管理处发布公示的条款为准","ref":"6.7.9.3.5"},{"cat":"考勤休假","sub":"备份管理","st":["日常管理分"],"obj":["备份人员"],"scores":[],"text":"签到备份人员须在备份签到时间前刷卡签到，否则根据签到时间按迟到、误机或旷工处理","ref":"6.7.9.3.6"},{"cat":"考勤休假","sub":"备份管理","st":["航班生产积分"],"obj":["备份人员"],"scores":["100"],"text":"备份人员未在规定时间内到岗，扣航班生产积分积100分","ref":"6.7.9.3.6"},{"cat":"考勤休假","sub":"备份管理","st":["日常管理分"],"obj":["备份人员"],"scores":["10"],"text":"人员不在位备份人员查岗不在位、擅自外出等，按旷工处理，扣日常管理分10分","ref":"6.7.9.3.6"},{"cat":"考勤休假","sub":"备份管理","st":["航班生产积分"],"obj":["备份人员"],"scores":["150"],"text":"备份人员查岗不在位、擅自外出等，按旷工处理，扣航班生产积分150分","ref":"6.7.9.3.6"},{"cat":"考勤休假","sub":"备份管理","st":["日常管理分"],"obj":["备份人员"],"scores":["5"],"text":"私自解备备份人员解除备份须得到当日AOC专员（乘务）同意，未经同意提前解除备份者，扣日常管理分5分","ref":"6.7.9.3.6"},{"cat":"考勤休假","sub":"备份管理","st":["航班生产积分"],"obj":["备份人员"],"scores":["60"],"text":"备份人员解除备份须得到当日AOC专员（乘务）同意，未经同意提前解除备份者，扣航班生产积分积60分","ref":"6.7.9.3.6"},{"cat":"考勤休假","sub":"备份管理","st":["日常管理分"],"obj":["备份人员"],"scores":["7"],"text":"电话不接AOC专员（乘务）在15分钟内3次电话均未能有效联络到公司备份人员，扣日常管理分7分","ref":"6.7.9.3.6"},{"cat":"考勤休假","sub":"备份管理","st":["航班生产积分","日常管理分"],"obj":["备份人员"],"scores":["100","7"],"text":"AOC专员（乘务）在15分钟内3次电话均未能有效联络到公司备份人员，扣航班生产积分100分。AOC专员（乘务）需在执行航班前3小时通知家中备份人员，如30分钟内3次电话均未能有效联络到家中备份人员（特殊保障任务及大面积航班延误的情况下，AOC专员（乘务）可视情况调整备份到岗时间），扣日常管理分7分。AOC专员（乘务）需在执行航班前3小时通知家中备份人员，如30分钟内3次电话均未能有效联络到家中备份人员，扣航班生产积分积100分。特殊保障任务及大面积航班延误的情况下，AOC专员（乘务）可视情况调整备份到岗时间","ref":"6.7.9.3.6"},{"cat":"日常管理","sub":"属地化管理","st":["日常管理分"],"obj":[],"scores":["5"],"text":"擅离基地无航班任务时，空勤人员不得随意离开所属基地所在城市，如离开，必须报所属分部经理批准，否则扣除日常管理分5分","ref":"6.7.9.3.7"},{"cat":"证件","sub":"证件/资料管理","st":["无"],"obj":[],"scores":[],"text":"通项因个人原因导致无证不能飞行所造成的个人经济损失和补办证件费用由本人自行承担。如证件已过期，在等待办理期间，由综合管理处安排地面工作","ref":"6.7.9.3.8"},{"cat":"证件","sub":"证件/资料管理","st":["日常管理分"],"obj":[],"scores":["5"],"text":"身份证/国际/地区证件遗失/续办/补办执行航班未携带部门要求的证件，但不影响后续执行航班的，扣日常管理分5分；造成后果或影响的，参照本手册6.7.9.1进行处罚","ref":"6.7.9.3.8"},{"cat":"证件","sub":"证件/资料管理","st":["日常管理分"],"obj":["乘务员"],"scores":["1"],"text":"未在规定时间内将护照、港澳通行证续办完成的客舱乘务员，按照原先证件办理的截至日期，每延长一天，扣日常管理分1分，直至证件办理完成为止。向乘务培训处申请延长续办时间的客舱乘务员，如无特殊情况，则必须在截止日期前完成续办/补办，否则，每延长一天，扣日常管理分1分，直至证件续办完毕","ref":"6.7.9.3.8"},{"cat":"证件","sub":"证件/资料管理","st":["日常管理分"],"obj":[],"scores":["1"],"text":"遗失护照、港澳通行证、台湾通行证、台湾出入境许可证、台胞证后，需在6个工作日内开始续办证件流程，每拖延一天扣日常管理分1分","ref":"6.7.9.3.8"},{"cat":"证件","sub":"证件/资料管理","st":["日常管理分"],"obj":[],"scores":["1"],"text":"因私使用护照、港澳通行证时，如未在规定时间内因私使用完成，每延长一天，扣日常管理分1分，直至证件使用完毕","ref":"6.7.9.3.8"},{"cat":"证件","sub":"证件/资料管理","st":["日常管理分"],"obj":[],"scores":[],"text":"未接到公司通知，私自续办证件导致无法执行航班，或私自续办证件后未及时将新证信息上报至乘务培训处而导致自身无法执行航班的情况，视为遗失证件处理","ref":"6.7.9.3.8"},{"cat":"证件","sub":"证件/资料管理","st":["日常管理分"],"obj":[],"scores":["1"],"text":"接到证件续办通知后，未在证件到期日期前开始证件续办流程，每拖延一天扣日常管理分1分","ref":"6.7.9.3.8"},{"cat":"证件","sub":"证件/资料管理","st":["日常管理分"],"obj":["乘务员"],"scores":["1"],"text":"接到证件续办通知后，未在规定时间内完成所有续办流程的客舱乘务员，如实际存在客观原因导致无法按时完成续办流程，可向乘务培训处申请一次延长续办时间，如无法提出合理理由者，按照原先证件办理的截至日期，每延长一天，扣除日常管理分1分，直至证件办理完成为止。申请延长续办时间的客舱乘务员，如无特殊情况，则必须在截止日期前完成续办，否则，每延长一天，扣除日常管理分1分，直至证件续办完毕","ref":"6.7.9.3.8"},{"cat":"证件","sub":"证件/资料管理","st":["日常管理分"],"obj":[],"scores":["10"],"text":"体检未按规定完成体检的，扣除日常管理分10分","ref":"6.7.9.3.8"},{"cat":"证件","sub":"证件/资料管理","st":["日常管理分"],"obj":["学员","乘务员"],"scores":["5"],"text":"带飞学员未携带《客舱乘务员飞机飞行训练指导记录本》，扣责任人日常管理分5分","ref":"6.7.9.3.8"},{"cat":"加分奖励","sub":"航班运行奖励","st":["航班生产积分"],"obj":[],"scores":["50"],"text":"奖励客舱机组积极协助地面工作人员处理霸机等旅客群体事件，无旅客投诉及其它安全、服务质量事件的，经核实属实，根据事件实际情况，给予客舱机组每人加航班生产积分50分","ref":"6.7.9.3.9"},{"cat":"销售财务","sub":"销售管理","st":["无"],"obj":["乘务长","4号位","乘务员"],"scores":["2","1"],"text":"乘务组每一位登录机上销售系统的人员必须于当日航班降落后的24小时内完成现金缴存；未在规定时间内完成现金缴存、缴存金额不足的，根据工号扣除此人员业务质量分2分，扣当班乘务长和4号位乘务员业务质量分1分","ref":"6.7.9.3.10"},{"cat":"销售财务","sub":"销售管理","st":["业务质量分"],"obj":["乘务长"],"scores":["2","5"],"text":"如是转账，未在当日航班降落后的24小时内完成转账、转账金额不足或转账航班信息填写不完整的，扣转账人业务质量分2分；经提醒后仍未及时转账或未补齐不足金额的，扣当班乘务长业务质量分5分","ref":"6.7.9.3.10"},{"cat":"销售财务","sub":"销售管理","st":["业务质量分"],"obj":["乘务长","4号位","乘务员"],"scores":["2"],"text":"销售单计算乘务长及4号位乘务员必须对销售单计算情况及销售款进行核查、销售单按照要求填写并确认签字；销售单计算差错或销售款少钱、未按要求填写或未在销售单上确认签字，扣当班乘务长和4号位乘务员业务质量分2分","ref":"6.7.9.3.10"},{"cat":"销售财务","sub":"销售管理","st":["业务质量分"],"obj":["乘务长","4号位","乘务员"],"scores":["2"],"text":"数据上传4号位乘务员上传数据前必须确认销售数据与实际航班销售额一致，在航班落地后1小时内完成销售数据上传；如数据差错、未在规定时间内上传，扣当班乘务长和4号位乘务员业务质量分2分","ref":"6.7.9.3.10"},{"cat":"销售财务","sub":"销售管理","st":["业务质量分"],"obj":["乘务长","4号位","乘务员"],"scores":["2"],"text":"数据维护4号位乘务员在航班落地后1小时内完成获取销售（确认销售数据与实际航班销售一致）、航后拍照（清晰的纸质销售单照片、销毁照片）、航后完成；未在规定时间内完成、确认，扣当班乘务长和4号位乘务员业务质量分2分","ref":"6.7.9.3.10"},{"cat":"日常管理","sub":"会议管理","st":["日常管理分"],"obj":[],"scores":["5"],"text":"补会会议补会者分部经理将以抽查的方式结合口头或书面形式对其进行考核，考核不合格者进行现场补会后再进行考核，若再不合格者，扣日常管理分5分","ref":"6.7.9.3.11"},{"cat":"日常管理","sub":"会议管理","st":["无"],"obj":[],"scores":["2"],"text":"迟到晚于会议指定时间的到会人员，扣日常管理分2分。日常分","ref":"6.7.9.3.11"},{"cat":"日常管理","sub":"会议管理","st":["日常管理分"],"obj":[],"scores":["5"],"text":"未参加因自身原因不能参加会议者，必须提前一天向所属分部经理请假，未经分部经理批准、无故缺席者，扣日常管理分5分","ref":"6.7.9.3.11"},{"cat":"日常管理","sub":"会议管理","st":["日常管理分"],"obj":[],"scores":["5"],"text":"无故缺席部门学习或会议者，扣日常管理分5分；占用休息期时间进行分队录屏会议学习的，扣日常管理分5分","ref":"6.7.9.3.11"},{"cat":"日常管理","sub":"会议管理","st":["日常管理分"],"obj":[],"scores":["5","1"],"text":"未参加会议的，也未在5个工作日内完成会议补签的，扣日常管理分5分。延迟一天加扣日常管理分1分，以此类推","ref":"6.7.9.3.11"},{"cat":"加分奖励","sub":"活动管理","st":["现金奖惩","日常管理分"],"obj":[],"scores":["2"],"text":"通项参加部门或以上级别各类竞赛（文体）活动，获得个人单项一等奖，奖励现金300元，加日常管理分2分","ref":"6.7.9.3.12"},{"cat":"加分奖励","sub":"活动管理","st":["现金奖惩","日常管理分"],"obj":[],"scores":["5"],"text":"参加部门或以上级别各类竞赛（文体）活动，获得个人综合一等奖，奖励现金1000元。获得个人综合二等奖，奖励现金800元。获得个人综合三等奖，奖励现金500元，加日常管理分5分","ref":"6.7.9.3.12"},{"cat":"加分奖励","sub":"活动管理","st":["日常管理分"],"obj":[],"scores":["5"],"text":"参加各项社会、公司活动的，加日常管理分5分/天，如实际活动时间超过8小时加日常管理分7/天","ref":"6.7.9.3.12"},{"cat":"加分奖励","sub":"活动管理","st":["日常管理分"],"obj":[],"scores":["5"],"text":"参加各项社会、公司活动的，受到公司领导或相关承办单位领导表扬者，加日常管理分5分","ref":"6.7.9.3.12"},{"cat":"加分奖励","sub":"活动管理","st":["日常管理分"],"obj":[],"scores":["2","5"],"text":"积极参加各项部门活动的，加日常管理分2分。受到领导或相关承办单位领导表扬者，加日常管理分5分","ref":"6.7.9.3.12"},{"cat":"加分奖励","sub":"活动管理","st":["日常管理分"],"obj":[],"scores":["10"],"text":"在受邀参加的各类比赛活动中，成绩良好，在省、市级获得名次，为春秋航空股份有限公司争得荣誉者，加日常管理分10分。加分项","ref":"6.7.9.3.12"},{"cat":"加分奖励","sub":"活动管理","st":["日常管理分"],"obj":[],"scores":["5"],"text":"以各种不合理的理由有意拒绝公司、部门活动，或事先未请假或请假未被批准，无故缺席已安排好的公司、部门活动，扣日常管理分5分","ref":"6.7.9.3.12"},{"cat":"加分奖励","sub":"活动管理","st":["日常管理分"],"obj":[],"scores":["5"],"text":"在公司礼仪活动中，工作责任心不强，服务技能差，导致工作失误并对公司形象领导点名批评，扣日常管理分5分","ref":"6.7.9.3.12"},{"cat":"加分奖励","sub":"活动管理","st":["业务质量分"],"obj":["乘务员"],"scores":["5","3","2"],"text":"乘务员被调整执行保障航班，航班保障顺利领导予以肯定，完成部门交办要客保障一系列流程任务，加业务质量分5分，管理干部加业务质量分3分。因保障航班，改动原航班为备份的乘务员，加业务质量分2分","ref":"6.7.9.3.12"},{"cat":"培训考核","sub":"培训及考核管理","st":["无"],"obj":[],"scores":[],"text":"通项因特殊原因不能参加部门指定的培训或考核，必须向所属客舱分部经理请假，由分部经理与乘务培训处协调，协调意见一致后，可不作扣分处理","ref":"6.7.9.3.13"},{"cat":"培训考核","sub":"培训及考核管理","st":["日常管理分"],"obj":[],"scores":["2"],"text":"培训时未按要求着装或携带相关物品资料的，扣日常管理分2分","ref":"6.7.9.3.13"},{"cat":"培训考核","sub":"培训及考核管理","st":["日常管理分"],"obj":[],"scores":["5"],"text":"无故不参加培训或考核者，扣日常管理分5分","ref":"6.7.9.3.13"},{"cat":"培训考核","sub":"培训及考核管理","st":["日常管理分"],"obj":["安全员"],"scores":["1","2"],"text":"安全员日常训练当月考核科目，体能不合格扣1分/科，上限扣2分/月；理论不合格扣1分/次，上限扣2分/月；技能不合格扣1分/科，上限扣2分/月","ref":"6.7.9.3.13"},{"cat":"培训考核","sub":"培训及考核管理","st":["日常管理分"],"obj":["学员"],"scores":["5","10"],"text":"为延续相应资格或资格而进行的年度复训，任意单科不合格者，扣日常管理分5分，并给予一次补考机会。补考仍不合格者，扣日常管理分10分，安排参加重获资格训练或初始训练。在参加相应训练前，如相关证件未过期，可安排“跟班学员”飞行或地面行政岗位工作","ref":"6.7.9.3.13"},{"cat":"培训考核","sub":"培训及考核管理","st":["无"],"obj":[],"scores":["2"],"text":"每月业务考试未通过者，给予一次补考机会，补考仍不日常分合格的每次扣日常管理分2分，直至通过考核。扣分项","ref":"6.7.9.3.13"},{"cat":"培训考核","sub":"培训及考核管理","st":["日常管理分"],"obj":[],"scores":["2"],"text":"安排的其它考核未通过者，给予一次补考机会，补考仍不合格的每次扣日常管理分2分，直至通过考核","ref":"6.7.9.3.13"},{"cat":"培训考核","sub":"培训及考核管理","st":["日常管理分"],"obj":[],"scores":["10"],"text":"考试作弊者，扣日常管理分10分，并取消当次考试成绩","ref":"6.7.9.3.13"},{"cat":"培训考核","sub":"培训及考核管理","st":["日常管理分"],"obj":[],"scores":["5"],"text":"培训过程中违反课堂纪律，如睡觉、玩手机或做其他与课堂无关的事，扣日常管理分5分","ref":"6.7.9.3.13"},{"cat":"培训考核","sub":"培训及考核管理","st":["日常管理分"],"obj":[],"scores":["2"],"text":"培训或考核迟到10分钟内（含）者，可继续参加本次培训或考核，扣日常管理分2分","ref":"6.7.9.3.13"},{"cat":"培训考核","sub":"培训及考核管理","st":["日常管理分"],"obj":[],"scores":["3"],"text":"因自身原因导致培训或考核迟到、早退超过10分钟以上的，取消本次培训或考核资格，并扣日常管理分3分","ref":"6.7.9.3.13"},{"cat":"培训考核","sub":"培训及考核管理","st":["日常管理分"],"obj":[],"scores":["10"],"text":"重新安排培训或考核后仍不按要求参加的，扣日常管理分10分","ref":"6.7.9.3.13"},{"cat":"日常管理","sub":"姓名章管理","st":["无"],"obj":[],"scores":[],"text":"通项在部门允许的范围内个人，姓名章的效力等同于个人亲笔签名，将个人印章转交给其他人使用者，需承担与其本人亲笔签名等同的相关责任","ref":"6.7.9.3.14"},{"cat":"日常管理","sub":"姓名章管理","st":["业务质量分"],"obj":[],"scores":["1"],"text":"领取、归还和上交相关物品、资料、票证或器械包时，需要登记及盖姓名章确认，如未盖章或登记，扣责任人业务质量分1分","ref":"6.7.9.3.14"},{"cat":"日常管理","sub":"姓名章管理","st":["业务质量分"],"obj":["安全员"],"scores":["1"],"text":"因自身原因丢失或损坏个人印章者，扣业务质量分1分。丢失或损坏后须在3个工作日内向综合管理处提出补办申请，否则加扣业务质量分1分/天。个人印章丢失或损坏期间，须由本人手写签字确认(安全员训练仅可盖章)，但签字不得潦草，无法辨识，否则扣业务质量分1分/次","ref":"6.7.9.3.14"},{"cat":"日常管理","sub":"日常行为作风管理","st":["业务质量分"],"obj":["乘务员"],"scores":["10"],"text":"国家表彰客舱乘务员的行为受到国家、省、市级组织特殊表扬或表彰者，经公司服务管理部审核属实的，当事人加业务质量分10分","ref":"6.7.9.3.15"},{"cat":"日常管理","sub":"日常行为作风管理","st":["业务质量分"],"obj":["乘务员"],"scores":["5"],"text":"旅客/外单位表彰客舱乘务员的行为受到旅客表扬并收到旅客或外单位的锦旗或特别表彰者，经公司服务管理部审核属实的，加业务质量分5分","ref":"6.7.9.3.15"},{"cat":"日常管理","sub":"日常行为作风管理","st":["日常管理分"],"obj":[],"scores":["5"],"text":"损坏公物故意损坏公司财物，除照价赔偿外，扣日常管理分5分","ref":"6.7.9.3.15"},{"cat":"日常管理","sub":"日常行为作风管理","st":["日常管理分"],"obj":["乘务员"],"scores":["10","40"],"text":"舆情管理客舱乘务员不得在任何网络平台发布有损公司形象的、泄露公司信息的图文，否则扣日常管理分10分。造成严重后果的，扣日常管理分40分","ref":"6.7.9.3.15"},{"cat":"日常管理","sub":"日常行为作风管理","st":["日常管理分"],"obj":["乘务员"],"scores":["2"],"text":"不文明行为客舱乘务员在驻外期间、召开重大会议期间或进入工作场所期间，有穿着暴露服装等不文明行为者，扣日常管理分2分","ref":"6.7.9.3.15"}];
+
+const SCORE_TYPES = [
+  {n:'安全质量分', ico:'🛡️', c:'#148453',
+   d:'用于评定员工航班工作中安全工作质量的累计量化分数，衡量各业务等级空勤人员的航班安全工作质量及安全工作作风。（6.7.4.2）',
+   r:['自入职后开始累积，起始 0 分；考核年度内加减累计','作为年终绩效考评依据时，每年 11 月 1 日清零；作为晋/降级依据考评时，该分数不清零','核算总分时按加减分相互抵扣后的得分','作为空勤人员晋、降级的限制条件和重要依据','作为年终绩效考评的重要依据（6.7.6.1.1）']},
+  {n:'业务质量分', ico:'⭐', c:'#2563EB',
+   d:'用于评定员工航班工作中服务质量、运行质量的累计量化分数，衡量各业务等级空勤人员的航班服务工作质量。（6.7.4.3）',
+   r:['累计与清零规则同安全质量分（11月1日清零 / 晋降级依据不清零）','加减相互抵扣后为总分','作为空勤人员晋、降级的限制条件和重要依据','作为年终绩效考评和年度超绩效奖发放的重要依据（6.7.6.1.2）']},
+  {n:'日常管理分', ico:'📋', c:'#C77D0B',
+   d:'用于评定员工日常行为的累计量化分数，衡量各业务等级空勤人员的日常行为作风表现。（6.7.4.4）',
+   r:['累计与清零规则同安全质量分','加减相互抵扣后为总分','作为晋、降级限制条件与重要依据','作为年终绩效考评和年度超绩效奖发放的重要依据（6.7.6.1.3）']},
+  {n:'航班生产积分', ico:'✈️', c:'#7C3AED',
+   d:'根据员工航班生产出勤情况奖励或扣罚的累计分数，衡量航班生产任务完成情况与生产贡献能力。（6.7.4.5）',
+   r:['自入职后开始累积，起始 0 分；可跨年度使用，离职后清零','每累计正 100 分，可提交调整已公布航班申请 1 次（需自行寻找其他乘务员替班），换取后取消该 100 分（6.7.6.1.4）','非出勤（病/事/暂停派遣）调整航班：1 天 -50 分、2 天 -100 分累加，涉及过夜或国际通宵 -200 分（6.7.4.8）']},
+  {n:'辅收绩效分', ico:'💰', c:'#0E9F6E',
+   d:'用于评定员工航班工作中机上销售累计量化分数，衡量航班辅收工作质量。（6.7.4.6）',
+   r:['年度内加减累计，每年 11 月 1 日清零','加减相互抵扣后为总分','作为年终绩效考评和年度超绩效奖发放的重要依据（6.7.6.1.5）']},
+  {n:'热情度积分', ico:'🔥', c:'#E4572E',
+   d:'根据员工积极配合中队、分部工作给予奖励的累计量化数字。（6.7.4.7）',
+   r:['具体管理要求及累积方式见本手册 8.3“热情度积分管理”（6.7.6.1.6）']},
+  {n:'安全绩效积分（部门/分队级）', ico:'🏢', c:'#5B5BD6',
+   d:'部门/分队级月度安全考核积分：安全基础分 100 + 安全激励分（上限 30）；当月所扣超过（含）100 分的按零分计算。（4.26.4.3.1）',
+   r:['运输航空事故：全年安全绩效积分归 0','征候/作风红线问题/行政约见/安全底线：当月及往后归 0','一类事件 -70 分（第二起及往后归 0）；严重差错/偏差 -50（第二起归 0）；二类事件 -40（第二起归 0）','同事件跨两类项目“一项一扣罚”；单一项目多条“就高原则”；连带责任按分值的 60% 计算（4.26.4.3.2）']},
+  {n:'绩效等级（月度/年度评级）', ico:'🏅', c:'#148453',
+   d:'乘务员月度与季度考核、乘务长月度/季度/年度考核（8.15）。考核维度及权重：安全 35% / 业务 25% / 运行 15% / 综合 10% / 工作评定 15%，销售为单项考核。（8.15.4.1）',
+   r:['月度考核：分队长每月完成并发送员工确认，2 日内可反馈修正','绩效分低于合格分 80 分的员工，直属上级须在 3 个工作日内绩效面谈（3.10.6.5）','年度评级 S/A/B/C/D：D 档或连续两年 C 档触发降级/转岗处理；竞聘普遍要求上年度绩效 B（部分岗位 A）以上']},
+];
+
+const THRESHOLDS = [
+  {v:'-60 / -80 / -100', t:'触发安全底线：安全质量底线 -60 分；一般事故征候 -80 分；严重事故征候 -100 分（6.7.8(4)）'},
+  {v:'-20 / -40', t:'触发安全红线：一般差错/安全质量事件 -20 分；严重差错/严重安全质量事件 -40 分（6.7.8(5)）'},
+  {v:'-5 / -10~-40', t:'未按要求履职或未按标准执行，扣责任人安全/业务质量分 5 分；造成后果的视轻重扣 10-40 分（6.7.8(1)）'},
+  {v:'-10 ~ -60', t:'进入作风问题清单、作风控制清单的，扣 10-60 分（6.7.9.1 通项）'},
+  {v:'×1.5 / ×2', t:'重复问题：年度内第 2 次同类 SOP 执行问题按原分值 1.5 倍；90 个日历日内第 3 次同类事件按 2 倍扣罚（6.7.9.1）'},
+  {v:'-2 / -6 / 项', t:'监督检查不合格项：部门检查至少 -2 分/项；局方、公司发现违规不合格项至少 -6 分/项'},
+  {v:'-5/-10/-20', t:'乘务长管理连带责任：至少 -5 分/项；造成不良影响 -10 分；造成严重影响 -20 分（6.7.9.1 通用条款）'},
+  {v:'-40', t:'伪造事实骗取奖励（如伪造旅客表扬），扣业务质量分 40 分并交人力资源部（6.7.9.2）'},
+  {v:'-30 / -40', t:'私拿私分旅客财物、机供品，漏价销售等：扣业务质量分 30 分，造成有效投诉 -40 分（服务严重差错）'},
+  {v:'≥60', t:'三类累计扣分（安全+业务+日常）超过 60 分（含），列为转岗、辞退、开除情形（6.7.12(13)）'},
+  {v:'>60', t:'前 12 个月奖惩分扣分汇总超过 60 分，合同到期不续签评定参考（8.3.2.1(3)）'},
+  {v:'-100 / 500封顶', t:'病假（签到前 3 小时以上提出）：第 1 天 -100 生产积分，之后每增加一天加扣 50 分，单次连续病假 500 分封顶'},
+  {v:'+100 加扣', t:'违规病假（签到前 3 小时内提出）加扣 100 生产积分；通知备上航班后请假再加扣 200 分（6.7.9.3.4）'},
+  {v:'-20 / -600', t:'拒飞或编造不实理由推脱航班：扣日常管理分 20 分 + 航班生产积分 600 分；年度内第 2 次拒飞可辞退（6.7.9.3.4/6.7.12）'},
+  {v:'-10', t:'旷工：扣日常管理分 10 分；连续旷工超 2 日（含）或一年内累计超 3 日（含）→ 辞退（6.7.12(10)）'},
+  {v:'+100 / 每100', t:'航班生产积分每累计正 100 分，可申请调整已公布航班 1 次（需自寻替班）（6.7.6.1.4 / 8.5.8 积分兑换）'},
+];
+
+const THRESHOLDS2 = [
+  {v:'≤25分', pri:1, t:'晋升普通乘务员：前 12 个月安全/业务/日常三项扣分合计≤25 分，病事假≤22 天（6.8.6.1.1）'},
+  {v:'≤25分', pri:1, t:'竞聘带班乘务长：竞聘前 12 个月安全质量分+业务质量分扣分合计≤25 分，病事假≤22 天（5.4.6.1）'},
+  {v:'≤15分', pri:1, t:'竞聘 A 类乘务教员：前 12 个月三项扣分合计≤15 分，病事假≤22 天（5.5.4.3.1）'},
+  {v:'≤10分 / ≤500', t:'怀孕病假所致低绩效豁免：三项扣分合计≤10 分，且航班生产积分扣分≤500 分（5.4.6.1/6.8.7.1.1）'},
+  {v:'≤5分 / ≤5天', t:'恢复等级期间：飞行 200 小时期间三项扣分合计≤5 分、病事假≤5 天，否则年度内不予恢复（6.8.8）'},
+  {v:'主动报告', t:'鼓励主动报告：主动报告、真实报告、及时报告，符合《安全信用管理规定》可获豁免或减轻处罚（6.7.8(2)）'},
+];
+
+const APPEAL = [
+  '每月按通告规定的申诉日期，在 SMP 系统“奖惩事件”中对业务质量分、安全质量分、辅收绩效分、热情度积分、航班生产积分和日常管理分加扣分进行申诉；超过规定期限未申诉者，不予申诉。（6.7.7.2.3）',
+  '综合管理处对航班生产积分、日常管理分的申诉作最后评定并公示；安全保卫质量处对安全质量分、业务质量分的申诉作最终评定与服务保障。（6.7.7.2.1/6.7.7.2.2）',
+  '加减分统计：各处室每月 5 日前汇总、7 日前上传 CCP 系统并发布通告公示。（6.7.7.1）',
+];
+
+const LADDER = [
+  '见习安全/乘务员', '普通安全/乘务员', '见习乘务长（无英语证书）', '带班乘务长', '乘务长', '客舱乘务教员', '客舱乘务检查员',
+];
+
+const PROMO = [
+  {t:'晋升 普通乘务员', em:'green', emt:'6.8.6.1.1 / 8.3.1', items:[
+    '实际飞行时间满 <b>1000 小时</b>（小时累计方式见 5.16）',
+    '上一年度绩效为 <b>B（含）以上</b>',
+    '申请晋级前 12 个月，安全质量分、业务质量分和日常管理分<b>扣分合计≤25 分</b>（计分方式为正负分累计）',
+    '申请晋级前 12 个月，病事假累计<b>≤22 天</b>',
+    '流程：向分队长申请 → 资格审核 → 人事测评 → 晋级 CBT（90 分以上）+ CCMS 等级维护',
+  ]},
+  {t:'竞聘 带班乘务长', em:'blue', emt:'5.4.5 / 5.4.6.1', items:[
+    '大专或大专以上文化程度',
+    '3 年客舱乘务员岗位经历，实飞小时：上海基地 <b>3500h</b>、非上海基地 <b>2700h</b>',
+    '近 3 年内未发生人为责任原因的安全/安保一般差错、一般安全质量偏差及以上事件（管理责任除外）',
+    '持有现行有效体检合格证 + 有效训练合格证；按《客舱乘务员训练大纲》完成乘务长培训并考核合格',
+    '上一年度绩效 <b>B（含）以上</b>（怀孕病假致 C/D：三项扣分≤10 且生产积分扣分≤500 可豁免）',
+    '竞聘前 12 个月安全+业务质量分扣分合计<b>≤25 分</b>，病事假<b>≤22 天</b>',
+    '6 个月内未涉及作风问题清单及以上',
+    '取得客舱广播员资格',
+    '40 周岁以下需英语证书其一：乘务中级英语 / CET-4-6≥425 / TEM-4-8 / 托业≥450（非上海基地可先晋见习乘务长，取证后转带班）',
+    '不得连续报名参加乘务长竞聘',
+  ]},
+  {t:'晋升 乘务长（从带班乘务长）', em:'purple', emt:'5.4 / 8.3.1.1', items:[
+    '参照本手册 5.4“乘务长管理规定”完成乘务长竞聘 / 晋级流程',
+    '完成 360 人事测评与乘务长晋级 CBT（90 分以上），进入乘务长训练，完成带飞与放单',
+    '晋级后按 CCMS 系统等级信息调整薪酬：基本工资次月调整（按晋升日期补足差额），小时费标准自晋升后第一次执行航班任务起调整（6.8.9）',
+  ]},
+  {t:'竞聘 A 类客舱乘务教员', em:'red', emt:'5.5.4.2 / 5.5.4.3', items:[
+    '持有现行有效体检合格证 + 有效客舱乘务员训练合格证',
+    '近 4 年内未发生人为责任原因的安全/安保一般差错、一般安全质量偏差及以上事件（管理责任除外）',
+    '按《客舱乘务员训练大纲》完成客舱乘务教员培训并考核合格',
+    '上一年度绩效为 <b>A（含）以上</b>',
+    '竞聘前 12 个月三项扣分合计<b>≤15 分</b>，病事假累计<b>≤22 天</b>',
+    '竞聘前 12 个月内不得有进入作风问题清单、作风控制清单的记录',
+    '获得英语证书其一：乘务中级英语 / CET-4-6≥425 / TEM-4-8 / 托业≥450',
+    'A 类教员航线教授特定机型时，须按训练大纲完成该机型训练并具备服务该机型的资格',
+  ]},
+  {t:'竞聘 客舱乘务检查员', em:'gold', emt:'5.8 / 6.8.8', items:[
+    '竞聘要求详见本手册 5.8“客舱乘务检查员管理规定”',
+    '原检查员等级人员在恢复乘务教员后，无需参加检查员竞聘，直接参加检查员训练且考核通过（6.8.8）',
+  ]},
+];
+
+const EXAM = [
+  '所有晋级、恢复 CBT 考核需达到 <b>90 分（含）以上</b> 方可通过（6.8.6.3）',
+  '晋级考试不合格者给予 <b>一次补考机会</b>，补考时间需与首次考试<b>间隔 30 天及以上</b>；补考不合格则本次晋级/恢复流程终止',
+  'CBT 考试需在 <b>人事测评完成后的 30 天内</b>（收到考试通知起算）完成（6.8.6.2）',
+  '晋级 / 降级人员基本工资次月调整（按晋升日期补足差额）；小时费标准自晋升（降级）后第一次执行航班任务起调整（6.8.9）',
+];
+
+const DEMOTE = [
+  {t:'处理性降级 — 即时降级', em:'red', items:[
+    '涉及公司严重事故/差错标准（CQH-SMP-5.21 / CQH-SQMM-5.10），按《安全生产绩效奖惩规定》CQH-SMP-5.20 或《服务奖惩规定》CQH-SQMM-6.13 实施即时降级',
+    '乘务长涉及安全/服务事件判定的即时降级执行标准参照 8.20“乘务长资质暂停、降级及解聘规定”',
+  ]},
+  {t:'处理性降级 — 季度降级', em:'red', items:[
+    '季度 PK 成绩合计得分排名后 50% 的人员实施季度降级：乘务长降业务等级一级（300 小时）；见习乘务员在见习岗位延长相应降级时间',
+    '往届季度降级还未恢复等级人员再次在季度 PK 被降级，则延长目前等级的恢复时间',
+  ]},
+  {t:'处理性降级 — 年终绩效降级', em:'red', items:[
+    '上一年度评级 <b>D 档</b> 或 <b>连续两年评级 C 档</b> 的人员，由部门决定转岗、劝退、降级 500 小时或延长晋级 500 小时',
+    '带班（见习）乘务长岗位年度评级 D 档或连续两年 C 档的，视为带班（见习）乘务长资质失效',
+    '怀孕病假致低绩效可豁免：年度三项扣分合计≤10 分且生产积分扣分≤500（连续两年 C 档需两个年度分别满足）',
+  ]},
+  {t:'身体原因暂停派遣降级（≥6 个月）', em:'red', items:[
+    '见习乘务员：延长 100 小时晋级',
+    '普通乘务员：降为见习乘务员等级 100 小时',
+    '带班乘务长 / 乘务长 / 教员 / 检查员：降为普通乘务员等级 100 小时',
+  ]},
+  {t:'资质失效降级', em:'red', items:[
+    '适用于客舱乘务员资质失效需参加初始训练的人员；完成初始训练并通过考核后方可申请恢复等级',
+  ]},
+  {t:'服务投诉考核挂钩降级（6.8.10）', em:'red', items:[
+    '乘务员当月发生旅客服务一般差错及以上事件，降级一个月',
+    '6 个月内投诉进件量累计满 3 次及以上（乘务长管理连带同样考核），按上款处理',
+    '春秋年度内发生一起服务严重差错事件：责任乘务员降级 3 个月，管理责任乘务长解聘（参照 8.20）',
+  ]},
+];
+
+const P820 = [
+  '即时 — <b>服务严重差错事件及以上</b>（管理连带/当事人）：<b>解聘</b>',
+  '即时 — <b>较大/严重安全失信行为</b>（安全严重差错/严重质量偏差、作风红线样例事件等）：<b>解聘</b>',
+  '春秋年度内 — <b>服务一般差错累计满 2 次</b>（管理连带/当事人）：<b>解聘</b>',
+  '春秋年度内 — <b>安全一般差错事件 / 一般安全质量偏差事件累计满 2 次</b>：<b>解聘</b>',
+  '春秋年度内 — 因乘务长自身服务态度原因<b>触发质量周报及以上问题累计满 2 次</b>：<b>解聘</b>',
+  '上一年度评级 <b>D 档</b>：转岗、劝退、<b>降级 800 小时</b>或延长晋级 800 小时',
+  '同类型安全违规问题累计 2 次及以上 / 民航局有效投诉 2 次及以上：暂停乘务长岗位派遣，执行乘务员岗位 <b>200 小时 / 80 天</b>',
+  '同类型服务违规问题累计 2 次及以上：暂停乘务长岗位派遣，执行乘务员岗位 <b>150 小时 / 60 天</b>',
+  '质量周报累计满 3 次及以上：暂停乘务长岗位派遣，执行乘务员岗位 <b>100 小时 / 40 天</b>',
+  '服务一般差错事件（管理连带/当事人）：暂停乘务长岗位派遣，执行乘务员岗位 <b>150 小时 / 60 天</b>',
+  '安全一般差错事件 / 一般安全质量偏差事件（管理连带/当事人）：暂停乘务长岗位派遣，执行乘务员岗位 <b>300 小时 / 120 天</b>',
+  '经部门技评委评估无法胜任乘务长岗位（舆情、有效投诉、作风诚信、沟通、业务能力等），或对公司/部门造成负面影响：<b>解聘；降级</b>',
+];
+
+const RECOVER = [
+  {t:'恢复 普通乘务员', em:'green', items:[
+    '原为普通乘务员：完成 RQT 训练后恢复见习乘务员等级，见习飞行满 <b>200 小时</b> 后可恢复普通乘务员',
+    '飞行 200 小时期间：三项扣分合计≤5 分、病事假≤5 天，否则该年度内不予恢复，需下一年度重新提交申请',
+  ]},
+  {t:'恢复 带班乘务长', em:'green', items:[
+    '完成 RQT 训练后恢复普通乘务员等级，飞行满 200 小时后按带班乘务长晋级流程恢复（需完成竞聘流程）',
+    '恢复时需在乘务长竞聘启动时完成报名，提交恢复表单后通过 360 人事测评和乘务长晋级 CBT 90 分以上，进入乘务长训练，完成带飞和放单',
+  ]},
+  {t:'恢复 乘务长', em:'green', items:[
+    '恢复带班乘务长且在该等级飞行满 <b>200 小时</b> 后可申请恢复乘务长等级，完成晋级 CBT 90 分以上',
+    '带班飞行 200 小时期间三项扣分≤5 分、病事假≤5 天，否则年度内不予恢复',
+  ]},
+  {t:'恢复 A 类客舱乘务教员 / 检查员', em:'green', items:[
+    '原教员等级恢复带班乘务长后无需参加教员竞聘：近 24 个日历月内参加过复训且资质有效 → 直接恢复；否则参加教员训练且考核通过',
+    '原检查员等级恢复乘务教员后无需参加检查员竞聘：近 24 个日历月内参加过复训且资质有效 → 直接恢复；否则参加检查员训练且考核通过',
+  ]},
+  {t:'离职回归 / 其他航司人员恢复', em:'green', items:[
+    '停止飞行时间在 2 年内（含）且提供原公司盖章飞行时间证明：取得本司见习乘务员资格后飞行满 300 小时，原飞行时间可全部累计；满足 1000 小时等晋级条件可申请恢复普通乘务员（360 人事测评 + 晋级 CBT 90 分）',
+    '恢复带班乘务长：满足乘务长竞聘要求后正常完成竞聘流程',
+    '恢复乘务长：带班乘务长等级飞行满 <b>1000 小时</b> 后，满足晋级条件可申请，完成晋级 CBT 90 分',
+    '暂停派遣超过两年（最后一次飞行日期至飞行时间审核表提交日），原有飞行时间不予累积计算',
+  ]},
+  {t:'恢复等级通用要求', em:'gold', items:[
+    '飞行时间满足降级小时后，可申请恢复等级',
+    '恢复等级需通过 <b>360 人事测评</b>，并按相应等级进行晋级 CBT，<b>90 分（含）以上</b>，补考一次需与首考间隔 30 天及以上',
+    '等级恢复日期前不得有一般及以上差错行为，否则该年度内不予恢复',
+    '流程：向分队长申请《空勤人员恢复等级申请表》→ 审核 → 综合管理处办理（360 测评）→ 乘务培训处 CBT（测评后 30 天内）→ CCMS 等级维护',
+  ]},
+];
+
+const EXIT = [
+  {t:'转岗、辞退、开除情形（6.7.12）', em:'red', items:[
+    '违反《员工手册》“辞退处理”相关条款，主要包括：触犯国家法律；年度内第 2 次拒飞；弄虚作假；严重影响公司声誉；以个人权利谋取私利；第 2 次私拿、私分、私送、私卖机上供应品；丢失器械包或包中匕首；证件转借造成严重后果；违法占用旅客钱、物；连续旷工超 2 日（含）或一年内累计旷工超 3 日（含）',
+    '春秋年度内累计受到 3 次口头警告或 2 次书面警告',
+    '因自身原因无法取得空勤人员相关证件/执照',
+    '<b>安全质量分、业务质量分和日常管理分合计扣分超过 60 分（含）</b>',
+    '乘务年度绩效分在该业务等级<b>末尾 1%</b> 的人员',
+  ]},
+  {t:'合同到期不续签评定参考（8.3.2.1）', em:'red', items:[
+    '年度绩效评定为 D 级，或三年内两年年度绩效评级为 C',
+    '连续 12 个月内 3 次口头警告单或 2 次书面警告单',
+    '前 12 个月奖惩分（日常管理分、业务质量分、安全质量分）扣分汇总超过 60 分',
+    '合同期内累计一般差错/偏差 3 次、严重偏差 2 次、严重差错 1 次',
+  ]},
+];
+
+/* ===================== 状态与渲染 ===================== */
+let kw = '', catF = '全部', stF = '全部类型', objF = '全部对象', tF = '全部', sortM = 'rel';
+const favs = new Set(JSON.parse(localStorage.getItem('manual_favs') || '[]'));
+function esc(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
+
+const CATS = ['全部','安全运行','服务规范','考勤休假','日常管理','证件','培训考核','销售财务','加分奖励'];
+const STS = ['全部类型','安全质量分','业务质量分','日常管理分','航班生产积分','现金奖惩','无'];
+const OBJS = ['全部对象','乘务员','乘务长','教员','学员','安全员','班组干部'];
+
+function ruleObjName(r){
+  const o = r.obj || [];
+  const map = o.map(x=> x==='乘务长'?'乘务长':x==='分队长'||x==='班组长'?'班组干部':x==='备份人员'?'乘务员':x==='4 号位'||x==='4号位'?'乘务员':x);
+  return [...new Set(map)];
+}
+function ruleMatchesFav(r, idx){ return favs.has(String(idx)); }
+function badgeClass(r){
+  const nums = (r.scores||[]).map(Number).filter(n=> !isNaN(n));
+  if(nums.length===0) return 's-sub';
+  const max = Math.max(...nums);
+  if(nums.some(n=> n>0 && (r.text||'').indexOf('加'+n)>=0 || (r.text||'').match(new RegExp('给予[^。]{0,10}加.*'+n+'分')))) return 's-add';
+  if(max>=40) return 's-high';
+  if(max>=15) return 's-mid';
+  return 's-sub';
+}
+function badgeLabel(r){
+  const s = r.scores||[];
+  if(s.length===0) return {n:'—',u:'无分值'};
+  const isAdd = /(加|奖励)[^。]{0,12}分/.test(r.text) && !/(扣|扣除)[^。]{0,12}分/.test(r.text.split('。')[0]);
+  const n = s.join('/');
+  return {n: (isAdd?'+':'')+n, u: isAdd?'加分':'扣分'};
+}
+function searchHit(r){
+  if(!kw) return true;
+  const k = kw.trim().toLowerCase();
+  const hay = (r.text+' '+(r.sub||'')+' '+(r.cat||'')+' '+(r.st||[]).join(' ')+' '+(r.obj||[]).join(' ')+' '+(r.ref||'')+(r.scores||[]).join(' ')).toLowerCase();
+  return hay.indexOf(k) !== -1;
+}
+function filterRules(){
+  return MANUAL_RULES.filter((r,i)=>{
+    if(!searchHit(r)) return false;
+    if(catF!=='全部' && r.cat!==catF) return false;
+    if(stF!=='全部类型' && !(r.st||[]).includes(stF)) return false;
+    if(tF!=='全部'){
+      const add = badgeLabel(r).u==='加分';
+      if(tF==='加分' && !add) return false;
+      if(tF==='扣分' && add) return false;
+    }
+    const objs = ruleObjName(r);
+    if(objF!=='全部对象' && !objs.includes(objF)) return false;
+    return true;
+  });
+}
+function sortRules(list){
+  const arr = list.slice();
+  if(sortM==='desc'){
+    arr.sort((a,b)=> (Math.max(...(b.scores||[]).map(Number).filter(n=>!isNaN(n))||[0])) - (Math.max(...(a.scores||[]).map(Number).filter(n=>!isNaN(n))||[0])));
+  } else if(sortM==='add'){
+    arr.sort((a,b)=> (badgeLabel(b).u==='加分'?1:0) - (badgeLabel(a).u==='加分'?1:0));
+  } else if(sortM==='sec'){
+    arr.sort((a,b)=> String(a.ref).localeCompare(String(b.ref)));
+  }
+  return arr;
+}
+function renderRules(){
+  const list = sortRules(filterRules());
+  const box = document.getElementById('rules');
+  document.getElementById('no-result').style.display = list.length ? 'none' : 'block';
+  box.innerHTML = list.map((r,idx)=>{
+    const oriIdx = MANUAL_RULES.indexOf(r);
+    const b = badgeLabel(r), bc = badgeClass(r);
+    const objs = ruleObjName(r);
+    const favOn = favs.has(String(oriIdx));
+    return '<div class="rule">'+
+      '<div class="r-head">'+
+        '<div class="score-badge '+bc+'">'+esc(b.n)+'<small>'+b.u+'</small></div>'+
+        '<div class="r-body">'+
+          '<div class="r-text clamped">'+esc(r.text)+'</div>'+
+          '<div class="r-act">'+
+            '<span class="tag">'+esc(r.cat||'-')+'</span>'+
+            (r.sub? '<span class="tag range">'+esc(r.sub)+'</span>':'')+
+            '<span class="tag ref">'+esc(r.ref||'')+'</span>'+
+            (r.st||[]).map(s=>'<span class="tag">'+esc(s)+'</span>').join('')+
+            objs.map(o=>'<span class="tag obj">'+esc(o)+'</span>').join('')+
+          '</div>'+
+        '</div>'+
+      '</div>'+
+      '<div style="display:flex;align-items:center;margin-top:2px">'+
+        '<button class="expand" onclick="toggleClamp(this)">展开全文 ▾</button>'+
+        '<button class="fav '+(favOn?'on':'')+'" onclick="toggleFav(this,'+oriIdx+')">'+(favOn?'★':'☆')+'</button>'+
+      '</div>'+
+    '</div>';
+  }).join('');
+  document.getElementById('st-rules').textContent = MANUAL_RULES.length;
+  renderChips();
+}
+function toggleClamp(btn){
+  const el = btn.closest('.rule').querySelector('.r-text');
+  el.classList.toggle('clamped');
+  btn.textContent = el.classList.contains('clamped') ? '展开全文 ▾' : '收起 ▲';
+}
+function toggleFav(btn, idx){
+  if(favs.has(String(idx))){ favs.delete(String(idx)); btn.textContent='☆'; btn.classList.remove('on'); }
+  else { favs.add(String(idx)); btn.textContent='★'; btn.classList.add('on'); }
+  localStorage.setItem('manual_favs', JSON.stringify([...favs]));
+  renderFavs();
+  document.getElementById('st-fav').textContent = favs.size;
+}
+function renderChips(){
+  const catCount = {};
+  MANUAL_RULES.forEach(r=>{ catCount[r.cat]=(catCount[r.cat]||0)+1; });
+  document.getElementById('f-cat-cnt').textContent = '共 '+MANUAL_RULES.length+' 条 · 当前 '+filterRules().length+' 条';
+  document.getElementById('chips-cat').innerHTML = CATS.map(c=>{
+    const n = c==='全部' ? MANUAL_RULES.length : (catCount[c]||0);
+    return '<button class="chip '+(catF===c?'active':'')+'">'+c+' <small>'+n+'</small></button>';
+  }).join('');
+  document.getElementById('chips-st').innerHTML = STS.map(c=>'<button class="chip '+(stF===c?'active':'')+'">'+c+'</button>').join('');
+  document.getElementById('chips-obj').innerHTML = OBJS.map(c=>'<button class="chip '+(objF===c?'active':'')+'">'+c+'</button>').join('');
+  document.getElementById('chips-t').innerHTML = ['全部','扣分','加分'].map(c=>'<button class="chip '+(tF===c?'active':'')+'">'+(c==='全部'?'全部':'')+(c==='扣分'?'➖ 扣分':'')+(c==='加分'?'➕ 加分':'')+'</button>').join('');
+  document.querySelectorAll('#chips-cat .chip').forEach((el,i)=>{ el.onclick=()=>{catF=CATS[i];renderRules();}; });
+  document.querySelectorAll('#chips-st .chip').forEach((el,i)=>{ el.onclick=()=>{stF=STS[i];renderRules();}; });
+  document.querySelectorAll('#chips-obj .chip').forEach((el,i)=>{ el.onclick=()=>{objF=OBJS[i];renderRules();}; });
+  document.querySelectorAll('#chips-t .chip').forEach((el,i)=>{ el.onclick=()=>{tF=['全部','扣分','加分'][i];renderRules();}; });
+}
+function doSearch(){ kw = document.getElementById('kw').value.trim(); renderRules(); }
+function resetFilters(){ kw=''; document.getElementById('kw').value=''; catF='全部'; stF='全部类型'; objF='全部对象'; tF='全部'; sortM='rel'; document.getElementById('sortSel').value='rel'; renderRules(); }
+
+/* 分数说明 */
+function renderScores(){
+  document.getElementById('scoreCards').innerHTML = SCORE_TYPES.map(s=>
+    '<div class="score-card"><div class="s-name"><span class="s-ico" style="background:'+s.c+'">'+s.ico+'</span>'+esc(s.n)+'</div>'+
+    '<p>'+esc(s.d)+'</p><ul>'+s.r.map(x=>'<li>'+x.replace(/<b>/g,'<b>').replace(/<\/b>/g,'</b>')+'</li>').join('')+'</ul></div>'
+  ).join('');
+  document.getElementById('throws').innerHTML = THRESHOLDS.map(t=>
+    '<div class="th"><b>'+esc(t.v)+'</b><span>'+esc(t.t)+'</span></div>'
+  ).join('');
+  document.getElementById('throws2').innerHTML = THRESHOLDS2.map(t=>
+    '<div class="th '+(t.pri?'pri':'')+'" style="flex-direction:row;align-items:center;gap:8px;flex-wrap:wrap"><b>'+esc(t.v)+'</b><span style="flex:1;min-width:150px">'+esc(t.t)+'</span></div>'
+  ).join('');
+  document.getElementById('appealCard').innerHTML = '<ul>'+APPEAL.map(x=>'<li>'+x.replace(/<b>/g,'<b>').replace(/<\/b>/g,'</b>')+'</li>').join('')+'</ul>';
+}
+
+/* 晋级降级 */
+function renderPromo(){
+  document.getElementById('ladder').innerHTML = LADDER.map((s,i)=>
+    '<div class="step '+(i===5||i===6?'s-pass':'')+'">'+(i+1)+'. '+esc(s)+(i===3?'<span>见习→带班（竞聘）</span>':'')+'</div>'
+  ).join('');
+  document.getElementById('promoCards').innerHTML = PROMO.map(p=>
+    '<div class="p-card"><div class="p-title">'+esc(p.t)+' <span class="em '+p.em+'">'+esc(p.emt)+'</span></div><ul>'+p.items.map(x=>'<li>'+x.replace(/<b>/g,'<b>').replace(/<\/b>/g,'</b>')+'</li>').join('')+'</ul></div>'
+  ).join('');
+  document.getElementById('examCard').innerHTML = '<ul>'+EXAM.map(x=>'<li>'+x.replace(/<b>/g,'<b>').replace(/<\/b>/g,'</b>')+'</li>').join('')+'</ul>';
+  document.getElementById('demoteCards').innerHTML = DEMOTE.map(p=>
+    '<div class="p-card"><div class="p-title">'+esc(p.t)+'</div><ul>'+p.items.map(x=>'<li>'+x.replace(/<b>/g,'<b>').replace(/<\/b>/g,'</b>')+'</li>').join('')+'</ul></div>'
+  ).join('');
+  document.getElementById('p820card').innerHTML = '<ul>'+P820.map(x=>'<li>'+x.replace(/<b>/g,'<b>').replace(/<\/b>/g,'</b>')+'</li>').join('')+'</ul>';
+  document.getElementById('recoverCards').innerHTML = RECOVER.map(p=>
+    '<div class="p-card"><div class="p-title">'+esc(p.t)+'</div><ul>'+p.items.map(x=>'<li>'+x.replace(/<b>/g,'<b>').replace(/<\/b>/g,'</b>')+'</li>').join('')+'</ul></div>'
+  ).join('');
+  document.getElementById('exitCards').innerHTML = EXIT.map(p=>
+    '<div class="p-card"><div class="p-title">'+esc(p.t)+'</div><ul>'+p.items.map(x=>'<li>'+x.replace(/<b>/g,'<b>').replace(/<\/b>/g,'</b>')+'</li>').join('')+'</ul></div>'
+  ).join('');
+}
+
+/* 收藏 */
+function renderFavs(){
+  const box = document.getElementById('favs');
+  const ids = MANUAL_RULES.map((_,i)=>String(i)).filter(i=>favs.has(i));
+  document.getElementById('fav-empty').style.display = ids.length ? 'none' : 'block';
+  document.getElementById('st-fav').textContent = ids.length;
+  box.innerHTML = ids.map(id=>{
+    const r = MANUAL_RULES[Number(id)];
+    const b = badgeLabel(r), bc = badgeClass(r);
+    return '<div class="rule"><div class="r-head">'+
+      '<div class="score-badge '+bc+'">'+esc(b.n)+'<small>'+b.u+'</small></div>'+
+      '<div class="r-body"><div class="r-text clamped">'+esc(r.text)+'</div>'+
+      '<div class="r-act"><span class="tag">'+esc(r.cat||'-')+'</span>'+(r.sub?'<span class="tag range">'+esc(r.sub)+'</span>':'')+'<span class="tag ref">'+esc(r.ref||'')+'</span></div></div></div>'+
+      '<div style="display:flex;align-items:center"><button class="expand" onclick="toggleClamp(this)">展开全文 ▾</button>'+
+      '<button class="fav on" onclick="toggleFav(this,'+id+')">★</button></div></div>';
+  }).join('');
+}
+
+/* 菜单切换 */
+document.getElementById('menu').addEventListener('click', e=>{
+  const btn = e.target.closest('.m-tab'); if(!btn) return;
+  document.querySelectorAll('.m-tab').forEach(b=>b.classList.toggle('active', b===btn));
+  document.querySelectorAll('.view').forEach(v=>v.classList.remove('active'));
+  document.getElementById('view-'+btn.dataset.v).classList.add('active');
+});
+
+/* 搜索回车 */
+document.getElementById('kw').addEventListener('input', ()=>{ kw = document.getElementById('kw').value.trim(); renderRules(); });
+
+/* 初始化 */
+function refreshStats(){
+  document.getElementById('st-rules').textContent = MANUAL_RULES.length;
+  document.getElementById('st-types').textContent = SCORE_TYPES.length;
+  document.getElementById('st-promo').textContent = LADDER.length + PROMO.length + DEMOTE.length + RECOVER.length + EXIT.length;
+  document.getElementById('st-fav').textContent = favs.size;
+}
+renderRules(); renderScores(); renderPromo(); renderFavs(); refreshStats();
+</script>
+</body>
+</html>

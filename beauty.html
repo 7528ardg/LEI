@@ -1,4 +1,4 @@
-﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿<!DOCTYPE html>
+﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿<!DOCTYPE html>
 <html lang="zh-CN">
 <head>
     <meta charset="UTF-8">
@@ -14846,39 +14846,69 @@ productIntrosByCategory: {
             const needCategory = getNeedCategoryForScript(set.id);
             if (!needCategory) return null;
 
-            // 为套装中的每个角色匹配最佳产品
+            // 分类别名：统一套装内品类名与产品库品类名，避免「精华水」等命名差异导致整类匹配不到（只有2款）
+            const categoryAliases = {
+                '精华水': '化妆水',
+                '水乳': '乳液'
+            };
+
+            // 统计套装内每个品类的期望数量（按原套装结构，同品类多款时匹配多款、不缺类）
+            const categoryBudget = {};
+            set.products.forEach(p => {
+                const cat = categoryAliases[p.category] || p.category;
+                categoryBudget[cat] = (categoryBudget[cat] || 0) + 1;
+            });
+
             const matchedProducts = [];
             const usedIds = [];
-            const rolePriority = { '肌底调理': 1, '深层修护': 2, '紧致锁水': 3, '二次清洁+补水': 1, '深层锁水修护': 2, '急救补水': 3, '源头美白': 2, '防护防晒黑': 3, '打底防护': 1, '均匀肤色': 2, '提升气色': 3, '温和清洁': 1, '舒缓修护': 2, '屏障修护': 3, '日常抗皱': 1, '密集修护': 2, '眼部美白': 3 };
 
-            // 获取该套装原始产品的类别列表
-            const originalCategories = set.products.map(p => p.category);
-            const uniqueCategories = [...new Set(originalCategories)];
-
-            uniqueCategories.forEach(cat => {
+            Object.keys(categoryBudget).forEach(cat => {
                 const catProducts = products.filter(p => p.category === cat);
                 if (catProducts.length === 0) return;
 
-                let bestProduct = null;
-                let bestScore = -1;
+                // 该品类在原套装中的产品与角色（按原套装顺序）
+                const catOriginalProducts = set.products.filter(p => (categoryAliases[p.category] || p.category) === cat);
 
-                catProducts.forEach(p => {
-                    if (usedIds.includes(p.id)) return;
-                    const score = calculateMatchScore(p, needCategory);
-                    if (score > bestScore) {
-                        bestScore = score;
-                        bestProduct = p;
+                // 1) 原套装产品优先选用：品牌相同 + 名称（忽略品牌前缀差异）匹配，保证与套装搭配相符
+                const originals = [];
+                catOriginalProducts.forEach(pp => {
+                    if (pp.brand === '其他') return; // 泛化占位产品（如「隔离防晒霜」）无精确对应，交给智能补齐
+                    const found = products.find(x => {
+                        if (x.brand !== pp.brand) return false;
+                        const a = (x.name || '').replace(x.brand, '');
+                        const b = (pp.name || '').replace(pp.brand, '');
+                        return a === b || (a && b && (a.includes(b) || b.includes(a)));
+                    });
+                    if (found && !usedIds.includes(found.id)) {
+                        usedIds.push(found.id);
+                        originals.push({ product: found, role: pp.role });
                     }
                 });
-
-                if (bestProduct) {
-                    usedIds.push(bestProduct.id);
-                    const originalRole = set.products.find(p => p.category === cat)?.role || '核心产品';
+                originals.forEach(o => {
                     matchedProducts.push({
-                        product: bestProduct,
-                        role: originalRole,
-                        matchScore: Math.round(bestScore),
+                        product: o.product,
+                        role: o.role,
+                        matchScore: Math.round(calculateMatchScore(o.product, needCategory)),
                         category: cat
+                    });
+                });
+
+                // 2) 剩余坑位按匹配分从高到低补同品类产品（同类多款不缺类）
+                const remaining = categoryBudget[cat] - originals.length;
+                if (remaining > 0) {
+                    const ranked = catProducts
+                        .map(p => ({ product: p, score: calculateMatchScore(p, needCategory) }))
+                        .filter(x => !usedIds.includes(x.product.id))
+                        .sort((a, b) => b.score - a.score);
+                    const availRoles = catOriginalProducts.map(p => p.role).filter(r => !originals.some(o => o.role === r));
+                    ranked.slice(0, remaining).forEach((item, idx) => {
+                        usedIds.push(item.product.id);
+                        matchedProducts.push({
+                            product: item.product,
+                            role: availRoles[idx] || '核心产品',
+                            matchScore: Math.round(item.score),
+                            category: cat
+                        });
                     });
                 }
             });
@@ -14949,7 +14979,7 @@ productIntrosByCategory: {
             });
 
             script += `**搭配使用的科学原理**\n\n`;
-            script += `${set.scientificBasis}。这三样搭配在一起，形成了一个完整的${needCategory}方案。单用任何一样效果都有限，但三者协同作用，效果是1+1+1>3的。\n\n`;
+            script += `${set.scientificBasis}。这几样搭配在一起，形成了一个完整的${needCategory}方案。单用任何一样效果都有限，但这${matchedProducts.length}款协同作用，效果远大于单用任何一款。\n\n`;
 
             script += `春秋航空正品保证，假一赔四，海关全程监管。落地前下单，3-7天送到家。`;
 
@@ -16502,36 +16532,37 @@ productIntrosByCategory: {
 
         // ===== 类型感知过渡句库（消除跨品类生硬衔接/割裂感） =====
         const TYPE_TRANSITIONS = {
-            'skincare|skincare': ['皮肤是一套完整流程，刚才那款和下面这款正好衔接。', '护肤讲究环环相扣，下面这款跟它完美配合。', '接下来这款，正好补上刚才那款缺的一步。'],
-            'skincare|makeup': ['底子养好了，上妆才好看。接下来看看这款彩妆。', '护肤打好了底，下面轮到彩妆环节了。', '刚才把肌肤底子打理好了，现在用彩妆把气色点亮。'],
+            'skincare|skincare': ['皮肤是一套完整流程，刚才那款和下面这款正好衔接。', '护肤讲究环环相扣，下面这款跟它完美配合。', '接下来这款，正好补上刚才那款缺的一步。', '护肤这件事讲究接力，刚才那款把基础打好，这款接着把效果做深。', '刚才那款先打通了吸收通道，下面这款正好趁热打铁。'],
+            'skincare|makeup': ['底子养好了，上妆才好看。接下来看看这款彩妆。', '护肤打好了底，下面轮到彩妆环节了。', '刚才把肌肤底子打理好了，现在用彩妆把气色点亮。', '护肤底子打得好，彩妆才服帖持久，下面这款正好接上。'],
             'skincare|fragrance': ['护肤是给自己的呵护，香水是给气质的点缀。', '肌肤照顾好了，别忘了还有香氛这个点睛之笔。', '护理完肌肤，下面这款香水能让整个人的气质立刻不一样。'],
             'skincare|health': ['护肤是外养，这款是内调，内外结合效果更好。', '皮肤状态也离不开身体状态，下面这款正好做内调。', '除了外用护肤品，内服调理也很重要，正好介绍这一款。'],
             'skincare|alcohol': ['护肤品选好了，给生活加点仪式感，下面这款酒也很不错。', '爱美也要懂生活，这款酒和刚才的好物是绝配。'],
             'skincare|souvenir': ['自己的好物选好了，下面这些还可以带回去送给家人朋友。', '照顾完自己，也别忘了给身边的人带份心意。', '护肤的够自己用了，而下面这款纪念品，最适合做伴手礼。'],
-            'makeup|makeup': ['妆容也要注意协调，下面这款和刚才那款正好搭配。', '接下来算是整套妆容的点睛之笔。'],
-            'makeup|fragrance': ['妆容完成，最后再来点香氛，整个人就完整了。', '妆画好了，香水一喷，气场马上不一样。'],
+            'makeup|makeup': ['妆容也要注意协调，下面这款和刚才那款正好搭配。', '接下来算是整套妆容的点睛之笔。', '整套妆面就差这一笔了，下面这款正好补上。'],
+            'makeup|fragrance': ['妆容完成，最后再来点香氛，整个人就完整了。', '妆画好了，香水一喷，气场马上不一样。', '妆容和香气是成套的仪式感，最后用香水收个尾。'],
             'makeup|skincare': ['当然，彩妆的前提是肌肤底子好，下面这款护肤正好为妆容打底。'],
             'makeup|souvenir': ['彩妆是犒劳自己，纪念品是分享心意，两不耽误。', '上面是您自己用的，下面的纪念品送人特别有面子。'],
             'makeup|alcohol': ['光鲜的妆容，也配得上一杯好酒的微醺时光。'],
-            'fragrance|souvenir': ['香水留给难忘的味道，纪念品留住旅途的记忆，都很值得。', '味道记在心里，记忆带回家中，这两样都很适合收下。'],
+            'fragrance|souvenir': ['香水留给难忘的味道，纪念品留住旅途的记忆，都很值得。', '味道记在心里，记忆带回家中，这两样都很适合收下。', '气味记住旅程，实物留住回忆，下面这款正好两者兼得。'],
             'fragrance|skincare': ['香氛尝过之后，回到肌肤本身的护理，下面这款也很基础好用。'],
             'fragrance|alcohol': ['香气与美酒，都是成熟品味的象征，下面这款正好相配。'],
             'alcohol|souvenir': ['好酒和好礼最相配，下面这款纪念品正好凑成一份心意。', '酒桌上聊得来，礼物带得走，这两样搭配很周到。'],
             'alcohol|skincare': ['美酒是享受，护肤是体贴，下一样回到体贴自己。'],
             'alcohol|alcohol': ['好酒讲究搭配，下面这款和刚才那款风味互补。'],
-            'souvenir|souvenir': ['这款和刚才那款特别配，凑成一套送人更有分量。', '再看一件同样有纪念意义的。'],
+            'souvenir|souvenir': ['这款和刚才那款特别配，凑成一套送人更有分量。', '再看一件同样有纪念意义的。', '这一套纪念品摆在一起特别完整，下面这款正好补齐全套。'],
             'souvenir|skincare': ['纪念品收好了，再给自己挑样实用的护肤品。'],
             'souvenir|makeup': ['伴手礼备好了，也别亏待自己，下面这款彩妆可以犒劳一下。'],
             'health|health': ['内调的组合拳讲究坚持，下面这款正好互补。'],
             'health|skincare': ['内调外养是一套，下面回到日常护肤，效果加乘。'],
-            'other|other': ['下面的也一样贴心实用。', '再看看下面这一款。']
+            'health|makeup': ['身体状态在线，妆容状态才在线，下面这款正好接上。'],
+            'other|other': ['下面的也一样贴心实用。', '再看看下面这一款。', '看完了再往下翻，还有一件同样出色的。']
         };
         const _transitionFor = (prevType, nextType) => {
             const direct = TYPE_TRANSITIONS[prevType + '|' + nextType];
             if (direct) return direct[Math.floor(Math.random() * direct.length)];
             const reverse = TYPE_TRANSITIONS[nextType + '|' + prevType];
             if (reverse) return reverse[Math.floor(Math.random() * reverse.length)];
-            const pool2 = ['接下来跟您说说下一款好物。', '下面这一款也同样值得一看。'];
+            const pool2 = ['接下来跟您说说下一款好物。', '下面这一款也同样值得一看。', '别着急，精彩的在后面，再看下一款。', '这款讲完了，下面这一款也同样值得期待。'];
             return pool2[Math.floor(Math.random() * pool2.length)];
         };
         // 搭配合理性审查
@@ -16745,14 +16776,14 @@ const getRandomUnique = (arr, usedSet) => {
                 crossSell: 0.12, quality: 0.05, closing: 0.20
             };
 
-            // 模块间过渡句库
+            // 模块间过渡句库（每类扩充多备选，避免多次生成话术时承接待词重复）
             const transitions = {
-                toBenefits: ['接下来，我重点跟您说说这几款产品的亮点。', '好，那我就一样一样给您介绍。', '下面我重点讲讲这几样好东西。'],
-                toUsage: ['那这款产品怎么用效果最好呢？我给您说说。', '买回去怎么用呢？很简单。', '用法上我给您一个小建议。'],
-                toTrust: ['您可能还想知道，这些东西到底靠不靠谱？', '说到这儿，您可能还想知道其他旅客用了怎么样。', '光我说好不行，您看看其他旅客的评价。'],
-                toCrossSell: ['对了，这几样搭配起来用，效果更好。', '我建议您可以搭配着买。', '跟您说个省钱的小窍门。'],
-                toQuality: ['最后再跟您说说品质保障。', '品质方面您完全放心。', '关于正品保障，我跟您多说两句。'],
-                toClosing: ['好了，今天就给您介绍到这儿。', '时间差不多了，我给您总结一下。', '最后我帮您捋一捋。']
+                toBenefits: ['接下来，我重点跟您说说这几款产品的亮点。', '好，那我就一样一样给您介绍。', '下面我重点讲讲这几样好东西。', '话不多说，我直接把这些好物的硬实力给您道来。', '这几款都是经得起细看的，下面我慢慢给您拆解。', '行，那就跟您挨个聊聊，每一样的特别之处我都不落下。'],
+                toUsage: ['那这款产品怎么用效果最好呢？我给您说说。', '买回去怎么用呢？很简单。', '用法上我给您一个小建议。', '好东西也要用得对，我把用法给您捋一捋。', '具体怎么用，我在这儿给您交代清楚。', '用对了方法效果翻倍，我教您怎么用。', '关于用法，您记住这几个要点就够了。'],
+                toTrust: ['您可能还想知道，这些东西到底靠不靠谱？', '说到这儿，您可能还想知道其他旅客用了怎么样。', '光我说好不行，您看看其他旅客的评价。', '口说无凭，我给您看看真实旅客的反馈。', '好不好用，旅客的口碑最有说服力。', '我再多嘴一句，这款的好评率在机上一直排在前列。'],
+                toCrossSell: ['对了，这几样搭配起来用，效果更好。', '我建议您可以搭配着买。', '跟您说个省钱的小窍门。', '单独买不划算，搭配着带才是聪明做法。', '悄悄跟您说，这几样组合起来，效果是1+1大于2的。', '既然都介绍到这儿了，我再给您加个搭配思路。'],
+                toQuality: ['最后再跟您说说品质保障。', '品质方面您完全放心。', '关于正品保障，我跟您多说两句。', '买得放心用得安心，品质这块我跟您念叨念叨。', '保障这块您可以一百个放心，我给您详细说说。', '最后我想重点强调一下品质，这是春秋航空的底线。'],
+                toClosing: ['好了，今天就给您介绍到这儿。', '时间差不多了，我给您总结一下。', '最后我帮您捋一捋。', '好的，我最后再给您划一下重点。', '离落地还有一会儿，现在下单完全来得及。', '总的来说，今天这几样都很值得带。']
             };
             const pickTransition = (key) => transitions[key][Math.floor(Math.random() * transitions[key].length)];
 
@@ -16794,17 +16825,23 @@ const getRandomUnique = (arr, usedSet) => {
                 return '';
             };
 
-            // 短时开场白精简版
+            // 短时开场白精简版（字数与系统标准开场相匹配，保留场景引入与信任背书）
             const shortOpenings = [
-                '各位旅客好，打扰几分钟，今天跟您分享几款机上好物。',
-                '旅客朋友们好，趁飞行时光，我给您介绍几样好东西。',
-                '大家好，今天航班上有几样口碑特别好的商品，我给您说说。',
-                '各位旅客好，今天有几样机上特惠好物，价格比专柜划算不少。'
+                '各位旅客朋友们好，打扰您几分钟。趁着飞机平稳飞行的这段时间，我想跟各位分享几款春秋航空精选的跨境好物，都是经过很多旅客验证的口碑产品，您听听看。',
+                '旅客朋友们好，旅途辛苦了。趁着这段飞行时光，我给您介绍几样实测好用的跨境正品，比专柜划算不少，落地前了解一下正合适。',
+                '大家好，欢迎乘坐春秋航空。今天航班上有几样口碑特别好的商品，都是品牌方直供、海关监管的正品，我一样一样给您说说。',
+                '各位旅客好，今天给大家带来几样机上特惠好物，价格比专柜划算不少，落地前下单还能直接送到家，我简单给您介绍。',
+                '旅客朋友们好，趁着飞行这段空闲时光，我把几款旅客回购最多的好物分享给您，品质有保障，价格也实在，您听听看。',
+                '大家好呀，最近很多旅客都在机上带这几款好物，反馈特别好。今天趁这个时机我也给您推荐一下，全部正品保障、假一赔四。',
+                '各位旅客朋友们好，乘机时光难得，我想跟您分享几款能提升出行幸福感的好物，都是经过市场验证的明星产品，机上特惠专享价。'
             ];
             const veryShortOpenings = [
-                '各位旅客好，今天有几样机上特惠好物，我快速给您介绍一下。',
-                '旅客朋友们好，趁这点时间，我给您推荐几样好东西。',
-                '大家好，今天航班上有几样特别划算的好物，我简单说说。'
+                '各位旅客好，今天有几样机上特惠好物，都是正品保障，我快速给您介绍一下。',
+                '旅客朋友们好，趁这点时间，我给您推荐几样机上旅客反馈特别好的跨境好物。',
+                '大家好，今天航班上有几样特别划算的跨境好物，品质有保障，我简单给您说说。',
+                '各位旅客好，趁着飞行时光，跟您分享几款机上热卖的跨境好物，划算又实用。',
+                '旅客朋友们好，最后这段飞行时间，给您推荐几样正品包税的机上好物，值得一看。',
+                '大家好，机上特惠好物来了，品牌方直供、海关监管，我快速给您过一遍亮点。'
             ];
 
             let openingText = '';
@@ -16846,7 +16883,7 @@ const getRandomUnique = (arr, usedSet) => {
                 }
             }
 
-            let benefitsText = isVeryShort ? `【核心卖点】\n` : isShort ? `【核心亮点】\n` : `【产品介绍】\n`;
+            let benefitsText = isVeryShort ? `【核心卖点】\n` : isShort ? `【核心亮点】\n` : `${pickTransition('toBenefits')}\n【产品介绍】\n`;
             selectedProducts.forEach((product, pIdx) => {
                 const pIsSouvenir = isSouvenirProduct(product);
                 const pProductIntros = getProductIntroByCategory(product);
@@ -16991,7 +17028,7 @@ const getRandomUnique = (arr, usedSet) => {
                 benefitsText += '\n';
             });
 
-            let usageText = isVeryShort ? '' : isShort ? `${pickTransition('toUsage')}\n【使用建议】\n` : `【使用建议】\n`;
+            let usageText = isVeryShort ? '' : `${pickTransition('toUsage')}\n【使用建议】\n`;
             if (isVeryShort) {
                 // 极简模式不单独设使用建议模块，合并到核心卖点
                 usageText = '';
@@ -18595,7 +18632,7 @@ const getRandomUnique = (arr, usedSet) => {
                         if (cat.matchProducts && cat.matchProducts.length > 0) {
                             var priorityColors = { 1: 'bg-green-100 text-green-700 border-green-300', 2: 'bg-pink-100 text-pink-700 border-pink-300', 3: 'bg-yellow-100 text-yellow-700 border-yellow-300', 4: 'bg-gray-100 text-gray-800 border-gray-300' };
                             var pColor = priorityColors[cat.recommendedPriority] || priorityColors[4];
-                            html += '<a href="#skin-cat-' + cat.id + '" onclick="setTimeout(function(){var el=document.getElementById(\'skin-cat-\' + \'' + cat.id + '\');if(el)el.scrollIntoView({behavior:\'smooth\',block:\'start\'});},50)" class="px-3 py-1.5 rounded-full text-xs font-medium border ' + pColor + ' hover:shadow-md cursor-pointer transition-colors inline-flex items-center gap-1">' + cat.icon + ' ' + cat.name + ' (' + cat.matchProducts.length + ')</a>';
+                            html += '<a href="javascript:void(0)" onclick="setTimeout(function(){var el=document.getElementById(\'skin-cat-\' + \'' + cat.id + '\');if(el)el.scrollIntoView({behavior:\'smooth\',block:\'start\'});},50)" class="px-3 py-1.5 rounded-full text-xs font-medium border ' + pColor + ' hover:shadow-md cursor-pointer transition-colors inline-flex items-center gap-1">' + cat.icon + ' ' + cat.name + ' (' + cat.matchProducts.length + ')</a>';
                         }
                     });
                     html += '</div></div>';

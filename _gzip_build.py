@@ -9,7 +9,9 @@ SOURCES = {
     'quiz': u'quiz.html',
     'performance': u'performance.html',
     'beauty': u'beauty.html',
+    'medical': u'medical.html',
     'daily': u'daily.html',
+    'manual': u'manual.html',
 }
 OUTS = [
     u'spring-assistant.html',
@@ -121,7 +123,9 @@ body{font-family:var(--font-sans);background:var(--bg);color:var(--text);min-hei
     <button class="mod-tab active" data-mod="quiz" onclick="switchModule('quiz')">📚 培训考核</button>
     <button class="mod-tab" data-mod="performance" onclick="switchModule('performance')">📊 绩效管理</button>
     <button class="mod-tab" data-mod="beauty" onclick="switchModule('beauty')">💄 美妆话术</button>
+    <button class="mod-tab" data-mod="medical" onclick="switchModule('medical')">🚑 医疗急救</button>
     <button class="mod-tab" data-mod="daily" onclick="switchModule('daily')">❓ 日常问题</button>
+    <button class="mod-tab" data-mod="manual" onclick="switchModule('manual')">📕 手册奖惩</button>
   </nav>
 
   <div class="actions">
@@ -147,9 +151,17 @@ body{font-family:var(--font-sans);background:var(--bg);color:var(--text);min-hei
     <div class="sys-loader" id="loader-beauty"><div class="sys-spinner"></div><div class="sl-text">正在进入 美妆话术 …</div></div>
     <iframe class="sys-frame" id="frame-beauty"></iframe>
   </div>
+  <div class="sys-wrap" id="wrap-medical">
+    <div class="sys-loader" id="loader-medical"><div class="sys-spinner"></div><div class="sl-text">正在进入 医疗急救 …</div></div>
+    <iframe class="sys-frame" id="frame-medical"></iframe>
+  </div>
   <div class="sys-wrap" id="wrap-daily">
     <div class="sys-loader" id="loader-daily"><div class="sys-spinner"></div><div class="sl-text">正在进入 日常问题 …</div></div>
     <iframe class="sys-frame" id="frame-daily"></iframe>
+  </div>
+  <div class="sys-wrap" id="wrap-manual">
+    <div class="sys-loader" id="loader-manual"><div class="sys-spinner"></div><div class="sl-text">正在进入 手册奖惩 …</div></div>
+    <iframe class="sys-frame" id="frame-manual"></iframe>
   </div>
 </main>
 
@@ -161,7 +173,9 @@ const MODULES = {
   quiz: "__B64_quiz__",
   performance: "__B64_performance__",
   beauty: "__B64_beauty__",
-  daily: "__B64_daily__"
+  medical: "__B64_medical__",
+  daily: "__B64_daily__",
+  manual: "__B64_manual__"
 };
 
 /* ===================== 解码引擎（gzip 解压；兼容未压缩旧数据回退） ===================== */
@@ -189,6 +203,32 @@ async function _b64ToHtml(b64){
 /* ===================== 模块切换（懒加载 + 缓存 + 解压） ===================== */
 let currentMod = null;
 const _modScroll = {};
+
+/* ===== 内嵌模式样式：隐藏各模块自带的顶栏/侧栏，避免"双导航栏" =====
+   （模块 Standalone 打开时仍保留自己的导航；嵌入全能助手时由外壳注入 CSS 隐藏） */
+const EMBED_CSS = {
+  quiz: '.livery-stripe,.topbar{display:none!important}.sidebar{top:0!important;height:100vh!important}.main{margin-top:0!important;min-height:100vh!important}@media(max-width:720px){.topbar{display:flex!important;position:fixed!important;top:8px!important;right:8px!important;left:auto!important;width:auto!important;height:auto!important;padding:0!important;background:transparent!important;border:none!important;box-shadow:none!important;gap:0!important;z-index:130!important}.topbar>*{display:none!important}.topbar>.hamburger{display:flex!important;width:40px!important;height:40px!important;align-items:center!important;justify-content:center!important;border:1px solid #E5EDE9!important;background:#fff!important;box-shadow:0 2px 10px rgba(0,0,0,.15)!important}}',
+  performance: '.module-nav{display:none!important}.module-content{margin-top:0!important;padding-top:16px!important}',
+  daily: '.livery-stripe,header.topbar{display:none!important}',
+  manual: 'header.top{display:none!important}.menu{top:0!important}',
+  beauty: '',
+  medical: ''
+};
+function injectEmbedCss(id, frame){
+  const css = EMBED_CSS[id];
+  if(!css) return;
+  try{
+    const d = frame.contentDocument;
+    if(!d) return;
+    const existing = d.getElementById('embed-mode-css');
+    if(existing) existing.remove();
+    const st = d.createElement('style');
+    st.id = 'embed-mode-css';
+    st.textContent = css;
+    (d.head || d.documentElement).appendChild(st);
+  }catch(e){}
+}
+
 function switchModule(id){
   if(currentMod === id) return; // 点击当前模块不重进，避免触发 display 切换导致移动端滚动位置丢失
 
@@ -217,6 +257,8 @@ function switchModule(id){
       frame.srcdoc = html;
       frame.onload = function(){
         if(loader) loader.classList.add('hidden');
+        _frames[id] = frame; // 标记已加载，避免每次切模块重复解压初始化（此前 _frames 从未被赋值）
+        injectEmbedCss(id, frame);
         if(_modScroll[id] != null){
           requestAnimationFrame(function(){
             try{
@@ -237,7 +279,7 @@ function switchModule(id){
       if(loader) loader.querySelector('.sl-text').textContent = '加载失败，请刷新重试';
     });
   } else if(_modScroll[id] != null){
-    const frame = document.getElementById('frame-'+id);
+    const frame = _frames[id];
     requestAnimationFrame(function(){
       try{
         const _sc = frame.contentDocument && frame.contentDocument.querySelector('.main-scroll-container');
@@ -255,7 +297,7 @@ function applyTheme(t){
   document.documentElement.setAttribute('data-theme', t);
   const btn = document.getElementById('themeBtn');
   btn.textContent = t==='dark' ? '🌙' : '☀️';
-  ['quiz','performance','beauty','daily'].forEach(id=>{
+  ['quiz','performance','beauty','medical','daily','manual'].forEach(id=>{
     const f = _frames[id];
     if(f && f.contentDocument){
       try{ f.contentDocument.documentElement.setAttribute('data-theme', t); }catch(e){}
