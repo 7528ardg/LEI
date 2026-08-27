@@ -1737,7 +1737,7 @@ input:focus,select:focus,textarea:focus{border-color:var(--color-brand);box-shad
   <div id="drawerExpandTab" onclick="openDrawer()" title="展开因子溯源抽屉">◀ 展开因子溯源</div>
 </div>
 
-<script src="risk/api/mock-server.js?v=20260408-v3-gz"></script>
+<script src="risk/api/mock-server.js?v=20260827-v3-gz-fix1"></script>
 <script src="risk/api/api-client.js?v=20260408-v3-gz"></script>
 <script>
 // ============ 登录验证 ============
@@ -13977,7 +13977,8 @@ async function deleteEventConfirm(eventId, dimId){
 // 生成符合「数据-控制清单」样式的 xlsx 模板（宋体11号加粗表头、冻结首行、列宽行高与原始一致）
 async function downloadEventTemplate(){
   try{
-    if(typeof XLSX==='undefined'){ toast('SheetJS库未加载，请刷新页面重试','error'); return; }
+    const XLSX = await window.__ensureXlsx();
+    if(!XLSX){ toast('SheetJS 库加载失败（网络原因），请检查网络后重试','error'); return; }
     // 控制清单表头：时间 / 一级风险主标签 / 二级分类 / 责任人 / 分队 / 问题描述（与数据清单文件完全一致）
     const headers=['时间','一级风险主标签','二级分类','责任人','分队','问题描述'];
     // 示例行（引导用户填写格式）
@@ -14296,9 +14297,10 @@ async function parseImportFile(file){
       const text=await file.text();
       rows=parseCSVText(text);
     }else{
-      // 使用 SheetJS 读取 xlsx
-      if(typeof XLSX==='undefined'){
-        toast('SheetJS 库未加载，请刷新页面重试','error');
+      // 使用 SheetJS 读取 xlsx（惰性加载，失败有兜底提示）
+      const XLSX = await window.__ensureXlsx();
+      if(!XLSX){
+        toast('SheetJS 库加载失败（网络原因），请检查网络后重试','error');
         return;
       }
       const data=await file.arrayBuffer();
@@ -21620,6 +21622,25 @@ async function doHistImportExcelEvents(){
   }
 })();
 </script>
-<script src="https://cdn.sheetjs.com/xlsx-0.20.1/package/dist/xlsx.full.min.js"></script>
+<script>
+// 【修复】SheetJS 由静态 CDN 改为惰性动态加载：仅在导出/导入 .xlsx 时才请求 CDN。
+// 若 CDN 不可达/返回异常内容，只影响该功能（toast 提示），不会把异常响应当作 JS 执行产生控制台 SyntaxError。
+window.__ensureXlsx = window.__ensureXlsx || function () {
+  if (window.XLSX) return Promise.resolve(window.XLSX);
+  if (window.__xlsxLoadingPromise) return window.__xlsxLoadingPromise;
+  window.__xlsxLoadingPromise = new Promise(function (resolve) {
+    var s = document.createElement('script');
+    s.src = 'https://cdn.sheetjs.com/xlsx-0.20.1/package/dist/xlsx.full.min.js';
+    s.async = true;
+    var done = false;
+    var finish = function () { if (done) return; done = true; clearTimeout(t); resolve(window.XLSX || null); };
+    s.onload = function () { finish(); };
+    s.onerror = function () { finish(); };
+    var t = setTimeout(function () { finish(); }, 15000);
+    document.head.appendChild(s);
+  });
+  return window.__xlsxLoadingPromise;
+};
+</script>
 </body>
 </html>

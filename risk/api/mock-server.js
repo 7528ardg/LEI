@@ -5376,15 +5376,25 @@
   // 【会话级状态】连续失败超过 2 次后，不再访问外网 GDACS 代理（直接走本地兜底，避免反复 net::ERR_ABORTED 红字）
   // 【修复·ERR_ABORTED】失败计数持久化到 localStorage：跨页面刷新/重开保持"代理不可达"判定，
   //   避免每次加载都对不可达的外部代理无界重试（fetch 超时被 abort 会在控制台产生 net::ERR_ABORTED 红字）
+  // 【修复·QUIC/冷却】对单个代理失败做 30 分钟冷却（如 allorigins 常见 ERR_QUIC_PROTOCOL_ERROR），
+  //   冷却期内不再访问该代理，从根源上减少浏览器层 net:: 红字；成功时清除冷却。
   const TYPHOON_MAX_FAIL_BEFORE_SKIP = 2;
   const _TY_FAIL_KEY = 'cabin_typhoon_proxy_fail_streak';
+  const _TY_FAILMAP_KEY = 'cabin_typhoon_proxy_failmap';
+  const TYPHOON_PROXY_COOLDOWN_MS = 30 * 60 * 1000; // 单代理失败冷却 30 分钟
   let _typhoonProxyFailStreak = (function () {
     try { return parseInt(localStorage.getItem(_TY_FAIL_KEY) || '0', 10) || 0; } catch (_e) { return 0; }
+  })();
+  let _typhoonProxyFailMap = (function () {
+    try { return JSON.parse(localStorage.getItem(_TY_FAILMAP_KEY) || '{}') || {}; } catch (_e) { return {}; }
   })();
   function _persistTyphoonFailStreak(v) {
     _typhoonProxyFailStreak = v;
     try { if (v > 0) localStorage.setItem(_TY_FAIL_KEY, String(v)); else localStorage.removeItem(_TY_FAIL_KEY); } catch (_e) {}
   }
+  function _markProxyFailed(name) { _typhoonProxyFailMap[name] = Date.now(); try { localStorage.setItem(_TY_FAILMAP_KEY, JSON.stringify(_typhoonProxyFailMap)); } catch (_e) {} }
+  function _markProxyOk(name) { if (_typhoonProxyFailMap[name]) { delete _typhoonProxyFailMap[name]; try { localStorage.setItem(_TY_FAILMAP_KEY, JSON.stringify(_typhoonProxyFailMap)); } catch (_e) {} } }
+  function _proxyOnCooldown(name) { const ts = _typhoonProxyFailMap[name]; return !!ts && (Date.now() - ts) < TYPHOON_PROXY_COOLDOWN_MS; }
 
   // 从GDACS获取真实台风数据（异步，带缓存）
   async function fetchTyphoonsFromGDACS() {
@@ -5503,11 +5513,12 @@
     try {
       // GDACS RSS feed - 获取活跃TC事件列表（多CORS代理fallback）
       const GDACS_RSS = 'https://www.gdacs.org/xml/rss.xml';
-      // 【修复 ERR_ABORTED】去掉 2 个经常不可达的历史代理（herokuapp 需要手动解锁、codetabs 经常限流），仅保留 2 个活跃代理+缩短超时
+      // 【修复 ERR_ABORTED/QUIC】去掉 2 个经常不可达的历史代理（herokuapp 需要手动解锁、codetabs 经常限流），
+      //   仅保留 2 个活跃代理+缩短超时；对单个失败代理做 30 分钟冷却（_proxyOnCooldown），冷却期不再访问
       const CORS_PROXIES = online
         ? [
-            (url) => 'https://corsproxy.io/?' + encodeURIComponent(url), // 代理1: corsproxy.io（较稳定）
-            (url) => 'https://api.allorigins.win/raw?url=' + encodeURIComponent(url)  // 代理2: allorigins（备用，失败不报错）
+            { name: 'corsproxy', url: (u) => 'https://corsproxy.io/?' + encodeURIComponent(u) },  // 代理1: corsproxy.io（较稳定）
+            { name: 'allorigins', url: (u) => 'https://api.allorigins.win/raw?url=' + encodeURIComponent(u) }  // 代理2: allorigins（备用，失败进入冷却）
           ]
         : []; // 离线不请求外网
 
@@ -5517,19 +5528,23 @@
       // 页面隐藏时只尝试首代理且超时更短（减少后台ABORTED）
       const baseTimeout = hidden ? 3000 : 5000;
 
-      // 尝试每个代理，直到成功
+      // 尝试每个代理，直到成功（冷却中的代理直接跳过，不产生 net:: 红字）
       for (let i = 0; i < CORS_PROXIES.length; i++) {
-        const proxyUrl = CORS_PROXIES[i](GDACS_RSS);
+        const proxy = CORS_PROXIES[i];
+        if (_proxyOnCooldown(proxy.name)) { lastError = lastError || new Error(proxy.name + ' 冷却中'); continue; }
+        const proxyUrl = proxy.url(GDACS_RSS);
         try {
           const controller = new AbortController();
           const timeoutId = setTimeout(() => controller.abort(), baseTimeout + i * 1500);
           const rssResp = await fetch(proxyUrl, { signal: controller.signal, credentials: 'omit', mode: 'cors', cache: 'no-store' });
           clearTimeout(timeoutId);
-          if (!rssResp.ok) { lastError = new Error(`代理${i+1} HTTP ${rssResp.status}`); continue; }
+          if (!rssResp.ok) { _markProxyFailed(proxy.name); lastError = new Error(`代理${i+1} HTTP ${rssResp.status}`); continue; }
           rssText = await rssResp.text();
-          if (rssText && rssText.length > 100) { usedProxy = `代理${i+1}`; break; }
+          if (rssText && rssText.length > 100) { usedProxy = `代理${i+1}(${proxy.name})`; _markProxyOk(proxy.name); break; }
+          _markProxyFailed(proxy.name);
         } catch (e) {
           // 【修复 ERR_ABORTED】AbortError（超时/页面卸载）属于预期行为，不累加失败计数也不打印红字
+          _markProxyFailed(proxy.name);
           const name = (e && e.name) || '';
           const msg = (e && e.message) || '';
           if (name === 'AbortError' || /aborted/i.test(msg) || /ERR_ABORTED/i.test(msg)) {
