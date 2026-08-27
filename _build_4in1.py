@@ -209,7 +209,7 @@ const EMBED_CSS = {
   quiz: '.livery-stripe,.topbar{display:none!important}.sidebar{top:0!important;height:100vh!important}.main{margin-top:0!important;min-height:100vh!important}@media(max-width:720px){.topbar{display:flex!important;position:fixed!important;top:8px!important;right:8px!important;left:auto!important;width:auto!important;height:auto!important;padding:0!important;background:transparent!important;border:none!important;box-shadow:none!important;gap:0!important;z-index:130!important}.topbar>*{display:none!important}.topbar>.hamburger{display:flex!important;width:40px!important;height:40px!important;align-items:center!important;justify-content:center!important;border:1px solid #E5EDE9!important;background:#fff!important;box-shadow:0 2px 10px rgba(0,0,0,.15)!important}}',
   performance: '.module-nav{display:none!important}.module-content{margin-top:0!important;padding-top:16px!important}',
   daily: '.livery-stripe,header.topbar{display:none!important}',
-  manual: 'header.top .t-top{display:none!important}header.top{position:static!important}.menu{position:static!important;top:auto!important}',
+  manual: 'header.top .t-top{display:none!important}.menu{position:static!important;top:auto!important}',
   beauty: '',
   medical: '',
   risk: '.topbar{display:none!important}.layout{height:100vh!important}.layout.with-banner{height:calc(100vh - 42px)!important}'
