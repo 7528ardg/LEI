@@ -120,6 +120,18 @@ body{font-family:var(--font-sans);background:var(--bg);color:var(--text);min-hei
 .m-btn:hover{transform:translateY(-1px);}
 .m-meta{font-size:.74rem;color:var(--text3);text-align:center;margin-top:14px;line-height:1.6;}
 @media(max-width:720px){.bk-btn span{display:none;}.bk-btn{padding:6px 9px;}}
+/* ===== 个人资料（姓名 / 头像） ===== */
+.user-chip .avatar img{width:100%;height:100%;border-radius:50%;object-fit:cover;display:block;}
+.user-chip .avatar div{width:100%;height:100%;display:flex;align-items:center;justify-content:center;border-radius:50%;}
+.profile-avatar-preview{width:88px;height:88px;border-radius:50%;margin:0 auto 6px;background:var(--grad-primary);display:flex;align-items:center;justify-content:center;color:#fff;font-size:1.8rem;font-weight:800;overflow:hidden;cursor:pointer;position:relative;}
+.profile-avatar-preview img{width:100%;height:100%;object-fit:cover;display:block;}
+.profile-avatar-preview .cam{position:absolute;left:0;right:0;bottom:0;background:rgba(0,0,0,.45);color:#fff;font-size:.62rem;padding:3px 0;text-align:center;opacity:0;transition:opacity .2s;}
+.profile-avatar-preview:hover .cam{opacity:1;}
+.pf-del{display:inline-flex;align-items:center;gap:4px;margin:2px auto 12px;padding:4px 10px;font-size:.74rem;color:var(--danger);background:none;border:none;cursor:pointer;font-family:var(--font-sans);}
+.pf-field{margin-bottom:14px;}
+.pf-field label{display:block;font-size:.78rem;color:var(--text2);margin-bottom:6px;font-weight:600;}
+.pf-field input[type=text]{width:100%;padding:10px 12px;border-radius:10px;border:1px solid var(--border);background:var(--bg);color:var(--text);font-size:.9rem;outline:none;box-sizing:border-box;font-family:var(--font-sans);}
+.pf-field input[type=text]:focus{border-color:var(--primary);box-shadow:0 0 0 3px var(--primary-soft);}
 </style>
 </head>
 <body>
@@ -157,9 +169,9 @@ body{font-family:var(--font-sans);background:var(--bg);color:var(--text);min-hei
     <button class="bk-btn" id="packsBadge" style="display:none" onclick="openPacksModal()" title="有新的数据包可安装">📦<span>新数据包</span></button>
     <button class="bk-btn" onclick="openBackupModal()" title="数据备份 / 恢复">💾<span>备份</span></button>
     <button class="theme-btn" id="themeBtn" onclick="cycleTheme()" title="切换主题">☀️</button>
-    <div class="user-chip" onclick="toast('春秋航空广州分队 · 客舱小助手')">
-      <div class="avatar">乘</div>
-      <span>乘务员</span>
+    <div class="user-chip" id="userChip" onclick="openProfileModal()" title="点击编辑姓名 / 头像">
+      <div class="avatar"><div id="avatarLetter">乘</div><img id="avatarImg" alt="" style="display:none"></div>
+      <span id="userName">乘务员</span>
     </div>
   </div>
 </header>
@@ -233,6 +245,31 @@ body{font-family:var(--font-sans);background:var(--bg);color:var(--text);min-hei
       <button class="m-btn ghost" onclick="closePacksModal()">稍后再说</button>
     </div>
     <div class="m-meta" id="packsModalMeta">来源：团队发布 · https + sha256 校验 · 不随个人备份迁移</div>
+  </div>
+</div>
+
+<!-- ===== 个人资料（姓名 / 头像） ===== -->
+<div class="modal-mask" id="profileModal" onclick="if(event.target===this)closeProfileModal()">
+  <div class="modal-card">
+    <h3>👤 个人资料</h3>
+    <p class="m-sub">设置顶栏显示的姓名与头像，本地保存，并随 💾 备份恢复迁移。</p>
+    <div class="profile-avatar-preview" id="profileAvatar" onclick="document.getElementById('pfFile').click()" title="点击选择图片">
+      <img id="profileAvatarImg" alt="" style="display:none">
+      <span id="profileAvatarLetter">乘</span>
+      <div class="cam">📷 更换</div>
+    </div>
+    <div style="text-align:center">
+      <button class="pf-del" type="button" onclick="clearAvatar()">🗑 删除头像</button>
+    </div>
+    <div class="pf-field">
+      <label for="pfName">姓名</label>
+      <input type="text" id="pfName" maxlength="12" placeholder="请输入姓名">
+    </div>
+    <div class="m-actions">
+      <button class="m-btn primary" onclick="saveProfile()">💾 保存</button>
+      <button class="m-btn ghost" onclick="closeProfileModal()">取消</button>
+    </div>
+    <input type="file" id="pfFile" accept="image/*" style="display:none" onchange="handleAvatarFile(this.files[0])">
   </div>
 </div>
 
@@ -629,12 +666,115 @@ window.addEventListener('message', function(e){
   }
 });
 
+/* ===================== 个人资料（姓名 / 头像） ===================== */
+const USER_PROFILE_KEY = 'user_profile';
+let pfAvatar = null; // 本次编辑暂存头像；null=未新选（保存沿用已存头像），''=已删除
+function readUserProfile(){
+  try{
+    const raw = localStorage.getItem(USER_PROFILE_KEY);
+    if(!raw) return { name:'乘务员', avatar:'' };
+    const p = JSON.parse(raw);
+    return {
+      name: (typeof p.name === 'string' && p.name.trim()) ? p.name.trim() : '乘务员',
+      avatar: (typeof p.avatar === 'string') ? p.avatar : ''
+    };
+  }catch(e){ return { name:'乘务员', avatar:'' }; }
+}
+function writeUserProfile(name, avatar){
+  localStorage.setItem(USER_PROFILE_KEY, JSON.stringify({ name:name, avatar:avatar||'', updatedAt:Date.now() }));
+}
+function renderUserChip(){
+  const p = readUserProfile();
+  const letter = document.getElementById('avatarLetter');
+  const img = document.getElementById('avatarImg');
+  const name = document.getElementById('userName');
+  if(!letter || !name) return;
+  if(p.avatar && img){
+    letter.style.display = 'none';
+    img.src = p.avatar;
+    img.style.display = '';
+  }else{
+    letter.textContent = (p.name || '乘').charAt(0);
+    letter.style.display = '';
+    if(img) img.style.display = 'none';
+  }
+  name.textContent = p.name;
+}
+function openProfileModal(){
+  pfAvatar = null;
+  const p = readUserProfile();
+  document.getElementById('pfName').value = p.name;
+  const letter = document.getElementById('profileAvatarLetter');
+  const img = document.getElementById('profileAvatarImg');
+  letter.textContent = (p.name || '乘').charAt(0);
+  if(p.avatar){ letter.style.display = 'none'; img.src = p.avatar; img.style.display = ''; }
+  else { letter.style.display = ''; img.style.display = 'none'; }
+  document.getElementById('profileModal').classList.add('show');
+}
+function closeProfileModal(){ document.getElementById('profileModal').classList.remove('show'); }
+function handleAvatarFile(file){
+  const input = document.getElementById('pfFile');
+  if(input) input.value = '';
+  if(!file) return;
+  if(!/^image\//.test(file.type)){ toast('请选择图片文件（JPG/PNG 等）', true); return; }
+  const reader = new FileReader();
+  reader.onload = function(ev){
+    const img = new Image();
+    img.onload = function(){
+      if(img.naturalWidth > 8192 || img.naturalHeight > 8192){ toast('图片尺寸过大，请选择较小图片', true); return; }
+      const size = 96;
+      const side = Math.min(img.naturalWidth, img.naturalHeight);
+      const sx = (img.naturalWidth - side) / 2, sy = (img.naturalHeight - side) / 2;
+      const c = document.createElement('canvas');
+      c.width = size; c.height = size;
+      const ctx = c.getContext('2d');
+      ctx.fillStyle = '#fff'; ctx.fillRect(0, 0, size, size);
+      ctx.drawImage(img, sx, sy, side, side, 0, 0, size, size);
+      const dataUrl = c.toDataURL('image/jpeg', 0.85);
+      pfAvatar = dataUrl;
+      const letter = document.getElementById('profileAvatarLetter');
+      const av = document.getElementById('profileAvatarImg');
+      letter.style.display = 'none';
+      av.src = dataUrl; av.style.display = '';
+    };
+    img.onerror = function(){ toast('图片解析失败，请换一张', true); };
+    img.src = ev.target.result;
+  };
+  reader.onerror = function(){ toast('读取文件失败', true); };
+  reader.readAsDataURL(file);
+}
+function clearAvatar(){
+  pfAvatar = '';
+  const cur = readUserProfile();
+  const letter = document.getElementById('profileAvatarLetter');
+  const img = document.getElementById('profileAvatarImg');
+  letter.textContent = ((document.getElementById('pfName').value || '').trim() || cur.name || '乘').charAt(0);
+  letter.style.display = '';
+  img.style.display = 'none';
+}
+function saveProfile(){
+  try{
+    const name = (document.getElementById('pfName').value || '').trim() || '乘务员';
+    const avatar = (typeof pfAvatar === 'string') ? pfAvatar : readUserProfile().avatar;
+    if(avatar && avatar.length > 180000){ toast('头像数据过大，请重新选择较小的图片', true); return; }
+    writeUserProfile(name, avatar);
+    pfAvatar = null;
+    renderUserChip();
+    closeProfileModal();
+    toast('个人资料已保存');
+  }catch(e){
+    if(e && e.name === 'QuotaExceededError') toast('存储空间不足，请更换较小的头像', true);
+    else toast('保存失败：' + ((e && e.message) || e), true);
+  }
+}
+
 /* ===================== 启动 ===================== */
 applyTheme('light');
 updateNetworkStatus();
 window.addEventListener('online', updateNetworkStatus);
 window.addEventListener('offline', updateNetworkStatus);
 checkPacksUpdate();
+renderUserChip();
 switchModule('quiz');
 </script>
 </body>
