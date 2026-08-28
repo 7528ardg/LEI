@@ -6,13 +6,13 @@
 <meta name="theme-color" content="#148453">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<meta name="apple-mobile-web-app-title" content="春秋全能助手">
+<meta name="apple-mobile-web-app-title" content="客舱小助手">
 <meta name="mobile-web-app-capable" content="yes">
-<meta name="application-name" content="春秋·广州分队全能助手">
-<meta name="description" content="春秋航空广州分队综合管理平台 - 刷题·绩效·美妆话术（快速拆分版）">
+<meta name="application-name" content="春秋航空广州分队客舱小助手">
+<meta name="description" content="春秋航空广州分队客舱小助手 - 你问我答·培训考核·绩效管理·美妆话术·医疗急救·风险预警·日常问题·手册奖惩·事件报告（快速拆分版）">
 <meta name="format-detection" content="telephone=no">
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
-<title>春秋航空 · 广州分队全能助手</title>
+<title>春秋航空 · 广州分队客舱小助手</title>
 <style>
 :root{
   --font-sans:-apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei",sans-serif;
@@ -55,7 +55,8 @@ body{font-family:var(--font-sans);background:var(--bg);color:var(--text);min-hei
 .user-chip .avatar{width:28px;height:28px;border-radius:50%;background:var(--grad-primary);display:flex;align-items:center;justify-content:center;color:#fff;font-size:.74rem;font-weight:800;}
 .sys-area{position:fixed;top:calc(3px + var(--topbar-h));left:0;right:0;bottom:0;background:var(--bg);}
 .sys-wrap{width:100%;height:100%;display:none;position:relative;}
-.sys-wrap.active{display:block;}
+.sys-wrap.active{display:block;animation:sysFade .22s ease-out;}
+@keyframes sysFade{from{opacity:.35;}to{opacity:1;}}
 .sys-frame{width:100%;height:100%;border:none;display:block;}
 .sys-loader{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;background:var(--bg);z-index:5;transition:opacity .4s;gap:14px;}
 .sys-loader.hidden{opacity:0;pointer-events:none;}
@@ -67,13 +68,20 @@ body{font-family:var(--font-sans);background:var(--bg);color:var(--text);min-hei
   .topbar{padding:0 14px;gap:10px;}
   .brand-name{font-size:.95rem;}
   .mod-tab{padding:8px 12px;font-size:.82rem;gap:6px;}
+  .module-tabs{-webkit-mask-image:linear-gradient(to right,transparent 0,#000 16px,#000 calc(100% - 16px),transparent 100%);mask-image:linear-gradient(to right,transparent 0,#000 16px,#000 calc(100% - 16px),transparent 100%);}
 }
 @media(max-width:720px){
-  .brand-name{font-size:.9rem;}
-  .brand-sub{font-size:.6rem;padding:1px 6px;}
+  .logo-wrap svg{width:30px;height:30px;}
+  .brand-name{font-size:.84rem;letter-spacing:-.2px;}
+  .brand-sub{font-size:.58rem;padding:1px 6px;}
   .net-status{display:none;}
   .mod-tab{padding:7px 10px;font-size:.8rem;gap:6px;}
   .user-chip span{display:none;}
+  /* 手机端 9 个模块页签横向滚动：左右边缘淡出提示可滑动，避免误以为内容被截断 */
+  .module-tabs{-webkit-mask-image:linear-gradient(to right,transparent 0,#000 16px,#000 calc(100% - 16px),transparent 100%);mask-image:linear-gradient(to right,transparent 0,#000 16px,#000 calc(100% - 16px),transparent 100%);}
+  /* 手机端 Toast 全宽展示，避免 min-width 溢出小屏 */
+  .toast-container{left:12px;right:12px;top:68px;}
+  .toast{min-width:0;width:100%;}
 }
 .toast-container{position:fixed;top:76px;right:20px;z-index:300;display:flex;flex-direction:column;gap:8px;}
 .toast{padding:11px 18px;border-radius:8px;background:var(--bg-card);border:1px solid var(--border);box-shadow:0 4px 16px rgba(0,0,0,.1);font-size:.86rem;display:flex;align-items:center;gap:10px;animation:slideIn .3s;min-width:240px;border-left:4px solid var(--primary);}
@@ -94,7 +102,7 @@ body{font-family:var(--font-sans);background:var(--bg);color:var(--text);min-hei
       <path d="M11 26 Q16 12 20 20 Q24 12 29 26" fill="none" stroke="url(#lg)" stroke-width="2.5" stroke-linecap="round" opacity=".7"/>
     </svg>
     <div>
-      <div class="brand-name">春秋航空 <span class="brand-sub">全能助手</span></div>
+      <div class="brand-name">春秋航空 <span class="brand-sub">客舱小助手</span></div>
     </div>
   </div>
 
@@ -104,14 +112,16 @@ body{font-family:var(--font-sans);background:var(--bg);color:var(--text);min-hei
     <button class="mod-tab" data-mod="performance" onclick="switchModule('performance')">📊 绩效管理</button>
     <button class="mod-tab" data-mod="beauty" onclick="switchModule('beauty')">💄 美妆话术</button>
     <button class="mod-tab" data-mod="risk" onclick="switchModule('risk')">⚠️ 风险预警</button>
+    <button class="mod-tab" data-mod="medical" onclick="switchModule('medical')">🚑 医疗急救</button>
     <button class="mod-tab" data-mod="daily" onclick="switchModule('daily')">❓ 日常问题</button>
     <button class="mod-tab" data-mod="manual" onclick="switchModule('manual')">📕 手册奖惩</button>
+    <button class="mod-tab" data-mod="report" onclick="switchModule('report')">🗂 事件报告</button>
   </nav>
 
   <div class="actions">
     <div class="net-status" id="netStatus"><span class="net-dot"></span><span id="netText">在线</span></div>
     <button class="theme-btn" id="themeBtn" onclick="cycleTheme()" title="切换主题">☀️</button>
-    <div class="user-chip" onclick="toast('春秋航空广州分队 · 全能助手')">
+    <div class="user-chip" onclick="toast('春秋航空广州分队 · 客舱小助手')">
       <div class="avatar">乘</div>
       <span>乘务员</span>
     </div>
@@ -139,6 +149,10 @@ body{font-family:var(--font-sans);background:var(--bg);color:var(--text);min-hei
     <div class="sys-loader" id="loader-risk"><div class="sys-spinner"></div><div class="sl-text">正在进入 风险预警（精简版）…</div></div>
     <iframe class="sys-frame" id="frame-risk"></iframe>
   </div>
+  <div class="sys-wrap" id="wrap-medical">
+    <div class="sys-loader" id="loader-medical"><div class="sys-spinner"></div><div class="sl-text">正在进入 医疗急救 …</div></div>
+    <iframe class="sys-frame" id="frame-medical"></iframe>
+  </div>
   <div class="sys-wrap" id="wrap-daily">
     <div class="sys-loader" id="loader-daily"><div class="sys-spinner"></div><div class="sl-text">正在进入 日常问题 …</div></div>
     <iframe class="sys-frame" id="frame-daily"></iframe>
@@ -146,6 +160,10 @@ body{font-family:var(--font-sans);background:var(--bg);color:var(--text);min-hei
   <div class="sys-wrap" id="wrap-manual">
     <div class="sys-loader" id="loader-manual"><div class="sys-spinner"></div><div class="sl-text">正在进入 手册奖惩 …</div></div>
     <iframe class="sys-frame" id="frame-manual"></iframe>
+  </div>
+  <div class="sys-wrap" id="wrap-report">
+    <div class="sys-loader" id="loader-report"><div class="sys-spinner"></div><div class="sl-text">正在进入 事件报告 …</div></div>
+    <iframe class="sys-frame" id="frame-report"></iframe>
   </div>
 </main>
 
@@ -159,8 +177,10 @@ const MOD_SRC = {
   performance: 'performance.html',
   beauty: 'beauty.html',
   risk: 'risk-lite.html',
+  medical: 'medical.html',
   daily: 'daily.html',
-  manual: 'manual.html'
+  manual: 'manual.html',
+  report: 'report.html'
 };
 const _loaded = {};
 const _modScroll = {};
@@ -173,8 +193,9 @@ const EMBED_CSS = {
   performance: '.livery-stripe{display:none!important}.module-nav{position:static!important;z-index:auto!important}.module-nav .navbar-brand{display:none!important}.module-nav .navbar-toggler{display:none!important}.module-nav .navbar-collapse{display:flex!important;flex-basis:auto!important;flex-grow:1!important}.module-nav .navbar-nav{flex-wrap:wrap!important}.module-content{margin-top:0!important;padding-top:12px!important}',
   daily: '.livery-stripe,header.topbar{display:none!important}',
   manual: 'header.top{display:none!important}',
-  beauty: '',
-  medical: '',
+  report: '.top{display:none!important}',
+  beauty: 'header[class*="bg-gradient-to-r"]{display:none!important}nav[class*="bg-white/80"]{top:0!important}div[class*="top-[120px]"]{top:52px!important}',
+  medical: '.headbar{display:none!important}',
   risk: '.topbar .logo,.topbar .user-chip,#appVersionBadge,#btnBackup,#btnGlobalRefresh,button[onclick="logout()"]{display:none!important}.topbar .breadcrumb{flex:1!important;min-width:0!important}',
 };
 function injectEmbedCss(id, frame){
@@ -208,6 +229,9 @@ function switchModule(id){
 
   currentMod = id;
   document.querySelectorAll('.mod-tab').forEach(b => b.classList.toggle('active', b.dataset.mod===id));
+  // 页签横向滚动时，把当前激活页签自动滚到可视区中部（手机/平板 9 个页签尤其需要）
+  const _ab = document.querySelector('.mod-tab.active');
+  if(_ab && _ab.scrollIntoView){ try{ _ab.scrollIntoView({behavior:'smooth',inline:'center',block:'nearest'}); }catch(e){ _ab.scrollIntoView(); } }
   document.querySelectorAll('.sys-wrap').forEach(w => w.classList.remove('active'));
   const wrap = document.getElementById('wrap-'+id);
   wrap.classList.add('active');
@@ -258,7 +282,7 @@ function applyTheme(t){
   document.documentElement.setAttribute('data-theme', t);
   const btn = document.getElementById('themeBtn');
   btn.textContent = t==='dark' ? '🌙' : '☀️';
-  ['qa','quiz','performance','beauty','risk','daily','manual'].forEach(id=>{
+  ['qa','quiz','performance','beauty','risk','medical','daily','manual','report'].forEach(id=>{
     const f = document.getElementById('frame-'+id);
     if(f && f.contentDocument){
       try{ f.contentDocument.documentElement.setAttribute('data-theme', t); }catch(e){}

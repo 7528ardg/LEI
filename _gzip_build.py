@@ -27,13 +27,13 @@ TEMPLATE = u'''<!DOCTYPE html>
 <meta name="theme-color" content="#148453">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<meta name="apple-mobile-web-app-title" content="春秋全能助手">
+<meta name="apple-mobile-web-app-title" content="客舱小助手">
 <meta name="mobile-web-app-capable" content="yes">
-<meta name="application-name" content="春秋·广州分队全能助手">
-<meta name="description" content="春秋航空广州分队综合管理平台 - 刷题·绩效·美妆话术·日常问题 全功能单文件版">
+<meta name="application-name" content="春秋航空广州分队客舱小助手">
+<meta name="description" content="春秋航空广州分队客舱小助手 - 你问我答·培训考核·绩效管理·美妆话术·医疗急救·日常问题·手册奖惩·事件报告 全功能单文件版">
 <meta name="format-detection" content="telephone=no">
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
-<title>春秋航空 · 广州分队全能助手</title>
+<title>春秋航空 · 广州分队客舱小助手</title>
 <style>
 :root{
   --font-sans:-apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei",sans-serif;
@@ -76,7 +76,8 @@ body{font-family:var(--font-sans);background:var(--bg);color:var(--text);min-hei
 .user-chip .avatar{width:28px;height:28px;border-radius:50%;background:var(--grad-primary);display:flex;align-items:center;justify-content:center;color:#fff;font-size:.74rem;font-weight:800;}
 .sys-area{position:fixed;top:calc(3px + var(--topbar-h));left:0;right:0;bottom:0;background:var(--bg);}
 .sys-wrap{width:100%;height:100%;display:none;position:relative;}
-.sys-wrap.active{display:block;}
+.sys-wrap.active{display:block;animation:sysFade .22s ease-out;}
+@keyframes sysFade{from{opacity:.35;}to{opacity:1;}}
 .sys-frame{width:100%;height:100%;border:none;display:block;}
 .sys-loader{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;background:var(--bg);z-index:5;transition:opacity .4s;gap:14px;}
 .sys-loader.hidden{opacity:0;pointer-events:none;}
@@ -90,13 +91,20 @@ body{font-family:var(--font-sans);background:var(--bg);color:var(--text);min-hei
   .mod-tab{padding:8px 12px;font-size:.82rem;gap:6px;}
   .sys-area{top:calc(3px + var(--topbar-h));}
   .toast-container{top:70px;}
+  .module-tabs{-webkit-mask-image:linear-gradient(to right,transparent 0,#000 16px,#000 calc(100% - 16px),transparent 100%);mask-image:linear-gradient(to right,transparent 0,#000 16px,#000 calc(100% - 16px),transparent 100%);}
 }
 @media(max-width:720px){
-  .brand-name{font-size:.9rem;}
-  .brand-sub{font-size:.6rem;padding:1px 6px;}
+  .logo-wrap svg{width:30px;height:30px;}
+  .brand-name{font-size:.84rem;letter-spacing:-.2px;}
+  .brand-sub{font-size:.58rem;padding:1px 6px;}
   .net-status{display:none;}
   .mod-tab{padding:7px 10px;font-size:.8rem;gap:6px;}
   .user-chip span{display:none;}
+  /* 手机端 9 个模块页签横向滚动：左右边缘淡出提示可滑动，避免误以为内容被截断 */
+  .module-tabs{-webkit-mask-image:linear-gradient(to right,transparent 0,#000 16px,#000 calc(100% - 16px),transparent 100%);mask-image:linear-gradient(to right,transparent 0,#000 16px,#000 calc(100% - 16px),transparent 100%);}
+  /* 手机端 Toast 全宽展示，避免 min-width 溢出小屏 */
+  .toast-container{left:12px;right:12px;top:68px;}
+  .toast{min-width:0;width:100%;}
 }
 .toast-container{position:fixed;top:76px;right:20px;z-index:300;display:flex;flex-direction:column;gap:8px;}
 .toast{padding:11px 18px;border-radius:8px;background:var(--bg-card);border:1px solid var(--border);box-shadow:0 4px 16px rgba(0,0,0,.1);font-size:.86rem;display:flex;align-items:center;gap:10px;animation:slideIn .3s;min-width:240px;border-left:4px solid var(--primary);}
@@ -117,7 +125,7 @@ body{font-family:var(--font-sans);background:var(--bg);color:var(--text);min-hei
       <path d="M11 26 Q16 12 20 20 Q24 12 29 26" fill="none" stroke="url(#lg)" stroke-width="2.5" stroke-linecap="round" opacity=".7"/>
     </svg>
     <div>
-      <div class="brand-name">春秋航空 <span class="brand-sub">全能助手</span></div>
+      <div class="brand-name">春秋航空 <span class="brand-sub">客舱小助手</span></div>
     </div>
   </div>
 
@@ -135,7 +143,7 @@ body{font-family:var(--font-sans);background:var(--bg);color:var(--text);min-hei
   <div class="actions">
     <div class="net-status" id="netStatus"><span class="net-dot"></span><span id="netText">在线</span></div>
     <button class="theme-btn" id="themeBtn" onclick="cycleTheme()" title="切换主题">☀️</button>
-    <div class="user-chip" onclick="toast('春秋航空广州分队 · 全能助手')">
+    <div class="user-chip" onclick="toast('春秋航空广州分队 · 客舱小助手')">
       <div class="avatar">乘</div>
       <span>乘务员</span>
     </div>
@@ -200,16 +208,41 @@ function _b64ToBytes(b64){
   for(let i=0;i<bin.length;i++) bytes[i] = bin.charCodeAt(i);
   return bytes;
 }
+// 内嵌 pako 解压库（约 47KB）：DecompressionStream 不可用的旧浏览器（Safari < 16.4 等）降级用
+(function(){
+  if(typeof window !== 'undefined' && typeof window.__pako50 !== 'undefined') return;
+  var _pako = window.__pako50 = {};
+  location.protocol; // no-op 占位，避免压缩器把下方函数当表达式
+  _pako.inflate = function(bytes){
+    // 纯 JS gzip 解压：jDataView-like 简化版（huffman + LZ77）
+    // 实际逻辑由构建脚本内嵌 pako 源码提供
+    throw new Error('pako not injected');
+  };
+})();
+__PAKO_SRC__
 async function _b64ToHtml(b64){
   const bytes = _b64ToBytes(b64);
   // gzip 数据头部：0x1f 0x8b
   if(bytes[0] === 0x1f && bytes[1] === 0x8b){
-    try{
-      const ds = new DecompressionStream('gzip');
-      const stream = new Blob([bytes]).stream().pipeThrough(ds);
-      const ab = await new Response(stream).arrayBuffer();
-      return new TextDecoder('utf-8').decode(ab);
-    }catch(e){ /* 若解压失败回退原文解码 */ }
+    // 优先使用原生 DecompressionStream（Chrome 80+ / Safari 16.4+ / Firefox 113+）
+    if(typeof DecompressionStream !== 'undefined'){
+      try{
+        const ds = new DecompressionStream('gzip');
+        const stream = new Blob([bytes]).stream().pipeThrough(ds);
+        const ab = await new Response(stream).arrayBuffer();
+        return new TextDecoder('utf-8').decode(ab);
+      }catch(e){ /* 原生解压失败，降级到 pako */ }
+    }
+    // 降级：pako 纯 JS 解压（兼容 Safari < 16.4 / 旧 Android WebView）
+    var _pk = window.pako || (window.__pako50);
+    if(_pk && typeof _pk.inflate === 'function'){
+      try{
+        const out = _pk.inflate(bytes);
+        return new TextDecoder('utf-8').decode(out);
+      }catch(e){ /* 降级解压失败，回退原文解码 */ }
+    }
+    // 无任何解压手段：返回明确错误而不是乱码
+    throw new Error('当前浏览器不支持 gzip 解压（DecompressionStream 需 iOS 16.4+ / Chrome 80+），请升级浏览器');
   }
   return new TextDecoder('utf-8').decode(bytes);
 }
@@ -227,8 +260,8 @@ const EMBED_CSS = {
   daily: '.livery-stripe,header.topbar{display:none!important}',
   manual: 'header.top .t-top{display:none!important}header.top{position:static!important}.menu{position:static!important;top:auto!important}',
   report: '.top .t-title{display:none!important}.top{position:static!important}.menu{position:static!important;top:auto!important}',
-  beauty: '',
-  medical: '',
+  beauty: 'header[class*="bg-gradient-to-r"]{display:none!important}nav[class*="bg-white/80"]{top:0!important}div[class*="top-[120px]"]{top:52px!important}',
+  medical: '.headbar{display:none!important}',
   risk: '.topbar .logo,.topbar .user-chip,#appVersionBadge,#btnBackup,#btnGlobalRefresh,button[onclick="logout()"]{display:none!important}.topbar .breadcrumb{flex:1!important;min-width:0!important}'
 };
 function injectEmbedCss(id, frame){
@@ -262,6 +295,9 @@ function switchModule(id){
 
   currentMod = id;
   document.querySelectorAll('.mod-tab').forEach(b => b.classList.toggle('active', b.dataset.mod===id));
+  // 页签横向滚动时，把当前激活页签自动滚到可视区中部（手机/平板 9 个页签尤其需要）
+  var _ab = document.querySelector('.mod-tab.active');
+  if(_ab && _ab.scrollIntoView){ try{ _ab.scrollIntoView({behavior:'smooth',inline:'center',block:'nearest'}); }catch(e){ _ab.scrollIntoView(); } }
   document.querySelectorAll('.sys-wrap').forEach(w => w.classList.remove('active'));
   const wrap = document.getElementById('wrap-'+id);
   wrap.classList.add('active');
@@ -367,6 +403,14 @@ switchModule('quiz');
 
 def build():
     t = TEMPLATE
+    # 内嵌 pako（保留缩进版，避免占位符处报缩进错误）
+    pako_src = io.open(u'_pako.min.js', 'rb').read().decode('utf-8')
+    pako_injected = pako_src.replace(u'function(t,e){', u';(function(t){var e=t.exports||{};')
+    # pako umd 在浏览器 <script> 中执行时 exports 为 undefined → 直接走 root 分支挂到 window.pako
+    # 因此无需改写，直接原样注入到 __PAKO_SRC__ 占位处
+    pako_injected = pako_src
+    assert '__PAKO_SRC__' in t, 'placeholder missing __PAKO_SRC__'
+    t = t.replace('__PAKO_SRC__', pako_injected)
     for key, path in SOURCES.items():
         raw = io.open(path, 'rb').read()
         gz = gzip.compress(raw, 9)
