@@ -17,3 +17,9 @@ __pdfqa/
 docs/manual_parse/
 docs/manual_imgs/
 docs/med_img/
+
+# 数据包发布工作区（待发布 JSON 放这里，发布成功后产物在 packs/packs/ 入库）
+packs/incoming/
+
+# 一次性迁移工具归档（如需入库请移回根目录）
+_legacy/

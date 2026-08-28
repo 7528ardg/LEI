@@ -38,7 +38,21 @@
 
 * **🗂 事件报告**：事件报告流程速查
 
-* **📇 库管理（管理员）**：上传新版手册 PDF → 自动解析章节 → 与四库匹配生成覆盖率地图与差异审核清单 → 确认后写入本机覆盖层（qa 问答自动生效）并可导出增量包；支持存量体检（裸缺口/弱覆盖/标签质量）与可选 AI 候选生成
+* **📇 库管理（管理员）**：上传新版手册 PDF → 自动解析章节 → 与四库匹配生成覆盖率地图与差异审核清单 → 确认后写入本机覆盖层（qa 问答自动生效）并可导出增量包；支持存量体检（裸缺口/弱覆盖/标签质量）与可选 AI 候选生成；**📦 数据包中心**可导入/导出/移除知识包·销售包·题库包（JSON 数据包覆盖内嵌基线，sales 包导入前自动合规检查）
+
+## 数据包式内容更新
+
+* 内容（知识库 / 美妆产品 / 题库）以 **JSON 数据包**形式覆盖内嵌基线，改内容无需重新发布整个 HTML
+
+* 数据包类型：`kb`（知识库，可带 `lib` 限定单库）/ `sales`（美妆产品）/ `quiz`（题库）/ `notice`（预留）
+
+* 格式：`{ "magic":"cabin-data-pack-v1", "packId":"sales-2026-09", "type":"sales", "title":"秋季机上销售包", "version":1, "issuedAt":"2026-08-29", "appliedUntil":"2026-12-31", "items":[{"op":"upsert"|"delete","key":"id","data":{...}}] }`
+
+* 入口：库管理「📦 数据包」tab → 导入 JSON / 演示包；qa·美妆·考核导入后**自动生效**（跨模块 storage 事件）
+
+* 数据包存本机 `packs_index` + `pack:{packId}`，**不随个人备份迁移**；旧版覆盖层（`kb_overlay_v1`）首次进入数据包中心自动迁移
+
+* **在线发布（M2）**：App 启动时自动拉取 `packs/manifest.json`（<https://7528ardg.github.io/LEI/packs/manifest.json）比对版本，发现新包顶栏出现「📦> 新数据包」→ 一键安装自动生效；发布流程与格式见 `packs/README.md`
 
 ## 维护
 
@@ -48,7 +62,11 @@
 
 * 离线单文件版由构建脚本生成：`python _build_4in1.py`（十模块完整版）/ `python _gzip_build.py`（九模块版）
 
-* `_check_js.py`：语法校验
+* 数据包引擎单一来源 `docs/_packs_engine.js`：改它后必须重跑 `python _sync_packs.py`（自动注入 qa/beauty/quiz/kb-admin.template.html，CI 用 `--check`），再跑 `python _build_kbadmin.py` + `_gzip_build.py` + `_build_4in1.py`
+
+* 一键工具：`python _build_all.py`（默认 构建+全量回归）；`build` / `verify` 单独执行；数据包发布见 `packs/README.md` 与 `_build_packs_release.py`
+
+* `_check_js.py`：全量语法校验（模块源 + 三外壳/产物）
 
 * 更新后浏览器若显示旧版，请强制刷新（Ctrl+F5 / Cmd+Shift+R）
 

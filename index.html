@@ -136,6 +136,7 @@ body{font-family:var(--font-sans);background:var(--bg);color:var(--text);min-hei
 
   <div class="actions">
     <div class="net-status" id="netStatus"><span class="net-dot"></span><span id="netText">在线</span></div>
+    <button class="bk-btn" id="packsBadge" style="display:none" onclick="openPacksModal()" title="有新的数据包可安装">📦<span>新数据包</span></button>
     <button class="bk-btn" onclick="openBackupModal()" title="数据备份 / 恢复">💾<span>备份</span></button>
     <button class="theme-btn" id="themeBtn" onclick="cycleTheme()" title="切换主题">☀️</button>
     <div class="user-chip" onclick="toast('春秋航空广州分队 · 客舱小助手')">
@@ -194,13 +195,26 @@ body{font-family:var(--font-sans);background:var(--bg);color:var(--text);min-hei
 <div class="modal-mask" id="backupModal" onclick="if(event.target===this)closeBackupModal()">
   <div class="modal-card">
     <h3>💾 数据备份与恢复</h3>
-    <p class="m-sub">备份包含：错题本与成绩、绩效数据、美妆收藏与定制话术、AI 配置、手册收藏、风险预警设置等全部本地数据。<br><br>换手机时：导出备份文件 → 通过微信「文件传输助手」或网盘发送给自己 → 在新手机打开助手后导入。</p>
+    <p class="m-sub">备份包含：错题本与成绩、绩效数据、美妆收藏与定制话术、AI 配置、手册收藏、风险预警设置等全部本地数据。<br>内容数据包（知识/销售/题库）随团队发布更新，不随个人备份迁移。<br><br>换手机时：导出备份文件 → 通过微信「文件传输助手」或网盘发送给自己 → 在新手机打开助手后导入。</p>
     <div class="m-actions">
       <button class="m-btn primary" onclick="exportBackup()">⬇️ 导出备份文件</button>
       <button class="m-btn ghost" onclick="document.getElementById('bkFile').click()">⬆️ 从文件恢复备份</button>
     </div>
     <input type="file" id="bkFile" accept=".json,application/json" style="display:none" onchange="importBackup(this.files[0])">
     <div class="m-meta" id="bkMeta"></div>
+  </div>
+</div>
+
+<!-- ===== 数据包在线更新（M2） ===== -->
+<div class="modal-mask" id="packsModal" onclick="if(event.target===this)closePacksModal()">
+  <div class="modal-card">
+    <h3>📦 发现可用数据包更新</h3>
+    <p class="m-sub" id="packsModalBody"></p>
+    <div class="m-actions">
+      <button class="m-btn primary" id="packsInstallBtn" onclick="installPacksUpdates()">⬇️ 全部安装</button>
+      <button class="m-btn ghost" onclick="closePacksModal()">稍后再说</button>
+    </div>
+    <div class="m-meta" id="packsModalMeta">来源：团队发布 · https + sha256 校验 · 不随个人备份迁移</div>
   </div>
 </div>
 
@@ -343,6 +357,97 @@ function toast(msg, type){
   setTimeout(()=>{ t.style.animation='slideIn .3s reverse forwards'; setTimeout(()=>t.remove(),300); }, 2600);
 }
 
+/* ===================== 数据包在线更新（M2）：manifest 拉取 + 顶栏提示 + 一键安装 ===================== */
+const PACKS_MANIFEST_URL = 'https://7528ardg.github.io/LEI/packs/manifest.json';
+const PACKS_MANIFEST_KEY = 'packs_manifest_url';
+const PACKS_TYPE_LABEL = { kb:'知识包', sales:'销售包', quiz:'题库包', notice:'通知识包' };
+var packsUpdateReady = [];
+function getPacksManifestUrl(){
+  try{ const u = localStorage.getItem(PACKS_MANIFEST_KEY); if(u) return u; }catch(e){}
+  return PACKS_MANIFEST_URL;
+}
+function escHtml(s){ return String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+/* 纯函数：manifest + 本地索引 → 待更新包列表（版本号更高或本机未装） */
+function computePackUpdates(man, idx){
+  const ready = [];
+  if(!man || man.magic !== 'cabin-packs-manifest-v1' || !Array.isArray(man.packs)) return ready;
+  man.packs.forEach(p=>{
+    if(!p || !p.packId || !p.url) return;
+    const local = idx && idx.packs ? idx.packs.find(e=>e.packId === p.packId) : null;
+    if(!local){ ready.push(p); return; }
+    if(p.version != null && (local.version == null || p.version > local.version)) ready.push(p);
+  });
+  return ready;
+}
+function showPacksBadge(ready){
+  const b = document.getElementById('packsBadge');
+  if(!b) return;
+  b.style.display = '';
+  const span = b.querySelector('span');
+  if(span) span.textContent = '新数据包(' + ready.length + ')';
+}
+function checkPacksUpdate(){
+  if(typeof navigator !== 'undefined' && !navigator.onLine) return;
+  fetch(getPacksManifestUrl(), { cache:'no-store' })
+    .then(r=>{ if(!r.ok) throw new Error('manifest HTTP ' + r.status); return r.json(); })
+    .then(man=>{
+      const idx = window.PACKS ? PACKS.readIndex(localStorage) : null;
+      const ready = computePackUpdates(man, idx);
+      if(!ready.length) return;
+      packsUpdateReady = ready;
+      showPacksBadge(ready);
+    })
+    .catch(()=>{ /* 离线 / 404 / 非法 manifest：静默不打扰 */ });
+}
+function openPacksModal(){
+  if(!packsUpdateReady.length) return;
+  const body = document.getElementById('packsModalBody');
+  if(!body) return;
+  body.innerHTML = '团队发布了 <b>' + packsUpdateReady.length + '</b> 个数据包，安装后 qa·美妆·考核立即生效（不随个人备份迁移）：<br>'
+    + packsUpdateReady.map(p=>'· <b>' + escHtml(p.title || p.packId) + '</b>（' + (PACKS_TYPE_LABEL[p.type] || p.type) + ' v' + (p.version != null ? p.version : 1) + ' · ' + escHtml(p.updatedAt || '') + '）').join('<br>');
+  document.getElementById('packsModal').classList.add('show');
+}
+function closePacksModal(){ document.getElementById('packsModal').classList.remove('show'); }
+async function fetchPackText(url, sha256){
+  const r = await fetch(url, { cache:'no-store' });
+  if(!r.ok) throw new Error('下载失败 HTTP ' + r.status);
+  const buf = await r.arrayBuffer();
+  if(sha256 && globalThis.crypto && crypto.subtle && crypto.subtle.digest){
+    const h = await crypto.subtle.digest('SHA-256', buf);
+    const hex = Array.from(new Uint8Array(h)).map(b=>b.toString(16).padStart(2,'0')).join('');
+    if(hex !== String(sha256).toLowerCase()) throw new Error('sha256 校验失败');
+  }
+  return new TextDecoder('utf-8').decode(buf);
+}
+async function installPacksUpdates(){
+  const btn = document.getElementById('packsInstallBtn');
+  if(btn) btn.disabled = true;
+  try{
+    let ok = 0, fail = 0;
+    for(const p of packsUpdateReady){
+      try{
+        const text = await fetchPackText(p.url, p.sha256);
+        const pack = JSON.parse(text);
+        if(!pack || pack.magic !== (window.PACKS ? PACKS.MAGIC : 'cabin-data-pack-v1')) throw new Error('数据包 magic 不符');
+        if(pack.packId !== p.packId) throw new Error('packId 与清单不符');
+        const r = window.PACKS ? PACKS.installPack(localStorage, pack, 'url') : { ok:false, reason:'引擎未就绪' };
+        if(!r.ok) throw new Error('安装失败：' + r.reason);
+        ok++;
+      }catch(e){
+        fail++;
+        toast('「' + (p.title || p.packId) + '」安装失败：' + (e && e.message || e), true);
+      }
+    }
+    if(ok) toast('已安装 ' + ok + ' 个数据包，qa·美妆·考核已自动生效');
+    else if(fail) toast('数据包安装失败，请稍后重试或联系管理员', true);
+    packsUpdateReady = [];
+    const b = document.getElementById('packsBadge'); if(b) b.style.display = 'none';
+  }finally{
+    if(btn) btn.disabled = false;
+  }
+  closePacksModal();
+}
+
 /* ===================== 网络状态 ===================== */
 function updateNetworkStatus(){
   const el = document.getElementById('netStatus');
@@ -367,14 +472,23 @@ const BACKUP_EXCLUDE = {
   'cabin_first_time_seen': 1,   // 首次使用引导标记
   '_app_last_version': 1,       // 风险模块版本标记（用于版本更新清缓存）
   'filtered_overview_v1': 1,    // 风险模块首页概览缓存
-  'briefing_today_v1_cache': 1  // 今日简报缓存
+  'briefing_today_v1_cache': 1,  // 今日简报缓存
+  'packs_index': 1               // 数据包索引（内容层）
 };
+// 内容层（数据包 / 新旧覆盖层）属"团队发布的内容"，不随个人备份迁移——避免换机或回滚时覆盖他人发布的数据
+const BACKUP_EXCLUDE_PREFIX = ['pack:', 'kb_overlay_v1'];
+function isBackupExcluded(k){
+  if(!k) return true;
+  if(BACKUP_EXCLUDE[k]) return true;
+  for(let i = 0; i < BACKUP_EXCLUDE_PREFIX.length; i++) if(k.indexOf(BACKUP_EXCLUDE_PREFIX[i]) === 0) return true;
+  return false;
+}
 function collectBackupKeys(){
   const keys = [];
   try{
     for(let i = 0; i < localStorage.length; i++){
       const k = localStorage.key(i);
-      if(k && !BACKUP_EXCLUDE[k]) keys.push(k);
+      if(!isBackupExcluded(k)) keys.push(k);
     }
   }catch(e){}
   return keys;
@@ -460,6 +574,7 @@ applyTheme('light');
 updateNetworkStatus();
 window.addEventListener('online', updateNetworkStatus);
 window.addEventListener('offline', updateNetworkStatus);
+checkPacksUpdate();
 switchModule('quiz');
 </script>
 </body>
