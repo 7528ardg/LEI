@@ -1,5 +1,15 @@
 {
   "magic": "cabin-packs-manifest-v1",
   "updatedAt": "2026-08-29",
-  "packs": []
+  "packs": [
+    {
+      "packId": "sales-2026-09-demo",
+      "title": "演示销售包（导入兼容测试）",
+      "type": "sales",
+      "version": 1,
+      "updatedAt": "2026-08-29",
+      "url": "packs/packs/sales-2026-09-demo.json",
+      "sha256": "cd8a834c87593304eb3fea85ef193c8550ad1fbfa6e4cd820fcca75ba95cc576"
+    }
+  ]
 }
