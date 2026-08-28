@@ -228,7 +228,8 @@ const EMBED_CSS = {
   manual: 'header.top .t-top{display:none!important}header.top{position:static!important}.menu{position:static!important;top:auto!important}',
   report: '.top .t-title{display:none!important}.top{position:static!important}.menu{position:static!important;top:auto!important}',
   beauty: '',
-  medical: ''
+  medical: '',
+  risk: '.topbar .logo,.topbar .user-chip,#appVersionBadge,#btnBackup,#btnGlobalRefresh,button[onclick="logout()"]{display:none!important}.topbar .breadcrumb{flex:1!important;min-width:0!important}'
 };
 function injectEmbedCss(id, frame){
   const css = EMBED_CSS[id];

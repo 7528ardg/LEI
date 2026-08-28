@@ -175,7 +175,7 @@ const EMBED_CSS = {
   manual: 'header.top{display:none!important}',
   beauty: '',
   medical: '',
-  risk: ''
+  risk: '.topbar .logo,.topbar .user-chip,#appVersionBadge,#btnBackup,#btnGlobalRefresh,button[onclick="logout()"]{display:none!important}.topbar .breadcrumb{flex:1!important;min-width:0!important}',
 };
 function injectEmbedCss(id, frame){
   const css = EMBED_CSS[id];
