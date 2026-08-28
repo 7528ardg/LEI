@@ -8979,6 +8979,7 @@ function renderWrong(){
       <div class="wr-toolbar">
         <div class="wr-toolbar-left">
           <button class="wr-tool-btn" onclick="startQuiz(APP.wrong.filter(i=>APP.questions[i]))" title="重做全部错题">✈️ 重练错题</button>
+          <button class="wr-tool-btn" onclick="aiWrongDiagnosis()" title="AI 分析错题规律，定位薄弱知识点（未接入 AI 时用规则统计）">🤖 薄弱点分析</button>
           <button class="wr-tool-btn" onclick="exportWrong('txt')" title="导出为纯文本">📤 导出 TXT</button>
           <button class="wr-tool-btn" onclick="exportWrong('html')" title="导出为 HTML（可打印）">🖨 打印</button>
           <button class="wr-tool-btn wr-tool-danger" onclick="clearWrong()" title="清空错题本">🗑 清空</button>
@@ -12399,6 +12400,153 @@ if('serviceWorker' in navigator && location.protocol.startsWith('http')){
   console.log('%c本次更新: 成就改版·资源离线化·Service Worker v10', 'color:#E64A19;font-weight:bold;');
   console.log('%c提示: 断网后所有功能仍可用，App 已自动缓存到本地', 'color:#22C55E;font-weight:bold;');
 })();
+
+/* ===================== 错题薄弱点分析 Agent（浏览器直调 LLM；未配置/失败降级为规则统计） ===================== */
+const QuizSpringAI = (function(){
+  const CFG_KEY = 'spring_ai_cfg';
+  const PROVIDERS = {
+    zhipu:       { base:'https://open.bigmodel.cn/api/paas/v4', model:'glm-4-flash-250414' },
+    siliconflow: { base:'https://api.siliconflow.cn/v1', model:'THUDM/GLM-4-9B-0414' }
+  };
+  const getCfg = () => {
+    try{ const c = JSON.parse(localStorage.getItem(CFG_KEY) || '{}'); return Object.assign({ provider:'zhipu', apiKey:'', endpoint:'', model:'' }, c); }
+    catch(e){ return { provider:'zhipu', apiKey:'', endpoint:'', model:'' }; }
+  };
+  const isEnabled = () => { const c = getCfg(); return !!(c.apiKey && String(c.apiKey).trim().length > 10); };
+  const resolve = (c) => {
+    const p = PROVIDERS[c.provider] || PROVIDERS.zhipu;
+    return { base:(c.endpoint || p.base).replace(/\/+$/,''), model:(c.model || p.model) };
+  };
+  async function chatLLM(messages, opts){
+    opts = opts || {};
+    const c = getCfg();
+    const r = resolve(c);
+    const ctrl = new AbortController();
+    const timer = setTimeout(()=>ctrl.abort(), opts.timeout || 25000);
+    const t = Math.min(opts.temperature != null ? opts.temperature : 0.6, 1.0);
+    try{
+      const res = await fetch(r.base + '/chat/completions', {
+        method:'POST',
+        headers:{ 'Content-Type':'application/json', 'Authorization':'Bearer ' + c.apiKey },
+        body: JSON.stringify({ model:r.model, messages:messages, temperature:t, max_tokens:(opts.maxTokens || 800), stream:false }),
+        signal: ctrl.signal
+      });
+      if(!res.ok){
+        let msg = 'HTTP ' + res.status;
+        try{ const d = await res.json(); msg = (d.error && (d.error.message || d.error.code)) || msg; }catch(e){}
+        throw new Error(msg);
+      }
+      const data = await res.json();
+      const text = (data.choices && data.choices[0] && data.choices[0].message && data.choices[0].message.content) || '';
+      return text.trim();
+    } finally { clearTimeout(timer); }
+  }
+  return { isEnabled, chatLLM };
+})();
+
+// 弹出一个轻量报告浮层（独立容器，不影响主 UI）
+function showDiagnosisPanel(title, bodyHtml){
+  let ov = document.getElementById('aiDiagOverlay');
+  if(ov) ov.remove();
+  ov = document.createElement('div');
+  ov.id = 'aiDiagOverlay';
+  ov.style.cssText = 'position:fixed;top:0;left:0;right:0;bottom:0;z-index:99999;background:rgba(15,23,42,.45);display:flex;align-items:center;justify-content:center;padding:16px;';
+  ov.innerHTML = `<div style="background:var(--bg-card,#fff);color:var(--text,#17301f);border-radius:16px;max-width:560px;width:100%;box-shadow:0 20px 60px rgba(0,0,0,.25);max-height:86vh;display:flex;flex-direction:column;overflow:hidden;">
+    <div style="padding:14px 18px;background:linear-gradient(135deg,#148453,#1fa56a);color:#fff;display:flex;justify-content:space-between;align-items:center;flex-shrink:0;">
+      <div style="font-weight:800;font-size:15px">${title}</div>
+      <button onclick="document.getElementById('aiDiagOverlay').remove()" style="border:none;background:rgba(255,255,255,.25);color:#fff;width:28px;height:28px;border-radius:8px;cursor:pointer;font-size:14px;">✕</button>
+    </div>
+    <div style="padding:16px 18px;overflow-y:auto;font-size:13px;line-height:1.8;" id="aiDiagBody">${bodyHtml}</div>
+  </div>`;
+  ov.onclick = function(e){ if(e.target === ov) ov.remove(); };
+  document.body.appendChild(ov);
+}
+
+// 规则版薄弱点统计（离线兜底，也作为 AI 的输入素材）
+function buildWeakStats(){
+  const q = (i) => APP.questions[i];
+  const byChapter = {};
+  const byTag = {};
+  const topRepeat = [];
+  (APP.wrong || []).forEach(i=>{
+    const qi = q(i);
+    if(!qi) return;
+    const st = (APP.wrongStats && APP.wrongStats[i]) || { count:1 };
+    const ch = qi.chapter || '未分类';
+    if(!byChapter[ch]) byChapter[ch] = { total:0, repeat:0 };
+    byChapter[ch].total++;
+    if(st.count >= 2) byChapter[ch].repeat++;
+    const tags = (APP.qTags && APP.qTags[i]) || [];
+    (Array.isArray(tags) ? tags : []).forEach(t=>{ byTag[t] = (byTag[t] || 0) + 1; });
+    if(st.count >= 3) topRepeat.push({ idx:i, count:st.count, title:(qi.q||'').slice(0,24), chapter:ch, tags });
+  });
+  topRepeat.sort((a,b)=>b.count-a.count);
+  return { total: APP.wrong.length, mastered: (APP.mastered||[]).length, byChapter, byTag, topRepeat: topRepeat.slice(0,5), notes: APP.notes || {} };
+}
+
+// 入口：规则统计 +（可选）AI 解读
+async function aiWrongDiagnosis(){
+  const st = buildWeakStats();
+  if(st.total === 0){ toast('错题本是空的，先去练几道吧 ✈️','info'); return; }
+  // 章节排序（按错题数降序）
+  const chArr = Object.keys(st.byChapter).map(c=>({ c, total:st.byChapter[c].total, repeat:st.byChapter[c].repeat })).sort((a,b)=>b.total-a.total);
+  const tagArr = Object.keys(st.byTag).map(t=>({ t, n:st.byTag[t] })).sort((a,b)=>b.n-a.n).slice(0,8);
+  // 规则版摘要（无论是否接入 AI 都先展示）
+  let ruleHtml = `<div style="color:var(--text2,#5a6f65);margin-bottom:12px;">共 <b style="color:var(--text,#17301f)">${st.total}</b> 道错题 · 已掌握 <b>${st.mastered}</b> ·
+    反复错 2 次以上 <b>${chArr.reduce((s,x)=>s+x.repeat,0)}</b> 道</div>`;
+  ruleHtml += `<div style="font-weight:700;margin-bottom:6px;">📊 薄弱章节（按错题数）</div>`;
+  ruleHtml += `<div style="margin-bottom:12px;">` + chArr.map(x=>{
+    const pct = Math.round(x.total/st.total*100);
+    return `<div style="display:flex;align-items:center;gap:8px;margin-bottom:6px;">
+      <span style="width:110px;flex-shrink:0;color:var(--text,#17301f);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${x.c}</span>
+      <div style="flex:1;height:8px;border-radius:4px;background:var(--border,#e5ede9);overflow:hidden;"><div style="width:${pct}%;height:100%;background:linear-gradient(90deg,#148453,#1fa56a);"></div></div>
+      <span style="width:88px;flex-shrink:0;text-align:right;color:var(--text2,#5a6f65);">${x.total} 道${x.repeat>0?`（反复${x.repeat}）`:''}</span>
+    </div>`; }).join('') + `</div>`;
+  if(tagArr.length){
+    ruleHtml += `<div style="font-weight:700;margin-bottom:6px;">🏷 高频知识点标签</div><div style="margin-bottom:12px;">` +
+      tagArr.map(x=>`<span style="display:inline-block;background:var(--primary-soft,#e8f3ee);color:var(--primary-dark,#0c5f3a);border-radius:999px;padding:2px 10px;margin:0 6px 6px 0;font-size:12px;">${x.t} ×${x.n}</span>`).join('') + `</div>`;
+  }
+  if(st.topRepeat.length){
+    ruleHtml += `<div style="font-weight:700;margin-bottom:6px;">🔁 反复出错的题（错 3 次以上）</div><div>`;
+    st.topRepeat.forEach(r=>{
+      ruleHtml += `<div style="background:var(--primary-mist,#f4f9f6);border:1px solid var(--border,#e5ede9);border-radius:8px;padding:6px 10px;margin-bottom:6px;font-size:12.5px;">
+        <span style="color:var(--danger,#e64a19);font-weight:700;">错 ${r.count} 次</span> · ${r.title}<span style="color:var(--text3,#9db0a6);margin-left:6px;">${r.chapter}</span>
+      </div>`;
+    });
+    ruleHtml += `</div>`;
+  }
+  const diagnosis = {
+    summary: `共错 ${st.total} 道（已掌握 ${st.mastered}），涉及章节 ${chArr.length} 个，高频错题 ${st.topRepeat.length} 道`,
+    chapters: chArr.slice(0,5).map(x=>`${x.c}（${x.total} 道${x.repeat?`，反复 ${x.repeat}`:''}）`),
+    tags: tagArr.slice(0,6).map(x=>x.t),
+    topQ: st.topRepeat.map(r=>r.title)
+  };
+  showDiagnosisPanel('🤖 错题薄弱点分析', ruleHtml + '<div class="aiDiagMore" id="aiDiagMore"></div>');
+  // AI 解读（未配置 Key 时跳过；请求失败自动忽略，仅保留规则版）
+  if(QuizSpringAI.isEnabled()){
+    const more = document.getElementById('aiDiagMore');
+    if(more) more.innerHTML = `<div style="margin-top:4px;color:var(--text3,#9db0a6);">⏳ AI 正在生成复习建议…</div>`;
+    try{
+      const sys = [
+        '你是一名春秋航空客舱乘务培训师，擅长帮助乘务员根据错题数据找到薄弱点、制定复习计划。',
+        '根据以下错题统计，用口语化、简洁的中文给出三部分内容：',
+        '1. 主要薄弱点判断（1-2 条，指出最需要优先补的章节/知识点）；',
+        '2. 针对性的复习建议（1-3 条，具体可执行，如结合某专题练习）；',
+        '3. 一句鼓励的话。',
+        '不要编造题库里不存在的知识点，只基于给定统计。'
+      ].join('\n');
+      const user = '【错题统计】\n' + JSON.stringify(diagnosis);
+      const resp = await QuizSpringAI.chatLLM([{ role:'system', content: sys }, { role:'user', content: user }], { temperature:0.6, maxTokens:600 });
+      const md = String(resp||'');
+      if(more) more.innerHTML = `<div style="margin-top:16px;padding-top:14px;border-top:1px dashed var(--border,#e5ede9);">
+        <div style="font-weight:700;color:var(--primary-dark,#0c5f3a);margin-bottom:8px;">🩺 AI 复习教练</div>
+        <div style="white-space:pre-wrap;color:var(--text,#17301f);">${md.replace(/</g,'&lt;')}</div>
+      </div>`;
+    }catch(e){
+      if(more) more.innerHTML = '';
+    }
+  }
+}
 </script>
 </body>
 </html>

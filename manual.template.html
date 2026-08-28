@@ -1,0 +1,640 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>手册奖惩 · 春秋航空广州分队</title>
+<style>
+*,::before,::after{box-sizing:border-box;margin:0;padding:0}
+html{font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei",sans-serif;line-height:1.6;-webkit-text-size-adjust:100%}
+:root{
+  --primary:#148453;--primary-dark:#0C5F3A;--primary-soft:#E8F3EE;--primary-mist:#F4F9F6;
+  --gold:#B8860B;--gold-soft:#FDF4D7;--danger:#D64545;--danger-soft:#FDECEC;
+  --blue:#2563EB;--blue-soft:#EAF1FE;--purple:#7C3AED;--purple-soft:#F1EBFE;
+  --bg:#F5F8F6;--card:#fff;--text:#1B2B23;--text2:#5A6F65;--text3:#9DB0A8;--border:#E5EDE9;
+  --grad:linear-gradient(135deg,#148453 0%,#1FA56A 100%);
+}
+html[data-theme="dark"]{--bg:#0F1A14;--card:#162420;--text:#E8F3EE;--text2:#8FA89C;--text3:#4A6358;--border:#1E3A2C;--primary-soft:#1A3D2A;--primary-mist:#142E22;--gold-soft:#2A2410;--danger-soft:#3A1D1D;--blue-soft:#16233C;--purple-soft:#241636;--shadow-c:rgba(0,0,0,.4)}
+body{background:var(--bg);color:var(--text);min-height:100vh;transition:background .3s,color .3s}
+.main-scroll-container{max-width:860px;margin:0 auto;padding:12px 14px 70px;-webkit-overflow-scrolling:touch}
+/* 顶栏 */
+.top{position:sticky;top:0;z-index:50;background:var(--grad);color:#fff;padding:14px 16px 12px;box-shadow:0 4px 16px rgba(20,132,83,.18)}
+.t-top{display:flex;align-items:center;gap:10px;margin-bottom:10px}
+.t-logo{width:38px;height:38px;border-radius:12px;background:rgba(255,255,255,.18);display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0}
+.t-title{font-size:1.06rem;font-weight:800;letter-spacing:.3px}
+.t-sub{font-size:.7rem;opacity:.85;margin-top:1px}
+.search{display:flex;gap:8px}
+.search input{flex:1;border:none;border-radius:10px;padding:10px 14px;font-size:.9rem;outline:none;background:rgba(255,255,255,.95);color:#1B2B23}
+.search button{border:none;border-radius:10px;padding:0 16px;background:rgba(255,255,255,.22);color:#fff;font-size:1rem;cursor:pointer}
+/* 统计 */
+.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;padding:12px 14px;background:var(--card);border-bottom:1px solid var(--border)}
+.stat{text-align:center}
+.stat b{display:block;font-size:1.15rem;color:var(--primary);font-weight:800}
+.stat span{font-size:.66rem;color:var(--text2)}
+/* 菜单 */
+.menu{position:sticky;top:116px;z-index:40;display:flex;gap:6px;background:var(--bg-card,var(--card));padding:8px 12px;overflow-x:auto;scrollbar-width:none;border-bottom:1px solid var(--border);backdrop-filter:blur(10px);background:rgba(255,255,255,.0)}
+.menu::-webkit-scrollbar{display:none}
+.m-tab{flex-shrink:0;padding:8px 14px;border-radius:18px;border:1px solid var(--border);background:var(--card);color:var(--text2);font-size:.82rem;font-weight:600;cursor:pointer;transition:all .2s;font-family:inherit}
+.m-tab.active{background:var(--grad);color:#fff;border-color:transparent;box-shadow:0 4px 12px rgba(20,132,83,.25)}
+/* 视图 */
+.view{display:none}
+.view.active{display:block;animation:fade .25s}
+@keyframes fade{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+.sec-title{display:flex;align-items:center;gap:8px;font-size:.98rem;font-weight:800;color:var(--text);margin:18px 4px 10px}
+.sec-title::before{content:'';width:4px;height:16px;border-radius:2px;background:var(--grad)}
+/* 过滤器 */
+.filters{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:12px;margin:12px 0}
+.f-group{margin-bottom:10px}
+.f-group:last-child{margin-bottom:0}
+.f-label{font-size:.68rem;color:var(--text2);margin-bottom:6px;display:flex;justify-content:space-between;align-items:center}
+.f-cnt{color:var(--text3);font-weight:500}
+.chips{display:flex;flex-wrap:wrap;gap:6px}
+.chip{padding:5px 12px;border-radius:14px;border:1px solid var(--border);background:var(--bg);font-size:.76rem;color:var(--text2);cursor:pointer;transition:all .15s;font-family:inherit}
+.chip:hover{border-color:var(--primary);color:var(--primary)}
+.chip.active{background:var(--primary-soft);border-color:var(--primary);color:var(--primary);font-weight:700}
+.chip.hot{background:var(--gold-soft);border-color:#E4C45C;color:#8a6d00}
+html[data-theme="dark"] .chip.hot{color:#E4C45C}
+.selects{display:flex;gap:8px}
+.selects select{flex:1;border:1px solid var(--border);border-radius:10px;padding:8px 6px;font-size:.78rem;background:var(--card);color:var(--text);outline:none}
+/* 规则卡片 */
+.rules{display:flex;flex-direction:column;gap:10px}
+.rule{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:12px 14px;transition:box-shadow .2s;position:relative}
+.rule.hit{border-color:var(--primary);box-shadow:0 0 0 1px var(--primary)}
+.rule .r-head{display:flex;align-items:flex-start;gap:10px}
+.score-badge{flex-shrink:0;min-width:44px;text-align:center;padding:4px 8px;border-radius:10px;font-size:.9rem;font-weight:800;color:#fff;line-height:1.2}
+.score-badge small{display:block;font-size:.55rem;font-weight:600;opacity:.9}
+.s-add{background:var(--grad)}
+.s-sub{background:#168247}
+.s-mid{background:#C77D0B}
+.s-high{background:#D64545}
+.rule .r-body{flex:1;min-width:0}
+.rule .r-text{font-size:.85rem;color:var(--text);line-height:1.62}
+.rule.clamped .r-text{display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden}
+.rule .r-act{display:flex;align-items:center;gap:6px;margin-top:8px;flex-wrap:wrap}
+.tag{display:inline-flex;align-items:center;gap:3px;font-size:.66rem;padding:2px 8px;border-radius:9px;background:var(--primary-mist);color:var(--primary);font-weight:600}
+.tag.ref{background:var(--blue-soft);color:var(--blue)}
+.tag.obj{background:#F5F0FF;color:var(--purple)}
+html[data-theme="dark"] .tag.obj{background:var(--purple-soft)}
+.tag.range{background:var(--gold-soft);color:#8a6d00}
+html[data-theme="dark"] .tag.range{color:#E4C45C}
+.rule .expand{margin-left:auto;border:none;background:none;color:var(--text3);font-size:.68rem;cursor:pointer;padding:4px;font-family:inherit}
+.rule .fav{margin-left:4px;border:none;background:none;font-size:1rem;cursor:pointer;padding:2px 4px;opacity:.55;transition:all .15s}
+.rule .fav.on{opacity:1;transform:scale(1.15)}
+.empty{text-align:center;color:var(--text3);padding:36px 0;font-size:.85rem}
+/* 分数说明卡 */
+.score-card{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:14px;margin-bottom:10px}
+.score-card .s-name{display:flex;align-items:center;gap:8px;font-weight:800;font-size:.92rem}
+.score-card .s-ico{width:26px;height:26px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:.8rem;color:#fff;flex-shrink:0}
+.score-card p{font-size:.8rem;color:var(--text2);line-height:1.66;margin-top:6px}
+.score-card ul{list-style:none;margin-top:6px}
+.score-card li{font-size:.78rem;color:var(--text2);padding:3px 0 3px 16px;position:relative;line-height:1.6}
+.score-card li::before{content:'•';color:var(--primary);position:absolute;left:2px;font-weight:800}
+/* 阈值卡 */
+.throw{display:flex;flex-wrap:wrap;gap:8px;margin-top:4px}
+.th{display:flex;flex-direction:column;align-items:flex-start;gap:2px;background:var(--card);border:1px solid var(--border);border-left:3px solid var(--danger);border-radius:10px;padding:8px 12px;min-width:150px;flex:1}
+html[data-theme="dark"] .th{background:var(--card)}
+.th b{font-size:.95rem;color:var(--danger);font-weight:800}
+.th span{font-size:.7rem;color:var(--text2)}
+.th.pri{border-left-color:var(--primary)}
+.th.pri b{color:var(--primary)}
+/* 晋级降级卡 */
+.p-card{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:14px;margin-bottom:10px}
+.p-card .p-title{display:flex;align-items:center;gap:8px;font-weight:800;font-size:.92rem;flex-wrap:wrap}
+.p-card .p-title .em{font-size:.66rem;padding:2px 8px;border-radius:9px;font-weight:700}
+.em.red{background:var(--danger-soft);color:var(--danger)}
+.em.green{background:var(--primary-soft);color:var(--primary)}
+.em.blue{background:var(--blue-soft);color:var(--blue)}
+.em.gold{background:var(--gold-soft);color:#8a6d00}
+html[data-theme="dark"] .em.gold{color:#E4C45C}
+.p-card ul{list-style:none;margin-top:8px}
+.p-card li{font-size:.8rem;color:var(--text2);padding:3px 0 3px 18px;position:relative;line-height:1.62}
+.p-card li::before{content:'▸';color:var(--primary);position:absolute;left:2px;font-weight:700}
+.p-card li b{color:var(--text);font-weight:700}
+.p-card .ref-tag{margin-top:8px;display:inline-block}
+.ladder{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:14px;margin-bottom:10px;display:flex;flex-direction:column;gap:2px}
+.ladder .step{display:flex;align-items:center;gap:10px;padding:7px 10px;border-radius:10px;background:var(--primary-mist);font-size:.82rem;font-weight:700;color:var(--primary);position:relative}
+.ladder .step:not(:last-child)::after{content:'↓';position:absolute;right:10px;color:var(--text3);font-size:.7rem}
+.ladder .step.s-pass{background:var(--primary-soft)}
+.ladder .step span{font-weight:500;color:var(--text2);font-size:.7rem;margin-left:auto}
+/* footer */
+footer{color:var(--text3);font-size:.68rem;text-align:center;line-height:1.8;padding:22px 10px 8px;margin-top:16px;border-top:1px dashed var(--border)}
+footer b{color:var(--text2)}
+@media(max-width:600px){.stats b{font-size:1rem}.th{min-width:130px}}
+</style>
+</head>
+<body>
+<header class="top">
+  <div class="t-top">
+    <div class="t-logo">📕</div>
+    <div>
+      <div class="t-title">手册奖惩 · 奖惩升级速查</div>
+      <div class="t-sub">《客舱服务部管理手册》01.14（2026.05.27生效）· 数据整理自手册全文</div>
+    </div>
+  </div>
+  <div class="search">
+    <input id="kw" placeholder="搜索：关键词 / 条款号(如 6.7.9.3.4) / 具体行为(如 迟到、酒测)…" autocomplete="off">
+    <button onclick="doSearch()">🔍</button>
+  </div>
+</header>
+<div class="stats">
+  <div class="stat"><b id="st-rules">0</b><span>奖惩条款</span></div>
+  <div class="stat"><b id="st-types">8</b><span>分数类型</span></div>
+  <div class="stat"><b id="st-promo">28</b><span>晋级降级规则</span></div>
+  <div class="stat"><b id="st-fav">0</b><span>已收藏</span></div>
+</div>
+<nav class="menu" id="menu">
+  <button class="m-tab active" data-v="query">🔍 扣分查询</button>
+  <button class="m-tab" data-v="scores">📊 分数说明</button>
+  <button class="m-tab" data-v="promo">🚀 晋级降级</button>
+  <button class="m-tab" data-v="fav">⭐ 我的收藏</button>
+</nav>
+<main class="main-scroll-container">
+
+  <!-- ============ 扣分查询 ============ -->
+  <section class="view active" id="view-query">
+    <div class="filters">
+      <div class="f-group">
+        <div class="f-label">事件分类 <span class="f-cnt" id="f-cat-cnt"></span></div>
+        <div class="chips" id="chips-cat"></div>
+      </div>
+      <div class="f-group">
+        <div class="f-label">分数类型</div>
+        <div class="chips" id="chips-st"></div>
+      </div>
+      <div class="f-group">
+        <div class="f-label">适用对象</div>
+        <div class="chips" id="chips-obj"></div>
+      </div>
+      <div class="f-group">
+        <div class="f-label">加分 / 扣分</div>
+        <div class="chips" id="chips-t"></div>
+      </div>
+      <div class="f-group selects">
+        <select id="sortSel">
+          <option value="rel">按 相关/默认 排序</option>
+          <option value="desc">按扣分值 从高到低</option>
+          <option value="add">加分项 优先显示</option>
+          <option value="sec">按手册章节 排序</option>
+        </select>
+        <button style="flex:0 0 auto;border:none;border-radius:10px;background:var(--primary-soft);color:var(--primary);padding:6px 14px;font-size:.78rem;font-weight:700;cursor:pointer;font-family:inherit" onclick="resetFilters()">重置</button>
+      </div>
+    </div>
+    <div class="rules" id="rules"></div>
+    <div class="empty" id="no-result" style="display:none">未找到匹配条款，换个关键词试试～</div>
+  </section>
+
+  <!-- ============ 分数说明 ============ -->
+  <section class="view" id="view-scores">
+    <div class="sec-title">各类分数定义与使用方法</div>
+    <div id="scoreCards"></div>
+    <div class="sec-title">🚨 关键扣分值速查（重点记忆）</div>
+    <div class="throw" id="throws"></div>
+    <div class="sec-title">累计扣分红线汇总</div>
+    <div class="throw" id="throws2"></div>
+    <div class="sec-title">申诉与公示（6.7.7）</div>
+    <div class="p-card" id="appealCard"></div>
+  </section>
+
+  <!-- ============ 晋级降级 ============ -->
+  <section class="view" id="view-promo">
+    <div class="sec-title">业务等级体系（6.8.5）</div>
+    <div class="ladder" id="ladder"></div>
+    <div class="sec-title">🚀 晋升条件</div>
+    <div id="promoCards"></div>
+    <div class="sec-title">📝 晋级 / 恢复考试规则（6.8.6.3）</div>
+    <div class="p-card" id="examCard"></div>
+    <div class="sec-title">📉 降级规定</div>
+    <div id="demoteCards"></div>
+    <div class="sec-title">乘务长资质暂停 · 降级 · 解聘（8.20）</div>
+    <div class="p-card" id="p820card"></div>
+    <div class="sec-title">↩️ 恢复等级（6.8.8）</div>
+    <div id="recoverCards"></div>
+    <div class="sec-title">合同 · 转岗 · 辞退红线</div>
+    <div id="exitCards"></div>
+  </section>
+
+  <!-- ============ 收藏 ============ -->
+  <section class="view" id="view-fav">
+    <div class="sec-title">我的收藏（本地保存）</div>
+    <div class="rules" id="favs"></div>
+    <div class="empty" id="fav-empty" style="display:none">还没有收藏条款，在「扣分查询」中点击 ☆ 收藏</div>
+  </section>
+
+  <footer>
+    <b>数据说明：</b>本板块内容整理自《客舱服务部管理手册》01.14 版（2026.05.27 生效），
+    覆盖第 6.7 奖惩管理、6.8 业务等级管理、5.4/5.5 乘务长/教员管理、8.20 乘务长暂停降级解聘、
+    8.15 绩效管理、4.26 安全绩效积分等章节。<br>
+    条文中“扣/加 X 分”以纸质手册及乘务门户（CC 系统）公示的最新版本为准；整理内容如与手册原文不符，以手册为准。
+  </footer>
+</main>
+
+<script>
+/* ===================== 数据 ===================== */
+const MANUAL_RULES = __RULES__;
+
+const SCORE_TYPES = [
+  {n:'安全质量分', ico:'🛡️', c:'#148453',
+   d:'用于评定员工航班工作中安全工作质量的累计量化分数，衡量各业务等级空勤人员的航班安全工作质量及安全工作作风。（6.7.4.2）',
+   r:['自入职后开始累积，起始 0 分；考核年度内加减累计','作为年终绩效考评依据时，每年 11 月 1 日清零；作为晋/降级依据考评时，该分数不清零','核算总分时按加减分相互抵扣后的得分','作为空勤人员晋、降级的限制条件和重要依据','作为年终绩效考评的重要依据（6.7.6.1.1）']},
+  {n:'业务质量分', ico:'⭐', c:'#2563EB',
+   d:'用于评定员工航班工作中服务质量、运行质量的累计量化分数，衡量各业务等级空勤人员的航班服务工作质量。（6.7.4.3）',
+   r:['累计与清零规则同安全质量分（11月1日清零 / 晋降级依据不清零）','加减相互抵扣后为总分','作为空勤人员晋、降级的限制条件和重要依据','作为年终绩效考评和年度超绩效奖发放的重要依据（6.7.6.1.2）']},
+  {n:'日常管理分', ico:'📋', c:'#C77D0B',
+   d:'用于评定员工日常行为的累计量化分数，衡量各业务等级空勤人员的日常行为作风表现。（6.7.4.4）',
+   r:['累计与清零规则同安全质量分','加减相互抵扣后为总分','作为晋、降级限制条件与重要依据','作为年终绩效考评和年度超绩效奖发放的重要依据（6.7.6.1.3）']},
+  {n:'航班生产积分', ico:'✈️', c:'#7C3AED',
+   d:'根据员工航班生产出勤情况奖励或扣罚的累计分数，衡量航班生产任务完成情况与生产贡献能力。（6.7.4.5）',
+   r:['自入职后开始累积，起始 0 分；可跨年度使用，离职后清零','每累计正 100 分，可提交调整已公布航班申请 1 次（需自行寻找其他乘务员替班），换取后取消该 100 分（6.7.6.1.4）','非出勤（病/事/暂停派遣）调整航班：1 天 -50 分、2 天 -100 分累加，涉及过夜或国际通宵 -200 分（6.7.4.8）']},
+  {n:'辅收绩效分', ico:'💰', c:'#0E9F6E',
+   d:'用于评定员工航班工作中机上销售累计量化分数，衡量航班辅收工作质量。（6.7.4.6）',
+   r:['年度内加减累计，每年 11 月 1 日清零','加减相互抵扣后为总分','作为年终绩效考评和年度超绩效奖发放的重要依据（6.7.6.1.5）']},
+  {n:'热情度积分', ico:'🔥', c:'#E4572E',
+   d:'根据员工积极配合中队、分部工作给予奖励的累计量化数字。（6.7.4.7）',
+   r:['具体管理要求及累积方式见本手册 8.3“热情度积分管理”（6.7.6.1.6）']},
+  {n:'安全绩效积分（部门/分队级）', ico:'🏢', c:'#5B5BD6',
+   d:'部门/分队级月度安全考核积分：安全基础分 100 + 安全激励分（上限 30）；当月所扣超过（含）100 分的按零分计算。（4.26.4.3.1）',
+   r:['运输航空事故：全年安全绩效积分归 0','征候/作风红线问题/行政约见/安全底线：当月及往后归 0','一类事件 -70 分（第二起及往后归 0）；严重差错/偏差 -50（第二起归 0）；二类事件 -40（第二起归 0）','同事件跨两类项目“一项一扣罚”；单一项目多条“就高原则”；连带责任按分值的 60% 计算（4.26.4.3.2）']},
+  {n:'绩效等级（月度/年度评级）', ico:'🏅', c:'#148453',
+   d:'乘务员月度与季度考核、乘务长月度/季度/年度考核（8.15）。考核维度及权重：安全 35% / 业务 25% / 运行 15% / 综合 10% / 工作评定 15%，销售为单项考核。（8.15.4.1）',
+   r:['月度考核：分队长每月完成并发送员工确认，2 日内可反馈修正','绩效分低于合格分 80 分的员工，直属上级须在 3 个工作日内绩效面谈（3.10.6.5）','年度评级 S/A/B/C/D：D 档或连续两年 C 档触发降级/转岗处理；竞聘普遍要求上年度绩效 B（部分岗位 A）以上']},
+];
+
+const THRESHOLDS = [
+  {v:'-60 / -80 / -100', t:'触发安全底线：安全质量底线 -60 分；一般事故征候 -80 分；严重事故征候 -100 分（6.7.8(4)）'},
+  {v:'-20 / -40', t:'触发安全红线：一般差错/安全质量事件 -20 分；严重差错/严重安全质量事件 -40 分（6.7.8(5)）'},
+  {v:'-5 / -10~-40', t:'未按要求履职或未按标准执行，扣责任人安全/业务质量分 5 分；造成后果的视轻重扣 10-40 分（6.7.8(1)）'},
+  {v:'-10 ~ -60', t:'进入作风问题清单、作风控制清单的，扣 10-60 分（6.7.9.1 通项）'},
+  {v:'×1.5 / ×2', t:'重复问题：年度内第 2 次同类 SOP 执行问题按原分值 1.5 倍；90 个日历日内第 3 次同类事件按 2 倍扣罚（6.7.9.1）'},
+  {v:'-2 / -6 / 项', t:'监督检查不合格项：部门检查至少 -2 分/项；局方、公司发现违规不合格项至少 -6 分/项'},
+  {v:'-5/-10/-20', t:'乘务长管理连带责任：至少 -5 分/项；造成不良影响 -10 分；造成严重影响 -20 分（6.7.9.1 通用条款）'},
+  {v:'-40', t:'伪造事实骗取奖励（如伪造旅客表扬），扣业务质量分 40 分并交人力资源部（6.7.9.2）'},
+  {v:'-30 / -40', t:'私拿私分旅客财物、机供品，漏价销售等：扣业务质量分 30 分，造成有效投诉 -40 分（服务严重差错）'},
+  {v:'≥60', t:'三类累计扣分（安全+业务+日常）超过 60 分（含），列为转岗、辞退、开除情形（6.7.12(13)）'},
+  {v:'>60', t:'前 12 个月奖惩分扣分汇总超过 60 分，合同到期不续签评定参考（8.3.2.1(3)）'},
+  {v:'-100 / 500封顶', t:'病假（签到前 3 小时以上提出）：第 1 天 -100 生产积分，之后每增加一天加扣 50 分，单次连续病假 500 分封顶'},
+  {v:'+100 加扣', t:'违规病假（签到前 3 小时内提出）加扣 100 生产积分；通知备上航班后请假再加扣 200 分（6.7.9.3.4）'},
+  {v:'-20 / -600', t:'拒飞或编造不实理由推脱航班：扣日常管理分 20 分 + 航班生产积分 600 分；年度内第 2 次拒飞可辞退（6.7.9.3.4/6.7.12）'},
+  {v:'-10', t:'旷工：扣日常管理分 10 分；连续旷工超 2 日（含）或一年内累计超 3 日（含）→ 辞退（6.7.12(10)）'},
+  {v:'+100 / 每100', t:'航班生产积分每累计正 100 分，可申请调整已公布航班 1 次（需自寻替班）（6.7.6.1.4 / 8.5.8 积分兑换）'},
+];
+
+const THRESHOLDS2 = [
+  {v:'≤25分', pri:1, t:'晋升普通乘务员：前 12 个月安全/业务/日常三项扣分合计≤25 分，病事假≤22 天（6.8.6.1.1）'},
+  {v:'≤25分', pri:1, t:'竞聘带班乘务长：竞聘前 12 个月安全质量分+业务质量分扣分合计≤25 分，病事假≤22 天（5.4.6.1）'},
+  {v:'≤15分', pri:1, t:'竞聘 A 类乘务教员：前 12 个月三项扣分合计≤15 分，病事假≤22 天（5.5.4.3.1）'},
+  {v:'≤10分 / ≤500', t:'怀孕病假所致低绩效豁免：三项扣分合计≤10 分，且航班生产积分扣分≤500 分（5.4.6.1/6.8.7.1.1）'},
+  {v:'≤5分 / ≤5天', t:'恢复等级期间：飞行 200 小时期间三项扣分合计≤5 分、病事假≤5 天，否则年度内不予恢复（6.8.8）'},
+  {v:'主动报告', t:'鼓励主动报告：主动报告、真实报告、及时报告，符合《安全信用管理规定》可获豁免或减轻处罚（6.7.8(2)）'},
+];
+
+const APPEAL = [
+  '每月按通告规定的申诉日期，在 SMP 系统“奖惩事件”中对业务质量分、安全质量分、辅收绩效分、热情度积分、航班生产积分和日常管理分加扣分进行申诉；超过规定期限未申诉者，不予申诉。（6.7.7.2.3）',
+  '综合管理处对航班生产积分、日常管理分的申诉作最后评定并公示；安全保卫质量处对安全质量分、业务质量分的申诉作最终评定与服务保障。（6.7.7.2.1/6.7.7.2.2）',
+  '加减分统计：各处室每月 5 日前汇总、7 日前上传 CCP 系统并发布通告公示。（6.7.7.1）',
+];
+
+const LADDER = [
+  '见习安全/乘务员', '普通安全/乘务员', '见习乘务长（无英语证书）', '带班乘务长', '乘务长', '客舱乘务教员', '客舱乘务检查员',
+];
+
+const PROMO = [
+  {t:'晋升 普通乘务员', em:'green', emt:'6.8.6.1.1 / 8.3.1', items:[
+    '实际飞行时间满 <b>1000 小时</b>（小时累计方式见 5.16）',
+    '上一年度绩效为 <b>B（含）以上</b>',
+    '申请晋级前 12 个月，安全质量分、业务质量分和日常管理分<b>扣分合计≤25 分</b>（计分方式为正负分累计）',
+    '申请晋级前 12 个月，病事假累计<b>≤22 天</b>',
+    '流程：向分队长申请 → 资格审核 → 人事测评 → 晋级 CBT（90 分以上）+ CCMS 等级维护',
+  ]},
+  {t:'竞聘 带班乘务长', em:'blue', emt:'5.4.5 / 5.4.6.1', items:[
+    '大专或大专以上文化程度',
+    '3 年客舱乘务员岗位经历，实飞小时：上海基地 <b>3500h</b>、非上海基地 <b>2700h</b>',
+    '近 3 年内未发生人为责任原因的安全/安保一般差错、一般安全质量偏差及以上事件（管理责任除外）',
+    '持有现行有效体检合格证 + 有效训练合格证；按《客舱乘务员训练大纲》完成乘务长培训并考核合格',
+    '上一年度绩效 <b>B（含）以上</b>（怀孕病假致 C/D：三项扣分≤10 且生产积分扣分≤500 可豁免）',
+    '竞聘前 12 个月安全+业务质量分扣分合计<b>≤25 分</b>，病事假<b>≤22 天</b>',
+    '6 个月内未涉及作风问题清单及以上',
+    '取得客舱广播员资格',
+    '40 周岁以下需英语证书其一：乘务中级英语 / CET-4-6≥425 / TEM-4-8 / 托业≥450（非上海基地可先晋见习乘务长，取证后转带班）',
+    '不得连续报名参加乘务长竞聘',
+  ]},
+  {t:'晋升 乘务长（从带班乘务长）', em:'purple', emt:'5.4 / 8.3.1.1', items:[
+    '参照本手册 5.4“乘务长管理规定”完成乘务长竞聘 / 晋级流程',
+    '完成 360 人事测评与乘务长晋级 CBT（90 分以上），进入乘务长训练，完成带飞与放单',
+    '晋级后按 CCMS 系统等级信息调整薪酬：基本工资次月调整（按晋升日期补足差额），小时费标准自晋升后第一次执行航班任务起调整（6.8.9）',
+  ]},
+  {t:'竞聘 A 类客舱乘务教员', em:'red', emt:'5.5.4.2 / 5.5.4.3', items:[
+    '持有现行有效体检合格证 + 有效客舱乘务员训练合格证',
+    '近 4 年内未发生人为责任原因的安全/安保一般差错、一般安全质量偏差及以上事件（管理责任除外）',
+    '按《客舱乘务员训练大纲》完成客舱乘务教员培训并考核合格',
+    '上一年度绩效为 <b>A（含）以上</b>',
+    '竞聘前 12 个月三项扣分合计<b>≤15 分</b>，病事假累计<b>≤22 天</b>',
+    '竞聘前 12 个月内不得有进入作风问题清单、作风控制清单的记录',
+    '获得英语证书其一：乘务中级英语 / CET-4-6≥425 / TEM-4-8 / 托业≥450',
+    'A 类教员航线教授特定机型时，须按训练大纲完成该机型训练并具备服务该机型的资格',
+  ]},
+  {t:'竞聘 客舱乘务检查员', em:'gold', emt:'5.8 / 6.8.8', items:[
+    '竞聘要求详见本手册 5.8“客舱乘务检查员管理规定”',
+    '原检查员等级人员在恢复乘务教员后，无需参加检查员竞聘，直接参加检查员训练且考核通过（6.8.8）',
+  ]},
+];
+
+const EXAM = [
+  '所有晋级、恢复 CBT 考核需达到 <b>90 分（含）以上</b> 方可通过（6.8.6.3）',
+  '晋级考试不合格者给予 <b>一次补考机会</b>，补考时间需与首次考试<b>间隔 30 天及以上</b>；补考不合格则本次晋级/恢复流程终止',
+  'CBT 考试需在 <b>人事测评完成后的 30 天内</b>（收到考试通知起算）完成（6.8.6.2）',
+  '晋级 / 降级人员基本工资次月调整（按晋升日期补足差额）；小时费标准自晋升（降级）后第一次执行航班任务起调整（6.8.9）',
+];
+
+const DEMOTE = [
+  {t:'处理性降级 — 即时降级', em:'red', items:[
+    '涉及公司严重事故/差错标准（CQH-SMP-5.21 / CQH-SQMM-5.10），按《安全生产绩效奖惩规定》CQH-SMP-5.20 或《服务奖惩规定》CQH-SQMM-6.13 实施即时降级',
+    '乘务长涉及安全/服务事件判定的即时降级执行标准参照 8.20“乘务长资质暂停、降级及解聘规定”',
+  ]},
+  {t:'处理性降级 — 季度降级', em:'red', items:[
+    '季度 PK 成绩合计得分排名后 50% 的人员实施季度降级：乘务长降业务等级一级（300 小时）；见习乘务员在见习岗位延长相应降级时间',
+    '往届季度降级还未恢复等级人员再次在季度 PK 被降级，则延长目前等级的恢复时间',
+  ]},
+  {t:'处理性降级 — 年终绩效降级', em:'red', items:[
+    '上一年度评级 <b>D 档</b> 或 <b>连续两年评级 C 档</b> 的人员，由部门决定转岗、劝退、降级 500 小时或延长晋级 500 小时',
+    '带班（见习）乘务长岗位年度评级 D 档或连续两年 C 档的，视为带班（见习）乘务长资质失效',
+    '怀孕病假致低绩效可豁免：年度三项扣分合计≤10 分且生产积分扣分≤500（连续两年 C 档需两个年度分别满足）',
+  ]},
+  {t:'身体原因暂停派遣降级（≥6 个月）', em:'red', items:[
+    '见习乘务员：延长 100 小时晋级',
+    '普通乘务员：降为见习乘务员等级 100 小时',
+    '带班乘务长 / 乘务长 / 教员 / 检查员：降为普通乘务员等级 100 小时',
+  ]},
+  {t:'资质失效降级', em:'red', items:[
+    '适用于客舱乘务员资质失效需参加初始训练的人员；完成初始训练并通过考核后方可申请恢复等级',
+  ]},
+  {t:'服务投诉考核挂钩降级（6.8.10）', em:'red', items:[
+    '乘务员当月发生旅客服务一般差错及以上事件，降级一个月',
+    '6 个月内投诉进件量累计满 3 次及以上（乘务长管理连带同样考核），按上款处理',
+    '春秋年度内发生一起服务严重差错事件：责任乘务员降级 3 个月，管理责任乘务长解聘（参照 8.20）',
+  ]},
+];
+
+const P820 = [
+  '即时 — <b>服务严重差错事件及以上</b>（管理连带/当事人）：<b>解聘</b>',
+  '即时 — <b>较大/严重安全失信行为</b>（安全严重差错/严重质量偏差、作风红线样例事件等）：<b>解聘</b>',
+  '春秋年度内 — <b>服务一般差错累计满 2 次</b>（管理连带/当事人）：<b>解聘</b>',
+  '春秋年度内 — <b>安全一般差错事件 / 一般安全质量偏差事件累计满 2 次</b>：<b>解聘</b>',
+  '春秋年度内 — 因乘务长自身服务态度原因<b>触发质量周报及以上问题累计满 2 次</b>：<b>解聘</b>',
+  '上一年度评级 <b>D 档</b>：转岗、劝退、<b>降级 800 小时</b>或延长晋级 800 小时',
+  '同类型安全违规问题累计 2 次及以上 / 民航局有效投诉 2 次及以上：暂停乘务长岗位派遣，执行乘务员岗位 <b>200 小时 / 80 天</b>',
+  '同类型服务违规问题累计 2 次及以上：暂停乘务长岗位派遣，执行乘务员岗位 <b>150 小时 / 60 天</b>',
+  '质量周报累计满 3 次及以上：暂停乘务长岗位派遣，执行乘务员岗位 <b>100 小时 / 40 天</b>',
+  '服务一般差错事件（管理连带/当事人）：暂停乘务长岗位派遣，执行乘务员岗位 <b>150 小时 / 60 天</b>',
+  '安全一般差错事件 / 一般安全质量偏差事件（管理连带/当事人）：暂停乘务长岗位派遣，执行乘务员岗位 <b>300 小时 / 120 天</b>',
+  '经部门技评委评估无法胜任乘务长岗位（舆情、有效投诉、作风诚信、沟通、业务能力等），或对公司/部门造成负面影响：<b>解聘；降级</b>',
+];
+
+const RECOVER = [
+  {t:'恢复 普通乘务员', em:'green', items:[
+    '原为普通乘务员：完成 RQT 训练后恢复见习乘务员等级，见习飞行满 <b>200 小时</b> 后可恢复普通乘务员',
+    '飞行 200 小时期间：三项扣分合计≤5 分、病事假≤5 天，否则该年度内不予恢复，需下一年度重新提交申请',
+  ]},
+  {t:'恢复 带班乘务长', em:'green', items:[
+    '完成 RQT 训练后恢复普通乘务员等级，飞行满 200 小时后按带班乘务长晋级流程恢复（需完成竞聘流程）',
+    '恢复时需在乘务长竞聘启动时完成报名，提交恢复表单后通过 360 人事测评和乘务长晋级 CBT 90 分以上，进入乘务长训练，完成带飞和放单',
+  ]},
+  {t:'恢复 乘务长', em:'green', items:[
+    '恢复带班乘务长且在该等级飞行满 <b>200 小时</b> 后可申请恢复乘务长等级，完成晋级 CBT 90 分以上',
+    '带班飞行 200 小时期间三项扣分≤5 分、病事假≤5 天，否则年度内不予恢复',
+  ]},
+  {t:'恢复 A 类客舱乘务教员 / 检查员', em:'green', items:[
+    '原教员等级恢复带班乘务长后无需参加教员竞聘：近 24 个日历月内参加过复训且资质有效 → 直接恢复；否则参加教员训练且考核通过',
+    '原检查员等级恢复乘务教员后无需参加检查员竞聘：近 24 个日历月内参加过复训且资质有效 → 直接恢复；否则参加检查员训练且考核通过',
+  ]},
+  {t:'离职回归 / 其他航司人员恢复', em:'green', items:[
+    '停止飞行时间在 2 年内（含）且提供原公司盖章飞行时间证明：取得本司见习乘务员资格后飞行满 300 小时，原飞行时间可全部累计；满足 1000 小时等晋级条件可申请恢复普通乘务员（360 人事测评 + 晋级 CBT 90 分）',
+    '恢复带班乘务长：满足乘务长竞聘要求后正常完成竞聘流程',
+    '恢复乘务长：带班乘务长等级飞行满 <b>1000 小时</b> 后，满足晋级条件可申请，完成晋级 CBT 90 分',
+    '暂停派遣超过两年（最后一次飞行日期至飞行时间审核表提交日），原有飞行时间不予累积计算',
+  ]},
+  {t:'恢复等级通用要求', em:'gold', items:[
+    '飞行时间满足降级小时后，可申请恢复等级',
+    '恢复等级需通过 <b>360 人事测评</b>，并按相应等级进行晋级 CBT，<b>90 分（含）以上</b>，补考一次需与首考间隔 30 天及以上',
+    '等级恢复日期前不得有一般及以上差错行为，否则该年度内不予恢复',
+    '流程：向分队长申请《空勤人员恢复等级申请表》→ 审核 → 综合管理处办理（360 测评）→ 乘务培训处 CBT（测评后 30 天内）→ CCMS 等级维护',
+  ]},
+];
+
+const EXIT = [
+  {t:'转岗、辞退、开除情形（6.7.12）', em:'red', items:[
+    '违反《员工手册》“辞退处理”相关条款，主要包括：触犯国家法律；年度内第 2 次拒飞；弄虚作假；严重影响公司声誉；以个人权利谋取私利；第 2 次私拿、私分、私送、私卖机上供应品；丢失器械包或包中匕首；证件转借造成严重后果；违法占用旅客钱、物；连续旷工超 2 日（含）或一年内累计旷工超 3 日（含）',
+    '春秋年度内累计受到 3 次口头警告或 2 次书面警告',
+    '因自身原因无法取得空勤人员相关证件/执照',
+    '<b>安全质量分、业务质量分和日常管理分合计扣分超过 60 分（含）</b>',
+    '乘务年度绩效分在该业务等级<b>末尾 1%</b> 的人员',
+  ]},
+  {t:'合同到期不续签评定参考（8.3.2.1）', em:'red', items:[
+    '年度绩效评定为 D 级，或三年内两年年度绩效评级为 C',
+    '连续 12 个月内 3 次口头警告单或 2 次书面警告单',
+    '前 12 个月奖惩分（日常管理分、业务质量分、安全质量分）扣分汇总超过 60 分',
+    '合同期内累计一般差错/偏差 3 次、严重偏差 2 次、严重差错 1 次',
+  ]},
+];
+
+/* ===================== 状态与渲染 ===================== */
+let kw = '', catF = '全部', stF = '全部类型', objF = '全部对象', tF = '全部', sortM = 'rel';
+const favs = new Set(JSON.parse(localStorage.getItem('manual_favs') || '[]'));
+function esc(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
+
+const CATS = ['全部','安全运行','服务规范','考勤休假','日常管理','证件','培训考核','销售财务','加分奖励'];
+const STS = ['全部类型','安全质量分','业务质量分','日常管理分','航班生产积分','现金奖惩','无'];
+const OBJS = ['全部对象','乘务员','乘务长','教员','学员','安全员','班组干部'];
+
+function ruleObjName(r){
+  const o = r.obj || [];
+  const map = o.map(x=> x==='乘务长'?'乘务长':x==='分队长'||x==='班组长'?'班组干部':x==='备份人员'?'乘务员':x==='4 号位'||x==='4号位'?'乘务员':x);
+  return [...new Set(map)];
+}
+function ruleMatchesFav(r, idx){ return favs.has(String(idx)); }
+function badgeClass(r){
+  const nums = (r.scores||[]).map(Number).filter(n=> !isNaN(n));
+  if(nums.length===0) return 's-sub';
+  const max = Math.max(...nums);
+  if(nums.some(n=> n>0 && (r.text||'').indexOf('加'+n)>=0 || (r.text||'').match(new RegExp('给予[^。]{0,10}加.*'+n+'分')))) return 's-add';
+  if(max>=40) return 's-high';
+  if(max>=15) return 's-mid';
+  return 's-sub';
+}
+function badgeLabel(r){
+  const s = r.scores||[];
+  if(s.length===0) return {n:'—',u:'无分值'};
+  const isAdd = /(加|奖励)[^。]{0,12}分/.test(r.text) && !/(扣|扣除)[^。]{0,12}分/.test(r.text.split('。')[0]);
+  const n = s.join('/');
+  return {n: (isAdd?'+':'')+n, u: isAdd?'加分':'扣分'};
+}
+function searchHit(r){
+  if(!kw) return true;
+  const k = kw.trim().toLowerCase();
+  const hay = (r.text+' '+(r.sub||'')+' '+(r.cat||'')+' '+(r.st||[]).join(' ')+' '+(r.obj||[]).join(' ')+' '+(r.ref||'')+(r.scores||[]).join(' ')).toLowerCase();
+  return hay.indexOf(k) !== -1;
+}
+function filterRules(){
+  return MANUAL_RULES.filter((r,i)=>{
+    if(!searchHit(r)) return false;
+    if(catF!=='全部' && r.cat!==catF) return false;
+    if(stF!=='全部类型' && !(r.st||[]).includes(stF)) return false;
+    if(tF!=='全部'){
+      const add = badgeLabel(r).u==='加分';
+      if(tF==='加分' && !add) return false;
+      if(tF==='扣分' && add) return false;
+    }
+    const objs = ruleObjName(r);
+    if(objF!=='全部对象' && !objs.includes(objF)) return false;
+    return true;
+  });
+}
+function sortRules(list){
+  const arr = list.slice();
+  if(sortM==='desc'){
+    arr.sort((a,b)=> (Math.max(...(b.scores||[]).map(Number).filter(n=>!isNaN(n))||[0])) - (Math.max(...(a.scores||[]).map(Number).filter(n=>!isNaN(n))||[0])));
+  } else if(sortM==='add'){
+    arr.sort((a,b)=> (badgeLabel(b).u==='加分'?1:0) - (badgeLabel(a).u==='加分'?1:0));
+  } else if(sortM==='sec'){
+    arr.sort((a,b)=> String(a.ref).localeCompare(String(b.ref)));
+  }
+  return arr;
+}
+function renderRules(){
+  const list = sortRules(filterRules());
+  const box = document.getElementById('rules');
+  document.getElementById('no-result').style.display = list.length ? 'none' : 'block';
+  box.innerHTML = list.map((r,idx)=>{
+    const oriIdx = MANUAL_RULES.indexOf(r);
+    const b = badgeLabel(r), bc = badgeClass(r);
+    const objs = ruleObjName(r);
+    const favOn = favs.has(String(oriIdx));
+    return '<div class="rule">'+
+      '<div class="r-head">'+
+        '<div class="score-badge '+bc+'">'+esc(b.n)+'<small>'+b.u+'</small></div>'+
+        '<div class="r-body">'+
+          '<div class="r-text clamped">'+esc(r.text)+'</div>'+
+          '<div class="r-act">'+
+            '<span class="tag">'+esc(r.cat||'-')+'</span>'+
+            (r.sub? '<span class="tag range">'+esc(r.sub)+'</span>':'')+
+            '<span class="tag ref">'+esc(r.ref||'')+'</span>'+
+            (r.st||[]).map(s=>'<span class="tag">'+esc(s)+'</span>').join('')+
+            objs.map(o=>'<span class="tag obj">'+esc(o)+'</span>').join('')+
+          '</div>'+
+        '</div>'+
+      '</div>'+
+      '<div style="display:flex;align-items:center;margin-top:2px">'+
+        '<button class="expand" onclick="toggleClamp(this)">展开全文 ▾</button>'+
+        '<button class="fav '+(favOn?'on':'')+'" onclick="toggleFav(this,'+oriIdx+')">'+(favOn?'★':'☆')+'</button>'+
+      '</div>'+
+    '</div>';
+  }).join('');
+  document.getElementById('st-rules').textContent = MANUAL_RULES.length;
+  renderChips();
+}
+function toggleClamp(btn){
+  const el = btn.closest('.rule').querySelector('.r-text');
+  el.classList.toggle('clamped');
+  btn.textContent = el.classList.contains('clamped') ? '展开全文 ▾' : '收起 ▲';
+}
+function toggleFav(btn, idx){
+  if(favs.has(String(idx))){ favs.delete(String(idx)); btn.textContent='☆'; btn.classList.remove('on'); }
+  else { favs.add(String(idx)); btn.textContent='★'; btn.classList.add('on'); }
+  localStorage.setItem('manual_favs', JSON.stringify([...favs]));
+  renderFavs();
+  document.getElementById('st-fav').textContent = favs.size;
+}
+function renderChips(){
+  const catCount = {};
+  MANUAL_RULES.forEach(r=>{ catCount[r.cat]=(catCount[r.cat]||0)+1; });
+  document.getElementById('f-cat-cnt').textContent = '共 '+MANUAL_RULES.length+' 条 · 当前 '+filterRules().length+' 条';
+  document.getElementById('chips-cat').innerHTML = CATS.map(c=>{
+    const n = c==='全部' ? MANUAL_RULES.length : (catCount[c]||0);
+    return '<button class="chip '+(catF===c?'active':'')+'">'+c+' <small>'+n+'</small></button>';
+  }).join('');
+  document.getElementById('chips-st').innerHTML = STS.map(c=>'<button class="chip '+(stF===c?'active':'')+'">'+c+'</button>').join('');
+  document.getElementById('chips-obj').innerHTML = OBJS.map(c=>'<button class="chip '+(objF===c?'active':'')+'">'+c+'</button>').join('');
+  document.getElementById('chips-t').innerHTML = ['全部','扣分','加分'].map(c=>'<button class="chip '+(tF===c?'active':'')+'">'+(c==='全部'?'全部':'')+(c==='扣分'?'➖ 扣分':'')+(c==='加分'?'➕ 加分':'')+'</button>').join('');
+  document.querySelectorAll('#chips-cat .chip').forEach((el,i)=>{ el.onclick=()=>{catF=CATS[i];renderRules();}; });
+  document.querySelectorAll('#chips-st .chip').forEach((el,i)=>{ el.onclick=()=>{stF=STS[i];renderRules();}; });
+  document.querySelectorAll('#chips-obj .chip').forEach((el,i)=>{ el.onclick=()=>{objF=OBJS[i];renderRules();}; });
+  document.querySelectorAll('#chips-t .chip').forEach((el,i)=>{ el.onclick=()=>{tF=['全部','扣分','加分'][i];renderRules();}; });
+}
+function doSearch(){ kw = document.getElementById('kw').value.trim(); renderRules(); }
+function resetFilters(){ kw=''; document.getElementById('kw').value=''; catF='全部'; stF='全部类型'; objF='全部对象'; tF='全部'; sortM='rel'; document.getElementById('sortSel').value='rel'; renderRules(); }
+
+/* 分数说明 */
+function renderScores(){
+  document.getElementById('scoreCards').innerHTML = SCORE_TYPES.map(s=>
+    '<div class="score-card"><div class="s-name"><span class="s-ico" style="background:'+s.c+'">'+s.ico+'</span>'+esc(s.n)+'</div>'+
+    '<p>'+esc(s.d)+'</p><ul>'+s.r.map(x=>'<li>'+x.replace(/<b>/g,'<b>').replace(/<\/b>/g,'</b>')+'</li>').join('')+'</ul></div>'
+  ).join('');
+  document.getElementById('throws').innerHTML = THRESHOLDS.map(t=>
+    '<div class="th"><b>'+esc(t.v)+'</b><span>'+esc(t.t)+'</span></div>'
+  ).join('');
+  document.getElementById('throws2').innerHTML = THRESHOLDS2.map(t=>
+    '<div class="th '+(t.pri?'pri':'')+'" style="flex-direction:row;align-items:center;gap:8px;flex-wrap:wrap"><b>'+esc(t.v)+'</b><span style="flex:1;min-width:150px">'+esc(t.t)+'</span></div>'
+  ).join('');
+  document.getElementById('appealCard').innerHTML = '<ul>'+APPEAL.map(x=>'<li>'+x.replace(/<b>/g,'<b>').replace(/<\/b>/g,'</b>')+'</li>').join('')+'</ul>';
+}
+
+/* 晋级降级 */
+function renderPromo(){
+  document.getElementById('ladder').innerHTML = LADDER.map((s,i)=>
+    '<div class="step '+(i===5||i===6?'s-pass':'')+'">'+(i+1)+'. '+esc(s)+(i===3?'<span>见习→带班（竞聘）</span>':'')+'</div>'
+  ).join('');
+  document.getElementById('promoCards').innerHTML = PROMO.map(p=>
+    '<div class="p-card"><div class="p-title">'+esc(p.t)+' <span class="em '+p.em+'">'+esc(p.emt)+'</span></div><ul>'+p.items.map(x=>'<li>'+x.replace(/<b>/g,'<b>').replace(/<\/b>/g,'</b>')+'</li>').join('')+'</ul></div>'
+  ).join('');
+  document.getElementById('examCard').innerHTML = '<ul>'+EXAM.map(x=>'<li>'+x.replace(/<b>/g,'<b>').replace(/<\/b>/g,'</b>')+'</li>').join('')+'</ul>';
+  document.getElementById('demoteCards').innerHTML = DEMOTE.map(p=>
+    '<div class="p-card"><div class="p-title">'+esc(p.t)+'</div><ul>'+p.items.map(x=>'<li>'+x.replace(/<b>/g,'<b>').replace(/<\/b>/g,'</b>')+'</li>').join('')+'</ul></div>'
+  ).join('');
+  document.getElementById('p820card').innerHTML = '<ul>'+P820.map(x=>'<li>'+x.replace(/<b>/g,'<b>').replace(/<\/b>/g,'</b>')+'</li>').join('')+'</ul>';
+  document.getElementById('recoverCards').innerHTML = RECOVER.map(p=>
+    '<div class="p-card"><div class="p-title">'+esc(p.t)+'</div><ul>'+p.items.map(x=>'<li>'+x.replace(/<b>/g,'<b>').replace(/<\/b>/g,'</b>')+'</li>').join('')+'</ul></div>'
+  ).join('');
+  document.getElementById('exitCards').innerHTML = EXIT.map(p=>
+    '<div class="p-card"><div class="p-title">'+esc(p.t)+'</div><ul>'+p.items.map(x=>'<li>'+x.replace(/<b>/g,'<b>').replace(/<\/b>/g,'</b>')+'</li>').join('')+'</ul></div>'
+  ).join('');
+}
+
+/* 收藏 */
+function renderFavs(){
+  const box = document.getElementById('favs');
+  const ids = MANUAL_RULES.map((_,i)=>String(i)).filter(i=>favs.has(i));
+  document.getElementById('fav-empty').style.display = ids.length ? 'none' : 'block';
+  document.getElementById('st-fav').textContent = ids.length;
+  box.innerHTML = ids.map(id=>{
+    const r = MANUAL_RULES[Number(id)];
+    const b = badgeLabel(r), bc = badgeClass(r);
+    return '<div class="rule"><div class="r-head">'+
+      '<div class="score-badge '+bc+'">'+esc(b.n)+'<small>'+b.u+'</small></div>'+
+      '<div class="r-body"><div class="r-text clamped">'+esc(r.text)+'</div>'+
+      '<div class="r-act"><span class="tag">'+esc(r.cat||'-')+'</span>'+(r.sub?'<span class="tag range">'+esc(r.sub)+'</span>':'')+'<span class="tag ref">'+esc(r.ref||'')+'</span></div></div></div>'+
+      '<div style="display:flex;align-items:center"><button class="expand" onclick="toggleClamp(this)">展开全文 ▾</button>'+
+      '<button class="fav on" onclick="toggleFav(this,'+id+')">★</button></div></div>';
+  }).join('');
+}
+
+/* 菜单切换 */
+document.getElementById('menu').addEventListener('click', e=>{
+  const btn = e.target.closest('.m-tab'); if(!btn) return;
+  document.querySelectorAll('.m-tab').forEach(b=>b.classList.toggle('active', b===btn));
+  document.querySelectorAll('.view').forEach(v=>v.classList.remove('active'));
+  document.getElementById('view-'+btn.dataset.v).classList.add('active');
+});
+
+/* 搜索回车 */
+document.getElementById('kw').addEventListener('input', ()=>{ kw = document.getElementById('kw').value.trim(); renderRules(); });
+
+/* 初始化 */
+function refreshStats(){
+  document.getElementById('st-rules').textContent = MANUAL_RULES.length;
+  document.getElementById('st-types').textContent = SCORE_TYPES.length;
+  document.getElementById('st-promo').textContent = LADDER.length + PROMO.length + DEMOTE.length + RECOVER.length + EXIT.length;
+  document.getElementById('st-fav').textContent = favs.size;
+}
+renderRules(); renderScores(); renderPromo(); renderFavs(); refreshStats();
+</script>
+</body>
+</html>

@@ -1929,7 +1929,7 @@ const SCRIPT_CATS = [
       { n:'Q版飞机毛绒挂件', t:'毛绒挂件', m:'童趣小物', s:'Q版飞机公仔，小朋友最爱', u:'挂包/背包配饰' } ] },
 ];
 const DUR_OPTS = [ {k:'3', l:'3 分钟（约 450 字 · 快速促单）'}, {k:'5', l:'5 分钟（约 750 字 · 标准完整）'}, {k:'8', l:'8 分钟（约 1200 字 · 深度场景）'} ];
-const BUDGET_OPTS = [ {k:'low', l:'性价比（优先入门/实惠款）'}, {k:'mid', l:'均衡（人气爆款为主）'}, {k:'high', l:'高端（主打奢牌/收藏款）'} ];
+const BUDGET_OPTS = [ {k:'low', l:'性价比（优先入门/实惠款）'}, {k:'mid', l:'均衡（人气款为主）'}, {k:'high', l:'高端（主打奢牌/收藏款）'} ];
 
 /* ---- 同品类合并：选了两款同类型（两种精华/两种水/两支口红）时，自动合成"组合介绍"，不硬搭配 ---- */
 function combineSameType(items){
@@ -1990,7 +1990,7 @@ function buildScript(cfg){
 
   /* 5 异议应对 */
   p('异议应对', [
-    '（若说贵）乘务员：理解，跨境保税正品、价格含税，比专柜和代购都省心，您可以当场扫码验真再决定。',
+    '（若说贵）乘务员：理解，跨境保税正品、价格含税，渠道和清关都有保障，您可以当场扫码验真再决定。',
     '（若犹豫）乘务员：机上库存有限，这一趟错过可能要等很久；您可以先入手最心动的一款试试。',
     '（若问效果）乘务员：按您的肤质/用法坚持用，一般2-4周可见改善；我按您的情况给的建议，比自己盲买稳妥。'
   ].join('\n'));
@@ -2028,6 +2028,36 @@ const CHIPS = [
   { ic:'⚙️', tl:'接入在线 AI', st:'自由对话', q:'' }
 ];
 let aiLastResp = null;
+
+/* ===================== 知识覆盖层合并（kb-admin 库管理新增/修订自动生效；损坏数据静默忽略） ===================== */
+(function(){
+  var POOLS = { daily: KB, ccm: window.KB_CCM_RAW, mgm: window.KB_MGM_RAW, svc: window.KB_SVC_RAW };
+  function apply(){
+    try{
+      var raw = localStorage.getItem('kb_overlay_v1');
+      if(!raw) return;
+      var ov = JSON.parse(raw);
+      if(!ov || ov.magic !== 'kb-overlay-v1') return;
+      for (var lib in POOLS){
+        var arr = (ov.byLib && ov.byLib[lib]) || [];
+        if(!arr.length) continue;
+        var pool = POOLS[lib];
+        if(!Array.isArray(pool)) continue;
+        arr.forEach(function(e){
+          if(!e || !e.q) return;
+          var idx = -1;
+          for (var i = 0; i < pool.length; i++){
+            if(pool[i] && e.src && pool[i].src === e.src){ idx = i; break; }
+          }
+          if(idx >= 0) pool[idx] = e; else pool.push(e);
+        });
+      }
+    }catch(err){ console.warn('知识覆盖层合并失败（已忽略）', err); }
+  }
+  apply();
+  // 库管理模块写入覆盖层时，无需刷新即可生效（外壳 iframe 缓存场景）
+  window.addEventListener('storage', function(ev){ if(ev.key === 'kb_overlay_v1') apply(); });
+})();
 
 /* ===== 四库来源路由：daily=日常库  ccm=乘务员手册  mgm=乘务员管理手册  svc=服务手册规范 ===== */
 let qaSource = 'daily';
@@ -2115,7 +2145,31 @@ function welcomeCard(){
 }
 
 /* 意图识别 */
+// 总调度：识别"去/打开/进入 + 模块"类命令，命中返回 { mod }；未命中返回 null
+function detectJumpIntent(text){
+  const t = text.trim();
+  // 命令前缀（去/打开/进入/转到 等强导航词 + 模块）——避免误伤普通问句（如"复飞怎么操作""手册里怎么规定"）
+  const hasCmd = /^(去|到|打开|进入|帮我打开|转到|跳去|切到|切换到|我要(去|到))\s*/.test(t);
+  if(!hasCmd) return null;
+  const rules = [
+    { re:/考|试|训练|刷题|练一练|模拟|答题|错题|题库|培训/, mod:'quiz' },
+    { re:/绩效|排名|评分|考核结果|班组|分数|数据看板/, mod:'performance' },
+    { re:/美妆|化妆品|护肤|话术|销售|推销|彩妆|香水|机上商城/, mod:'beauty' },
+    { re:/医疗|急救|CPR|救护|心肺复苏|受伤|生病|急救箱/, mod:'medical' },
+    { re:/手册|奖惩|奖惩记录|管理制度|管理规定/, mod:'manual' },
+    { re:/日常|生活|常用|小知识|FAQ|基础/, mod:'daily' },
+    { re:/风险|预警|天气|台风|气象|航线风险/, mod:'risk' },
+    { re:/库管理|知识库管理|题库管理|数据同步/, mod:'kbadmin' },
+  ];
+  for(let i = 0; i < rules.length; i++){
+    if(rules[i].re.test(t)) return { mod: rules[i].mod };
+  }
+  return null;
+}
 function detectIntent(text){
+  // 0. 总调度：明确的"去X模块"命令直接跳转
+  const jmp = detectJumpIntent(text);
+  if(jmp) return 'jump';
   // 1. 话术生成意图
   if (/(写|生成|来|要|给|帮我|我要|来一段|编|做).{0,4}(销售话术|话术|稿子|台词|推销词|销售词)|销售话术|话术稿|稿子|台词/.test(text)) return 'script';
   // 2. 知识库意图：按关键词命中排序（在当前选中的知识库内检索）
@@ -2172,6 +2226,7 @@ async function process(text){
     return;
   }
   const intent = detectIntent(text);
+  if (intent === 'jump'){ const j = detectJumpIntent(text); if(j && j.mod){ const names = { quiz:'📚 培训考核', performance:'📊 绩效管理', beauty:'💄 美妆话术', medical:'🚑 医疗急救', manual:'📕 手册奖惩', daily:'❓ 日常问题', risk:'⚠️ 风险预警', kbadmin:'📇 库管理' }; addMsg('bot', '⏭ 为你切换到 <b>' + (names[j.mod]||j.mod) + '</b> 模块…'); setTimeout(()=>jumpTo(j.mod), 600); return; } }
   if (intent === 'script'){ startWizard(); return; }
   const pool = currentKbPool();
   if (intent === 'kb'){ const hits = kbSearch(text, 3, pool); await typing(''); clearTyping(); kbReply(hits, text); return; }

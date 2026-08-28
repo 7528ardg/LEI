@@ -1,0 +1,923 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<title>客舱小助手 · 库管理</title>
+<style>
+:root{
+  --font-sans:-apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei",sans-serif;
+  --primary:#148453;--primary-dark:#0C5F3A;--primary-soft:#E8F3EE;--primary-mist:#F4F9F6;
+  --gold:#F5B800;--danger:#E64A19;--danger-soft:#FEE7DE;
+  --bg:#F5F8F6;--card:#fff;--text:#0F2A1F;--text2:#5A6F65;--text3:#B5C2BC;--border:#E5EDE9;
+  --shadow:0 4px 14px rgba(20,132,83,.10);
+  --ok:#1DA463;--ok-soft:#E5F5EC;--warn:#B7791F;--warn-soft:#FBF1DE;--bad:#C72A1F;--bad-soft:#FCE9E7;--blue:#2B7CD3;--blue-soft:#E7F0FA;
+}
+html[data-theme="dark"]{
+  --bg:#0F1A14;--card:#162420;--text:#E8F3EE;--text2:#8FA89C;--text3:#4A6358;--border:#1E3A2C;
+  --primary-soft:#1A3D2A;--primary-mist:#142E22;--danger-soft:#2A1410;--ok-soft:#123328;--warn-soft:#312A12;--bad-soft:#331512;--blue-soft:#12263A;
+}
+*{margin:0;padding:0;box-sizing:border-box;}
+body{font-family:var(--font-sans);background:var(--bg);color:var(--text);min-height:100vh;}
+button{font-family:var(--font-sans);cursor:pointer;}
+.kb-top{position:sticky;top:0;z-index:50;background:var(--card);border-bottom:1px solid var(--border);padding:10px 16px;display:flex;align-items:center;gap:12px;flex-wrap:wrap;}
+.kb-logo{display:flex;align-items:center;gap:8px;font-weight:800;color:var(--primary);font-size:1rem;}
+.kb-logo .dot{width:22px;height:22px;border-radius:6px;background:var(--primary);color:#fff;display:flex;align-items:center;justify-content:center;font-size:.72rem;}
+.kb-logo small{font-weight:500;color:var(--text2);font-size:.72rem;}
+.lib-chips{display:flex;gap:6px;flex-wrap:wrap;flex:1;}
+.lib-chip{padding:4px 10px;border-radius:14px;background:var(--primary-mist);border:1px solid var(--border);font-size:.74rem;color:var(--text2);display:flex;align-items:center;gap:6px;}
+.lib-chip b{color:var(--primary);}
+.kb-tools{display:flex;align-items:center;gap:8px;margin-left:auto;}
+.kb-tools .tbtn{padding:6px 12px;border-radius:8px;border:1px solid var(--border);background:var(--card);color:var(--text2);font-size:.78rem;font-weight:600;}
+.kb-tools .tbtn:hover{border-color:var(--primary);color:var(--primary);}
+.ai-switch{display:flex;align-items:center;gap:6px;font-size:.76rem;color:var(--text2);}
+.ai-switch input{accent-color:var(--primary);}
+.kb-tabs{position:sticky;top:56px;z-index:49;background:var(--bg);display:flex;gap:4px;padding:8px 12px;overflow-x:auto;scrollbar-width:none;border-bottom:1px solid var(--border);}
+.kb-tabs::-webkit-scrollbar{display:none;}
+.kb-tab{padding:8px 14px;border-radius:9px;border:none;background:transparent;font-size:.84rem;font-weight:600;color:var(--text2);white-space:nowrap;}
+.kb-tab.active{background:var(--primary);color:#fff;box-shadow:var(--shadow);}
+main{padding:14px 16px 60px;max-width:1080px;margin:0 auto;}
+.view{display:none;}
+.view.active{display:block;animation:fd .2s ease-out;}
+@keyframes fd{from{opacity:.3;}to{opacity:1;}}
+.sect{margin-bottom:18px;}
+.sect-h{display:flex;align-items:center;gap:10px;margin-bottom:10px;flex-wrap:wrap;}
+.sect-h h3{font-size:.98rem;color:var(--text);}
+.sect-h .hint{font-size:.74rem;color:var(--text2);}
+.card{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:14px;margin-bottom:12px;}
+.row{display:flex;align-items:center;gap:10px;flex-wrap:wrap;}
+.big-btn{padding:12px 18px;border-radius:10px;border:none;background:var(--primary);color:#fff;font-size:.9rem;font-weight:700;box-shadow:var(--shadow);}
+.big-btn:disabled{opacity:.5;cursor:not-allowed;}
+.big-btn.ghost{background:var(--primary-soft);color:var(--primary);box-shadow:none;}
+.big-btn.gold{background:var(--gold);color:#3A2E00;}
+.big-btn.danger{background:var(--danger);color:#fff;}
+.small-btn{padding:5px 10px;border-radius:7px;border:1px solid var(--border);background:var(--card);font-size:.76rem;color:var(--text2);font-weight:600;}
+.small-btn:hover{border-color:var(--primary);color:var(--primary);}
+.small-btn.on{background:var(--primary);color:#fff;border-color:var(--primary);}
+.tag{display:inline-block;padding:1px 8px;border-radius:10px;font-size:.7rem;font-weight:600;margin-right:4px;}
+.tag.ok{background:var(--ok-soft);color:var(--ok);}
+.tag.warn{background:var(--warn-soft);color:var(--warn);}
+.tag.bad{background:var(--bad-soft);color:var(--bad);}
+.tag.blue{background:var(--blue-soft);color:var(--blue);}
+.tag.muted{background:var(--surface-muted,#EFEFF2);color:var(--text3);}
+.kv{font-size:.74rem;color:var(--text2);}
+table{width:100%;border-collapse:collapse;font-size:.8rem;}
+th{text-align:left;padding:8px 10px;color:var(--text2);font-weight:600;border-bottom:1px solid var(--border);font-size:.74rem;white-space:nowrap;}
+td{padding:9px 10px;border-bottom:1px solid var(--border);vertical-align:top;}
+tr:last-child td{border-bottom:none;}
+td .q{font-weight:600;color:var(--text);font-size:.8rem;}
+td .a{font-size:.74rem;color:var(--text2);max-width:520px;}
+textarea,input[type=text]{width:100%;border:1px solid var(--border);border-radius:8px;padding:8px 10px;font-size:.8rem;font-family:var(--font-sans);background:var(--bg);color:var(--text);}
+textarea{min-height:52px;resize:vertical;}
+label.lbl{font-size:.74rem;color:var(--text2);display:block;margin-bottom:4px;}
+.acc{margin-bottom:10px;border:1px solid var(--border);border-radius:10px;background:var(--card);overflow:hidden;}
+.acc-head{display:flex;align-items:center;gap:10px;padding:12px 14px;cursor:pointer;flex-wrap:wrap;}
+.acc-head h4{font-size:.88rem;color:var(--text);}
+.acc-head .sum{font-size:.74rem;color:var(--text2);}
+.acc-body{display:none;border-top:1px solid var(--border);padding:6px 6px 10px;overflow-x:auto;}
+.acc.open .acc-body{display:block;}
+.cell-st{width:88px;}
+.cell-var{min-width:230px;max-width:340px;}
+.diff-row{border:1px solid var(--border);border-radius:10px;padding:12px;margin-bottom:10px;background:var(--card);}
+.diff-head{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:8px;}
+.diff-head .num{font-size:.82rem;font-weight:800;color:var(--primary);}
+.diff-editor{display:flex;gap:10px;flex-wrap:wrap;margin-top:8px;}
+.diff-editor .fe{flex:1;min-width:200px;}
+.progress{height:8px;border-radius:5px;background:var(--primary-mist);overflow:hidden;margin-top:8px;}
+.progress i{display:block;height:100%;width:0;background:var(--primary);transition:width .15s;}
+.metric-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:10px;margin-bottom:16px;}
+.metric{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:12px;text-align:center;}
+.metric .v{font-size:1.5rem;font-weight:800;color:var(--primary);}
+.metric .k{font-size:.72rem;color:var(--text2);margin-top:4px;}
+.modal-mask{position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,.45);z-index:200;display:none;align-items:center;justify-content:center;padding:20px;}
+.modal-mask.show{display:flex;}
+.modal-card{background:var(--card);border:1px solid var(--border);border-radius:14px;box-shadow:0 12px 32px rgba(0,0,0,.2);width:100%;max-width:560px;padding:20px;max-height:84vh;overflow-y:auto;}
+.modal-card h3{margin-bottom:8px;font-size:1rem;}
+.modal-card .m-sub{font-size:.8rem;color:var(--text2);margin-bottom:14px;line-height:1.6;}
+.m-actions{display:flex;gap:10px;justify-content:flex-end;margin-top:16px;flex-wrap:wrap;}
+.toast-wrap{position:fixed;top:14px;right:14px;z-index:300;display:flex;flex-direction:column;gap:8px;}
+.toast{padding:10px 16px;border-radius:9px;background:var(--card);border:1px solid var(--border);box-shadow:0 4px 14px rgba(0,0,0,.15);font-size:.82rem;border-left:4px solid var(--primary);animation:tin .25s;}
+.toast.err{border-left-color:var(--danger);}
+@keyframes tin{from{transform:translateX(60px);opacity:0;}to{transform:translateX(0);opacity:1;}}
+.kbox{background:var(--primary-mist);border-left:3px solid var(--primary);border-radius:8px;padding:8px 12px;font-size:.76rem;color:var(--text2);line-height:1.6;margin-top:8px;}
+.empt{text-align:center;color:var(--text3);padding:26px 0;font-size:.84rem;}
+@media(max-width:720px){.kb-tabs{top:0;}main{padding:10px 10px 60px;}.cell-var{min-width:200px;}}
+</style>
+</head>
+<body>
+
+<header class="kb-top">
+  <div class="kb-logo"><span class="dot">库</span>知识库管理<small>手册数字化工作台</small></div>
+  <div class="lib-chips" id="libChips"></div>
+  <div class="kb-tools">
+    <label class="ai-switch"><input type="checkbox" id="aiOn" onchange="toggleAi()">✨ AI 候选</label>
+    <button class="tbtn" onclick="runHealth()">🏥 体检</button>
+  </div>
+</header>
+
+<nav class="kb-tabs">
+  <button class="kb-tab active" data-v="upload" onclick="switchTab('upload')">📄 上传解析</button>
+  <button class="kb-tab" data-v="cover" onclick="switchTab('cover')">🗺 覆盖率地图</button>
+  <button class="kb-tab" data-v="diff" onclick="switchTab('diff')">📋 差异审核</button>
+  <button class="kb-tab" data-v="health" onclick="switchTab('health')">🏥 体检报告</button>
+  <button class="kb-tab" data-v="overlay" onclick="switchTab('overlay')">💼 覆盖层管理</button>
+</nav>
+
+<main>
+
+<!-- ========== 上传解析 ========== -->
+<section class="view active" id="view-upload">
+  <div class="card">
+    <div class="sect-h"><h3>上传新版手册</h3><span class="hint">解析后自动与该库现有条目匹配，产出覆盖率地图与差异清单</span></div>
+    <div class="row">
+      <div class="fe" style="min-width:180px;">
+        <label class="lbl">目标知识库</label>
+        <select id="targetLib" class="small-btn" style="width:100%;padding:9px;font-size:.82rem;"></select>
+      </div>
+      <button class="big-btn" onclick="$('pdfFile').click()">📎 选择 PDF 文件</button>
+      <button class="big-btn ghost" id="btnParse" onclick="parsePdf()" disabled>▶ 开始解析</button>
+      <button class="big-btn danger" id="btnDemo" onclick="runDemo()">🧪 演示数据</button>
+    </div>
+    <input type="file" id="pdfFile" accept="application/pdf" hidden>
+    <div id="fileInfo" class="kv" style="margin-top:8px;"></div>
+    <div id="precheck" style="margin-top:6px;"></div>
+    <div class="progress" id="progWrap" style="display:none;"><i id="progBar"></i></div>
+    <div id="parseSummary" class="kbox" style="display:none;"></div>
+  </div>
+  <div class="card">
+    <div class="sect-h"><h3>章节树</h3><span class="hint" id="sectCount"></span></div>
+    <div id="secTree" class="empt">尚未解析手册，选择 PDF 后点击「开始解析」</div>
+  </div>
+</section>
+
+<!-- ========== 覆盖率地图 ========== -->
+<section class="view" id="view-cover">
+  <div class="sect-h">
+    <h3>章节覆盖率</h3>
+    <span class="hint">已覆盖 <span class="tag ok">●</span> 新增 <span class="tag warn">●</span> 待复核 <span class="tag bad">●</span> 手册已无此章(缺失) <span class="tag muted">●</span></span>
+    <button class="small-btn" onclick="buildDiffs()">📋 生成差异审核清单 →</button>
+  </div>
+  <div id="coverList" class="empt">请先在上传解析页解析一本手册</div>
+</section>
+
+<!-- ========== 差异审核 ========== -->
+<section class="view" id="view-diff">
+  <div class="sect-h">
+    <h3>差异审核</h3>
+    <span class="hint">逐条确认后入库（写入本机覆盖层，qa 问答立即可用新知识）</span>
+    <button class="big-btn gold" onclick="confirmAll()">✔ 批量确认入库</button>
+  </div>
+  <div class="row" style="margin-bottom:12px;gap:8px;align-items:center;">
+    <button class="big-btn" id="btnBatch" onclick="batchAiGen()">🤖 批量 AI 生成候选</button>
+    <span id="batchProg" class="kv"></span>
+    <button class="small-btn" onclick="checkAllDiffs(true)">☑ 全选</button>
+    <button class="small-btn" onclick="checkAllDiffs(false)">☐ 全不选</button>
+  </div>
+  <div id="diffList" class="empt">暂无可审核条目。</div>
+</section>
+
+<!-- ========== 体检报告 ========== -->
+<section class="view" id="view-health">
+  <div class="sect-h">
+    <h3>知识库健康度体检</h3>
+    <span class="hint">不传文件，扫描四库查漏补缺</span>
+    <button class="small-btn" onclick="exportHealthMd()">⬇ 导出体检报告(Markdown)</button>
+  </div>
+  <div id="healthMetric" class="metric-grid"></div>
+  <div class="card">
+    <div class="sect-h"><h3>裸缺口章节</h3><span class="hint">库内 src 章节号存在但整章无任何条目覆盖</span></div>
+    <div id="healthGap" class="empt">点击上方「🏥 体检」按钮开始扫描</div>
+  </div>
+  <div class="card">
+    <div class="sect-h"><h3>弱覆盖标注</h3><span class="hint">条目答案内出现「以…为准 / 详见原文」等已知待补信号</span></div>
+    <div id="healthWeak" class="empt">—</div>
+  </div>
+  <div class="card">
+    <div class="sect-h"><h3>标签质量</h3><span class="hint">缺失 / 过短(<2字符) / 库内高重复</span></div>
+    <div id="healthTag" class="empt">—</div>
+  </div>
+</section>
+
+<!-- ========== 覆盖层管理 ========== -->
+<section class="view" id="view-overlay">
+  <div class="sect-h">
+    <h3>本机覆盖层</h3>
+    <span class="hint">已生效的知识更新；qa 问答启动时自动合并</span>
+  </div>
+  <div class="row" style="margin-bottom:12px;gap:8px;">
+    <button class="big-btn ghost" onclick="exportOverlay()">⬇ 导出增量包</button>
+    <button class="big-btn ghost" onclick="$('ovFile').click()">⬆ 导入增量包</button>
+    <button class="small-btn" onclick="copyJs()">📋 复制为 JS 片段（回写源文件）</button>
+    <button class="small-btn" style="color:var(--danger);" onclick="clearOverlay()">🗑 清空覆盖层</button>
+  </div>
+  <input type="file" id="ovFile" accept=".json,application/json" hidden>
+  <div id="ovList" class="empt">当前无覆盖更新。</div>
+</section>
+
+</main>
+
+<div class="modal-mask" id="modal" onclick="if(event.target===this)closeModal()">
+  <div class="modal-card">
+    <h3 id="modalTitle">提示</h3>
+    <div class="m-sub" id="modalBody"></div>
+    <div class="m-actions" id="modalActs"></div>
+  </div>
+</div>
+
+<div class="toast-wrap" id="toastWrap"></div>
+
+<script>
+__PDFJS_SRC__
+</script>
+<script>
+/* pdf.js worker 源码内联：提前挂载 window.pdfjsWorker（fake worker 主线程降级时直接使用，无需外部下载）
+   注意：本块只注入 worker 源码，且 worker 全局必须是 pdfjsWorker（与 pdf.js loadScript 预期一致） */
+__PDFWORKER_SRC__
+</script>
+<script>
+'use strict';
+/* ===================== 数据源：构建时从 qa.html 同步注入（改四库须同步 qa.html 后重跑 _build_kbadmin.py） ===================== */
+const BASE_LIBS = {
+  daily: __BASE_DAILY_ARR__,
+  ccm: __BASE_CCM_ARR__,
+  mgm: __BASE_MGM_ARR__,
+  svc: __BASE_SVC_ARR__
+};
+const LIBS_META = [
+  { id:'daily', name:'日常库', ac:'手册' },
+  { id:'ccm',   name:'乘务员手册', ac:'CCM' },
+  { id:'mgm',   name:'管理手册', ac:'手册' },
+  { id:'svc',   name:'服务规范', ac:'服务规范' }
+];
+const OV_KEY = 'kb_overlay_v1';
+const OV_MAGIC = 'kb-overlay-v1';
+const OV_VER = 1;
+
+/* ===================== 基础工具 ===================== */
+const $ = (id) => document.getElementById(id);
+function esc(s){ return String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+function stripHtml(s){ const d=document.createElement('div'); d.innerHTML=String(s||''); return d.textContent||d.innerText||''; }
+function toast(msg, err){ const w=$('toastWrap'); const t=document.createElement('div'); t.className='toast'+(err?' err':''); t.textContent=msg; w.appendChild(t); setTimeout(()=>{ t.style.opacity='0'; t.style.transition='opacity .3s'; setTimeout(()=>t.remove(),300); }, 2800); }
+function pad(n){ return n<10?'0'+n:''+n; }
+function today(){ const d=new Date(); return d.getFullYear()+pad(d.getMonth()+1)+pad(d.getDate()); }
+function fmtBytes(b){ return b>1048576?(b/1048576).toFixed(1)+' MB':(b/1024).toFixed(0)+' KB'; }
+
+/* ===================== 状态 ===================== */
+const S = {
+  pdfText:'', pdfName:'', pdfPages:0, pdfChars:0, perPageMin:0,
+  sections: [],           // {num, title, page, text}
+  cover: {},              // { libId: {covered:[], news:[], reviews:[], missing:[]} }
+  diffs: [],              // 审核行 {lib, num, title, text, kind:'new'|'review', entry(旧), q, a, t, checked, aiState}
+  pending: 0
+};
+/* ===================== pdf.js 初始化 ===================== */
+// workerSrc 用最小 dummy data URL：Worker(dataURL) 会被浏览器拒绝 → pdf.js 自动走 fake worker
+// 主线程降级，先用 <script> 加载 workerSrc（dummy 立即成功），再复用上方内联的完整 window.pdfjsWorker
+window.pdfjsLib.GlobalWorkerOptions.workerSrc = 'data:application/javascript,void 0;';
+// CMap：内联常用中文字典（GBK-EUC / UniGB / B5pc / UniCNS），离线无网络也能解析 CID 中文字体
+const INLINE_CMAPS = __INLINE_CMAPS__;
+class InlineCMapReaderFactory {
+  constructor(_ref){ const _p = _ref || {}; this.baseUrl = _p.baseUrl != null ? _p.baseUrl : null; this.isCompressed = _p.isCompressed !== false; }
+  async fetch(_ref2){
+    const name = _ref2.name;
+    const b64 = INLINE_CMAPS[name];
+    if(!b64) throw new Error('未内置该 CMap：' + name);
+    const bin = atob(b64);
+    const bytes = new Uint8Array(bin.length);
+    for(let i = 0; i < bin.length; i++) bytes[i] = bin.charCodeAt(i);
+    return { cMapData: bytes, compressionType: this.isCompressed ? 1 : 0 }; // 1=BINARY(bcmap)
+  }
+}
+
+/* ===================== Tab ===================== */
+function switchTab(v){
+  document.querySelectorAll('.kb-tab').forEach(b=>b.classList.toggle('active', b.dataset.v===v));
+  document.querySelectorAll('.view').forEach(s=>s.classList.toggle('active', s.id==='view-'+v));
+}
+
+/* ===================== AI 候选 ===================== */
+let AI_ON = false;
+function toggleAi(){ AI_ON = $('aiOn').checked; if(AI_ON && !hasAICfg()) toast('未配置 AI，将使用离线规则模式', true); }
+function hasAICfg(){ try{ const c=JSON.parse(localStorage.getItem('spring_ai_cfg')||'{}'); return !!(c.apiKey); }catch(e){ return false; } }
+async function aiChat(messages){
+  const cfg = JSON.parse(localStorage.getItem('spring_ai_cfg')||'{}') || {};
+  if(!cfg.apiKey) throw new Error('未配置 API Key');
+  let url = cfg.endpoint || '';
+  if(!url){
+    const EP = { zhipu:'https://open.bigmodel.cn/api/paas/v4/chat/completions', siliconflow:'https://api.siliconflow.cn/v1/chat/completions', deepseek:'https://api.deepseek.com/chat/completions' };
+    url = EP[cfg.provider] || EP.zhipu;
+  }
+  const r = await fetch(url, {
+    method:'POST',
+    headers:{ 'Content-Type':'application/json', 'Authorization':'Bearer '+cfg.apiKey },
+    body: JSON.stringify({ model: cfg.model || 'glm-4-flash', temperature: Math.min(1, 0.7), messages })
+  });
+  if(!r.ok) throw new Error('AI 接口 '+r.status);
+  const j = await r.json();
+  return (j.choices && j.choices[0] && j.choices[0].message && j.choices[0].message.content) || '';
+}
+async function aiGenCandidate(diff){
+  const text = (diff.title||'') + '\n' + (diff.text||'').slice(0, 900);
+  const sys = '你是春秋航空客舱业务知识整理助手。严格根据给定手册内容生成一条完整知识问答，只输出一个 JSON 对象，不要任何解释或前后缀。格式：{"q":"问题","t":["标签"],"cat":"分类","a":"答案"}。要求：q 用乘务员口语自然提问；t 取 2-5 个短关键词；cat 沿用手册章节主题做分类；a 依据给定内容分条简明作答（一条一个要点，可用换行分条），严禁虚构手册中没有的内容。示例：{"q":"起飞后多久才可开始客舱服务？","t":["起飞后20分钟","客舱服务","安全带信号灯"],"cat":"客舱安全与旅客管理","a":"平飞或起飞后20分钟且安全带信号灯关闭后，使用机组协同准备会确定的联络方式与驾驶舱再次沟通天气和预知颠簸，随后方可开始客舱服务程序。如起飞后20分钟安全带灯仍未关闭，应主动内话联系飞行机组。"}';
+  const user = '章节：' + diff.num + ' ' + diff.title + '\n手册内容：\n' + text;
+  const raw = await aiChat([{ role:'system', content: sys }, { role:'user', content: user }]);
+  const m = raw.match(/\{[\s\S]*\}/);
+  if(!m) throw new Error('AI 返回无 JSON');
+  const c = JSON.parse(m[0]);
+  // 答案兜底：内容不足或未生成时保留原文摘录，不编造；换行转 <br> 便于渲染
+  if(!c.a || !String(c.a).trim()) c.a = stripHtml(text).trim().slice(0, 300);
+  c.a = String(c.a).replace(/\r\n/g,'\n').replace(/\n+/g,'<br>').replace(/(<br>){2,}/g,'<br>').trim();
+  return c;
+}
+
+/* ===================== 上传与解析 ===================== */
+function initTargetLib(){
+  const sel = $('targetLib');
+  sel.innerHTML = LIBS_META.map(l=>'<option value="'+l.id+'">'+l.name+'（'+BASE_LIBS[l.id].length+' 条）</option>').join('');
+}
+let pickedFile = null;
+$('pdfFile').addEventListener('change', function(ev){
+  const f = ev.target.files && ev.target.files[0];
+  if(!f) return;
+  if(f.type !== 'application/pdf' && !/\.pdf$/i.test(f.name)){ toast('请选择 PDF 文件', true); return; }
+  pickedFile = f;
+  $('fileInfo').textContent = f.name + ' · ' + fmtBytes(f.size);
+  $('btnParse').disabled = false;
+  $('precheck').innerHTML = '';
+  $('parseSummary').style.display = 'none';
+});
+async function parsePdf(){
+  if(!pickedFile){ toast('请先选择 PDF', true); return; }
+  $('btnParse').disabled = true;
+  const prog = $('progWrap'); prog.style.display = 'block'; const bar = $('progBar'); bar.style.width = '0';
+  try{
+    const data = await pickedFile.arrayBuffer();
+    const pdfOpts = { data, cMapUrl: 'inline:', cMapPacked: true, CMapReaderFactory: InlineCMapReaderFactory };
+    let task = null;
+    try{
+      task = await window.pdfjsLib.getDocument(pdfOpts).promise;
+    }catch(e){
+      // worker 创建失败（如部分 WebView 限制）→ 降级主线程解析
+      toast('worker 不可用，已降级主线程解析');
+      task = await window.pdfjsLib.getDocument(Object.assign({}, pdfOpts, { disableWorker: true })).promise;
+    }
+    const pages = task.numPages;
+    const chunks = [];
+    let minChars = Infinity, total = 0;
+    for(let p = 1; p <= pages; p++){
+      const page = await task.getPage(p);
+      const tc = await page.getTextContent();
+      let ptext = '';
+      // 按 y 坐标重建行（hasEOL 在部分 PDF 生成器下缺失，坐标分组更稳，与 pdfplumber 按 top 分组同思路）
+      let curLine = '', lastY = null;
+      function flushLine(){ if(curLine.trim()) ptext += curLine + '\n'; curLine = ''; }
+      for(const it of tc.items){
+        if(!it.str) continue;
+        const y = it.transform ? it.transform[5] : 0;
+        if(lastY != null && Math.abs(y - lastY) > 1.5) flushLine();
+        lastY = y;
+        curLine += it.str;
+      }
+      flushLine();
+      // 只压平行内多余空白，保留换行
+      ptext = ptext.replace(/[ \t]+/g,' ').replace(/ *\n */g,'\n').trim();
+      chunks.push('===PAGE ' + p + '===\n' + ptext);
+      total += ptext.length;
+      if(ptext.length < minChars) minChars = ptext.length;
+      bar.style.width = Math.round(p/ pages*100) + '%';
+    }
+    S.pdfText = chunks.join('\n');
+    S.pdfPages = pages; S.pdfChars = total; S.perPageMin = minChars;
+    $('parseSummary').style.display = 'block';
+    $('parseSummary').innerHTML = '📄 ' + pickedFile.name + '：共 <b>'+pages+'</b> 页，提取 <b>'+total+'</b> 字符，最少页 '+minChars+' 字' +
+      (minChars < 80 ? ' <span class="tag bad">疑似扫描件，请先 OCR 或提供文字版 PDF</span>' : ' <span class="tag ok">文字版正常</span>');
+    if(minChars < 80){ toast('疑似扫描件，可能无法有效提取', true); }
+    parseSections();
+  }catch(e){
+    console.error(e);
+    toast('解析失败：' + (e && e.message ? e.message : e), true);
+    $('precheck').innerHTML = '<div class="kbox" style="border-left-color:var(--danger);">解析失败，可能原因：文件损坏 / 浏览器不支持 / 库加载问题。请换一份文字版 PDF 重试。</div>';
+  }finally{
+    $('btnParse').disabled = false;
+    setTimeout(()=>{ prog.style.display='none'; }, 400);
+  }
+}
+function parseSections(){
+  const lines = S.pdfText.split('\n');
+  const secs = [];
+  let curPage = 0;
+  const re = /^\s*(\d{1,2}(?:\.\d{1,3}){1,4})\s+(\S.{0,38})$/;
+  for(let i=0;i<lines.length;i++){
+    const l = lines[i];
+    const pm = l.match(/^===PAGE (\d+)===$/);
+    if(pm){ curPage = +pm[1]; continue; }
+    if(curPage === 0) continue; // 正文开始前忽略
+    const m = l.trim().match(re);
+    if(!m) continue;
+    const title = m[2].trim();
+    if(!/[\u4e00-\u9fa5]/.test(title)) continue;          // 标题须含汉字
+    if(/^\d+$/.test(title)) continue;                     // 排除纯数字（页码类）
+    const num = m[1];
+    // 收集该章节正文（到下一个章节标题或分页前的两行）
+    let body = '';
+    let j = i + 1;
+    while(j < lines.length && j < i + 40){
+      const lj = lines[j];
+      if(/^===PAGE \d+===$/.test(lj)){ j++; continue; }
+      if(re.test(lj.trim()) && /[\u4e00-\u9fa5]/.test(lj.split(/\s+/).slice(1).join(' '))) break;
+      body += lj + ' ';
+      j++;
+    }
+    secs.push({ num, title, page: curPage, text: body.replace(/\s+/g,' ').trim().slice(0, 600) });
+  }
+  S.sections = secs;
+  $('sectCount').textContent = '识别 ' + secs.length + ' 个章节';
+  renderSectionTree();
+  computeCoverage();
+  toast('解析完成：识别 ' + secs.length + ' 个章节');
+}
+function renderSectionTree(){
+  const wrap = $('secTree');
+  if(!S.sections.length){ wrap.className='empt'; wrap.textContent='未识别到章节（可能是扫描件或章节编号格式不同）。'; return; }
+  wrap.className='';
+  let lastLv = 0;
+  wrap.innerHTML = S.sections.map(s=>{
+    const lv = Math.min(3, Math.max(0, s.num.split('.').length - 2));
+    const padN = lv * 16;
+    return '<div style="padding-left:'+padN+'px;font-size:.8rem;line-height:1.9;border-left:1px solid var(--border);margin-left:'+(padN?14:0)+'px;"><b style="color:var(--primary);">'+s.num+'</b> '+esc(s.title)+' <span class="kv">· P'+s.page+'</span></div>';
+  }).join('');
+}
+function numberFrom(src){
+  const m = String(src||'').match(/(\d+(?:\.\d+)+)/);
+  return m ? m[1] : '';
+}
+function numMatch(a, b){
+  if(!a || !b) return false;
+  if(a === b) return true;
+  const sa = a.split('.'), sb = b.split('.');
+  const n = Math.min(sa.length, sb.length);
+  for(let i=0;i<n;i++) if(sa[i] !== sb[i]) return false;
+  return true;
+}
+function tagSim(entry, section){
+  const tags = (entry.t && entry.t.join('')) || stripHtml(entry.q || '').slice(0,20);
+  const secText = section.title + (section.text||'');
+  if(!tags || !secText) return 0;
+  let hit = 0;
+  for (const ch of tags) if(secText.indexOf(ch) >= 0) hit++;
+  return hit / Math.max(tags.length, 1);
+}
+function computeCoverage(){
+  const cov = {};
+  LIBS_META.forEach(lib => {
+    const entries = BASE_LIBS[lib.id] || [];
+    const entryNums = entries.map(e=>({ e, num: numberFrom(e.src) }));
+    const covered = [], news = [], reviews = [], missing = [];
+    S.sections.forEach(sec => {
+      const hit = entryNums.filter(x=>x.num && numMatch(x.num, sec.num));
+      if(hit.length){
+        const best = hit.reduce((a,b)=> a.num.length>=b.num.length?a:b);
+        const sim = tagSim(best.e, sec);
+        if(sim < 0.10) reviews.push({ sec, entry: best.e, sim });
+        else covered.push({ sec, entry: best.e });
+      }else{
+        news.push(sec);
+      }
+    });
+    // 缺失：库内条目章节号在新手册中完全没有对应
+    const secNums = S.sections.map(s=>s.num);
+    entryNums.forEach(({ e, num }) => {
+      if(!num) return;
+      const has = secNums.some(sn => numMatch(num, sn));
+      if(!has) missing.push(e);
+    });
+    cov[lib.id] = { covered, news, reviews, missing };
+  });
+  S.cover = cov;
+  renderCoverMap();
+  switchTab('cover');
+}
+function renderCoverMap(){
+  const wrap = $('coverList');
+  if(!S.sections.length){ wrap.className='empt'; wrap.textContent='请先上传解析手册'; return; }
+  wrap.className='';
+  wrap.innerHTML = LIBS_META.map(lib => {
+    const c = S.cover[lib.id];
+    if(!c) return '';
+    const html = [];
+    html.push('<div class="acc"><div class="acc-head" onclick="this.parentNode.classList.toggle(\'open\')">');
+    html.push('<h4>'+lib.name+' <span class="kv">'+lib.ac+'</span></h4>');
+    html.push('<span class="sum"><span class="tag ok">已覆盖 '+c.covered.length+'</span><span class="tag warn">新增 '+c.news.length+'</span><span class="tag bad">待复核 '+c.reviews.length+'</span><span class="tag muted">缺失 '+c.missing.length+'</span></span>');
+    html.push('</div><div class="acc-body"><table>');
+    html.push('<tr><th>章节</th><th>标题</th><th>状态</th></tr>');
+    c.covered.slice(0,200).forEach(r=>{ html.push('<tr><td class="cell-st">'+r.sec.num+'</td><td>'+esc(r.sec.title)+'</td><td><span class="tag ok">已覆盖</span></td></tr>'); });
+    c.news.forEach(r=>{ html.push('<tr><td class="cell-st">'+r.num+'</td><td>'+esc(r.title)+'</td><td><span class="tag warn">新增</span></td></tr>'); });
+    c.reviews.forEach(r=>{ html.push('<tr><td class="cell-st">'+r.sec.num+'</td><td>'+esc(r.sec.title)+'</td><td><span class="tag bad">待复核</span></td></tr>'); });
+    c.missing.forEach(e=>{ html.push('<tr><td class="cell-st">'+esc(numberFrom(e.src))+'</td><td>'+esc(e.q||'')+'</td><td><span class="tag muted">手册已无此章</span></td></tr>'); });
+    html.push('</table></div></div>');
+    return html.join('');
+  }).join('');
+}
+function guessCat(libId, section){
+  const entries = BASE_LIBS[libId] || [];
+  if(!entries.length) return '未分类';
+  let best = entries[0].cat || '未分类', bestScore = -1;
+  entries.forEach(e=>{
+    const cat = e.cat || ''; if(!cat) return;
+    const words = cat + ' ' + (e.t||[]).join(' ');
+    let sc = 0;
+    for(const ch of section.title){ if(words.indexOf(ch)>=0) sc += 1; }
+    if(sc > bestScore){ bestScore = sc; best = cat; }
+  });
+  return best;
+}
+const ICONS = ['📘','💼','🏥','❓','⚠️','📕','🗂'];
+function buildDiffs(){
+  if(!S.sections.length){ toast('请先解析手册', true); return; }
+  const diffs = [];
+  LIBS_META.forEach(lib => {
+    const c = S.cover[lib.id];
+    if(!c) return;
+    c.news.forEach(sec => {
+      diffs.push({ lib: lib.id, num: sec.num, title: sec.title, text: sec.text, kind:'new', q:'', a:'', t:'', checked:false, aiState:0 });
+    });
+    c.reviews.forEach(r => {
+      diffs.push({ lib: lib.id, num: r.sec.num, title: r.sec.title, text: r.sec.text, kind:'review', entry: r.entry, q: r.entry.q||'', a: r.entry.a||'', t:(r.entry.t||[]).join(','), checked:false, aiState:0 });
+    });
+  });
+  S.diffs = diffs;
+  renderDiffs();
+  switchTab('diff');
+  toast('差异清单：' + diffs.length + ' 条待处理');
+}
+function renderDiffs(){
+  const wrap = $('diffList');
+  if(!S.diffs.length){ wrap.className='empt'; wrap.textContent='暂无可审核条目（本手册与所选行为已全部覆盖）。'; return; }
+  wrap.className='';
+  wrap.innerHTML = S.diffs.map((d, idx) => {
+    const lib = LIBS_META.find(l=>l.id===d.lib);
+    const html = [];
+    html.push('<div class="diff-row" data-idx="'+idx+'"><div class="diff-head">');
+    html.push('<input type="checkbox" '+(d.checked?'checked':'')+' onchange="S.diffs['+idx+'].checked=this.checked">');
+    html.push('<span class="num">'+d.num+'</span><b>'+esc(d.title)+'</b>');
+    html.push('<span class="tag '+(d.kind==='new'?'warn':'bad')+'">'+(d.kind==='new'?'新增':'待复核')+'</span>');
+    html.push('<span class="tag muted">'+lib.name+'</span>');
+    if(d.kind==='review') html.push('<span class="tag muted">旧条目 · 相似度偏低</span>');
+    if(d.aiState===1) html.push('<span class="tag blue ai-tag">AI 候选</span>');
+    else if(d.aiState===2) html.push('<span class="tag bad ai-tag">AI 生成失败</span>');
+    if(d.kind==='new') html.push('<button class="small-btn" onclick="aiGen('+idx+')">✨ AI 生成候选</button>');
+    html.push('</div>');
+    if(d.kind==='review' && d.entry){
+      html.push('<div class="kbox" style="margin:0;"><b>原条目：</b>'+esc(stripHtml(d.entry.q))+'<br><span style="opacity:.8;">'+esc(stripHtml(d.entry.a)).slice(0,120)+'…</span></div>');
+    }
+    html.push('<div class="diff-editor">');
+    html.push('<div class="fe" style="flex:2;"><label class="lbl">问题 q</label><textarea data-f="q" data-idx="'+idx+'" placeholder="（新章节）请编写问题">'+esc(d.q)+'</textarea></div>');
+    html.push('<div class="fe" style="flex:3;"><label class="lbl">答案 a（可摘录新手册原文）</label><textarea data-f="a" data-idx="'+idx+'">'+esc(d.a)+'</textarea></div>');
+    html.push('<div class="fe" style="flex:1;"><label class="lbl">标签 t（逗号分隔）</label><input type="text" data-f="t" data-idx="'+idx+'" value="'+esc(d.t)+'"></div>');
+    html.push('</div>');
+    if(d.kind==='new') html.push('<div class="kbox">新章节摘录：'+esc(stripHtml(d.text).slice(0,200))+(stripHtml(d.text).length>200?'…':'')+'</div>');
+    html.push('</div>');
+    return html.join('');
+  }).join('');
+}
+function onDiffInput(ev){
+  const t = ev.target;
+  if(!t || !t.dataset || !t.dataset.f) return;
+  const d = S.diffs[+t.dataset.idx];
+  if(!d) return;
+  if(t.dataset.f==='t') d.t = t.value; else d[t.dataset.f] = t.value;
+}
+async function aiGen(idx){
+  const d = S.diffs[idx];
+  if(!d) return;
+  d.aiState = 0;
+  renderDiffs();
+  try{
+    const c = await aiGenCandidate(d);
+    d.q = c.q || d.q; d.t = (c.t||[]).join(',') || d.t; d.cat = c.cat || ''; d.a = c.a || d.a;
+    d.aiState = 1;
+  }catch(e){
+    d.aiState = 2;
+    toast('AI 生成失败：' + e.message, true);
+  }
+  renderDiffs();
+}
+
+/* ===================== 批量智能入库 Agent ===================== */
+let AI_RUNNING = false, AI_STOP = false;
+function checkAllDiffs(v){ S.diffs.forEach(d=>d.checked=v); renderDiffs(); }
+function setDiffState(idx, state){
+  const row = document.querySelector('#diffList .diff-row[data-idx="'+idx+'"]');
+  if(!row) return;
+  let tag = row.querySelector('.tag.ai-tag');
+  if(!tag){
+    tag = document.createElement('span');
+    tag.className = 'tag ai-tag';
+    row.querySelector('.diff-head').appendChild(tag);
+  }
+  tag.textContent = state===1 ? 'AI 候选' : (state===2 ? 'AI 生成失败' : '生成中…');
+  tag.className = 'tag ai-tag' + (state===1 ? ' blue' : (state===2 ? ' bad' : ' warn'));
+}
+async function batchAiGen(){
+  // 生成中再次点击 → 停止
+  if(AI_RUNNING){ AI_STOP = true; return; }
+  if(!S.diffs.length){ toast('暂无差异条目可生成', true); return; }
+  const idxs = [];
+  S.diffs.forEach((d,i)=>{ if(d.kind==='new' && !(d.aiState===1 && d.q && d.q.trim())) idxs.push(i); });
+  if(!idxs.length){ toast('新增章节均已生成过候选；如需重生成，请逐条点「✨ AI 生成候选」', true); return; }
+  if(!hasAICfg()){ toast('未配置 AI（spring_ai_cfg），无法批量生成', true); return; }
+  const btn = $('btnBatch'), prog = $('batchProg');
+  AI_RUNNING = true; AI_STOP = false;
+  btn.textContent = '⏹ 停止生成';
+  let ok = 0, fail = 0, stopped = false;
+  try{
+    for(let k=0;k<idxs.length;k++){
+      if(AI_STOP){ stopped = true; break; }
+      const i = idxs[k], d = S.diffs[i];
+      prog.textContent = '生成中 ' + (k+1) + '/' + idxs.length + '：' + d.num + ' ' + d.title;
+      setDiffState(i, 0);
+      try{
+        const c = await aiGenCandidate(d);
+        d.q = c.q || d.q; d.t = (c.t||[]).join(',') || d.t;
+        d.cat = c.cat || d.cat || ''; d.a = c.a || d.a || '';
+        d.aiState = 1; ok++;
+        setDiffState(i, 1);
+      }catch(e){
+        d.aiState = 2; fail++;
+        setDiffState(i, 2);
+      }
+    }
+  }finally{
+    AI_RUNNING = false; AI_STOP = false;
+    btn.textContent = '🤖 批量 AI 生成候选';
+    prog.textContent = '';
+    renderDiffs();
+  }
+  toast(ok + ' 条生成成功' + (fail ? '，' + fail + ' 条失败（可逐条重试）' : '') + (stopped ? '（已手动停止）' : '。生成内容可在下方编辑后勾选入库。'), fail > 0);
+}
+
+/* ===================== 覆盖层 ===================== */
+function emptyOverlay(){ return { magic: OV_MAGIC, version: OV_VER, updatedAt: '', byLib: { daily:[], ccm:[], mgm:[], svc:[] } }; }
+function loadOverlay(){
+  try{
+    const raw = localStorage.getItem(OV_KEY);
+    if(!raw) return emptyOverlay();
+    const o = JSON.parse(raw);
+    if(!o || o.magic !== OV_MAGIC) return emptyOverlay();
+    o.byLib = o.byLib || { daily:[], ccm:[], mgm:[], svc:[] };
+    return o;
+  }catch(e){ return emptyOverlay(); }
+}
+function saveOverlay(o){ try{ localStorage.setItem(OV_KEY, JSON.stringify(o)); }catch(e){ toast('本地存储失败（可能空间不足）', true); } }
+function confirmAll(){
+  if(!S.diffs.length){ toast('暂无可入库条目', true); return; }
+  const checked = S.diffs.filter(d=>d.checked);
+  if(!checked.length){ toast('请先勾选要入库的条目', true); return; }
+  const o = loadOverlay();
+  o.updatedAt = new Date().toISOString();
+  let n = 0;
+  checked.forEach(d=>{
+    const lib = d.lib;
+    const newEntry = {
+      cat: d.cat || guessCat(lib, { title:d.title }),
+      icon: ICONS[Math.floor(Math.random()*ICONS.length)],
+      src: LIBS_META.find(l=>l.id===lib).ac + ' ' + d.num,
+      t: (d.t||'').split(/[,，]/).map(s=>s.trim()).filter(Boolean),
+      q: d.q || d.title,
+      a: d.a || (d.kind==='review' && d.entry ? d.entry.a : esc(d.text || '以手册原文为准')),
+      _op: d.kind==='review' ? 'mod' : 'add'
+    };
+    o.byLib[lib] = o.byLib[lib] || [];
+    // mod：若已存在同 src 的 mod，先移除旧 mod，再追加新 mod
+    if(newEntry._op==='mod'){
+      o.byLib[lib] = o.byLib[lib].filter(x=>!(x._op==='mod' && x.src===newEntry.src));
+    }
+    o.byLib[lib].push(newEntry);
+    n++;
+  });
+  saveOverlay(o);
+  toast('已入库 ' + n + ' 条知识更新，qa 问答将自动生效');
+  S.diffs = S.diffs.filter(d=>!checked.includes(d));
+  renderDiffs();
+  renderOverlay();
+  renderLibChips();
+}
+function renderOverlay(){
+  const o = loadOverlay();
+  const wrap = $('ovList');
+  const total = LIBS_META.reduce((s,l)=>s+(o.byLib[l.id]||[]).length, 0);
+  if(!total){ wrap.className='empt'; wrap.textContent='当前无覆盖更新。'; return; }
+  wrap.className='';
+  wrap.innerHTML = LIBS_META.map(lib=>{
+    const arr = o.byLib[lib.id] || [];
+    if(!arr.length) return '';
+    return '<div class="acc"><div class="acc-head" onclick="this.parentNode.classList.toggle(\'open\')"><h4>'+lib.name+'</h4><span class="sum">'+arr.length+' 条</span></div><div class="acc-body"><table><tr><th>状态</th><th>章节</th><th>问题</th></tr>'
+      + arr.map(e=>'<tr><td><span class="tag '+(e._op==='add'?'ok':'blue')+'">'+ (e._op==='add'?'新增':'修订') +'</span></td><td class="cell-st">'+esc(e.src)+'</td><td>'+esc(e.q)+'</td></tr>').join('')
+      + '</table></div></div>';
+  }).join('');
+}
+function exportOverlay(){
+  const o = loadOverlay();
+  const n = LIBS_META.reduce((s,l)=>s+(o.byLib[l.id]||[]).length, 0);
+  if(!n){ toast('暂无覆盖更新可导出', true); return; }
+  const blob = new Blob([JSON.stringify(o)], { type:'application/json' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = '客舱知识增量包_' + today() + '.json';
+  document.body.appendChild(a); a.click();
+  setTimeout(()=>{ URL.revokeObjectURL(a.href); a.remove(); }, 500);
+  toast('增量包已导出（' + n + ' 条）');
+}
+function importOverlayFile(file){
+  const r = new FileReader();
+  r.onload = function(ev){
+    try{
+      const o = JSON.parse(ev.target.result);
+      if(!o || o.magic !== OV_MAGIC){ toast('不是有效的增量包', true); return; }
+      if(o.version > OV_VER){ toast('增量包版本较新，请升级助手', true); return; }
+      const cur = loadOverlay();
+      cur.updatedAt = new Date().toISOString();
+      LIBS_META.forEach(l=>{
+        (o.byLib[l.id]||[]).forEach(e=>{
+          if(e._op==='mod') cur.byLib[l.id] = cur.byLib[l.id].filter(x=>!(x._op==='mod' && x.src===e.src));
+          cur.byLib[l.id].push(e);
+        });
+      });
+      saveOverlay(cur);
+      toast('增量包已导入');
+      renderOverlay(); renderLibChips();
+    }catch(e){ toast('增量包解析失败', true); }
+  };
+  r.readAsText(file);
+}
+$('ovFile').addEventListener('change', function(ev){ const f=ev.target.files&&ev.target.files[0]; if(f) importOverlayFile(f); this.value=''; });
+function copyJs(){
+  const o = loadOverlay();
+  const parts = [];
+  parts.push('/* 知识增量包回写片段（粘贴到 docs/_kb_*.js 或 qa.html 对应数组后）· ' + new Date().toLocaleString() + ' */');
+  LIBS_META.forEach(lib=>{
+    const arr = o.byLib[lib.id] || [];
+    if(!arr.length) return;
+    const add = arr.filter(e=>e._op==='add');
+    const mod = arr.filter(e=>e._op==='mod');
+    const varName = lib.id==='daily' ? 'KB' : ('KB_' + lib.id.toUpperCase() + '_RAW');
+    if(add.length) parts.push('window.'+varName+' = window.'+varName+'.concat(' + JSON.stringify(add.map(e=>({cat:e.cat,icon:e.icon,src:e.src,t:e.t,q:e.q,a:e.a}))) + ');');
+    if(mod.length) parts.push('/* 修订 ' + mod.length + ' 条：在 arrays 中按 src 定位替换下列条目 */' + mod.map(e=>'// '+e.src+' → '+e.q).join('\n'));
+  });
+  const text = parts.join('\n');
+  if(!navigator.clipboard){ toast('当前环境不支持剪贴板', true); return; }
+  navigator.clipboard.writeText(text).then(()=>toast('JS 片段已复制')).catch(()=>toast('复制失败', true));
+}
+function clearOverlay(){
+  openModal('清空覆盖层', '将移除全部本机知识更新，qa 问答回到内置四库状态。此操作不可撤销，确定吗？', [
+    { label:'确定清空', cls:'danger', fn(){ localStorage.removeItem(OV_KEY); closeModal(); renderOverlay(); renderLibChips(); toast('覆盖层已清空'); } },
+    { label:'取消', fn(){ closeModal(); } }
+  ]);
+}
+
+/* ===================== 体检 ===================== */
+let healthData = null;
+function runHealth(){
+  const gapRows = [], weakRows = [], tagRows = [];
+  let totalEntries = 0;
+  LIBS_META.forEach(lib=>{
+    const arr = BASE_LIBS[lib.id] || [];
+    totalEntries += arr.length;
+    const secMap = {};
+    arr.forEach(e=>{
+      const num = numberFrom(e.src);
+      if(!num) return;
+      // 以 src 前两级为章节键，统计该章节条目数
+      const secKey = num.split('.').slice(0,2).join('.');
+      secMap[secKey] = secMap[secKey] || [];
+      secMap[secKey].push(e);
+      const txt = stripHtml(e.a||'');
+      if(/(以.{0,24}为准|详见原文|以原文为准|以手册原文为准)/.test(txt)){
+        weakRows.push({ lib: lib.name, src: e.src, q: e.q });
+      }
+      const t = e.t || [];
+      if(!t.length) tagRows.push({ lib: lib.name, src: e.src, q: e.q, why:'无标签' });
+      else t.forEach(tag=>{ if(tag.length<2) tagRows.push({ lib: lib.name, src: e.src, q: e.q, why:'标签过短「'+tag+'」' }); });
+    });
+    Object.keys(secMap).forEach(k=>{
+      const es = secMap[k];
+      if(es.length === 1) gapRows.push({ lib: lib.name, sec: k, n: 1 });
+    });
+  });
+  const gapByTop = {};
+  LIBS_META.forEach(lib=>{
+    const arr = BASE_LIBS[lib.id] || [];
+    const topSet = new Set();
+    arr.forEach(e=>{ const num=numberFrom(e.src); if(num) topSet.add(num.split('.')[0]); });
+    gapByTop[lib.name] = { chapters: topSet.size, entries: arr.length };
+  });
+  healthData = { gapRows, weakRows, tagRows, totalEntries, gapByTop };
+  renderHealth();
+  toast('体检完成：低覆盖章节 ' + gapRows.length + '、弱覆盖 ' + weakRows.length + '、标签问题 ' + tagRows.length);
+}
+function renderHealth(){
+  $('healthMetric').innerHTML = [
+    { v: healthData.totalEntries, k: '库内条目总数' },
+    { v: healthData.gapRows.length, k: '低覆盖章节(仅1条)' },
+    { v: healthData.weakRows.length, k: '弱覆盖标注' },
+    { v: healthData.tagRows.length, k: '标签质量问题' }
+  ].map(m=>'<div class="metric"><div class="v">'+m.v+'</div><div class="k">'+m.k+'</div></div>').join('');
+  const gap = $('healthGap'), weak = $('healthWeak'), tag = $('healthTag');
+  gap.className = weak.className = tag.className = '';
+  gap.innerHTML = healthData.gapRows.length
+    ? '<table><tr><th>库</th><th>章节</th><th>状态</th></tr>' + healthData.gapRows.map(r=>'<tr><td>'+r.lib+'</td><td class="cell-st">'+r.sec+'</td><td>该二级章节仅 '+r.n+' 条覆盖，建议补强</td></tr>').join('') + '</table>'
+    : '<div class="empt" style="padding:14px;">未发现低覆盖章节</div>';
+  weak.innerHTML = healthData.weakRows.length
+    ? '<table><tr><th>库</th><th>src</th><th>问题</th></tr>' + healthData.weakRows.slice(0,200).map(r=>'<tr><td>'+r.lib+'</td><td class="cell-st">'+esc(r.src)+'</td><td>'+esc(r.q)+'</td></tr>').join('') + '</table>'
+    : '<div class="empt" style="padding:14px;">无弱覆盖标注</div>';
+  tag.innerHTML = healthData.tagRows.length
+    ? '<table><tr><th>库</th><th>src</th><th>问题</th></tr>' + healthData.tagRows.slice(0,200).map(r=>'<tr><td>'+r.lib+'</td><td class="cell-st">'+esc(r.src)+'</td><td>'+esc(r.q)+' · <span class="tag warn">'+esc(r.why)+'</span></td></tr>').join('') + '</table>'
+    : '<div class="empt" style="padding:14px;">标签质量正常</div>';
+}
+function exportHealthMd(){
+  if(!healthData){ toast('请先运行体检', true); return; }
+  const L = [];
+  const d = new Date();
+  L.push('# 知识库健康度体检报告');
+  L.push('生成时间：' + d.toLocaleString() + '｜库内条目共计 ' + healthData.totalEntries);
+  L.push('');
+  L.push('## 每库分布');
+  Object.keys(healthData.gapByTop).forEach(k=>{ L.push('- ' + k + '：' + healthData.gapByTop[k].entries + ' 条 / ' + healthData.gapByTop[k].chapters + ' 个根章节'); });
+  L.push('');
+  L.push('## 裸缺口章节（' + healthData.gapRows.length + '）');
+  if(healthData.gapRows.length){ L.push('| 库 | src | 说明 |'); L.push('|---|---|---|'); healthData.gapRows.forEach(r=>L.push('| '+r.lib+' | '+r.sec+' | 该二级章节无条目覆盖 |')); } else L.push('未发现');
+  L.push('');
+  L.push('## 弱覆盖标注（' + healthData.weakRows.length + '）');
+  if(healthData.weakRows.length){ L.push('| 库 | src | 条目 |'); L.push('|---|---|---|'); healthData.weakRows.forEach(r=>L.push('| '+r.lib+' | '+r.src+' | '+r.q+' |')); } else L.push('无');
+  L.push('');
+  L.push('## 标签质量问题（' + healthData.tagRows.length + '）');
+  if(healthData.tagRows.length){ L.push('| 库 | src | 条目 | 问题 |'); L.push('|---|---|---|---|'); healthData.tagRows.forEach(r=>L.push('| '+r.lib+' | '+r.src+' | '+r.q+' | '+r.why+' |')); } else L.push('无');
+  const blob = new Blob([L.join('\n')], { type:'text/markdown;charset=utf-8' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = '知识库体检报告_' + today() + '.md';
+  document.body.appendChild(a); a.click();
+  setTimeout(()=>{ URL.revokeObjectURL(a.href); a.remove(); }, 500);
+}
+
+/* ===================== 演示数据 ===================== */
+function runDemo(){
+  S.pdfText = [
+    '===PAGE 1===',
+    '客舱乘务员手册（演示）',
+    '3.1 机组成员职责与资格',
+    '3.1.1 适用范围',
+    '本手册适用于所有在册客舱乘务员，职责以安全为第一优先。',
+    '3.1.2 主要职责',
+    '客舱乘务员负责客舱安全、应急撤离、旅客服务与秩序维护。',
+    '3.2 值勤与疲劳管理',
+    '3.2.1 签到时间',
+    '签到时间要求航前至少90分钟到达指定地点。',
+    '3.3 客舱安全',
+    '3.3.1 安全带信号灯',
+    '起飞与着陆阶段应接通安全带信号灯。',
+    '4.1 新增主题（演示新增章节）',
+    '这是手册新增的章节：客舱餐饮服务的新流程与话术要求。',
+    '===PAGE 2===',
+    '4.2 又一新增章节（演示）',
+    '机上儿童旅客服务要点，强调安全座椅与监护。'
+  ].join('\n');
+  S.pdfName = '演示手册.pdf'; S.pdfPages = 2; S.pdfChars = S.pdfText.length; S.perPageMin = 200;
+  $('parseSummary').style.display = 'block';
+  $('parseSummary').innerHTML = '🧪 已加载演示手册（2 页，' + S.pdfText.length + ' 字），可用于体验解析→匹配→审核流程。';
+  parseSections();
+}
+
+/* ===================== Modal ===================== */
+function openModal(title, body, acts){
+  $('modalTitle').textContent = title;
+  $('modalBody').innerHTML = body;
+  const box = $('modalActs');
+  box.innerHTML = '';
+  (acts||[]).forEach(a=>{
+    const b = document.createElement('button');
+    b.className = 'small-btn'+(a.cls?' '+a.cls:'');
+    b.textContent = a.label;
+    b.addEventListener('click',()=>{ b.disabled=true; a.fn(); });
+    box.appendChild(b);
+  });
+  $('modal').classList.add('show');
+}
+function closeModal(){ $('modal').classList.remove('show'); }
+
+/* ===================== 启动 ===================== */
+$('diffList').addEventListener('input', onDiffInput, true);
+function renderLibChips(){
+  const o = loadOverlay();
+  $('libChips').innerHTML = LIBS_META.map(l=>{
+    const ov = (o.byLib[l.id]||[]).length;
+    return '<span class="lib-chip">'+l.name+' <b>'+BASE_LIBS[l.id].length+'</b>'+(ov?' <span class="tag ok">+'+ov+'</span>':'')+'</span>';
+  }).join('');
+}
+initTargetLib();
+renderLibChips();
+renderOverlay();
+</script>
+</body>
+</html>

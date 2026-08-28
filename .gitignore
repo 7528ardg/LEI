@@ -4,6 +4,9 @@ __check_*
 __pycache__/
 .DS_Store
 
+# kb-admin 真实 PDF 验证套件（含生成的测试 PDF，不入库；node_modules 勿提交）
+__pdfqa/
+
 # 离线大文件（站点不需要，避免撑爆仓库）
 *.pptx
 *.docx

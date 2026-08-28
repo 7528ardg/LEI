@@ -14,6 +14,7 @@ SOURCES = {
     'daily': u'daily.html',
     'manual': u'manual.html',
     'report': u'report.html',
+    'kbadmin': u'kb-admin.html',
 }
 OUTS = [
     u'spring-assistant.html',
@@ -110,6 +111,21 @@ body{font-family:var(--font-sans);background:var(--bg);color:var(--text);min-hei
 .toast{padding:11px 18px;border-radius:8px;background:var(--bg-card);border:1px solid var(--border);box-shadow:0 4px 16px rgba(0,0,0,.1);font-size:.86rem;display:flex;align-items:center;gap:10px;animation:slideIn .3s;min-width:240px;border-left:4px solid var(--primary);}
 .toast.toast-info{border-left-color:var(--primary);}
 @keyframes slideIn{from{transform:translateX(100%);opacity:0;}to{transform:translateX(0);opacity:1;}}
+/* ===== 全局数据备份/恢复 ===== */
+.bk-btn{display:flex;align-items:center;gap:6px;padding:6px 12px;border-radius:14px;border:1px solid var(--border);background:var(--bg);color:var(--text2);cursor:pointer;font-size:.8rem;font-weight:600;transition:all .2s;font-family:var(--font-sans);flex-shrink:0;}
+.bk-btn:hover{border-color:var(--primary);color:var(--primary);background:var(--primary-soft);}
+.modal-mask{position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,.45);z-index:400;display:none;align-items:center;justify-content:center;padding:20px;}
+.modal-mask.show{display:flex;}
+.modal-card{background:var(--bg-card);border:1px solid var(--border);border-radius:16px;box-shadow:var(--shadow-lg);width:100%;max-width:400px;padding:24px;box-sizing:border-box;}
+.modal-card h3{margin:0 0 6px;font-size:1.05rem;color:var(--text);}
+.modal-card .m-sub{font-size:.82rem;color:var(--text2);line-height:1.7;margin:0 0 16px;}
+.m-actions{display:flex;flex-direction:column;gap:10px;}
+.m-btn{display:flex;align-items:center;justify-content:center;gap:8px;width:100%;padding:12px;border-radius:10px;border:none;cursor:pointer;font-size:.9rem;font-weight:700;font-family:var(--font-sans);transition:all .2s;}
+.m-btn.primary{background:var(--grad-primary);color:#fff;box-shadow:var(--shadow);}
+.m-btn.ghost{background:var(--primary-soft);color:var(--primary);border:1px solid var(--primary-light);}
+.m-btn:hover{transform:translateY(-1px);}
+.m-meta{font-size:.74rem;color:var(--text3);text-align:center;margin-top:14px;line-height:1.6;}
+@media(max-width:720px){.bk-btn span{display:none;}.bk-btn{padding:6px 9px;}}
 </style>
 </head>
 <body>
@@ -138,10 +154,12 @@ body{font-family:var(--font-sans);background:var(--bg);color:var(--text);min-hei
     <button class="mod-tab" data-mod="daily" onclick="switchModule('daily')">❓ 日常问题</button>
     <button class="mod-tab" data-mod="manual" onclick="switchModule('manual')">📕 手册奖惩</button>
     <button class="mod-tab" data-mod="report" onclick="switchModule('report')">🗂 事件报告</button>
+    <button class="mod-tab" data-mod="kbadmin" onclick="switchModule('kbadmin')">📇 库管理</button>
   </nav>
 
   <div class="actions">
     <div class="net-status" id="netStatus"><span class="net-dot"></span><span id="netText">在线</span></div>
+    <button class="bk-btn" onclick="openBackupModal()" title="数据备份 / 恢复">💾<span>备份</span></button>
     <button class="theme-btn" id="themeBtn" onclick="cycleTheme()" title="切换主题">☀️</button>
     <div class="user-chip" onclick="toast('春秋航空广州分队 · 客舱小助手')">
       <div class="avatar">乘</div>
@@ -183,9 +201,27 @@ body{font-family:var(--font-sans);background:var(--bg);color:var(--text);min-hei
     <div class="sys-loader" id="loader-report"><div class="sys-spinner"></div><div class="sl-text">正在进入 事件报告 …</div></div>
     <iframe class="sys-frame" id="frame-report"></iframe>
   </div>
+  <div class="sys-wrap" id="wrap-kbadmin">
+    <div class="sys-loader" id="loader-kbadmin"><div class="sys-spinner"></div><div class="sl-text">正在进入 库管理 …</div></div>
+    <iframe class="sys-frame" id="frame-kbadmin"></iframe>
+  </div>
 </main>
 
 <div class="toast-container" id="toastContainer"></div>
+
+<!-- ===== 全局数据备份 / 恢复 ===== -->
+<div class="modal-mask" id="backupModal" onclick="if(event.target===this)closeBackupModal()">
+  <div class="modal-card">
+    <h3>💾 数据备份与恢复</h3>
+    <p class="m-sub">备份包含：错题本与成绩、绩效数据、美妆收藏与定制话术、AI 配置、手册收藏、风险预警设置等全部本地数据。<br><br>换手机时：导出备份文件 → 通过微信「文件传输助手」或网盘发送给自己 → 在新手机打开助手后导入。</p>
+    <div class="m-actions">
+      <button class="m-btn primary" onclick="exportBackup()">⬇️ 导出备份文件</button>
+      <button class="m-btn ghost" onclick="document.getElementById('bkFile').click()">⬆️ 从文件恢复备份</button>
+    </div>
+    <input type="file" id="bkFile" accept=".json,application/json" style="display:none" onchange="importBackup(this.files[0])">
+    <div class="m-meta" id="bkMeta"></div>
+  </div>
+</div>
 
 <script>
 /* ===================== 三大系统完整功能数据（gzip 压缩 base64 内嵌，运行时解压） ===================== */
@@ -197,7 +233,8 @@ const MODULES = {
   medical: "__B64_medical__",
   daily: "__B64_daily__",
   manual: "__B64_manual__",
-  report: "__B64_report__"
+  report: "__B64_report__",
+  kbadmin: "__B64_kbadmin__"
 };
 
 /* ===================== 解码引擎（gzip 解压；兼容未压缩旧数据回退） ===================== */
@@ -262,7 +299,8 @@ const EMBED_CSS = {
   report: '.top .t-title{display:none!important}.top{position:static!important}.menu{position:static!important;top:auto!important}',
   beauty: 'header[class*="bg-gradient-to-r"]{display:none!important}nav[class*="bg-white/80"]{top:0!important}div[class*="top-[120px]"]{top:52px!important}',
   medical: '.headbar{display:none!important}',
-  risk: '.topbar .logo,.topbar .user-chip,#appVersionBadge,#btnBackup,#btnGlobalRefresh,button[onclick="logout()"]{display:none!important}.topbar .breadcrumb{flex:1!important;min-width:0!important}'
+  risk: '.topbar .logo,.topbar .user-chip,#appVersionBadge,#btnBackup,#btnGlobalRefresh,button[onclick="logout()"]{display:none!important}.topbar .breadcrumb{flex:1!important;min-width:0!important}',
+  kbadmin: 'header.kb-top{display:none!important}.kb-tabs{top:0!important}'
 };
 function injectEmbedCss(id, frame){
   const css = EMBED_CSS[id];
@@ -350,7 +388,7 @@ function applyTheme(t){
   document.documentElement.setAttribute('data-theme', t);
   const btn = document.getElementById('themeBtn');
   btn.textContent = t==='dark' ? '🌙' : '☀️';
-  ['qa','quiz','performance','beauty','medical','daily','manual','report'].forEach(id=>{
+  ['qa','quiz','performance','beauty','medical','daily','manual','report','kbadmin'].forEach(id=>{
     const f = _frames[id];
     if(f && f.contentDocument){
       try{ f.contentDocument.documentElement.setAttribute('data-theme', t); }catch(e){}
@@ -372,6 +410,102 @@ function toast(msg, type){
   t.textContent = msg;
   c.appendChild(t);
   setTimeout(()=>{ t.style.animation='slideIn .3s reverse forwards'; setTimeout(()=>t.remove(),300); }, 2600);
+}
+
+/* ===================== 全局数据备份 / 恢复 ===================== */
+const BACKUP_MAGIC = 'spring-cabin-assistant-backup';
+const BACKUP_VER = 1;
+// 易失/临时类键不随备份恢复（缓存、首次引导标记等，恢复后会自动重建）
+const BACKUP_EXCLUDE = {
+  'cabin_first_time_seen': 1,   // 首次使用引导标记
+  '_app_last_version': 1,       // 风险模块版本标记（用于版本更新清缓存）
+  'filtered_overview_v1': 1,    // 风险模块首页概览缓存
+  'briefing_today_v1_cache': 1  // 今日简报缓存
+};
+function collectBackupKeys(){
+  const keys = [];
+  try{
+    for(let i = 0; i < localStorage.length; i++){
+      const k = localStorage.key(i);
+      if(k && !BACKUP_EXCLUDE[k]) keys.push(k);
+    }
+  }catch(e){}
+  return keys;
+}
+function openBackupModal(){
+  document.getElementById('backupModal').classList.add('show');
+  const meta = document.getElementById('bkMeta');
+  try{
+    const keys = collectBackupKeys();
+    let bytes = 0;
+    for(let i = 0; i < keys.length; i++) bytes += (localStorage.getItem(keys[i]) || '').length * 2;
+    meta.textContent = '本机共 ' + localStorage.length + ' 项数据（含 ' + keys.length + ' 项）· ' + (bytes/1048576).toFixed(2) + ' MB';
+  }catch(e){ meta.textContent = ''; }
+}
+function closeBackupModal(){
+  document.getElementById('backupModal').classList.remove('show');
+}
+function exportBackup(){
+  try{
+    const keys = collectBackupKeys();
+    const data = {};
+    for(let i = 0; i < keys.length; i++) data[keys[i]] = localStorage.getItem(keys[i]);
+    const payload = {
+      magic: BACKUP_MAGIC,
+      version: BACKUP_VER,
+      app: '客舱小助手',
+      exportedAt: new Date().toISOString(),
+      keyCount: keys.length,
+      keys: data
+    };
+    const blob = new Blob([JSON.stringify(payload)], { type: 'application/json' });
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    const d = new Date();
+    const pad = n => (n < 10 ? '0' + n : '' + n);
+    a.download = '客舱小助手备份_' + d.getFullYear() + pad(d.getMonth()+1) + pad(d.getDate()) + '.json';
+    document.body.appendChild(a);
+    a.click();
+    setTimeout(() => { URL.revokeObjectURL(a.href); a.remove(); }, 500);
+    toast('备份已导出（' + keys.length + ' 项数据）');
+  }catch(e){
+    toast('导出失败：' + e.message);
+  }
+}
+function importBackup(file){
+  const input = document.getElementById('bkFile');
+  const reset = () => { input.value = ''; };
+  if(!file){ reset(); return; }
+  const reader = new FileReader();
+  reader.onload = function(ev){
+    try{
+      const payload = JSON.parse(ev.target.result);
+      if(!payload || payload.magic !== BACKUP_MAGIC || typeof payload.keys !== 'object' || payload.keys === null){
+        toast('不是有效的备份文件'); reset(); return;
+      }
+      if(payload.version > BACKUP_VER){
+        toast('备份来自更新版本，请先升级助手再恢复'); reset(); return;
+      }
+      const entries = Object.keys(payload.keys);
+      if(!entries.length){ toast('备份文件为空'); reset(); return; }
+      let ok = 0;
+      for(let i = 0; i < entries.length; i++){
+        try{ localStorage.setItem(entries[i], payload.keys[entries[i]]); ok++; }catch(e){}
+      }
+      if(ok){
+        toast('已恢复 ' + ok + ' 项数据，正在刷新…');
+        setTimeout(() => location.reload(), 800);
+      }else{
+        toast('恢复失败：存储空间不足或浏览器限制');
+        reset();
+      }
+    }catch(e){
+      toast('备份文件解析失败');
+      reset();
+    }
+  };
+  reader.onerror = function(){ toast('读取文件失败'); reset(); };
+  reader.readAsText(file);
 }
 
 /* ===================== 网络状态 ===================== */
