@@ -2807,12 +2807,14 @@ function updateSendBtn(){
 const GENERIC_TAGS = new Set(['操作','使用','检查','方法','步骤','流程','标准','要求','怎么','如何','什么','哪个','哪些','多久','多少','几点','注意','处理','做法','规定','程序','支持','提供','时候','地方','时间']);
 function kbSearch(text, n, pool){
   pool = pool || KB;
-  const norm = text.replace(/的/g,'');
+  const low = String(text).toLowerCase();            // 忽略大小写：um/UM、pbe/PBE 等缩写均可命中
+  const norm = low.replace(/的/g,'');
   const scored = pool.map(k => {
     let score = 0;
-    (k.t || []).forEach(kw => { if (kw && !GENERIC_TAGS.has(kw) && (text.indexOf(kw) >= 0 || norm.indexOf(kw) >= 0)) score += kw.length; });
+    (k.t || []).forEach(kw => { if (kw && !GENERIC_TAGS.has(kw) && (low.indexOf(kw.toLowerCase()) >= 0 || norm.indexOf(kw.toLowerCase()) >= 0)) score += kw.length; });
     // 命中条目标题也算
-    if(k.q && text.length >= 2 && text.indexOf(k.q.slice(0, Math.min(4, k.q.length))) >= 0) score += 2;
+    const ql = k.q ? k.q.toLowerCase() : '';
+    if(ql && low.length >= 2 && low.indexOf(ql.slice(0, Math.min(4, ql.length))) >= 0) score += 2;
     return { k, s: score };
   }).filter(x => x.s > 0).sort((a,b) => b.s - a.s);
   return scored.slice(0, n || 3);
@@ -2852,7 +2854,8 @@ async function process(text){
       return;
     }catch(e){
       addMsg('bot', '😅 AI 连不上（' + esc(String(e.message||e)) + '）。让我先用内置知识库试试……');
-      const hits = pool.filter(k => text.length>1 && k.t.some(kw => !GENERIC_TAGS.has(kw) && text.indexOf(kw)>=0)).slice(0,2).map(k => ({ k, s:1 }));
+      const low = String(text).toLowerCase();
+      const hits = pool.filter(k => low.length>1 && k.t.some(kw => !GENERIC_TAGS.has(kw) && low.indexOf(String(kw).toLowerCase())>=0)).slice(0,2).map(k => ({ k, s:1 }));
       if(hits.length){ kbReply(hits, text); return; }
     }
   }
@@ -2869,15 +2872,15 @@ function kbReply(hits, rawText){
   if (hits && hits.length){
     // 收集命中条目的关联标签（滤掉泛词，避免把全库拉下水）
     const relSet = new Set();
-    hits.forEach(x => (x.k.rel || []).forEach(t => { if (t && !GENERIC_TAGS.has(t)) relSet.add(t); }));
+    hits.forEach(x => (x.k.rel || []).forEach(t => { if (t && !GENERIC_TAGS.has(t)) relSet.add(String(t).toLowerCase()); }));
     // 在当前库中找匹配 rel 且未被展示的条目，按命中数排序取前 3
     const shownIds = new Set(hits.map(x => x.k.q));
     const cands = [];
     pool.forEach(k => {
       if (shownIds.has(k.q)) return;
       let score = 0;
-      (k.t || []).forEach(kw => { if ([...relSet].some(r => kw.indexOf(r) >= 0 || r.indexOf(kw) >= 0)) score += kw.length; });
-      if ((k.rel || []).some(r => relSet.has(r))) score += 100;
+      (k.t || []).forEach(kw => { const kl = String(kw).toLowerCase(); if ([...relSet].some(r => kl.indexOf(r) >= 0 || r.indexOf(kl) >= 0)) score += kw.length; });
+      if ((k.rel || []).some(r => relSet.has(String(r).toLowerCase()))) score += 100;
       if (score > 0) cands.push({ k, s: score });
     });
     cands.sort((a,b) => b.s - a.s);
