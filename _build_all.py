@@ -34,6 +34,9 @@ VERIFY_SCRIPTS = [
     u'node _verify_packs_m14.js',  # 备份内容层隔离 14
     u'node _verify_packs_m15.js',  # 产物内嵌特征 40
     u'node _verify_packs_m2.js',   # 在线更新 27
+    u'node _verify_script_gen.js 20260829',  # 话术生成引擎回归（6类x12套组合 × 品类匹配审计）
+    u'node _verify_full_script.js 20260829', # 全话术链路回归（随机24套×3次：开场→落地前下单 结构/语义/违禁词/品牌重复/句级重复）
+    u'node _verify_ai_price.js',   # 竞品分析 AI 更新价格（JSON 解析/覆盖层/预设与自定义应用）
     u'python _verify_packs_m3.py', # 发布管线 19
 ]
 
