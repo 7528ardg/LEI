@@ -23,3 +23,6 @@ packs/incoming/
 
 # 一次性迁移工具归档（如需入库请移回根目录）
 _legacy/
+
+# AI 工具工作目录（设计/计划文档已归档至 docs/superpowers/）
+.claude/

@@ -2425,7 +2425,6 @@ function selectFactor(el){
 // 这样页面打开时直接显示上次的数据，不再有全屏"加载中"
 // 【P1-6】每个缓存恢复步骤独立 try-catch，避免单点失败导致全部缓存被跳过
 function restoreFromCache(){
-  console.log('[cache] 开始从缓存恢复数据...');
   try{ CacheStatus.init(); }catch(e){ console.warn('[cache] CacheStatus初始化失败:', e.message); }
 
   // 1. 恢复台风数据
@@ -2433,7 +2432,6 @@ function restoreFromCache(){
     const cachedTyphoons = DataCache.get('typhoons');
     if(cachedTyphoons){
       STATE.typhoonData = cachedTyphoons;
-      console.log('[cache] 台风数据已恢复：', cachedTyphoons.length, '个');
     }
   }catch(e){ console.warn('[cache] 台风数据恢复失败:', e.message); }
 
@@ -2442,7 +2440,6 @@ function restoreFromCache(){
     const cachedEvents = DataCache.get('events');
     if(cachedEvents && Array.isArray(cachedEvents)){
       STATE.events = cachedEvents;
-      console.log('[cache] 事件列表已恢复：', cachedEvents.length, '条');
     }
   }catch(e){ console.warn('[cache] 事件列表恢复失败:', e.message); }
 
@@ -2451,8 +2448,6 @@ function restoreFromCache(){
   try{ cachedBase = loadBaseFromCache(); }catch(e){ console.warn('[cache] 基地选择恢复失败:', e.message); }
 
   if(cachedBase){
-    console.log('[cache] 基地选择已恢复：', cachedBase);
-
     // 恢复风险评分
     try{
       const cachedScores = DataCache.get('riskScores_' + (cachedBase || 'null'));
@@ -2534,7 +2529,6 @@ function restoreFromCache(){
       updateMultiDimProfile(cachedBase);
     }catch(e){ console.warn('[cache] 导航/面包屑/地图恢复失败:', e.message); }
 
-    console.log('[cache] 缓存恢复完成，页面已显示上次数据');
     return true; // 有缓存
   } else {
     // 无缓存基地，尝试恢复总部全景
@@ -2544,7 +2538,6 @@ function restoreFromCache(){
         _hqOverviewData = cachedHq;
         STATE.hqOverviewData = cachedHq;
         renderHqOverview(cachedHq);
-        console.log('[cache] 总部全景数据已恢复');
       }
     }catch(e){ console.warn('[cache] 总部全景恢复失败:', e.message); }
     return false;
@@ -2615,7 +2608,6 @@ async function initDashboard(){
       STATE.typhoonData=typhoonRes.data?.typhoons||[];
       // 写入缓存
       DataCache.set('typhoons', STATE.typhoonData);
-      console.log('[init] 台风数据加载完成：',STATE.typhoonData.length,'个活跃台风');
     }catch(e){
       console.warn('[init] 台风数据加载失败：',e.message);
       // 离线降级：使用缓存
@@ -2637,7 +2629,6 @@ async function initDashboard(){
     // （selectBase内部会再次调用 loadDimStats，此处作为双保险兜底，避免"必须手动刷新才显示"）
     try {
       const _defBase = cachedBase || STATE.currentBase || null;
-      console.log('[init] 主动加载维度统计（双保险兜底）：base=' + (_defBase || 'HQ(默认)'));
       await loadDimStats(_defBase);
     } catch(e) { console.warn('[init] 兜底加载维度统计失败，稍后由selectBase/refresh重试:', e.message); }
 
@@ -2669,7 +2660,6 @@ async function initDashboard(){
       await loadWeatherTimeline(null);
       // 【修复·问题4 关键点2】无缓存分支：同样必须保证维度统计加载（之前缺少此调用）
       try {
-        console.log('[init] 无缓存分支：加载总部维度统计');
         await loadDimStats(null);
       } catch(e) { console.warn('[init] 无缓存分支加载维度统计失败:', e.message); }
       // 初始化面包屑（显示总部）
@@ -3877,7 +3867,6 @@ async function selectBase(baseId,baseName){
   ]);
   // 【防竞态】如果在此期间用户又切换了基地，本次请求作废（但面板可见性已正确设置，不影响显示）
   if (mySeq !== _selectBaseReqSeq) {
-    console.log('[selectBase] 丢弃过期调用 seq=' + mySeq + ', base=' + baseId);
     return;
   }
   // 清理子级基地详细面板
@@ -5196,7 +5185,6 @@ function _repaintTopRankPanelWithFilter(opts) {
         const tmp = document.createElement('div');
         tmp.innerHTML = newHtml;
         if (tmp.firstElementChild) newPanel.replaceWith(tmp.firstElementChild);
-        console.log('[hook] 已刷新新三段式风险预警面板（时间筛选联动）');
         // 绑定三段式面板的侧边导航交互（因为面板被重建了）
         if (typeof window._bindThreeStageNav === 'function') try { window._bindThreeStageNav(); } catch(_) {}
         return;
@@ -8392,7 +8380,6 @@ function applyOpFilters(d, curTrend){
     if (dimFilter) {
       filteredEvs = filteredEvs.filter(ev => ev.dimension_id === dimFilter);
     }
-    console.log('[applyOpFilters] 应用筛选：range', rangeLabel, '| baseFilter=', baseFilter, '| dimFilter=', dimFilter, '| 原始事件=', allEvs.length, '| 过滤后事件=', filteredEvs.length, '| needClearReAgg=', needClearReAgg);
 
     // 重新聚合 d.division_breakdown：deep clone 一份 divBd
     const divBdClone = JSON.parse(JSON.stringify(d.division_breakdown || []));
@@ -8752,7 +8739,6 @@ function _repaintDimStatsWithFilter() {
         }
       }
     }
-    console.log('[hook] _repaintDimStatsWithFilter 已刷新 dimStatsGrid（时间筛选联动）');
   } catch (e) {
     console.warn('[hook] _repaintDimStatsWithFilter 失败：', e);
   }
@@ -8800,7 +8786,6 @@ function _repaintHqOverviewWithFilter() {
       const dimsSub = dimsP.children[dimsP.children.length - 1];
       if (dimsSub) dimsSub.innerHTML = `筛选范围：${rangeLabel} · ${sevC+sevG>0?'需重点关注':'数据平稳'}`;
     }
-    console.log('[hook] _repaintHqOverviewWithFilter 已刷新总部全景摘要（时间筛选联动）');
   } catch (e) {
     console.warn('[hook] _repaintHqOverviewWithFilter 失败：', e);
   }
@@ -12745,7 +12730,6 @@ async function loadDimStats(baseId){
     const dimsRes=await CabinAPI.riskDimensions.list();
     // 【防竞态】如果在此期间用户切换了基地，本次请求作废
     if (mySeq !== _dimStatsReqSeq) {
-      console.log('[dimStats] 丢弃过期请求 seq=' + mySeq + ', base=' + baseId);
       return;
     }
     const dims=dimsRes.data.data||[];
@@ -12767,7 +12751,6 @@ async function loadDimStats(baseId){
           // 包装成与 stats 接口一致的 { data: {...} } 结构
           return { data: raw };
         });
-        console.log('[dimStats] 使用批处理接口成功，请求数：1 次（原 7+1 = 8 次）');
       }
     } catch (batchErr) {
       if (mySeq !== _dimStatsReqSeq) return; // 防竞态
@@ -12868,7 +12851,6 @@ function renderDimStatsGrid(cacheData, baseId){
         ${fatigueReportHtml}
       </div>`;
     }).join('');
-    console.log('[renderDimStatsGrid] 缓存恢复渲染成功，维度数：'+dims.length+'，baseId：'+(baseId||'null'));
   }catch(e){
     console.warn('[renderDimStatsGrid] 渲染失败：', e.message);
   }
@@ -13257,7 +13239,6 @@ async function loadAllEventsToState(){
     STATE.events = evts;
     // 写入缓存
     DataCache.set('events', evts);
-    console.log('[loadAllEventsToState] 已加载 '+evts.length+' 条事件到 STATE.events');
   }catch(e){
     console.warn('[loadAllEventsToState] 加载失败', e);
     STATE.events = STATE.events || [];
@@ -13268,7 +13249,6 @@ async function loadAllEventsToState(){
 async function refreshAllDataPanels(){
   const baseId=STATE.currentBase||null;
   const baseName=STATE.currentBaseName||'总部全景';
-  console.log('[refreshAll] 开始刷新所有板块，当前基地：'+baseName);
 
   // 1. 并行加载基础数据（风险评分、简报、航线、趋势图）
   const basePromises=[
@@ -13355,7 +13335,6 @@ async function refreshAllDataPanels(){
     }
   }catch(e){ /* 忽略健康检查失败 */ }
 
-  console.log('[refreshAll] 所有板块刷新完成');
 }
 
 // L11: SOP条款映射
@@ -14906,7 +14885,6 @@ function setWeatherUpdateFreq(hours){
   if(_weatherUpdateTimer){ clearInterval(_weatherUpdateTimer); _weatherUpdateTimer=null; }
   // 设置新定时器（小时 → 毫秒）
   _weatherUpdateTimer=setInterval(()=>{
-    console.log(`[weather] 自动更新触发（每 ${h} 小时）`);
     refreshWeatherData();
   },h*3600*1000);
   // 同步下拉框选中状态
@@ -17263,7 +17241,6 @@ async function loadBriefingReport(baseId, forceRefresh){
         STATE.briefingTodayV2 = entry.v2 || null;
         STATE.briefingToday = entry.v1 || {};
         contentEl.innerHTML = entry.html || '';
-        console.log('[loadBriefingReport] 命中前端缓存（5 分钟内）', cacheKey);
         toast('简报已加载（5 分钟内缓存）', 'success');
         cacheHit = true;
       }
@@ -17287,7 +17264,6 @@ async function loadBriefingReport(baseId, forceRefresh){
     const _timeoutPromise = new Promise((_, rej) => setTimeout(() => { v2TimedOut = true; rej(new Error('V2 接口 12 秒超时，自动降级 V1')); }, 12000));
     try{
       briefingV2 = await Promise.race([_v2Promise, _timeoutPromise]);
-      console.log('[briefingV2] 返回数据版本：',briefingV2?.version, briefingV2);
     }catch(v2Err){
       v2ErrMsg = v2Err.message || '';
       console.warn('[briefingV2] V2接口失败，降级V1：',v2ErrMsg, v2TimedOut?'（超时自动降级）':'');
@@ -17617,13 +17593,11 @@ async function loadBriefingReport(baseId, forceRefresh){
           if (Date.now() - dt.getTime() > 2 * 24 * 3600 * 1000) delete saved[k];
         });
         localStorage.setItem('briefing_today_v1_cache', JSON.stringify(saved));
-        console.log('[loadBriefingReport] V2简报已缓存（5 分钟）', cacheKey);
       } catch(_) {}
       return;
     }
 
     // ===== 4. V2 失败降级：使用原 V1 渲染 =====
-    console.log('[briefingReport] 使用 V1 兼容渲染');
     // ... (原 V1 渲染逻辑，保持与现有兼容)
     const dimHtml=dims.map((d,i)=>{
       const dimId=d.id||'dim_'+i;
@@ -17828,7 +17802,6 @@ async function loadBriefingReport(baseId, forceRefresh){
         if (Date.now() - dt.getTime() > 2 * 24 * 3600 * 1000) delete saved[k];
       });
       localStorage.setItem('briefing_today_v1_cache', JSON.stringify(saved));
-      console.log('[loadBriefingReport] 已缓存简报（5 分钟有效）', cacheKey);
     } catch(_) {}
   }catch(e){
     console.error('[briefingReport]',e);
@@ -18352,24 +18325,20 @@ document.addEventListener('DOMContentLoaded',function(){
     // 1. 管理建议自动刷新（5分钟）
     if(typeof _measureRefreshTimer !== 'undefined' && _measureRefreshTimer){
       clearInterval(_measureRefreshTimer); _measureRefreshTimer = null;
-      console.log('[cleanup] 已清理 _measureRefreshTimer');
     }
     // 2. 基地机场天气自动刷新（5分钟）
     if(typeof _weatherRefreshTimer !== 'undefined' && _weatherRefreshTimer){
       clearInterval(_weatherRefreshTimer); _weatherRefreshTimer = null;
-      console.log('[cleanup] 已清理 _weatherRefreshTimer');
     }
     // 3. 天气数据用户自定义频率定时器
     if(typeof _weatherUpdateTimer !== 'undefined' && _weatherUpdateTimer){
       clearInterval(_weatherUpdateTimer); _weatherUpdateTimer = null;
-      console.log('[cleanup] 已清理 _weatherUpdateTimer');
     }
     // 4. 清理 Leaflet 地图实例（减少内存占用）
     if(STATE && STATE.leafletMap){
       try { STATE.leafletMap.remove(); } catch(e){}
       STATE.leafletMap = null; STATE.tileLayer = null;
       STATE.mapMarkersLayer = null; STATE.mapRoutesLayer = null; STATE.mapWeatherLayer = null;
-      console.log('[cleanup] 已清理 Leaflet 地图实例');
     }
   }
   // 注册清理事件：beforeunload（页面关闭前）+ pagehide（Safari/移动端兼容）
@@ -18730,7 +18699,6 @@ document.addEventListener('DOMContentLoaded',function(){
     try {
       const loggedIn = document.getElementById('loginOverlay')?.classList.contains('hidden') === true;
       if (loggedIn && typeof refreshWeatherData === 'function') {
-        console.log('[auto-trigger] 页面就绪，自动获取各大基地真实气象数据');
         refreshWeatherData();
       }
     } catch(err) { console.warn('[auto-trigger-weather] 刷新失败：', err.message); }
