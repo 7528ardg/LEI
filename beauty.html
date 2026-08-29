@@ -851,9 +851,27 @@
         // ===== 数据包销售覆盖（M1.2）：施加 type='sales' 覆盖层，产品按 id 匹配 =====
         // 原地 splice/替换，绝不重建 products 数组（全文件闭包引用 const products）
         ;(function(){
+          // 数据包产品字段兜底：数据包 item 字段不全（无 brand/volume/成分数组等），
+          // 统一补齐默认值，避免同比比拼、详情、生成话术等处对 undefined 调 .slice/.map 崩溃
+          function normalizeProduct(p){
+            if(p && typeof p === 'object'){
+              p.brand = p.brand || '机上好物';
+              p.category = p.category || '';
+              p.volume = p.volume || '';
+              p.origin = p.origin || '';
+              p.coreBenefits = p.coreBenefits || [];
+              p.keyIngredients = p.keyIngredients || [];
+              p.targetSkinTypes = p.targetSkinTypes || [];
+              p.unsuitable = p.unsuitable || [];
+              p.tags = p.tags || [];
+            }
+            return p;
+          }
           function applySales(){
             if(typeof window === 'undefined' || !window.PACKS || !window.localStorage) return;
             PACKS.applyMapToArray(products, PACKS.buildPackMap(window.localStorage, 'sales'), function(p){ return p && p.id ? String(p.id) : ''; });
+            // 合并后统一兜底（含基线+覆盖的全部产品，防止旧 localStorage 序里字段缺失的产品）
+            for(var i = 0; i < products.length; i++){ normalizeProduct(products[i]); }
           }
           try{ applySales(); }catch(e){ console.warn('销售数据包合并失败（已忽略）', e); }
           // 跨模块即时生效：库管理导入销售包后，当前已加载本模块也自动重新合并
@@ -15462,10 +15480,10 @@ productIntrosByCategory: {
 
         const filterProducts = () => {
             let prods = products.filter(p => {
-                const matchSearch = !state.searchQuery || p.name.toLowerCase().includes(state.searchQuery.toLowerCase()) || p.brand.toLowerCase().includes(state.searchQuery.toLowerCase()) || p.category.toLowerCase().includes(state.searchQuery.toLowerCase()) || p.tags.some(t => t.toLowerCase().includes(state.searchQuery.toLowerCase()));
+                const matchSearch = !state.searchQuery || p.name.toLowerCase().includes(state.searchQuery.toLowerCase()) || (p.brand || '').toLowerCase().includes(state.searchQuery.toLowerCase()) || p.category.toLowerCase().includes(state.searchQuery.toLowerCase()) || (p.tags || []).some(t => t.toLowerCase().includes(state.searchQuery.toLowerCase()));
                 const matchBrand = state.brandFilter === 'all' || p.brand === state.brandFilter;
                 const matchCategory = state.categoryFilter === 'all' || p.category === state.categoryFilter;
-                const matchSuppFilter = !state.browseSupplementFilter || p.category === '保健品' && p.tags.some(t => t === state.browseSupplementFilter || p.name.includes(state.browseSupplementFilter));
+                const matchSuppFilter = !state.browseSupplementFilter || p.category === '保健品' && (p.tags || []).some(t => t === state.browseSupplementFilter || p.name.includes(state.browseSupplementFilter));
                 // 产品浏览板块不过滤肤质，肤质筛选只影响肤质筛选板块
                 return matchSearch && matchBrand && matchCategory && matchSuppFilter;
             });
@@ -16081,9 +16099,9 @@ productIntrosByCategory: {
         // 获取产品优势
         const getProductAdvantages = (p) => {
             const advantages = [];
-            const uniqueIngredients = p.keyIngredients.map(i => i.commonName);
+            const uniqueIngredients = (p.keyIngredients || []).map(i => i.commonName);
             if (uniqueIngredients.length > 3) advantages.push('成分丰富，含' + uniqueIngredients.length + '种核心功效成分');
-            if (p.coreBenefits.length > 4) advantages.push('功效全面，覆盖' + p.coreBenefits.length + '大肌肤需求');
+            if ((p.coreBenefits || []).length > 4) advantages.push('功效全面，覆盖' + p.coreBenefits.length + '大肌肤需求');
             if ((p.targetSkinTypes || []).includes('所有肤质') || (p.targetSkinTypes || []).includes('全肤质')) advantages.push('适用性广，全肤质可用');
             if (p.stock === 'in_stock') advantages.push('现货充足，即买即发');
             advantages.push('核心成分：' + uniqueIngredients.slice(0, 2).join('、'));
@@ -16099,7 +16117,7 @@ productIntrosByCategory: {
             if (p.unsuitable && p.unsuitable.length > 0) {
                 p.unsuitable.forEach(u => { disadvantages.push('不适用：' + u.type + '（' + u.reason + '）'); });
             }
-            if (p.coreBenefits.length < 3) disadvantages.push('功效相对单一');
+            if ((p.coreBenefits || []).length < 3) disadvantages.push('功效相对单一');
             return disadvantages;
         };
         const loadCustomScripts = () => { try { const s = localStorage.getItem('customScripts'); if (s) state.customScripts = JSON.parse(s); } catch(e) {} };
@@ -17364,7 +17382,7 @@ const getRandomUnique = (arr, usedSet) => {
                     productListText = `\n今天给您介绍${selectedProducts.length}款：${selectedProducts.map((p, i) => `${p.brand}${p.name}`).join('、')}。`;
                 } else {
                     productListText = `\n今天给大家介绍${selectedProducts.length}款东西，分别是：`;
-                    selectedProducts.forEach((p, i) => { productListText += `\n第${i + 1}款：${p.brand} ${p.name}（${p.coreBenefits.slice(0, 2).join('、')}）`; });
+                    selectedProducts.forEach((p, i) => { productListText += `\n第${i + 1}款：${p.brand || '机上好物'} ${p.name}（${(p.coreBenefits || []).slice(0, 2).join('、')}）`; });
                     productListText += '\n';
                 }
             }
@@ -17532,13 +17550,13 @@ const getRandomUnique = (arr, usedSet) => {
                 let comboBlock = isVeryShort ? '\n' : `\n${pickTransition('toCrossSell')}\n【同品类组合 · 合理搭配】\n`;
                 dupFams.forEach(f => {
                     const g = famMap[f];
-                    const gNames = g.map(p => `${p.brand}${p.name}`).join(' + ');
+                    const gNames = g.map(p => `${p.brand || '机上好物'}${p.name}`).join(' + ');
                     if (isVeryShort) {
-                        comboBlock += `同属「${f}」：${gNames}——${g.map(p => `${p.name}主打${(p.coreBenefits[0] || '').split(/[，、]/)[0]}`).join('、')}，搭着用效果翻倍。\n`;
+                        comboBlock += `同属「${f}」：${gNames}——${g.map(p => `${p.name}主打${(((p.coreBenefits || [])[0]) || '多重功效').split(/[，、]/)[0]}`).join('、')}，搭着用效果翻倍。\n`;
                         return;
                     }
                     comboBlock += `**「${f}」多款组合（${gNames}）**：`;
-                    comboBlock += `这几款同属${f}，但各有分工——${g.map(p => `${p.brand}${p.name}侧重${p.coreBenefits.slice(0, 2).join('、')}`).join('；')}。\n`;
+                    comboBlock += `这几款同属${f}，但各有分工——${g.map(p => `${p.brand || '机上好物'}${p.name}侧重${(p.coreBenefits || []).slice(0, 2).join('、') || '多重功效'}`).join('；')}。\n`;
                     comboBlock += `搭配建议：${g.map((p, i) => `${i === 0 ? '先用' : (i === g.length - 1 ? '最后用' : '再用')}${p.brand}${p.name}`).join('，')}，按"先轻后重、先打底后叠加"的顺序使用，1+1>2，比单独用任何一款更事半功倍。\n`;
                 });
                 benefitsText += comboBlock + '\n';
@@ -17591,7 +17609,7 @@ const getRandomUnique = (arr, usedSet) => {
 
                     if (hasSouvenir) {
                         usageText += `**纪念品搭配建议**：\n`;
-                        souvenirProds.forEach((p, i) => { usageText += `第${i + 1}件：${p.brand} ${p.name}——${p.coreBenefits[0]}\n`; });
+                        souvenirProds.forEach((p, i) => { usageText += `第${i + 1}件：${p.brand || '机上好物'} ${p.name}——${((p.coreBenefits || [])[0]) || '人气好物'}\n`; });
                         usageText += '\n';
                     }
 
@@ -17607,14 +17625,14 @@ const getRandomUnique = (arr, usedSet) => {
                     if (hasFragrance) {
                         usageText += `**香氛搭配建议**：\n`;
                         usageText += `香水是最后的点睛之笔，建议在穿搭完成后使用：\n`;
-                        fragranceProds.forEach(p => { usageText += `${p.brand} ${p.name}——${p.coreBenefits[0]}\n`; });
+                        fragranceProds.forEach(p => { usageText += `${p.brand || '机上好物'} ${p.name}——${((p.coreBenefits || [])[0]) || '人气好物'}\n`; });
                         usageText += '\n';
                     }
 
                     if (hasHealth) {
                         usageText += `**保健品搭配建议**：\n`;
                         usageText += `内调外养效果更好：\n`;
-                        healthProds.forEach(p => { usageText += `${p.brand} ${p.name}——${p.coreBenefits[0]}\n`; });
+                        healthProds.forEach(p => { usageText += `${p.brand || '机上好物'} ${p.name}——${((p.coreBenefits || [])[0]) || '人气好物'}\n`; });
                         usageText += '\n';
                     }
 
@@ -17641,12 +17659,12 @@ const getRandomUnique = (arr, usedSet) => {
                 } else if (hasFragrance && fragranceProds.length === selectedProducts.length) {
                     usageText += `这几款香水各有特色，可以根据不同场合选择。\n\n`;
                     usageText += `**香氛推荐**：\n`;
-                    selectedProducts.forEach((p, i) => { usageText += `\n${p.brand} ${p.name}——${p.coreBenefits[0]}`; });
+                    selectedProducts.forEach((p, i) => { usageText += `\n${p.brand || '机上好物'} ${p.name}——${((p.coreBenefits || [])[0]) || '人气好物'}`; });
                     usageText += '\n\n';
                 } else if (hasHealth && healthProds.length === selectedProducts.length) {
                     usageText += `这几款保健品搭配服用，内调效果更好。\n\n`;
                     usageText += `**保健品推荐**：\n`;
-                    selectedProducts.forEach((p, i) => { usageText += `\n${p.brand} ${p.name}——${p.coreBenefits[0]}`; });
+                    selectedProducts.forEach((p, i) => { usageText += `\n${p.brand || '机上好物'} ${p.name}——${((p.coreBenefits || [])[0]) || '人气好物'}`; });
                     usageText += '\n\n';
                 } else {
                     usageText += `这几样搭配起来，效果更好。\n\n`;
@@ -17664,26 +17682,26 @@ const getRandomUnique = (arr, usedSet) => {
                             const skincareOrder = { '卸妆': 0, '洁面': 1, '面膜': 2, '精华水': 3, '化妆水': 3, '精华': 4, '眼霜': 5, '眼膜': 6, '面霜': 7, '防晒': 8 };
                             const orderedSkincare = [...skincareProds].sort((a, b) => (skincareOrder[a.category] || 5) - (skincareOrder[b.category] || 5));
                             orderedSkincare.forEach((p, i) => {
-                                usageText += `\n第${i + 1}步用${p.brand}${p.name}，它的作用是${p.coreBenefits[0]}，为后续的产品打好基础。\n`;
+                                usageText += `\n第${i + 1}步用${p.brand || '机上好物'}${p.name}，它的作用是${((p.coreBenefits || [])[0]) || '多重功效'}，为后续的产品打好基础。\n`;
                             });
                         }
                         if (hasSouvenir) {
                             usageText += `\n再说纪念品这边，搭配起来更有意义。`;
                             souvenirProds.forEach((p, i) => {
-                                usageText += `\n第${i + 1}件${p.brand}${p.name}，它的特色是${p.coreBenefits[0]}，搭配起来更完整。\n`;
+                                usageText += `\n第${i + 1}件${p.brand || '机上好物'}${p.name}，它的特色是${((p.coreBenefits || [])[0]) || '人气好物'}，搭配起来更完整。\n`;
                             });
                         }
                     } else if (isAllSouvenir) {
                         usageText += `\n我再跟您详细说说为什么要这样搭配。`;
                         selectedProducts.forEach((p, i) => {
-                            usageText += `\n第${i + 1}样${p.brand}${p.name}，它的特色是${p.coreBenefits[0]}，搭配起来更完整。\n`;
+                            usageText += `\n第${i + 1}样${p.brand || '机上好物'}${p.name}，它的特色是${((p.coreBenefits || [])[0]) || '人气好物'}，搭配起来更完整。\n`;
                         });
                     } else {
                         usageText += `\n我再跟您详细说说为什么要这样搭配。`;
                         const categoryOrder = { '洁面': 0, '精华水': 1, '化妆水': 1, '精华': 2, '眼霜': 3, '眼膜': 3, '面霜': 4, '防晒': 5, '面膜': 10, '卸妆': -1 };
                         const ordered = [...selectedProducts].sort((a, b) => (categoryOrder[a.category] || 5) - (categoryOrder[b.category] || 5));
                         ordered.forEach((p, i) => {
-                            usageText += `\n第${i + 1}步用${p.brand}${p.name}，它的作用是${p.coreBenefits[0]}，为后续的产品打好基础。\n`;
+                            usageText += `\n第${i + 1}步用${p.brand || '机上好物'}${p.name}，它的作用是${((p.coreBenefits || [])[0]) || '多重功效'}，为后续的产品打好基础。\n`;
                         });
                     }
                     usageText += `\n${getRandomUnique(vCrossSellPhrases, usedBenefitIntros)}\n`;
@@ -17792,13 +17810,13 @@ const getRandomUnique = (arr, usedSet) => {
                 totalDuration: d * 60, generatedAt: new Date().toLocaleString('zh-CN'), customerProfile: {...state.customerProfile},
                 modules: isVeryShort ? [
                     { id: 'opening', type: 'opening', title: '✈️ 快速开场', duration: Math.round(d * 60 * moduleRatios.opening), content: openingText + productListText, keyPoints: ['简短问候', '快速引入产品'] },
-                    { id: 'coreBenefits', type: 'coreBenefits', title: '🌟 核心卖点速递', duration: Math.round(d * 60 * moduleRatios.coreBenefits), content: benefitsText, keyPoints: selectedProducts.flatMap(p => [`${p.brand} ${p.name}：${p.coreBenefits.slice(0, 2).join('、')}`]) },
+                    { id: 'coreBenefits', type: 'coreBenefits', title: '🌟 核心卖点速递', duration: Math.round(d * 60 * moduleRatios.coreBenefits), content: benefitsText, keyPoints: selectedProducts.flatMap(p => [`${p.brand || '机上好物'} ${p.name}：${(p.coreBenefits || []).slice(0, 2).join('、')}`]) },
                     { id: 'closing', type: 'closing', title: '🛒 限时下单', duration: Math.round(d * 60 * moduleRatios.closing), content: closingText, keyPoints: [`机上专享价`, '3-7天到家', '正品保证假一赔四', '落地前下单'] }
                 ] : [
                     { id: 'opening', type: 'opening', title: '✈️ 旅客朋友们好（开场问候）', duration: Math.round(d * 60 * moduleRatios.opening), content: openingText + productListText, keyPoints: ['亲切问候（各位旅客朋友们好/旅途辛苦了）', '场景引入（万米高空/航班时光/机上特惠）', `介绍${selectedProducts.length}款机上好物：${selectedProducts.map(p => p.name).join('、')}`] },
-                    { id: 'coreBenefits', type: 'coreBenefits', title: isAllSouvenir ? '🌟 春秋航空特色纪念品（核心亮点）' : '🌟 机上跨境好物（核心卖点与成分）', duration: Math.round(d * 60 * moduleRatios.coreBenefits), content: benefitsText, keyPoints: [...selectedProducts.flatMap(p => [`**${p.brand} ${p.name}**：${p.coreBenefits.slice(0, 3).join('、')}`, ...p.keyIngredients.slice(0, 2).map(i => isSouvenirProduct(p) ? `亮点：${i.commonName}` : `成分：${i.commonName}`), p.targetSkinTypes.slice(0, 2).join('、')])] },
+                    { id: 'coreBenefits', type: 'coreBenefits', title: isAllSouvenir ? '🌟 春秋航空特色纪念品（核心亮点）' : '🌟 机上跨境好物（核心卖点与成分）', duration: Math.round(d * 60 * moduleRatios.coreBenefits), content: benefitsText, keyPoints: [...selectedProducts.flatMap(p => [`**${p.brand || '机上好物'} ${p.name}**：${(p.coreBenefits || []).slice(0, 3).join('、')}`, ...(p.keyIngredients || []).slice(0, 2).map(i => isSouvenirProduct(p) ? `亮点：${i.commonName}` : `成分：${i.commonName}`), (p.targetSkinTypes || []).slice(0, 2).join('、')])] },
                     { id: 'usage', type: 'usage', title: usageModuleTitle, duration: Math.round(d * 60 * moduleRatios.usage), content: usageText, keyPoints: usageKeyPoints },
-                    { id: 'trust', type: 'cases', title: '🏆 春秋旅客真实口碑', duration: Math.round(d * 60 * moduleRatios.trust), content: trustText, keyPoints: ['回头客比例数据', '航班旅客真实评价', `适合人群：${selectedProducts.flatMap(p => p.targetSkinTypes.slice(0, 2)).join('、')}`] },
+                    { id: 'trust', type: 'cases', title: '🏆 春秋旅客真实口碑', duration: Math.round(d * 60 * moduleRatios.trust), content: trustText, keyPoints: ['回头客比例数据', '航班旅客真实评价', `适合人群：${selectedProducts.flatMap(p => (p.targetSkinTypes || []).slice(0, 2)).join('、')}`] },
                     ...(crossSellText ? [{ id: 'crossSell', type: 'crossSell', title: isAllSouvenir ? '🔗 纪念品搭配推荐' : '🔗 机上搭配推荐', duration: Math.round(d * 60 * moduleRatios.crossSell), content: crossSellText, keyPoints: [`推荐搭配：${selectedProducts.map(p => p.name).join(' + ')}`, isAllSouvenir ? '搭配购买更有意义' : '协同效果说明', isAllSouvenir ? '机上专享搭配价更划算' : '机上跨境搭配价更划算'] }] : []),
                     { id: 'quality', type: 'quality', title: '✅ 春秋航空品质保证', duration: Math.round(d * 60 * moduleRatios.quality), content: qualityText, keyPoints: isAllSouvenir ? ['春秋航空官方出品', '品质有保障', '有问题包退换', '春秋航空信誉保障'] : ['跨境商品正品保证', '假一赔四承诺', '海关全程监管', '清关记录可查', '春秋航空信誉保障'] },
                     { id: 'closing', type: 'closing', title: '🛒 落地前下单（购买引导）', duration: Math.round(d * 60 * moduleRatios.closing), content: closingText, keyPoints: isAllSouvenir ? [`机上专享价（${selectedProducts.map(p => p.brand).join('、')}）`, '3-7天配送到家', '填写收货地址即可', '促成下单'] : [`机上专享价（${selectedProducts.map(p => p.brand).join('、')}）`, '保税仓直发3-7天到家', '填写收货地址+身份信息', '促成下单'] }
@@ -17881,7 +17899,7 @@ const getRandomUnique = (arr, usedSet) => {
             // 为什么推荐
             html += '<div class="bg-white rounded-xl p-4 border border-' + color + '-200"><div class="flex items-center gap-2 mb-2"><span class="text-' + color + '-600 text-base">💡</span><span class="font-bold text-' + color + '-800 text-sm">为什么推荐</span></div>';
             html += '<div class="text-xs text-gray-800 leading-relaxed">';
-            html += '<p class="mb-1">• 核心功效：' + p.coreBenefits.slice(0, 3).join('、') + '</p>';
+            html += '<p class="mb-1">• 核心功效：' + (p.coreBenefits || []).slice(0, 3).join('、') + '</p>';
             html += '<p>• 推荐理由：' + reasons + '</p>';
             html += '</div></div>';
             
@@ -18105,8 +18123,8 @@ const getRandomUnique = (arr, usedSet) => {
                                 html += `<div class="px-3 pb-3 space-y-3">
                                     ${skinTags.length > 0 ? `<div><div class="text-xs font-medium text-gray-500 mb-1">🏷️ 适合肤质：</div><div class="flex flex-wrap gap-1">${skinTags.map(t => { const cMap = { blue: 'bg-blue-100 text-gray-800', amber: 'bg-amber-100 text-amber-700', cyan: 'bg-cyan-100 text-cyan-700', teal: 'bg-teal-100 text-teal-700', rose: 'bg-rose-100 text-rose-700', green: 'bg-green-100 text-green-700', purple: 'bg-purple-100 text-purple-700' }; return `<span class="px-2 py-0.5 ${cMap[t.color] || 'bg-gray-100 text-gray-800'} rounded text-xs">${t.label}</span>`; }).join('')}</div></div>` : ''}
                                     <div class="bg-pink-50 rounded-lg p-3"><h4 class="text-sm font-semibold text-pink-800 mb-1">📝 产品说明</h4><p class="text-sm text-gray-800">${p.description}</p></div>
-                                    <div class="bg-emerald-50 rounded-lg p-3"><h4 class="text-sm font-semibold text-emerald-800 mb-1">🌿 核心成分</h4>${p.keyIngredients.map(i => `<div class="text-sm text-gray-800 mb-1"><span class="font-medium">${i.commonName}</span><span class="text-gray-500">：${i.mechanism}</span></div>`).join('')}</div>
-                                    <div class="bg-rose-50 rounded-lg p-3 border-2 border-rose-200"><h4 class="text-sm font-semibold text-rose-700 mb-2 flex items-center gap-2"><span class="text-base">⚠️</span> 不适用人群</h4><div class="space-y-2">${p.unsuitable.map(u => `<div class="unsuitable-item"><div class="flex items-start gap-2"><span class="text-rose-500 font-bold text-sm">✗</span><div><div class="font-semibold text-rose-700 text-sm">${u.type}</div><div class="text-xs text-gray-800 mt-1">${u.reason}</div></div></div></div>`).join('')}</div></div>
+                                    <div class="bg-emerald-50 rounded-lg p-3"><h4 class="text-sm font-semibold text-emerald-800 mb-1">🌿 核心成分</h4>${(p.keyIngredients || []).map(i => `<div class="text-sm text-gray-800 mb-1"><span class="font-medium">${i.commonName}</span><span class="text-gray-500">：${i.mechanism}</span></div>`).join('')}</div>
+                                    <div class="bg-rose-50 rounded-lg p-3 border-2 border-rose-200"><h4 class="text-sm font-semibold text-rose-700 mb-2 flex items-center gap-2"><span class="text-base">⚠️</span> 不适用人群</h4><div class="space-y-2">${(p.unsuitable || []).map(u => `<div class="unsuitable-item"><div class="flex items-start gap-2"><span class="text-rose-500 font-bold text-sm">✗</span><div><div class="font-semibold text-rose-700 text-sm">${u.type}</div><div class="text-xs text-gray-800 mt-1">${u.reason}</div></div></div></div>`).join('')}</div></div>
                                     <div class="flex gap-2"><button onclick="quickGenerate('${p.id}')" class="flex-1 py-2 bg-gradient-to-r from-pink-500 to-purple-500 text-gray-800 rounded-lg font-medium shadow-lg">✨ 快速生成话术</button><button onclick="toggleProduct('${p.id}')" class="px-4 py-2 ${isSel ? 'bg-rose-500 text-gray-800' : 'bg-pink-500 text-gray-800'} rounded-lg">${isSel ? '移除' : '选择产品'}</button></div>
                                 </div>`;
                             }
@@ -18330,7 +18348,7 @@ const getRandomUnique = (arr, usedSet) => {
                             var prob = needsData.skinProblems.find(function(pp) { return pp.id === pid; });
                             if (prob && p.benefits) {
                                 prob.benefits.forEach(function(b) {
-                                    if (p.benefits.includes(b)) { score += 3; reasons.push('解决' + prob.label); }
+                                    if (p.benefits && p.benefits.includes(b)) { score += 3; reasons.push('解决' + prob.label); }
                                 });
                             }
                             if (prob && p.tags) {
@@ -18356,7 +18374,7 @@ const getRandomUnique = (arr, usedSet) => {
                             var eff = needsData.effects.find(function(e) { return e.id === eid; });
                             if (eff && p.benefits) {
                                 eff.benefits.forEach(function(b) {
-                                    if (p.benefits.includes(b)) { score += 3; reasons.push(eff.label); }
+                                    if (p.benefits && p.benefits.includes(b)) { score += 3; reasons.push(eff.label); }
                                 });
                             }
                             if (eff && p.tags) {
@@ -18406,7 +18424,7 @@ const getRandomUnique = (arr, usedSet) => {
                 const getFilteredProducts = function(category, matchedIds, filterTags) {
                     let prods = products.filter(function(p) {
                         if (filterTags) {
-                            return p.category === category && filterTags.some(function(t) { return p.tags.includes(t); });
+                            return p.category === category && filterTags.some(function(t) { return (p.tags || []).includes(t); });
                         } else {
                             return p.category === category && matchedIds.has(p.id);
                         }
@@ -18652,7 +18670,7 @@ const getRandomUnique = (arr, usedSet) => {
                                             <div class="flex-shrink-0 w-7 h-7 bg-${rColor}-100 rounded-lg flex items-center justify-center text-xs font-bold text-${rColor}-600">${idx + 1}</div>
                                             <div class="flex-1 min-w-0">
                                                 <div class="text-sm font-bold text-gray-800">${p.name}</div>
-                                                <div class="text-xs text-gray-500">${p.brand} · ${p.category} · ${p.volume}</div>
+                                                <div class="text-xs text-gray-500">${p.brand || '机上好物'} · ${p.category || ''} · ${p.volume || ''}</div>
                                                 <div class="mt-1.5 bg-${rColor}-50 rounded-lg p-2 border border-${rColor}-100">
                                                     <div class="flex items-center gap-1.5 mb-1">
                                                         <span class="text-sm">${bias.icon}</span>
@@ -18664,7 +18682,7 @@ const getRandomUnique = (arr, usedSet) => {
                                                     </div>
                                                 </div>
                                                 <div class="flex flex-wrap gap-1 mt-2">
-                                                    ${p.coreBenefits.slice(0, 3).map(function(b) { return '<span class="px-1.5 py-0.5 bg-' + rColor + '-50 text-' + rColor + '-600 rounded text-xs">' + b + '</span>'; }).join('')}
+                                                    ${(p.coreBenefits || []).slice(0, 3).map(function(b) { return '<span class="px-1.5 py-0.5 bg-' + rColor + '-50 text-' + rColor + '-600 rounded text-xs">' + b + '</span>'; }).join('')}
                                                 </div>
                                             </div>
                                             <div class="flex flex-col gap-1.5 flex-shrink-0">
@@ -18756,7 +18774,7 @@ const getRandomUnique = (arr, usedSet) => {
                                                             <span class="text-xs text-gray-500">${p.category}</span>
                                                         </div>
                                                         <div class="flex flex-wrap gap-1 mt-2">
-                                                            ${p.coreBenefits.slice(0, 3).map(function(b) { return '<span class="px-1.5 py-0.5 bg-gray-100 text-gray-600 rounded text-xs">' + b + '</span>'; }).join('')}
+                                                            ${(p.coreBenefits || []).slice(0, 3).map(function(b) { return '<span class="px-1.5 py-0.5 bg-gray-100 text-gray-600 rounded text-xs">' + b + '</span>'; }).join('')}
                                                         </div>
                                                     </div>
                                                     <div class="flex flex-col gap-1.5 flex-shrink-0">
@@ -18817,7 +18835,7 @@ const getRandomUnique = (arr, usedSet) => {
                                                                 <span class="text-xs text-gray-500">${p.category}</span>
                                                             </div>
                                                             <div class="flex flex-wrap gap-1 mt-2">
-                                                                ${p.coreBenefits.slice(0, 3).map(function(b) { return '<span class="px-1.5 py-0.5 bg-gray-100 text-gray-600 rounded text-xs">' + b + '</span>'; }).join('')}
+                                                                ${(p.coreBenefits || []).slice(0, 3).map(function(b) { return '<span class="px-1.5 py-0.5 bg-gray-100 text-gray-600 rounded text-xs">' + b + '</span>'; }).join('')}
                                                             </div>
                                                         </div>
                                                         <div class="flex flex-col gap-1.5 flex-shrink-0">
@@ -18857,7 +18875,7 @@ const getRandomUnique = (arr, usedSet) => {
                             const matchedIds = new Set(state.matchedProducts.map(function(pp) { return pp.id; }));
                             supplementCategories.forEach(function(cat) {
                                 var catProducts = products.filter(function(p) {
-                                    return p.category === '保健品' && cat.filterTags.some(function(t) { return p.tags.includes(t); });
+                                    return p.category === '保健品' && cat.filterTags.some(function(t) { return (p.tags || []).includes(t); });
                                 });
                                 // 如果有匹配的id，优先显示匹配的产品
                                 if (matchedIds.size > 0) {
@@ -18895,7 +18913,7 @@ const getRandomUnique = (arr, usedSet) => {
                                                             <span class="text-xs text-gray-500">${p.category}</span>
                                                         </div>
                                                         <div class="flex flex-wrap gap-1 mt-2">
-                                                            ${p.coreBenefits.slice(0, 3).map(function(b) { return '<span class="px-1.5 py-0.5 bg-gray-100 text-gray-600 rounded text-xs">' + b + '</span>'; }).join('')}
+                                                            ${(p.coreBenefits || []).slice(0, 3).map(function(b) { return '<span class="px-1.5 py-0.5 bg-gray-100 text-gray-600 rounded text-xs">' + b + '</span>'; }).join('')}
                                                         </div>
                                                     </div>
                                                     <div class="flex flex-col gap-1.5 flex-shrink-0">
@@ -18958,7 +18976,7 @@ const getRandomUnique = (arr, usedSet) => {
                                                             <span class="text-xs text-gray-500">${p.category}</span>
                                                         </div>
                                                         <div class="flex flex-wrap gap-1 mt-2">
-                                                            ${p.coreBenefits.slice(0, 3).map(function(b) { return '<span class="px-1.5 py-0.5 bg-gray-100 text-gray-600 rounded text-xs">' + b + '</span>'; }).join('')}
+                                                            ${(p.coreBenefits || []).slice(0, 3).map(function(b) { return '<span class="px-1.5 py-0.5 bg-gray-100 text-gray-600 rounded text-xs">' + b + '</span>'; }).join('')}
                                                         </div>
                                                     </div>
                                                     <div class="flex flex-col gap-1.5 flex-shrink-0">
@@ -19044,7 +19062,7 @@ const getRandomUnique = (arr, usedSet) => {
                                                     <div class="flex-shrink-0 w-7 h-7 bg-gray-100 rounded-lg flex items-center justify-center text-xs font-bold text-gray-600">${idx + 1}</div>
                                                     <div class="flex-1 min-w-0">
                                                         <div class="text-sm font-bold text-gray-800">${p.name}</div>
-                                                        <div class="text-xs text-gray-500">${p.brand} · ${p.category} · ${p.volume}</div>
+                                                        <div class="text-xs text-gray-500">${p.brand || '机上好物'} · ${p.category || ''} · ${p.volume || ''}</div>
                                                         ${reasons ? `<div class="mt-1 text-xs text-emerald-600">✓ ${reasons}</div>` : ''}
                                                         <div class="mt-1.5 bg-amber-50 rounded-lg p-2 border border-amber-100">
                                                             <div class="flex items-center gap-1.5 mb-1">
@@ -19217,7 +19235,7 @@ const getRandomUnique = (arr, usedSet) => {
                             html += '</div>';
                             
                             html += '<div class="flex flex-wrap gap-1 mt-1.5">';
-                            p.coreBenefits.slice(0, 3).forEach(function(b) { html += '<span class="px-1.5 py-0.5 bg-gray-100 text-gray-800 rounded text-xs">' + b + '</span>'; });
+                            (p.coreBenefits || []).slice(0, 3).forEach(function(b) { html += '<span class="px-1.5 py-0.5 bg-gray-100 text-gray-800 rounded text-xs">' + b + '</span>'; });
                             html += '</div></div>';
                             
                             html += '<div class="flex flex-col gap-1.5 flex-shrink-0">';
@@ -19310,7 +19328,7 @@ const getRandomUnique = (arr, usedSet) => {
                             html += '</div></div></div>';
                             
                             // Light sensitivity & storage
-                            var hasLightSensitive = p.keyIngredients.some(function(i) {
+                            var hasLightSensitive = (p.keyIngredients || []).some(function(i) {
                                 return i.commonName.includes('酸') || i.commonName.includes('VC') || i.commonName.includes('维C') || i.commonName.includes('视黄醇') || i.commonName.includes('A醇') || i.commonName.includes('果酸') || i.commonName.includes('水杨酸');
                             });
                             
@@ -19351,7 +19369,7 @@ const getRandomUnique = (arr, usedSet) => {
                                 <div class="flex-1 min-w-0">
                                     <div class="flex items-center gap-2 mb-2"><span class="text-lg font-bold text-pink-600">${idx + 1}</span><div class="product-name font-bold text-gray-800">${p.brand} ${p.name}</div></div>
                                     <div class="flex items-center gap-2 flex-wrap"><span class="text-xs px-2 py-0.5 bg-pink-50 text-pink-600 rounded">${p.category}</span><span class="text-xs text-gray-400">${p.volume}</span><span class="text-xs text-gray-400">${p.origin}</span></div>
-                                    <div class="flex flex-wrap gap-1 mt-2">${p.coreBenefits.slice(0, 4).map(b => `<span class="px-2 py-0.5 bg-white text-pink-600 rounded text-xs border border-pink-100">${b}</span>`).join('')}</div>
+                                    <div class="flex flex-wrap gap-1 mt-2">${(p.coreBenefits || []).slice(0, 4).map(b => `<span class="px-2 py-0.5 bg-white text-pink-600 rounded text-xs border border-pink-100">${b}</span>`).join('')}</div>
                                 </div>
                                 <div class="flex flex-col gap-2"><button onclick="quickGenerate('${p.id}')" class="px-3 py-2 bg-gradient-to-r from-pink-500 to-purple-500 text-gray-800 rounded-lg text-sm shadow-lg">✨ 话术</button><button onclick="toggleProduct('${p.id}')" class="px-3 py-2 bg-rose-50 text-rose-500 rounded-lg text-sm hover:bg-rose-100">移除</button></div>
                             </div>
@@ -19435,10 +19453,10 @@ const getRandomUnique = (arr, usedSet) => {
                                             <tr class="border-t border-red-50 bg-red-50/30"><td class="p-3 text-xs font-medium text-gray-600 border-b border-red-50">容量</td>${compareProds.map(p => `<td class="p-3 text-sm text-gray-800 border-b border-red-50">${p.volume}</td>`).join('')}</tr>
                                             <tr class="border-t border-red-50"><td class="p-3 text-xs font-medium text-gray-600 border-b border-red-50">产地</td>${compareProds.map(p => `<td class="p-3 text-sm text-gray-800 border-b border-red-50">${p.origin}</td>`).join('')}</tr>
                                             <tr class="border-t border-red-50 bg-red-50/30"><td class="p-3 text-xs font-medium text-gray-600 border-b border-red-50">库存</td>${compareProds.map(p => `<td class="p-3 text-sm border-b border-red-50"><span class="${getStockClass(p.stock)} px-2 py-0.5 rounded text-xs">${getStockText(p.stock)}</span></td>`).join('')}</tr>
-                                            <tr class="border-t border-red-50"><td class="p-3 text-xs font-medium text-gray-600 border-b border-red-50"> 核心功效</td>${compareProds.map(p => `<td class="p-3 border-b border-red-50"><div class="flex flex-wrap gap-1">${p.coreBenefits.map(b => `<span class="px-2 py-0.5 bg-green-50 text-green-700 rounded text-xs">${b}</span>`).join('')}</div></td>`).join('')}</tr>
-                                            <tr class="border-t border-red-50 bg-red-50/30"><td class="p-3 text-xs font-medium text-gray-600 border-b border-red-50">🧪 关键成分</td>${compareProds.map(p => `<td class="p-3 border-b border-red-50"><div class="space-y-1">${p.keyIngredients.map(i => `<div class="text-xs"><span class="font-medium text-gray-800">${i.commonName}</span><span class="text-gray-500">：${i.mechanism}</span></div>`).join('')}</div></td>`).join('')}</tr>
+                                            <tr class="border-t border-red-50"><td class="p-3 text-xs font-medium text-gray-600 border-b border-red-50"> 核心功效</td>${compareProds.map(p => `<td class="p-3 border-b border-red-50"><div class="flex flex-wrap gap-1">${(p.coreBenefits || []).map(b => `<span class="px-2 py-0.5 bg-green-50 text-green-700 rounded text-xs">${b}</span>`).join('')}</div></td>`).join('')}</tr>
+                                            <tr class="border-t border-red-50 bg-red-50/30"><td class="p-3 text-xs font-medium text-gray-600 border-b border-red-50">🧪 关键成分</td>${compareProds.map(p => `<td class="p-3 border-b border-red-50"><div class="space-y-1">${(p.keyIngredients || []).map(i => `<div class="text-xs"><span class="font-medium text-gray-800">${i.commonName}</span><span class="text-gray-500">：${i.mechanism}</span></div>`).join('')}</div></td>`).join('')}</tr>
                                             <tr class="border-t border-red-50"><td class="p-3 text-xs font-medium text-gray-600 border-b border-red-50">👥 适用人群</td>${compareProds.map(p => `<td class="p-3 border-b border-red-50"><div class="flex flex-wrap gap-1">${(p.targetSkinTypes || []).map(t => `<span class="px-2 py-0.5 bg-blue-50 text-blue-700 rounded text-xs">${t}</span>`).join('')}</div></td>`).join('')}</tr>
-                                            ${compareProds[0].unsuitable && compareProds[0].unsuitable.length > 0 ? `<tr class="border-t border-red-50 bg-red-50/30"><td class="p-3 text-xs font-medium text-gray-600 border-b border-red-50">⚠️ 不适用</td>${compareProds.map(p => `<td class="p-3 border-b border-red-50"><div class="space-y-1">${p.unsuitable.map(u => `<div class="text-xs"><span class="text-rose-600 font-medium">${u.type}</span><span class="text-gray-500">：${u.reason}</span></div>`).join('')}</div></td>`).join('')}</tr>` : ''}
+                                            ${compareProds[0].unsuitable && compareProds[0].unsuitable.length > 0 ? `<tr class="border-t border-red-50 bg-red-50/30"><td class="p-3 text-xs font-medium text-gray-600 border-b border-red-50">⚠️ 不适用</td>${compareProds.map(p => `<td class="p-3 border-b border-red-50"><div class="space-y-1">${(p.unsuitable || []).map(u => `<div class="text-xs"><span class="text-rose-600 font-medium">${u.type}</span><span class="text-gray-500">：${u.reason}</span></div>`).join('')}</div></td>`).join('')}</tr>` : ''}
                                             <tr class="border-t border-red-200 bg-emerald-50"><td class="p-3 text-xs font-bold text-emerald-800 border-b border-red-200">✨ 优势</td>${compareProds.map(p => `<td class="p-3 border-b border-red-200"><div class="space-y-1">${getProductAdvantages(p).map(a => `<div class="flex items-start gap-1"><span class="text-emerald-500 text-xs flex-shrink-0">✓</span><span class="text-xs text-emerald-700">${a}</span></div>`).join('')}</div></td>`).join('')}</tr>
                                             <tr class="border-t border-red-200 bg-rose-50"><td class="p-3 text-xs font-bold text-rose-800 border-b border-red-200">⚠️ 劣势/注意</td>${compareProds.map(p => `<td class="p-3 border-b border-red-200"><div class="space-y-1">${getProductDisadvantages(p).length > 0 ? getProductDisadvantages(p).map(a => `<div class="flex items-start gap-1"><span class="text-rose-500 text-xs flex-shrink-0">✗</span><span class="text-xs text-rose-700">${a}</span></div>`).join('') : '<span class="text-xs text-gray-400">暂无明显劣势</span>'}</div></td>`).join('')}</tr>
                                         </tbody>
@@ -19469,9 +19487,9 @@ const getRandomUnique = (arr, usedSet) => {
                             </div>
                             <p class="text-sm text-gray-800 mt-2 line-clamp-2">${p.description}</p>
                             <div class="mt-2"><div class="text-xs font-medium text-gray-500 mb-1">🎯 核心功效：</div>
-                                <div class="flex flex-wrap gap-1">${p.coreBenefits.slice(0, 4).map(b => `<span class="px-2 py-0.5 bg-orange-50 text-orange-600 rounded text-xs">${b}</span>`).join('')}</div></div>
+                                <div class="flex flex-wrap gap-1">${(p.coreBenefits || []).slice(0, 4).map(b => `<span class="px-2 py-0.5 bg-orange-50 text-orange-600 rounded text-xs">${b}</span>`).join('')}</div></div>
                             <div class="mt-2"><div class="text-xs font-medium text-gray-500 mb-1"> 关键成分：</div>
-                                <div class="flex flex-wrap gap-1">${p.keyIngredients.slice(0, 3).map(i => `<span class="px-2 py-0.5 bg-pink-50 text-pink-600 rounded text-xs">${i.commonName}</span>`).join('')}</div></div>
+                                <div class="flex flex-wrap gap-1">${(p.keyIngredients || []).slice(0, 3).map(i => `<span class="px-2 py-0.5 bg-pink-50 text-pink-600 rounded text-xs">${i.commonName}</span>`).join('')}</div></div>
                             <div class="mt-2"><div class="text-xs font-medium text-gray-500 mb-1">👥 适用人群：</div>
                                 <div class="flex flex-wrap gap-1">${(p.targetSkinTypes || []).slice(0, 4).map(t => `<span class="px-2 py-0.5 bg-green-50 text-green-600 rounded text-xs">${t}</span>`).join('')}</div></div>
                             ${p.unsuitable && p.unsuitable.length > 0 ? `<div class="mt-2 bg-rose-50 rounded-lg p-2 border border-rose-100"><div class="text-xs font-medium text-rose-700 mb-1 flex items-center gap-1">️ 不适用人群：</div>
@@ -21841,8 +21859,8 @@ html += `<div class="mb-6"><div class="flex items-center justify-between mb-3"><
                 }
                 if (customer.concerns && customer.concerns.length > 0) {
                     const concernMatch = customer.concerns.some(c => 
-                        p.coreBenefits.some(b => b.includes(c)) || 
-                        p.tags.some(t => t.includes(c))
+                        (p.coreBenefits || []).some(b => b.includes(c)) || 
+                        (p.tags || []).some(t => t.includes(c))
                     );
                     if (concernMatch) score += 2;
                 }
