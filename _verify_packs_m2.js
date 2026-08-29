@@ -2,6 +2,10 @@
  * 1) 三外壳一致性：index.html 与两个构建模板均含 M2 特征
  * 2) vm 真实执行 index.html 的 M2 JS 块：computePackUpdates 差异判定、
  *    checkPacksUpdate 全流程（stub fetch）、installPacksUpdates 安装落库（含损坏包容错）
+ * 3) 外壳内嵌 PACKS 引擎回归（2026-08-29 修复）：外壳 M2 安装依赖 window.PACKS，
+ *    此前引擎只注入 4 个模块未注入 3 个外壳 → 安装恒报"引擎未就绪"。
+ *    现校验 3 外壳均内嵌引擎；并从 index.html 提取引擎源码独立执行，
+ *    走 checkPacksUpdate→installPacksUpdates 真实链路验证落库。
  * 运行：node _verify_packs_m2.js
  */
 'use strict';
@@ -155,6 +159,72 @@ sandbox.fetch = async (url) => {
   const dl = await run('fetchPackText({url:"packs/p-mirror.json"}, undefined)');
   check('数据包下载：主源失败→镜像回源成功', dl === JSON.stringify(PK_MIRROR));
   check('M2 含请求超时机制（fetchWithTimeout）', /fetchWithTimeout/.test(block));
+
+  /* --- 3. 外壳内嵌 PACKS 引擎回归（2026-08-29 修复：引擎只注入模块、漏注外壳） --- */
+  for (const f of ['index.html', '_gzip_build.py', '_build_4in1.py']) {
+    const s = fs.readFileSync(f, 'utf8');
+    check(f + ' 内嵌 PACKS 引擎（标记 + window.PACKS 赋值）',
+      s.indexOf('//__PACKS_ENGINE_START__') >= 0 && s.indexOf('//__PACKS_ENGINE_END__') >= 0 && s.indexOf('window.PACKS = PACKS') >= 0);
+  }
+  // 从 index.html 提取引擎源码（START/END 之间），独立执行：模拟真实外壳文档加载后 window.PACKS 可用
+  const engStart = html.indexOf('//__PACKS_ENGINE_START__');
+  const engEnd = html.indexOf('//__PACKS_ENGINE_END__');
+  const engineSrc = (engStart >= 0 && engEnd > engStart)
+    ? html.slice(engStart, engEnd).split('\n')
+        .filter(l => { const t = l.trim(); return t !== '//__PACKS_ENGINE_START__' && t !== '//__PACKS_ENGINE_END__'; })
+        .join('\n')
+    : '';
+  check('index.html 引擎源码可提取', engineSrc.length > 200);
+  if (engineSrc.length > 200) {
+    const CASE = 'p-shell';
+    const engStore = memStore();
+    const engToasts = [];
+    const engBadgeSpan = { textContent: '' };
+    const engEls = {};
+    const engSandbox = {
+      console, TextEncoder, TextDecoder,
+      toast(m) { engToasts.push(m); },
+      localStorage: engStore,
+      navigator: { onLine: true },
+      addEventListener() {},        // 浏览器里 window 即全局对象：window 自引用后 engine 的 window.PACKS=PACKS 直接挂全局
+      document: { getElementById: id => (id === 'packsBadge' ? { style: {}, classList: { add() {}, remove() {} }, querySelector: () => engBadgeSpan } : (engEls[id] = engEls[id] || elStub())) }
+    };
+    engSandbox.window = engSandbox;   // 模拟浏览器：window 引用即全局对象
+    vm.createContext(engSandbox);
+    vm.runInContext(engineSrc, engSandbox, { filename: 'shell-packs-engine.js' });
+    const engPacks = engSandbox.window.PACKS;
+    check('外壳引擎独立执行后 window.PACKS 可用', !!(engPacks && typeof engPacks.installPack === 'function'));
+    if (engPacks) {
+      const PK_REAL = { magic: engPacks.MAGIC, packId: CASE, type: 'quiz', title: '外壳安装包', version: 1, issuedAt: '2026-08-29', items: [{ op: 'upsert', key: 'S1', data: { q: '外壳题' } }] };
+      vm.runInContext(block, engSandbox, { filename: 'shell-m2.js' });
+      const urls2 = [
+        'https://7528ardg.github.io/LEI/packs/manifest.json',
+        'https://7528ardg.github.io/LEI/packs/' + CASE + '.json'
+      ];
+      engSandbox.fetch = async (url) => {
+        if (url === urls2[0] || url.indexOf('cdn.jsdelivr.net') >= 0 && url.indexOf('manifest.json') >= 0) {
+          return { ok: true, status: 200, json: async () => ({ magic: 'cabin-packs-manifest-v1', packs: [{ packId: CASE, title: '外壳安装包', type: 'quiz', version: 1, url: 'packs/' + CASE + '.json' }] }) };
+        }
+        if (url.indexOf(CASE + '.json') >= 0) {
+          return { ok: true, status: 200, arrayBuffer: async () => new TextEncoder().encode(JSON.stringify(PK_REAL)).buffer };
+        }
+        return { ok: false, status: 404, arrayBuffer: async () => new ArrayBuffer(0) };
+      };
+      vm.runInContext('checkPacksUpdate()', engSandbox);
+      await new Promise(r => setImmediate(r));
+      await new Promise(r => setImmediate(r));
+      check('外壳引擎路径：checkPacksUpdate 填充待装包（readIndex 走真实引擎）',
+        Array.isArray(engSandbox.packsUpdateReady) && engSandbox.packsUpdateReady.length === 1 && engSandbox.packsUpdateReady[0].packId === CASE);
+      vm.runInContext('installPacksUpdates()', engSandbox);
+      await new Promise(r => setImmediate(r));
+      await new Promise(r => setImmediate(r));
+      const idxShell = engPacks.readIndex(engStore);
+      const packed = engPacks.readPack(engStore, CASE);
+      check('外壳引擎路径：installPacksUpdates 安装落库（不再报引擎未就绪）',
+        !!(idxShell && idxShell.packs.length === 1 && idxShell.packs[0].source === 'url' && packed && packed.packId === CASE));
+      check('外壳引擎路径：安装成功 toast', engToasts.some(m => /已安装 1 个数据包/.test(String(m))), JSON.stringify(engToasts));
+    }
+  }
 
   let pass = 0, fail = 0;
   for (const r of results) {

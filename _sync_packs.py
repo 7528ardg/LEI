@@ -1,5 +1,11 @@
 # -*- coding: utf-8 -*-
-"""将 docs/_packs_engine.js 数据包引擎注入到 4 个消费端源文件（单一来源，杜绝手抄漂移）
+"""将 docs/_packs_engine.js 数据包引擎注入到 4 消费端源文件 + 3 三外壳（单一来源，杜绝手抄漂移）
+
+消费端（模块内嵌引擎，供模块内数据包中心/覆盖层消费）：qa / beauty / quiz / kb-admin.template
+三外壳（外壳级引擎，供 M2 在线安装 installPacksUpdates 使用 window.PACKS 落库）：
+    index.html / _gzip_build.py 模板 / _build_4in1.py 模板
+    （2026-08-29 修复：此前外壳只有 M2 读取分支做了 window.PACKS 判空，安装分支因无引擎
+      恒走 { ok:false, reason:'引擎未就绪' }，导致"安装数据包报引擎未安装"）
 
 用法：
     python _sync_packs.py            # 注入/更新（幂等：有块替换，无块在 </head> 前插入）
@@ -26,6 +32,9 @@ TARGETS = [
     u'beauty.html',
     u'quiz.html',
     u'kb-admin.template.html',
+    u'index.html',
+    u'_gzip_build.py',
+    u'_build_4in1.py',
 ]
 BLOCK_START = u'//__PACKS_ENGINE_START__'
 BLOCK_END = u'//__PACKS_ENGINE_END__'
@@ -89,7 +98,10 @@ def check_file(path, src):
     if not m:
         return u'DIRTY'
     cur = m.group(1).strip()
-    return u'OK' if cur == src.strip() else u'STALE'
+    # 忽略 \r（git autocrlf 会在 checkout 时把 LF 转 CRLF，避免 eol 差异导致误报 STALE）
+    cur = cur.replace(u'\r', u'').strip()
+    src_norm = src.replace(u'\r', u'').strip()
+    return u'OK' if cur == src_norm else u'STALE'
 
 
 def remove_file(path):
