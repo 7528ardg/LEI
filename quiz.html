@@ -1765,7 +1765,7 @@ a{color:var(--primary);text-decoration:none;}
 /* ===== 考试顶部倒计时条（粘性 + 醒目） ===== */
 .exam-countdown-bar{position:sticky;top:60px;z-index:50;background:linear-gradient(135deg,#148453 0%,#0d6d40 100%);color:#fff;padding:12px 20px;border-radius:14px;margin-bottom:18px;box-shadow:0 8px 24px rgba(20,132,83,.25),inset 0 1px 0 rgba(255,255,255,.1);overflow:hidden;transition:background .4s;}
 .exam-countdown-bar.ecb-warning{background:linear-gradient(135deg,#F08A00 0%,#E64A19 100%);box-shadow:0 8px 24px rgba(230,74,25,.35),inset 0 1px 0 rgba(255,255,255,.1);animation:ecbPulse 1.5s ease-in-out infinite;}
-.exam-countdown-bar.ecb-danger{background:linear-gradient(135deg,#DC2626 0%,#991B1B 100%);box-shadow:0 8px 24px rgba(220,38,38,.4);animation:ecbShake .5s ease-in-out infinite;}
+.exam-countdown-bar.ecb-danger{background:linear-gradient(135deg,#DC2626 0%,#991B1B 100%);box-shadow:0 8px 24px rgba(220,38,38,.4);animation:ecbPulse 1s ease-in-out infinite;}
 @keyframes ecbPulse{0%,100%{box-shadow:0 8px 24px rgba(230,74,25,.35);}50%{box-shadow:0 8px 32px rgba(230,74,25,.6);}}
 @keyframes ecbShake{0%,100%{transform:translateX(0);}25%{transform:translateX(-2px);}75%{transform:translateX(2px);}}
 .ecb-inner{display:flex;align-items:center;gap:14px;position:relative;z-index:1;}
