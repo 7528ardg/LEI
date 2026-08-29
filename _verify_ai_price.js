@@ -54,13 +54,14 @@ console.log('[1] parseAiPriceJson');
 eq('纯 JSON', api.parseAiPriceJson('[{"platform":"天猫","store":"A","size":"30ml","price":665,"note":"日常价"}]'),
    [{ platform: '天猫', store: 'A', size: '30ml', price: 665, note: '日常价' }]);
 eq('markdown 代码块', api.parseAiPriceJson('```json\n[{"platform":"京东","size":"50ml","price":900}]\n```'),
-   [{ platform: '京东', store: '', size: '50ml', price: 900, note: 'AI估算' }]);
+   [{ platform: '京东', store: '', size: '50ml', price: 900, note: '联网参考价' }]);
 eq('带前后缀文本', api.parseAiPriceJson('以下是价格：\n[{"platform":"日上","size":"100ml","price":880,"note":"免税价"}]\n请查收。'),
    [{ platform: '日上', store: '', size: '100ml', price: 880, note: '免税价' }]);
 eq('空数组', api.parseAiPriceJson('[]'), []);
 eq('空字符串', api.parseAiPriceJson(''), []);
 eq('非法 JSON', api.parseAiPriceJson('这是没有数组的文本'), []);
 eq('过滤 price=0/空行', api.parseAiPriceJson('[{"platform":"天猫","size":"30ml","price":0},{"price":100}]'), []);
+eq('单对象JSON自动包数组', api.parseAiPriceJson('{"platform":"日上","size":"50ml","price":800}'), [{ platform: '日上', store: '', size: '50ml', price: 800, note: '联网参考价' }]);
 
 console.log('[2] getCompetitorPrices');
 eq('无覆盖取原数据', api.getCompetitorPrices(competitorData[0]), competitorData[0].prices);
@@ -75,7 +76,7 @@ api.applyCompetitorPrices(competitorData[0], [
 ]);
 eq('覆盖层写入', state.competitorPriceOverrides['comp001'].prices.map(p => [p.platform, p.price, p.note]),
    [['天猫', 920, '日常价'], ['日上', 860, '免税价']]);
-ok('updateTime 带 AI更新', /AI更新/.test(state.competitorPriceOverrides['comp001'].prices[0].updateTime));
+ok('updateTime 带 联网更新', /联网更新/.test(state.competitorPriceOverrides['comp001'].prices[0].updateTime));
 ok('原预设数据未被污染', competitorData[0].prices.length === 1 && competitorData[0].prices[0].price === 665);
 
 console.log('[4] applyCompetitorPrices（自定义竞品 -> 直接更新）');
@@ -84,15 +85,47 @@ api.applyCompetitorPrices(state.competitorProducts[0], [{ platform: '京东', si
 eq('自定义竞品 prices 更新', state.competitorProducts[0].prices.length, 1);
 ok('自定义竞品不进覆盖层', !state.competitorPriceOverrides['custom1']);
 
-console.log('[5] aiFetchPrices 走 SpringAI.chatLLM 并解析');
-let lastPrompt = '';
-SpringAI.chatLLM = async (msgs, opts) => { lastPrompt = msgs[1].content; return '```json\n[{"platform":"天猫","size":"30ml","price":665,"note":"日常价"}]\n```'; };
+console.log('[5] aiFetchPrices：Firecrawl 免费通道（不消耗计费工具）');
+let lastPrompt = '', lastOpts = null, lastFetchUrl = '';
+globalThis.fetch = async (url, o) => { lastFetchUrl = String(url); return { ok:true, json: async () => ({ success:true, data:{ web:[
+  { title:'兰蔻小黑瓶 30ml 价格解析', description:'淘宝 · 原价1100.00元，到手价 980 元', url:'https://taobao.example/x' },
+  { title:'兰蔻官方旗舰店 小黑瓶精华肌底液', description:'京东自营 30ml 售价 1080 元', url:'https://jd.example/y' }
+]}, creditsUsed:2 }) }; };
+SpringAI.chatLLM = async (msgs, opts) => { lastOpts = opts; lastPrompt = msgs[1].content; return '```json\n[{"platform":"淘宝","size":"30ml","price":980,"note":"活动价"},{"platform":"京东","size":"30ml","price":1080,"note":"日常价"}]\n```'; };
 (async () => {
   const c0 = { id: 'comp002', brand: '兰蔻', name: '小黑瓶', category: '精华', prices: [{ platform: '天猫', size: '30ml', price: 700 }] };
   const res = await api.aiFetchPrices(c0);
-  eq('aiFetchPrices 解析结果', res, [{ platform: '天猫', store: '', size: '30ml', price: 665, note: '日常价' }]);
-  ok('prompt 含产品信息', lastPrompt.indexOf('兰蔻 小黑瓶') !== -1);
+  eq('Firecrawl 通道解析结果', res, [
+    { platform: '淘宝', store: '', size: '30ml', price: 980, note: '活动价' },
+    { platform: '京东', store: '', size: '30ml', price: 1080, note: '日常价' }
+  ]);
+  ok('调用 Firecrawl /v2/search', lastFetchUrl.indexOf('api.firecrawl.dev/v2/search') !== -1);
+  ok('prompt 含搜索结果真实价格', lastPrompt.indexOf('原价1100.00元') !== -1 || lastPrompt.indexOf('1080') !== -1);
+  ok('免费通道不传 tools（不消耗计费）', !(lastOpts && lastOpts.tools && lastOpts.tools.length));
 
+    console.log('[6] aiFetchPrices：Firecrawl 失败自动回退 Tavily Keyless（免费备份源）');
+  let fallbackHeader = '', fallbackUrl = '', fallbackBody = '';
+  globalThis.fetch = async (url, opt) => {
+    if (String(url).indexOf('firecrawl') !== -1) throw new TypeError('Failed to fetch');
+    fallbackUrl = String(url); fallbackHeader = String((opt && opt.headers && opt.headers['X-Tavily-Access-Mode']) || ''); fallbackBody = String((opt && opt.body) || '');
+    return { ok:true, json: async () => ({ results:[{ title:'日上免税 雅诗兰黛小棕瓶', content:'100ml 售价 860 元', url:'https://dfs.example/a' }] }) };
+  };
+  SpringAI.chatLLM = async (msgs, opts) => { lastOpts = opts; return '[{"platform":"日上","size":"100ml","price":860,"note":"免税价"}]'; };
+  const res2 = await api.aiFetchPrices({ id: 'comp005', brand: '雅诗兰黛', name: '小棕瓶', prices: [] });
+  eq('回退 Tavily 解析结果', res2, [{ platform: '日上', store: '', size: '100ml', price: 860, note: '免税价' }]);
+  ok('回退调用 Tavily /search', fallbackUrl.indexOf('api.tavily.com/search') !== -1);
+  ok('Tavily Keyless 头为 keyless', fallbackHeader === 'keyless');
+  ok('回退通道不传计费 tools', !(lastOpts && lastOpts.tools && lastOpts.tools.length));
+
+  console.log('[7] aiFetchPrices：Firecrawl 空结果 + 兜底也为空 -> 抛错不编造');
+  globalThis.fetch = async () => ({ ok:true, json: async () => ({ success:true, data:{ web: [] } }) });
+  SpringAI.chatLLM = async () => '';
+  let errMsg = '';
+  try { await api.aiFetchPrices({ id: 'comp006', brand: '某', name: '未知款', prices: [] }); }
+  catch(e) { errMsg = String((e && e.message) || e); }
+  ok('空结果抛免费通道不可用', errMsg.indexOf('免费搜索通道暂不可用') !== -1);
+
+  globalThis.fetch = undefined;
   console.log('\nPASS ' + pass + ' / ' + (pass + fail));
   process.exit(fail ? 1 : 0);
 })().catch((e) => { console.log('ASYNC_ERR', e); process.exit(1); });

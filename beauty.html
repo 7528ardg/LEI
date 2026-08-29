@@ -4110,8 +4110,8 @@ productIntrosByCategory: {
         const SpringAI = (function(){
             const CFG_KEY = 'spring_ai_cfg';
             const PROVIDERS = {
-                zhipu:       { key:'zhipu',       name:'智谱 GLM-4-Flash-250414（免费）', base:'https://open.bigmodel.cn/api/paas/v4', model:'glm-4-flash-250414',    hint:'open.bigmodel.cn 免费注册，GLM-4-Flash 系列免费调用' },
-                siliconflow: { key:'siliconflow', name:'硅基流动 GLM-4-9B-0414（免费）',  base:'https://api.siliconflow.cn/v1',        model:'THUDM/GLM-4-9B-0414',    hint:'siliconflow.cn 免费开源模型，注册送体验额度' }
+                zhipu:       { key:'zhipu',       name:'智谱 GLM-4-Flash-250414（免费）', base:'https://open.bigmodel.cn/api/paas/v4', model:'glm-4-flash-250414',    hint:'open.bigmodel.cn 免费注册，GLM-4-Flash 系列免费调用；竞品价格由免费联网搜索源提供，模型只负责抽取' },
+                siliconflow: { key:'siliconflow', name:'硅基流动 GLM-4-9B-0414（免费）',  base:'https://api.siliconflow.cn/v1',        model:'THUDM/GLM-4-9B-0414',    hint:'siliconflow.cn 免费开源模型，注册送体验额度；竞品价格由免费联网搜索源提供，模型只负责抽取' }
             };
             const getCfg = () => {
                 try{ const c = JSON.parse(localStorage.getItem(CFG_KEY) || '{}'); return Object.assign({ provider:'zhipu', apiKey:'', endpoint:'', model:'' }, c); }
@@ -4192,7 +4192,7 @@ productIntrosByCategory: {
                 ov.onclick = (e) => { if(e.target === ov) ov.remove(); };
                 $('sa-test').onclick = async () => {
                     const p = providerSelect();
-                    const tmp = { provider:$('sa-provider').value, apiKey:$('sa-key').value.trim(), endpoint:$('sa-endpoint').value.trim(), model:$('sa-model').value.trim() };
+                    const tmp = Object.assign(getCfg(), { provider:$('sa-provider').value, apiKey:$('sa-key').value.trim(), endpoint:$('sa-endpoint').value.trim(), model:$('sa-model').value.trim() });
                     localStorage.setItem('spring_ai_cfg', JSON.stringify(tmp));
                     const st = $('sa-status');
                     st.style.color='#e65100'; st.textContent='⏳ 正在测试连接…';
@@ -4206,7 +4206,7 @@ productIntrosByCategory: {
                     }
                 };
                 $('sa-save').onclick = () => {
-                    const v = { provider:$('sa-provider').value, apiKey:$('sa-key').value.trim(), endpoint:$('sa-endpoint').value.trim(), model:$('sa-model').value.trim() };
+                    const v = Object.assign(getCfg(), { provider:$('sa-provider').value, apiKey:$('sa-key').value.trim(), endpoint:$('sa-endpoint').value.trim(), model:$('sa-model').value.trim() });
                     setCfg(v);
                     ov.remove();
                     if(cb) cb(v);
@@ -22636,50 +22636,121 @@ html += `<div class="mb-6"><div class="flex items-center justify-between mb-3"><
                 try { arr = JSON.parse(t.slice(s, e + 1)); } catch(err) { arr = []; }
             }
             if (!Array.isArray(arr)) arr = [];
+            // 兼容 AI 只输出单个价格对象（漏外层数组）的情况
+            if (!arr.length) {
+                const so = t.indexOf('{');
+                const eo = t.lastIndexOf('}');
+                if (so !== -1 && eo > so) {
+                    try {
+                        const single = JSON.parse(t.slice(so, eo + 1));
+                        if (single && typeof single === 'object' && !Array.isArray(single)) arr = [single];
+                    } catch(err) { /* 保持空 */ }
+                }
+            }
             return arr.map(function(p) {
                 return {
                     platform: String(p.platform || '').trim(),
                     store: String(p.store || '').trim(),
                     size: String(p.size || '').trim(),
                     price: parseInt(p.price) || 0,
-                    note: String(p.note || 'AI估算').trim()
+                    note: String(p.note || '联网参考价').trim()
                 };
             }).filter(function(p) { return p.price > 0 && (p.platform || p.size); });
         };
-        // 调用 AI 获取参考价
-        const aiFetchPrices = async (comp) => {
-            const current = getCompetitorPrices(comp);
-            const sizeHint = [...new Set(current.map(function(p){ return p.size; }).filter(Boolean))].slice(0, 6).join('、');
-            const platformHint = [...new Set(current.map(function(p){ return p.platform; }).filter(Boolean))].slice(0, 5).join('、');
-            const sys = [
-                '你是春秋航空机上免税品销售团队的竞品价格分析师，擅长给出合理、客观的化妆品市场参考价格。',
-                '你只输出一个 JSON 数组，不要输出任何解释、前后缀或 markdown 代码块标记。',
-                'JSON 格式（严格）：[{"platform":"渠道名","store":"渠道店铺全称","size":"规格","price":整数,"note":"日常价/活动价/免税价/跨境价"}]',
-                '如果实在无法给出该产品的可靠价格，请只输出空数组 []。'
-            ].join('\n');
-            const user = [
-                '请为以下竞品提供当前中国市场的参考零售价格（人民币）：',
-                '产品：' + comp.brand + ' ' + comp.name,
-                '品类：' + (comp.category || '化妆品'),
-                '常见规格参考：' + (sizeHint || '如 30ml / 50ml / 75ml'),
-                '建议覆盖渠道：' + (platformHint || '天猫旗舰店、京东自营、天猫国际、日上免税、三亚免税城'),
-                '要求：1. 各渠道给出常见规格与对应参考价；2. 价格为合理的市场参考价，不确定的渠道可以不列；3. 免税渠道应显著低于专柜价。'
-            ].join('\n');
-            const resp = await SpringAI.chatLLM([
-                { role: 'system', content: sys },
-                { role: 'user', content: user }
-            ], { temperature: 0.3, maxTokens: 1200, timeout: 30000 });
-            return parseAiPriceJson(resp);
-        };
-        // 应用价格：预设竞品写入覆盖层（可恢复默认），自定义竞品直接更新
+        // ===== 免费价格搜索通道（全部免注册免 key、免费额度，无任何收费路径）=====
+// 源1：Firecrawl Keyless（api.firecrawl.dev/v2/search，CORS 放行，每月免费额度）
+// 源2：Tavily Keyless（api.tavily.com/search + X-Tavily-Access-Mode:keyless，CORS 放行，免注册免费额度）
+const PRICE_SEARCH_TIMEOUT = 20000;
+const searchPriceText = async (comp) => {
+    const q = (comp.brand || '') + ' ' + (comp.name || '') + ' 价格';
+    const textFromResults = function(items) {
+        return items.map(function(w, i) {
+            const title = String(w.title || '').replace(/\s+/g, ' ').slice(0, 80);
+            const desc = String(w.description || w.content || '').replace(/\s+/g, ' ').slice(0, 260);
+            const url = String(w.url || '');
+            return (i + 1) + '. ' + [title, desc, url].filter(Boolean).join(' | ');
+        }).join('\n');
+    };
+    // 1) Firecrawl Keyless 免费搜索
+    try {
+        const ctrl = new AbortController();
+        const timer = setTimeout(function() { ctrl.abort(); }, PRICE_SEARCH_TIMEOUT);
+        let res = null;
+        try {
+            res = await fetch('https://api.firecrawl.dev/v2/search', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ query: q + ' 人民币 天猫 京东 免税', limit: 6 }),
+                signal: ctrl.signal
+            });
+        } finally { clearTimeout(timer); }
+        if (res && res.ok) {
+            const j = await res.json();
+            const web = (j && j.data && Array.isArray(j.data.web)) ? j.data.web : [];
+            if (web.length) return { engine: 'firecrawl', text: textFromResults(web) };
+        }
+    } catch(e) { /* 源1失败，走源2 */ }
+    // 2) Tavily Keyless 免费搜索（备份源，同样免注册免 key）
+    try {
+        const ctrl = new AbortController();
+        const timer = setTimeout(function() { ctrl.abort(); }, PRICE_SEARCH_TIMEOUT);
+        let res = null;
+        try {
+            res = await fetch('https://api.tavily.com/search', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json', 'X-Tavily-Access-Mode': 'keyless' },
+                body: JSON.stringify({ query: q + ' 人民币 天猫 京东 免税', max_results: 6, search_depth: 'basic' }),
+                signal: ctrl.signal
+            });
+        } finally { clearTimeout(timer); }
+        if (res && res.ok) {
+            const j = await res.json();
+            const results = (j && Array.isArray(j.results)) ? j.results : [];
+            if (results.length) return { engine: 'tavily', text: textFromResults(results) };
+        }
+    } catch(e) { /* 两个免费源均不可用 */ }
+    return { engine: 'none', text: '' };
+};
+// 调用 AI 获取参考价：免费搜索真实网页 → GLM-4-Flash（免费模型）只从搜索摘要中抽取价格，禁止记忆估算
+const aiFetchPrices = async (comp) => {
+    const current = getCompetitorPrices(comp);
+    const sizeHint = [...new Set(current.map(function(p){ return p.size; }).filter(Boolean))].slice(0, 6).join('、');
+    const platformHint = [...new Set(current.map(function(p){ return p.platform; }).filter(Boolean))].slice(0, 5).join('、');
+    const search = await searchPriceText(comp);
+    if (!search.text) throw new Error('所有免费搜索通道暂不可用（Firecrawl / Tavily 免注册免费额度耗尽或网络异常）。请稍后重试，或手动编辑价格。');
+    const sys = [
+        '你是春秋航空机上免税品销售团队的竞品价格分析师。',
+        '你只能依据下方【搜索结果】中明确出现的零售价抽取数据，严禁使用你自己的知识、记忆或知识库推测任何价格。',
+        '搜索结果里某个渠道/规格没有明确价格数字的，一律不要输出。',
+        '你只输出一个 JSON 数组，不要输出任何解释、前后缀或 markdown 代码块标记。',
+        'JSON 格式（严格）：[{"platform":"渠道名","store":"渠道店铺全称","size":"规格","price":整数,"note":"日常价/活动价/免税价/跨境价","source":"该行价格来自哪条搜索结果"}]\'',
+        '连一条明确价格都没有时，只输出空数组 []，绝对不要编造。'
+    ].join('\n');
+    const user = [
+        '产品：' + comp.brand + ' ' + comp.name + '（' + (comp.category || '化妆品') + '）',
+        '常见规格参考：' + (sizeHint || '如 30ml / 50ml / 75ml'),
+        '建议覆盖渠道：' + (platformHint || '天猫旗舰店、京东自营、天猫国际、日上免税、三亚免税城'),
+        '以下为搜索到的真实页面信息（价格只能从这里取，不得凭空补全）：',
+        '------',
+        search.text.slice(0, 4000),
+        '------',
+        '请抽取各渠道真实在售价（人民币）输出 JSON 数组。'
+    ].join('\n');
+    const resp = await SpringAI.chatLLM([
+        { role: 'system', content: sys },
+        { role: 'user', content: user }
+    ], { temperature: 0.1, maxTokens: 1200, timeout: 45000 });
+    return parseAiPriceJson(resp);
+};
+// 应用价格：预设竞品写入覆盖层（可恢复默认），自定义竞品直接更新
         const applyCompetitorPrices = (comp, prices) => {
             const now = new Date();
             const dateStr = now.getFullYear() + '年' + (now.getMonth() + 1) + '月' + now.getDate() + '日';
             const updatedPrices = prices.map(function(p) {
                 return {
                     platform: p.platform, store: p.store, size: p.size, price: p.price,
-                    note: p.note || 'AI估算',
-                    updateTime: dateStr + ' AI更新'
+                    note: p.note || '联网参考价',
+                    updateTime: dateStr + ' 联网更新'
                 };
             });
             const isPreset = competitorData.some(function(d) { return d.id === comp.id; });
@@ -22744,7 +22815,7 @@ html += `<div class="mb-6"><div class="flex items-center justify-between mb-3"><
                 '    <button id="aip-close" style="border:none;background:rgba(255,255,255,.25);color:#fff;width:28px;height:28px;border-radius:8px;cursor:pointer;font-size:14px;line-height:1">✕</button>',
                 '  </div>',
                 '  <div style="padding:16px 18px;overflow-y:auto">',
-                '    <div style="font-size:12px;color:#5a6f65;margin-bottom:6px">以下为 AI 参考价（GLM-4-Flash 基于知识库估算，非实时联网抓取），请在确认前核对或修改；确认后写入竞品数据并标记 ' + dateStr + '。</div>',
+                '    <div style="font-size:12px;color:#5a6f65;margin-bottom:6px">以下为 AI 通过免费联网搜索（Firecrawl / Tavily 双免费源，均免注册、免费额度，自动切换）得到的当前市场参考价，价格必须来自搜索结果、非知识库估算，请在确认前核对或修改；确认后写入竞品数据并标记 ' + dateStr + '。</div>',
                 '    <div style="font-size:13px;font-weight:700;color:#17301f;margin-bottom:10px">' + (competitor.brand || '') + ' ' + (competitor.name || '') + ' · ' + (competitor.category || '') + '</div>',
                 '    <div style="display:flex;gap:6px;font-size:11px;color:#8a9a90;padding:0 2px;margin-bottom:4px">',
                 '      <span style="width:22%">平台</span><span style="width:24%">店铺</span><span style="width:15%">规格</span><span style="width:15%">价格(¥)</span><span style="width:18%">备注</span><span style="width:6%"></span>',
@@ -22771,7 +22842,7 @@ html += `<div class="mb-6"><div class="flex items-center justify-between mb-3"><
                     '<input class="aip-store" type="text" placeholder="店铺" value="' + (p.store || '') + '" style="width:24%;padding:7px 8px;border:1px solid #e5ede9;border-radius:8px;font-size:12px;background:#fff;color:#17301f">',
                     '<input class="aip-size" type="text" placeholder="规格" value="' + (p.size || '') + '" style="width:15%;padding:7px 8px;border:1px solid #e5ede9;border-radius:8px;font-size:12px;background:#fff;color:#17301f">',
                     '<input class="aip-price" type="number" placeholder="0" value="' + (p.price || '') + '" style="width:15%;padding:7px 8px;border:1px solid #e5ede9;border-radius:8px;font-size:12px;background:#fff;color:#17301f">',
-                    '<input class="aip-note" type="text" placeholder="备注" value="' + (p.note || 'AI估算') + '" style="width:18%;padding:7px 8px;border:1px solid #e5ede9;border-radius:8px;font-size:12px;background:#fff;color:#17301f">',
+                    '<input class="aip-note" type="text" placeholder="备注" value="' + (p.note || '联网参考价') + '" style="width:18%;padding:7px 8px;border:1px solid #e5ede9;border-radius:8px;font-size:12px;background:#fff;color:#17301f">',
                     '<button class="aip-del" type="button" style="width:6%;border:none;background:none;color:#c62828;cursor:pointer;font-size:14px;line-height:1;padding:0">✕</button>'
                 ].join('');
                 rowsEl.appendChild(div);
@@ -22796,7 +22867,7 @@ html += `<div class="mb-6"><div class="flex items-center justify-between mb-3"><
                     const size = (row.querySelector('.aip-size') && row.querySelector('.aip-size').value || '').trim();
                     const price = parseInt(row.querySelector('.aip-price') && row.querySelector('.aip-price').value) || 0;
                     const note = (row.querySelector('.aip-note') && row.querySelector('.aip-note').value || '').trim();
-                    if (platform || size || price > 0) prices.push({ platform: platform, store: store, size: size, price: price, note: note || 'AI估算' });
+                    if (platform || size || price > 0) prices.push({ platform: platform, store: store, size: size, price: price, note: note || '联网参考价' });
                 });
                 if (!prices.length) { showAlert('请至少填写一条有效价格'); return; }
                 ov.remove();
@@ -22819,12 +22890,12 @@ html += `<div class="mb-6"><div class="flex items-center justify-between mb-3"><
                 hideAiLoading();
                 if (aiPriceStop) return;
                 if (!prices.length) {
-                    showConfirm('未获取到价格', 'AI 未能给出该产品的可靠参考价格，可尝试：\n1. 重新点击「AI 更新价格」再试；\n2. 手动编辑更新价格。是否手动编辑？', function(ok) { if (ok) editCompetitor(competitorId); });
+                    showConfirm('未获取到价格', '联网搜索未检索到该产品的可靠真实价格，可尝试：\n1. 重新点击「AI 更新价格」再试；\n2. 手动编辑更新价格。是否手动编辑？', function(ok) { if (ok) editCompetitor(competitorId); });
                     return;
                 }
                 renderAiPricePreview(comp, prices, function(finalPrices) {
                     applyCompetitorPrices(comp, finalPrices);
-                    showAlert('✅ 价格已更新：' + finalPrices.length + ' 条参考价已写入（AI 估算，可展开卡片查看/再次更新）');
+                    showAlert('✅ 价格已更新：' + finalPrices.length + ' 条参考价已写入（AI 联网搜索，可展开卡片查看/再次更新）');
                 });
             } catch(e) {
                 hideAiLoading();
@@ -22849,7 +22920,7 @@ html += `<div class="mb-6"><div class="flex items-center justify-between mb-3"><
                 return true;
             });
             if (!targets.length) { showAlert('当前筛选下没有可更新的竞品'); return; }
-            showConfirm('批量 AI 更新', '将依次调用 AI 更新 ' + targets.length + ' 款竞品的参考价格（每款约 5-10 秒，可随时停止）。是否继续？', async function(ok) {
+            showConfirm('批量 AI 更新', '将依次免费联网搜索（Firecrawl / Tavily 双免费源自动切换，均免注册、免费额度）更新 ' + targets.length + ' 款竞品的参考价格（每款约 8-20 秒，可随时停止）。是否继续？', async function(ok) {
                 if (!ok) return;
                 aiPriceStop = false;
                 const ov = showAiLoading('准备批量更新…');
@@ -22869,7 +22940,7 @@ html += `<div class="mb-6"><div class="flex items-center justify-between mb-3"><
                 if (aiPriceStop) {
                     showAlert('⏹ 已停止：成功 ' + success + ' 款，未获取 ' + fail + ' 款');
                 } else {
-                    showAlert('✅ 批量更新完成：成功 ' + success + ' 款，未获取 ' + fail + ' 款' + (fail ? '（AI 未能给出可靠价格，可手动编辑或重试）' : ''));
+                    showAlert('✅ 批量更新完成：成功 ' + success + ' 款，未获取 ' + fail + ' 款' + (fail ? '（联网搜索未获取到该款可靠价格，可手动编辑或重试）' : ''));
                 }
             });
         };

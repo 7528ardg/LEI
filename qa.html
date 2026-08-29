@@ -518,8 +518,8 @@ const SpringAI = (function(){
     siliconflow: { key:'siliconflow', name:'硅基流动 GLM-4-9B-0414（免费）',  base:'https://api.siliconflow.cn/v1',        model:'THUDM/GLM-4-9B-0414',    hint:'siliconflow.cn 免费开源模型，注册送体验额度' }
   };
   const getCfg = () => {
-    try{ const c = JSON.parse(localStorage.getItem(CFG_KEY) || '{}'); return Object.assign({ provider:'zhipu', apiKey:'', endpoint:'', model:'' }, c); }
-    catch(e){ return { provider:'zhipu', apiKey:'', endpoint:'', model:'' }; }
+    try{ const c = JSON.parse(localStorage.getItem(CFG_KEY) || '{}'); return Object.assign({ provider:'zhipu', apiKey:'', endpoint:'', model:'', tavilyKey:'' }, c); }
+    catch(e){ return { provider:'zhipu', apiKey:'', endpoint:'', model:'', tavilyKey:'' }; }
   };
   const setCfg = (c) => { try{ localStorage.setItem(CFG_KEY, JSON.stringify(c)); }catch(e){} };
   const isEnabled = () => { const c = getCfg(); return !!(c.apiKey && String(c.apiKey).trim().length > 10); };
@@ -552,6 +552,26 @@ const SpringAI = (function(){
       return text.trim();
     } finally { clearTimeout(timer); }
   }
+  async function tavilySearch(query, opts){
+    opts = opts || {};
+    const key = String(getCfg().tavilyKey || '').trim();
+    const h = { 'Content-Type': 'application/json' };
+    if (key) { h['Authorization'] = 'Bearer ' + key; } else { h['X-Tavily-Access-Mode'] = 'keyless'; }
+    const ctrl = new AbortController();
+    const timer = setTimeout(function(){ ctrl.abort(); }, opts.timeout || 20000);
+    try{
+      const res = await fetch('https://api.tavily.com/search', {
+        method: 'POST',
+        headers: h,
+        body: JSON.stringify({ query: query, max_results: opts.maxResults || 6, search_depth: 'basic' }),
+        signal: ctrl.signal
+      });
+      if(!res.ok){ let msg = 'HTTP ' + res.status; try{ const d = await res.json(); msg = (d.detail || d.message) || msg; }catch(e){} throw new Error(msg); }
+      const j = await res.json();
+      const results = (j && Array.isArray(j.results)) ? j.results : [];
+      return { ok: true, results: results.map(function(r){ return { title: String(r.title || ''), url: String(r.url || ''), content: String(r.content || r.raw_content || '') }; }) };
+    } finally { clearTimeout(timer); }
+  }
   function openSettings(cb){
     const c = getCfg();
     const old = document.getElementById('sa-modal'); if(old) old.remove();
@@ -582,6 +602,9 @@ const SpringAI = (function(){
       '    <div style="font-size:11px;color:var(--text3,#9db0a6);margin-bottom:12px">💬 两种便捷切换：①重启前在此选择并保存；②对话中发 <b>/风格 精简</b> 等命令实时切换（不做知识库检索）。</div>',
       '    <label style="display:block;font-size:12px;font-weight:700;margin-bottom:4px;color:var(--text2,#5a6f65)">API Key</label>',
       '    <input id="sa-key" type="password" placeholder="粘贴你的 API Key（sk-...）" value="'+c.apiKey+'" style="width:100%;padding:9px 10px;border:1px solid var(--border,#e5ede9);border-radius:9px;margin-bottom:6px;background:var(--bg-card,#fff);color:var(--text,#17301f);font-size:13px">',
+      '    <label style="display:block;font-size:12px;font-weight:700;margin-bottom:4px;margin-top:8px;color:var(--text2,#5a6f65)">Tavily 搜索 API Key <span style="font-weight:400;color:var(--text3,#9db0a6)">（可选 · 免费联网搜索）</span></label>',
+      '    <input id="sa-tavily" type="password" placeholder="tvly-...（免费注册 app.tavily.com，每月 1000 次）" value="'+c.tavilyKey+'" style="width:100%;padding:9px 10px;border:1px solid var(--border,#e5ede9);border-radius:9px;margin-bottom:6px;background:var(--bg-card,#fff);color:var(--text,#17301f);font-size:13px">',
+      '    <div style="font-size:11px;color:var(--text3,#9db0a6);margin-bottom:10px">💡 填写后联网搜索走你的 Key（额度更高更稳）；不填自动走免注册免 Key 通道。免费注册：<a class="tut-link" target="_blank" rel="noopener" href="https://app.tavily.com/">app.tavily.com</a>。Key 仅存本机。</div>',
       '    <div id="sa-status" style="font-size:11px;color:#c62828;margin-bottom:10px"></div>',
       '    <details style="font-size:12px;color:var(--text2,#5a6f65);margin-bottom:12px">',
       '      <summary style="cursor:pointer">高级（可选：自定义接口地址/模型名，默认无需填写）</summary>',
@@ -604,7 +627,7 @@ const SpringAI = (function(){
     $('sa-close').onclick = () => ov.remove();
     ov.onclick = (e) => { if(e.target === ov) ov.remove(); };
     $('sa-test').onclick = async () => {
-      const tmp = { provider:$('sa-provider').value, apiKey:$('sa-key').value.trim(), endpoint:$('sa-endpoint').value.trim(), model:$('sa-model').value.trim() };
+      const tmp = { provider:$('sa-provider').value, apiKey:$('sa-key').value.trim(), endpoint:$('sa-endpoint').value.trim(), model:$('sa-model').value.trim(), tavilyKey:$('sa-tavily').value.trim() };
       localStorage.setItem('spring_ai_cfg', JSON.stringify(tmp));
       const st = $('sa-status');
       st.style.color='#e65100'; st.textContent='⏳ 正在测试连接…';
@@ -617,7 +640,7 @@ const SpringAI = (function(){
       }
     };
     $('sa-save').onclick = () => {
-      const v = { provider:$('sa-provider').value, apiKey:$('sa-key').value.trim(), endpoint:$('sa-endpoint').value.trim(), model:$('sa-model').value.trim() };
+      const v = { provider:$('sa-provider').value, apiKey:$('sa-key').value.trim(), endpoint:$('sa-endpoint').value.trim(), model:$('sa-model').value.trim(), tavilyKey:$('sa-tavily').value.trim() };
       localStorage.setItem('spring_ai_style', $('sa-style').value);
       setCfg(v);
       ov.remove();
@@ -625,7 +648,7 @@ const SpringAI = (function(){
       if(cb) cb(v);
     };
   }
-  return { isEnabled, chatLLM, openSettings, getCfg, setCfg, PROVIDERS };
+  return { isEnabled, chatLLM, openSettings, getCfg, setCfg, PROVIDERS, tavilySearch };
 })();
 
 /* ===================== AI 回复风格：四种可切换（存 localStorage 'spring_ai_style'） ===================== */
