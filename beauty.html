@@ -19582,10 +19582,10 @@ const getRandomUnique = (arr, usedSet) => {
                         });
                         html += `</div>
                                 </div>
-                                <div class="flex items-center gap-1 flex-shrink-0 opacity-0 group-hover:opacity-100 transition-opacity">
-                                    <button onclick="editScriptLib('${catKey}','${script.id}')" class="p-1.5 text-gray-400 hover:text-purple-600 hover:bg-purple-50 rounded-lg transition-colors" title="编辑">✏️</button>
-                                    <button onclick="copyScriptContent('${script.content.replace(/'/g, "\\'")}')" class="p-1.5 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors" title="复制">📋</button>
-                                    <button onclick="deleteScriptLib('${catKey}','${script.id}')" class="p-1.5 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors" title="删除">🗑️</button>
+                                <div class="flex items-center gap-1.5 flex-shrink-0">
+                                    <button onclick="editScriptLib('${catKey}','${script.id}')" class="px-2.5 py-1.5 bg-purple-50 text-purple-600 hover:bg-purple-100 rounded-lg transition-colors text-xs font-medium" title="编辑话术">✏️ 编辑</button>
+                                    <button onclick="copyScriptContent('${script.content.replace(/'/g, "\\'")}')" class="px-2.5 py-1.5 bg-blue-50 text-blue-600 hover:bg-blue-100 rounded-lg transition-colors text-xs font-medium" title="复制话术">📋</button>
+                                    <button onclick="deleteScriptLib('${catKey}','${script.id}')" class="px-2.5 py-1.5 bg-red-50 text-red-500 hover:bg-red-100 rounded-lg transition-colors text-xs font-medium" title="删除话术">🗑️</button>
                                 </div>
                             </div>
                         </div>`;
@@ -19602,6 +19602,8 @@ const getRandomUnique = (arr, usedSet) => {
                 // Edit/Add form modal
                 if (state.scriptLibShowForm) {
                     const isEditing = state.scriptLibEditingId !== null;
+                    const contentLines = (state.scriptLibFormContent || '').split('\n').length;
+                    const contentMinH = Math.max(240, contentLines * 28);
                     html += `<div class="fixed inset-0 z-[100] flex items-center justify-center p-4" style="background:rgba(0,0,0,0.5);">
                         <div class="bg-white rounded-2xl shadow-2xl max-w-lg w-full overflow-hidden">
                             <div class="bg-gradient-to-r from-violet-500 to-purple-500 p-4">
@@ -19619,7 +19621,7 @@ const getRandomUnique = (arr, usedSet) => {
                     });
                     html += `</select></div>
                                 <div><label class="text-sm text-gray-800 mb-1 block">话术内容</label>
-                                    <textarea id="scriptlib-content" rows="4" placeholder="请输入话术内容..." class="w-full px-3 py-2 bg-white border border-gray-200 rounded-lg text-sm focus:border-purple-300 focus:outline-none focus:ring-2 focus:ring-purple-100">${state.scriptLibFormContent}</textarea>
+                                    <textarea id="scriptlib-content" placeholder="请输入话术内容..." class="w-full px-3 py-2 bg-white border border-gray-200 rounded-lg text-sm focus:border-purple-300 focus:outline-none focus:ring-2 focus:ring-purple-100 whitespace-pre-wrap leading-relaxed resize-y" style="min-height:${contentMinH}px;max-height:50vh;">${state.scriptLibFormContent}</textarea>
                                 </div>
                                 <div><label class="text-sm text-gray-800 mb-1 block">标签（逗号分隔）</label>
                                     <input type="text" id="scriptlib-tags" value="${state.scriptLibFormTags.join(',')}" placeholder="如：热情,专业,关怀" class="w-full px-3 py-2 bg-white border border-gray-200 rounded-lg text-sm focus:border-purple-300 focus:outline-none focus:ring-2 focus:ring-purple-100">
