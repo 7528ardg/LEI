@@ -52,7 +52,13 @@
 
 * 数据包存本机 `packs_index` + `pack:{packId}`，**不随个人备份迁移**；旧版覆盖层（`kb_overlay_v1`）首次进入数据包中心自动迁移
 
-* **在线发布（M2）**：App 启动时自动拉取 `packs/manifest.json`（<https://7528ardg.github.io/LEI/packs/manifest.json）比对版本，发现新包顶栏出现「📦> 新数据包」→ 一键安装自动生效；发布流程与格式见 `packs/README.md`
+* **在线发布（M2）**：App 启动时自动拉取 `packs/manifest.json`（<<https://7528ardg.github.io/LEI/packs/manifest.json）比对版本，发现新包顶栏出现「📦> 新数据包」→ 一键安装自动生效；发布流程与格式见 `packs/README.md`
+
+  * **大陆网络友好**：manifest/数据包请求均带超时（不再无限等待），源站 github.io 不可达时自动回源 jsdelivr 镜像（<<https://cdn.jsdelivr.net/gh/7528ardg/LEI@main/），下载仍走> sha256 校验；manifest 本地缓存 1 小时减少重复拉取；下载失败提示"请检查网络后重试"而非"联系管理员"
+
+  * **拆分版模块加载线路**：默认同源加载；若某模块 15 秒未加载完成会自动在主源与镜像间切换线路（Toast 提示），双线路都失败时点击加载页即可重试。也可手动固定线路：浏览器控制台执行 `localStorage.setItem('app_base_url','https://cdn.jsdelivr.net/gh/7528ardg/LEI@main/')` 后刷新（清空该键即恢复默认）
+
+  * manifest 地址可用 `localStorage.setItem('packs_manifest_url','<自定义地址>')` 覆盖（团队自建镜像时使用）
 
 ## 维护
 

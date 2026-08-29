@@ -568,16 +568,59 @@ function importBackup(file){
   reader.readAsText(file);
 }
 
-/* ===================== 数据包在线更新（M2）：manifest 拉取 + 顶栏提示 + 一键安装 ===================== */
+/* ===================== 数据包在线更新（M2）：manifest 拉取 + 顶栏提示 + 一键安装 =====================
+ * 加固：①所有请求带超时（AbortController），弱网不再无限等待；
+ *       ②源站 github.io 不可达时自动回源 jsdelivr 镜像（中国大陆可访问），manifest/数据包均支持；
+ *       ③manifest 本地缓存 1 小时，避免每次打开都慢速拉取；
+ *       ④下载失败给出可操作提示（不再出现"联系管理员"的歧义文案）。
+ */
 const PACKS_MANIFEST_URL = 'https://7528ardg.github.io/LEI/packs/manifest.json';
 const PACKS_MANIFEST_KEY = 'packs_manifest_url';
+const PACKS_MANIFEST_CACHE_KEY = 'packs_manifest_cache';
+const PACKS_MANIFEST_TTL = 60 * 60 * 1000;   // manifest 本地缓存有效期（1 小时）
+const PACKS_MIRROR_BASE = 'https://cdn.jsdelivr.net/gh/7528ardg/LEI@main/'; // 中国大陆可访问镜像
+const PACKS_FETCH_TIMEOUT = 8000;            // 单次请求超时（毫秒）
 const PACKS_TYPE_LABEL = { kb:'知识包', sales:'销售包', quiz:'题库包', notice:'通知识包' };
 var packsUpdateReady = [];
 function getPacksManifestUrl(){
   try{ const u = localStorage.getItem(PACKS_MANIFEST_KEY); if(u) return u; }catch(e){}
   return PACKS_MANIFEST_URL;
 }
+/* 可覆盖源站基址：默认 github.io；若用户自定义 manifest 地址则按其目录推导，保证相对 url 可解析 */
+function getPacksBase(){
+  try{
+    const u = localStorage.getItem(PACKS_MANIFEST_KEY);
+    if(u){ const i = u.lastIndexOf('/'); if(i > 0) return u.slice(0, i + 1); }
+  }catch(e){}
+  return 'https://7528ardg.github.io/LEI/';
+}
+function absPackUrl(rel){
+  if(/^https?:\/\//i.test(rel)) return rel;
+  return getPacksBase() + String(rel).replace(/^\.?\//,'');
+}
 function escHtml(s){ return String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+/* 带超时的 fetch：ms 内未返回即中断（AbortError），防止弱网下无限等待 */
+function fetchWithTimeout(url, ms){
+  const ctrl = (typeof AbortController !== 'undefined') ? new AbortController() : null;
+  let timer = null;
+  if(ctrl) timer = setTimeout(function(){ ctrl.abort(); }, ms || PACKS_FETCH_TIMEOUT);
+  return new Promise(function(resolve, reject){
+    fetch(url, { cache:'no-store', signal: ctrl ? ctrl.signal : undefined })
+      .then(function(r){ if(timer) clearTimeout(timer); resolve(r); })
+      .catch(function(e){ if(timer) clearTimeout(timer); reject(e); });
+  });
+}
+/* 依次尝试多个地址（源站 → 镜像），全部失败才 reject */
+function fetchFirst(urls, ms){
+  const list = Array.isArray(urls) ? urls.slice() : [urls];
+  let i = 0;
+  function next(){
+    if(i >= list.length) return Promise.reject(new Error('所有下载地址均不可达'));
+    const u = list[i++];
+    return fetchWithTimeout(u, ms).catch(function(){ return next(); });
+  }
+  return next();
+}
 /* 纯函数：manifest + 本地索引 → 待更新包列表（版本号更高或本机未装） */
 function computePackUpdates(man, idx){
   const ready = [];
@@ -597,18 +640,44 @@ function showPacksBadge(ready){
   const span = b.querySelector('span');
   if(span) span.textContent = '新数据包(' + ready.length + ')';
 }
+function readManifestCache(){
+  try{
+    const s = localStorage.getItem(PACKS_MANIFEST_CACHE_KEY);
+    if(!s) return null;
+    const c = JSON.parse(s);
+    if(!c || !c.man || !c.t) return null;
+    return c;
+  }catch(e){ return null; }
+}
+function writeManifestCache(man){
+  try{ localStorage.setItem(PACKS_MANIFEST_CACHE_KEY, JSON.stringify({ t: Date.now(), man: man })); }catch(e){}
+}
+function applyManifest(man){
+  const idx = window.PACKS ? PACKS.readIndex(localStorage) : null;
+  const ready = computePackUpdates(man, idx);
+  if(!ready.length) return;
+  packsUpdateReady = ready;
+  showPacksBadge(ready);
+}
+function fetchManifest(){
+  const urls = [getPacksManifestUrl()];
+  const primary = urls[0];
+  // 镜像与源站同相对路径；加 ?cb= 强制回源，避免 CDN 缓存旧版清单
+  if(primary.indexOf(PACKS_MIRROR_BASE) !== 0){
+    urls.push(PACKS_MIRROR_BASE + 'packs/manifest.json?cb=' + Date.now());
+  }
+  return fetchFirst(urls, PACKS_FETCH_TIMEOUT).then(function(r){
+    if(!r.ok) throw new Error('manifest HTTP ' + r.status);
+    return r.json();
+  });
+}
 function checkPacksUpdate(){
   if(typeof navigator !== 'undefined' && !navigator.onLine) return;
-  fetch(getPacksManifestUrl(), { cache:'no-store' })
-    .then(r=>{ if(!r.ok) throw new Error('manifest HTTP ' + r.status); return r.json(); })
-    .then(man=>{
-      const idx = window.PACKS ? PACKS.readIndex(localStorage) : null;
-      const ready = computePackUpdates(man, idx);
-      if(!ready.length) return;
-      packsUpdateReady = ready;
-      showPacksBadge(ready);
-    })
-    .catch(()=>{ /* 离线 / 404 / 非法 manifest：静默不打扰 */ });
+  const cached = readManifestCache();
+  if(cached && (Date.now() - cached.t < PACKS_MANIFEST_TTL)){ applyManifest(cached.man); return; }
+  fetchManifest()
+    .then(function(man){ writeManifestCache(man); applyManifest(man); })
+    .catch(function(){ /* 网络不可达：有缓存（即使过期）也展示，弱网/离线仍能看到待装包 */ if(cached) applyManifest(cached.man); });
 }
 function openPacksModal(){
   if(!packsUpdateReady.length) return;
@@ -619,16 +688,30 @@ function openPacksModal(){
   document.getElementById('packsModal').classList.add('show');
 }
 function closePacksModal(){ document.getElementById('packsModal').classList.remove('show'); }
-async function fetchPackText(url, sha256){
-  const r = await fetch(url, { cache:'no-store' });
-  if(!r.ok) throw new Error('下载失败 HTTP ' + r.status);
-  const buf = await r.arrayBuffer();
-  if(sha256 && globalThis.crypto && crypto.subtle && crypto.subtle.digest){
-    const h = await crypto.subtle.digest('SHA-256', buf);
-    const hex = Array.from(new Uint8Array(h)).map(b=>b.toString(16).padStart(2,'0')).join('');
-    if(hex !== String(sha256).toLowerCase()) throw new Error('sha256 校验失败');
+async function fetchPackText(p, sha256){
+  // p 为清单条目；依次尝试 源站 → 镜像，sha256 校验通过才返回（镜像缓存过期自动跳过）
+  const rel = p && p.url;
+  if(!rel) throw new Error('缺少下载地址');
+  const urls = [absPackUrl(rel)];
+  const relClean = String(rel).replace(/^\.?\//,'');
+  if(urls[0].indexOf(PACKS_MIRROR_BASE) !== 0){
+    urls.push(PACKS_MIRROR_BASE + relClean + '?cb=' + Date.now());
   }
-  return new TextDecoder('utf-8').decode(buf);
+  let lastErr = null;
+  for(const u of urls){
+    try{
+      const r = await fetchWithTimeout(u, PACKS_FETCH_TIMEOUT * 3);
+      if(!r.ok) throw new Error('下载失败 HTTP ' + r.status);
+      const buf = await r.arrayBuffer();
+      if(sha256 && globalThis.crypto && crypto.subtle && crypto.subtle.digest){
+        const h = await crypto.subtle.digest('SHA-256', buf);
+        const hex = Array.from(new Uint8Array(h)).map(b=>b.toString(16).padStart(2,'0')).join('');
+        if(hex !== String(sha256).toLowerCase()) throw new Error('sha256 校验失败');
+      }
+      return new TextDecoder('utf-8').decode(buf);
+    }catch(e){ lastErr = e; }
+  }
+  throw lastErr || new Error('下载失败');
 }
 async function installPacksUpdates(){
   const btn = document.getElementById('packsInstallBtn');
@@ -637,7 +720,7 @@ async function installPacksUpdates(){
     let ok = 0, fail = 0;
     for(const p of packsUpdateReady){
       try{
-        const text = await fetchPackText(p.url, p.sha256);
+        const text = await fetchPackText(p, p.sha256);
         const pack = JSON.parse(text);
         if(!pack || pack.magic !== (window.PACKS ? PACKS.MAGIC : 'cabin-data-pack-v1')) throw new Error('数据包 magic 不符');
         if(pack.packId !== p.packId) throw new Error('packId 与清单不符');
@@ -646,11 +729,11 @@ async function installPacksUpdates(){
         ok++;
       }catch(e){
         fail++;
-        toast('「' + (p.title || p.packId) + '」安装失败：' + (e && e.message || e), true);
+        toast('「' + (p.title || p.packId) + '」下载失败：' + (e && e.message || e), true);
       }
     }
     if(ok) toast('已安装 ' + ok + ' 个数据包，qa·美妆·考核已自动生效');
-    else if(fail) toast('数据包安装失败，请稍后重试或联系管理员', true);
+    else if(fail) toast('数据包下载失败，请检查网络后重试', true);
     packsUpdateReady = [];
     const b = document.getElementById('packsBadge'); if(b) b.style.display = 'none';
   }finally{

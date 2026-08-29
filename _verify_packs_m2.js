@@ -117,6 +117,45 @@ sandbox.fetch = async (url) => {
   const stale = PACKS.readPack(sandbox.localStorage, 'p-nonexist');
   check('损坏/未知包读取为 null（不落库）', stale === null && !!stash);
 
+  /* --- 2.3 新增：manifest 本地缓存 + 缓存新鲜短路 --- */
+  check('manifest 拉取成功后写入本地缓存', !!sandbox.localStorage.getItem('packs_manifest_cache'));
+  check('相对 url 解析为源站地址', run('absPackUrl("packs/x.json")') === 'https://7528ardg.github.io/LEI/packs/x.json');
+  check('绝对地址原样返回', run('absPackUrl("https://a.b/c.json")') === 'https://a.b/c.json');
+  check('镜像基址指向 jsdelivr 仓库', (run('PACKS_MIRROR_BASE') || '').indexOf('https://cdn.jsdelivr.net/gh/7528ardg/LEI') === 0, String(run('PACKS_MIRROR_BASE')));
+  // 写入"含 from-cache 包"的新鲜缓存；网络若被调用会返回 p-new → 若结果为 from-cache 证明走了缓存短路
+  sandbox.localStorage.setItem('packs_manifest_cache', JSON.stringify({ t: Date.now(), man: { magic: 'cabin-packs-manifest-v1', packs: [{ packId: 'from-cache', title: '缓存包', type: 'quiz', version: 1, url: 'packs/c.json' }] } }));
+  sandbox.packsUpdateReady = [];
+  sandbox.fetch = async () => ({ ok: true, status: 200, json: async () => ({ magic: 'cabin-packs-manifest-v1', packs: [{ packId: 'p-new', title: '网络新包', type: 'quiz', version: 1, url: 'packs/p-new.json' }] }) });
+  vm.runInContext('checkPacksUpdate()', sandbox);
+  await new Promise(r => setImmediate(r));
+  await new Promise(r => setImmediate(r));
+  check('缓存新鲜短路：采用缓存清单而非网络', Array.isArray(sandbox.packsUpdateReady) && sandbox.packsUpdateReady.length === 1 && sandbox.packsUpdateReady[0].packId === 'from-cache', 'packs=' + (sandbox.packsUpdateReady || []).map(p => p.packId).join(','));
+
+  /* --- 2.4 新增：源站不可达 → 自动回源镜像（manifest 与数据包下载） --- */
+  const MIRROR_BASE = run('PACKS_MIRROR_BASE');
+  const PK_MIRROR = { magic: PACKS.MAGIC, packId: 'p-mirror', type: 'quiz', title: '镜像包', version: 1, issuedAt: '2026-08-29', items: [{ op:'upsert', key:'M1', data:{ q:'镜像题' } }] };
+  sandbox.localStorage.removeItem('packs_manifest_cache');
+  sandbox.packsUpdateReady = [];
+  sandbox.fetch = async (url) => {
+    if (url.indexOf(MIRROR_BASE + 'packs/manifest.json') === 0) {
+      return { ok: true, status: 200, json: async () => ({ magic: 'cabin-packs-manifest-v1', packs: [{ packId: 'p-mirror', title: '镜像包', type: 'quiz', version: 1, url: 'packs/p-mirror.json' }] }) };
+    }
+    throw new Error('源站不可达:' + url);
+  };
+  vm.runInContext('checkPacksUpdate()', sandbox);
+  await new Promise(r => setImmediate(r));
+  await new Promise(r => setImmediate(r));
+  check('主源失败→镜像回源成功并填充待装包', Array.isArray(sandbox.packsUpdateReady) && sandbox.packsUpdateReady.length === 1 && sandbox.packsUpdateReady[0].packId === 'p-mirror', 'len=' + (sandbox.packsUpdateReady || []).length);
+  sandbox.fetch = async (url) => {
+    if (url.indexOf(MIRROR_BASE + 'packs/p-mirror.json') === 0) {
+      return { ok: true, status: 200, arrayBuffer: async () => new TextEncoder().encode(JSON.stringify(PK_MIRROR)).buffer };
+    }
+    throw new Error('源站不可达:' + url);
+  };
+  const dl = await run('fetchPackText({url:"packs/p-mirror.json"}, undefined)');
+  check('数据包下载：主源失败→镜像回源成功', dl === JSON.stringify(PK_MIRROR));
+  check('M2 含请求超时机制（fetchWithTimeout）', /fetchWithTimeout/.test(block));
+
   let pass = 0, fail = 0;
   for (const r of results) {
     if (r.pass) { pass++; console.log('PASS  ' + r.name); }
