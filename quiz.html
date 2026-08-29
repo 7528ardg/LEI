@@ -1529,6 +1529,40 @@ a{color:var(--primary);text-decoration:none;}
 .me-tab.active{background:var(--grad-primary);color:#fff;box-shadow:0 4px 12px rgba(20,132,83,.25);}
 .me-tab.active::after{content:'';position:absolute;left:50%;bottom:-4px;transform:translateX(-50%);width:24px;height:3px;background:var(--grad-primary);border-radius:2px;display:none;}
 
+/* ===== 问题集合（BUG 留言 · 记录监控） ===== */
+.iss-card{background:var(--bg-card);border:1px solid var(--border);border-radius:14px;padding:18px 20px;margin-bottom:16px;box-shadow:var(--shadow-sm);}
+.iss-card-title{font-family:var(--font-display);font-size:1rem;font-weight:700;color:var(--text);margin-bottom:14px;display:flex;align-items:center;gap:8px;padding-bottom:12px;border-bottom:1px dashed var(--border);}
+.iss-field{margin-bottom:14px;}
+.iss-field label{display:block;font-size:.78rem;color:var(--text2);margin-bottom:6px;font-weight:600;}
+.iss-field select,.iss-field input[type=text],.iss-field textarea{width:100%;padding:10px 12px;border-radius:10px;border:1px solid var(--border);background:var(--bg);color:var(--text);font-size:.9rem;outline:none;box-sizing:border-box;font-family:var(--font-sans);}
+.iss-field select:focus,.iss-field input[type=text]:focus,.iss-field textarea:focus{border-color:var(--primary);box-shadow:0 0 0 3px var(--primary-soft);}
+.iss-field textarea{min-height:88px;resize:vertical;line-height:1.6;}
+.iss-submit{display:inline-flex;align-items:center;justify-content:center;gap:8px;width:100%;padding:12px;border-radius:10px;border:none;background:var(--grad-primary);color:#fff;font-size:.92rem;font-weight:700;cursor:pointer;font-family:var(--font-sans);box-shadow:var(--shadow);transition:all .2s;}
+.iss-submit:hover{transform:translateY(-1px);box-shadow:var(--shadow-lg);}
+.iss-stat-row{display:flex;gap:10px;margin-bottom:16px;flex-wrap:wrap;}
+.iss-stat{flex:1;min-width:110px;text-align:center;padding:12px 8px;border-radius:12px;background:var(--primary-mist);border:1px solid var(--primary-light);}
+.iss-stat .iss-stat-val{font-family:var(--font-display);font-size:1.4rem;font-weight:800;color:var(--primary);line-height:1;}
+.iss-stat .iss-stat-lbl{font-size:.72rem;color:var(--text2);margin-top:4px;font-weight:600;}
+.iss-item{background:var(--bg-card);border:1px solid var(--border);border-radius:12px;padding:14px 16px;margin-bottom:10px;box-shadow:var(--shadow-sm);}
+.iss-item-head{display:flex;align-items:center;gap:8px;margin-bottom:8px;flex-wrap:wrap;}
+.iss-tag{font-size:.72rem;font-weight:700;padding:3px 10px;border-radius:20px;white-space:nowrap;}
+.iss-tag-pending{background:var(--warning-soft);color:var(--gold-dark);}
+.iss-tag-done{background:var(--success-soft);color:var(--success);}
+.iss-tag-auto{background:var(--info-soft);color:var(--info);}
+.iss-tag-manual{background:var(--primary-soft);color:var(--primary);}
+.iss-loc{font-size:.8rem;font-weight:600;color:var(--text2);background:var(--bg);border:1px solid var(--border);padding:3px 10px;border-radius:20px;}
+.iss-time{font-size:.72rem;color:var(--text3);margin-left:auto;}
+.iss-msg{font-size:.9rem;color:var(--text);line-height:1.6;word-break:break-word;}
+.iss-item-actions{display:flex;gap:8px;margin-top:10px;flex-wrap:wrap;}
+.iss-act{padding:6px 14px;border-radius:8px;border:1px solid var(--border);background:var(--bg);color:var(--text2);font-size:.8rem;cursor:pointer;font-family:var(--font-sans);font-weight:600;transition:all .2s;}
+.iss-act:hover{border-color:var(--primary);color:var(--primary);background:var(--primary-soft);}
+.iss-act.primary{background:var(--success-soft);border-color:var(--success);color:var(--success);}
+.iss-act.primary:hover{background:var(--success);color:#fff;}
+.iss-act.danger:hover{border-color:var(--danger);color:var(--danger);background:var(--danger-soft);}
+.iss-empty{text-align:center;padding:36px 16px;color:var(--text3);font-size:.86rem;line-height:1.7;}
+.iss-legend{font-size:.76rem;color:var(--text3);margin-top:10px;line-height:1.6;background:var(--primary-mist);border:1px dashed var(--primary-light);border-radius:10px;padding:10px 14px;}
+
+
 /* 顶部固定操作栏（粘性 + 醒目"开始考试"按钮） */
 .me-top-action-bar{position:sticky;top:0;z-index:20;background:linear-gradient(135deg,#fff 0%,#F0FDF4 100%);border:1px solid var(--primary-light);border-radius:14px;padding:12px 18px;margin-bottom:18px;display:flex;align-items:center;gap:14px;flex-wrap:wrap;box-shadow:0 4px 16px rgba(20,132,83,.12),inset 0 1px 0 rgba(255,255,255,.8);}
 .me-tab-meta{flex:1;min-width:160px;}
@@ -4676,6 +4710,18 @@ const BADGES = [
   {id:'spring_summer_fly',cat:'spring',rarity:'uncommon',points:18,name:'夏日巡航',desc:'答对 3 道夏季/炎热天气运行相关题',icon:'🌞',unlocked:false},
   {id:'spring_international',cat:'spring',rarity:'uncommon',points:18,name:'国际航线',desc:'答对 3 道国际航线/海关/边检相关题',icon:'🌏',unlocked:false},
   {id:'spring_red_eye',cat:'spring',rarity:'uncommon',points:18,name:'红眼航班',desc:'答对 3 道红眼/夜间飞行相关题',icon:'😴',unlocked:false},
+
+  // ===== 春秋专属·第五期 (Spring v5) — 对齐本题库 10 大章节 =====
+  {id:'spring_ch1',cat:'spring',rarity:'common',points:8,name:'手册开篇',desc:'答对 3 道第一章（概述）题',icon:'📘',unlocked:false},
+  {id:'spring_ch2',cat:'spring',rarity:'uncommon',points:12,name:'术语达人',desc:'答对 10 道第二章（术语和定义）题',icon:'📖',unlocked:false},
+  {id:'spring_ch3',cat:'spring',rarity:'rare',points:25,name:'乘务管理师',desc:'答对 30 道第三章（乘务员管理）题',icon:'🧑‍✈️',unlocked:false},
+  {id:'spring_ch4',cat:'spring',rarity:'rare',points:25,name:'设备专家',desc:'答对 30 道第四章（客舱设备）题',icon:'🛠',unlocked:false},
+  {id:'spring_ch5',cat:'spring',rarity:'rare',points:22,name:'运行内行',desc:'答对 20 道第五章（飞行运行）题',icon:'🛫',unlocked:false},
+  {id:'spring_ch6',cat:'spring',rarity:'rare',points:22,name:'应急指挥官',desc:'答对 20 道第六章（应急处置）题',icon:'🚨',unlocked:false},
+  {id:'spring_ch7',cat:'spring',rarity:'rare',points:22,name:'急救先锋',desc:'答对 20 道第七章（机上急救）题',icon:'🚑',unlocked:false},
+  {id:'spring_ch8',cat:'spring',rarity:'uncommon',points:12,name:'附录通',desc:'答对 10 道第八章（附录）题',icon:'📎',unlocked:false},
+  {id:'spring_ch9',cat:'spring',rarity:'uncommon',points:18,name:'服务规范标兵',desc:'答对 15 道第九章（客舱服务规范）题',icon:'🛎',unlocked:false},
+  {id:'spring_ch10',cat:'spring',rarity:'common',points:8,name:'规章通',desc:'答对 3 道第十章（补充知识/规章）题',icon:'📜',unlocked:false},
 ];
 
 // 成就分类
@@ -4706,6 +4752,7 @@ const NAV_ITEMS = [
   {id:'favorite',icon:'⭐',label:'收藏·VIP座位'},
   {id:'history',icon:'🕐',label:'历史航段'},
   {id:'achievement',icon:'🏅',label:'成就·乘务成就'},
+  {id:'issues',icon:'🐞',label:'问题集合'},
   {id:'settings',icon:'⚙️',label:'客舱设置'},
 ];
 
@@ -5532,7 +5579,7 @@ function renderNav(){
 
 /* ===== BREADCRUMB ===== */
 function updateBreadcrumb(page){
-  const names = {home:'客舱',bank:'题库·航班清单',chapter:'章节专项练习',quiz:'答题·启航',mockExam:'模拟考试·自组卷',stats:'飞行数据',wrong:'错题本·黑匣子',favorite:'收藏·VIP座位',history:'历史航段',achievement:'成就·乘务成就',settings:'客舱设置'};
+  const names = {home:'客舱',bank:'题库·航班清单',chapter:'章节专项练习',quiz:'答题·启航',mockExam:'模拟考试·自组卷',stats:'飞行数据',wrong:'错题本·黑匣子',favorite:'收藏·VIP座位',history:'历史航段',achievement:'成就·乘务成就',issues:'问题集合',settings:'客舱设置'};
   document.getElementById('breadcrumb').innerHTML = `<span>春秋航空</span><span class="sep">›</span><span class="current">${names[page]||page}</span>`;
 }
 
@@ -5611,7 +5658,7 @@ function go(page){
   m.innerHTML = '<div class="skeleton" style="height:200px;margin-bottom:16px;"></div><div class="skeleton" style="height:100px;margin-bottom:16px;"></div><div class="skeleton" style="height:150px;"></div>';
   // 短暂延迟后渲染实际内容
   setTimeout(()=>{
-    const renderers = {home:renderHome,bank:renderBank,chapter:renderChapterPractice,quiz:renderQuiz,stats:renderStats,wrong:renderWrong,favorite:renderFavorite,history:renderHistory,achievement:renderAchievement,settings:renderSettings,mockExam:renderMockExam};
+    const renderers = {home:renderHome,bank:renderBank,chapter:renderChapterPractice,quiz:renderQuiz,stats:renderStats,wrong:renderWrong,favorite:renderFavorite,history:renderHistory,achievement:renderAchievement,settings:renderSettings,mockExam:renderMockExam,issues:renderIssues};
     if(renderers[page]) renderers[page]();
   },50);
   // close sidebar on mobile
@@ -8974,6 +9021,18 @@ function checkAndUnlockBadges(pct, elapsed, total, correct){
   if(getCorrectByText(['国际航线','国际航班','海关','边检','出境','入境','护照','签证']) >= 3) tryUnlock('spring_international');
   if(getCorrectByText(['红眼','夜间飞行','跨夜','通宵','长航线']) >= 3) tryUnlock('spring_red_eye');
 
+  // ===== 春秋专属·第五期 (Spring v5) — 对齐本题库 10 大章节 =====
+  if(getCorrectByChapter(['第一章']) >= 3) tryUnlock('spring_ch1');
+  if(getCorrectByChapter(['第二章']) >= 10) tryUnlock('spring_ch2');
+  if(getCorrectByChapter(['第三章']) >= 30) tryUnlock('spring_ch3');
+  if(getCorrectByChapter(['第四章']) >= 30) tryUnlock('spring_ch4');
+  if(getCorrectByChapter(['第五章']) >= 20) tryUnlock('spring_ch5');
+  if(getCorrectByChapter(['第六章']) >= 20) tryUnlock('spring_ch6');
+  if(getCorrectByChapter(['第七章']) >= 20) tryUnlock('spring_ch7');
+  if(getCorrectByChapter(['第八章']) >= 10) tryUnlock('spring_ch8');
+  if(getCorrectByChapter(['第九章']) >= 15) tryUnlock('spring_ch9');
+  if(getCorrectByChapter(['第十章']) >= 3) tryUnlock('spring_ch10');
+
   // ===== 终极 =====
   const unlockedCount = BADGES.filter(b=>b.unlocked && !b.hidden).length;
   const totalUnlocked = BADGES.filter(b=>b.unlocked).length;
@@ -11136,6 +11195,137 @@ function renderAchievement(){
   };
 }
 
+/* ===== 问题集合（BUG 留言 · 记录监控） ===== */
+/* 板块：①留言反馈（用户提交问题 + 问题所在位置）②BUG 记录监控（自动捕获运行时异常 + 留存记录） */
+const ISSUE_STORAGE_KEY = 'spring_quiz_issues';
+const ISSUE_LOCS = ['答题·启航','题库·航班清单','章节专项','模拟考试','飞行数据','错题本','收藏','历史航段','成就','客舱设置','首页客舱','其他'];
+function loadIssues(){
+  try{
+    const raw = localStorage.getItem(ISSUE_STORAGE_KEY);
+    const arr = raw ? JSON.parse(raw) : [];
+    return Array.isArray(arr) ? arr : [];
+  }catch(e){ return []; }
+}
+function saveIssues(arr){
+  try{ localStorage.setItem(ISSUE_STORAGE_KEY, JSON.stringify(arr.slice(0, 200))); }catch(e){}
+}
+function addIssue(rec){
+  const arr = loadIssues();
+  rec.id = 'iss_' + Date.now() + '_' + Math.random().toString(36).slice(2,7);
+  rec.time = new Date().toISOString();
+  rec.status = rec.status || 'pending';
+  arr.unshift(rec);
+  saveIssues(arr);
+}
+function renderIssues(){
+  const arr = loadIssues();
+  const pending = arr.filter(i=>i.status==='pending').length;
+  const done = arr.length - pending;
+  const auto = arr.filter(i=>i.source==='auto').length;
+  const manual = arr.length - auto;
+  const mode = APP._issMode || 'report';
+  const LOC_OPTS = ISSUE_LOCS.map(l=>`<option value="${l}">${l}</option>`).join('');
+  const listHtml = arr.length ? arr.map(it=>`
+    <div class="iss-item" style="${it.status==='done'?'opacity:.68;':''}">
+      <div class="iss-item-head">
+        <span class="iss-tag ${it.status==='done'?'iss-tag-done':'iss-tag-pending'}">${it.status==='done'?'✓ 已处理':'⏳ 待处理'}</span>
+        <span class="iss-tag ${it.source==='auto'?'iss-tag-auto':'iss-tag-manual'}">${it.source==='auto'?'自动捕获':'手动留言'}</span>
+        <span class="iss-loc">📍 ${escapeHtml(it.loc||'未知')}</span>
+        <span class="iss-time">${formatTime(it.time)}</span>
+      </div>
+      <div class="iss-msg">${escapeHtml(it.msg)}</div>
+      <div class="iss-item-actions">
+        ${it.status==='pending'?`<button class="iss-act primary" onclick="markIssueDone('${it.id}')">✔ 标记已处理</button>`:''}
+        <button class="iss-act danger" onclick="deleteIssue('${it.id}')">🗑 删除</button>
+      </div>
+    </div>
+  `).join('') : `<div class="iss-empty">✈️ 暂无记录<br><span style="font-size:.8rem;">提交问题留言后，记录将在此处持续留存监控</span></div>`;
+
+  document.getElementById('mainContent').innerHTML = `
+    <div class="page-hero">
+      <h1>🐞 问题集合</h1>
+      <p>留言反馈 · 问题定位 · BUG 记录监控</p>
+      <div class="plane-anim">🐞</div>
+    </div>
+
+    <div class="iss-stat-row">
+      <div class="iss-stat"><div class="iss-stat-val">${arr.length}</div><div class="iss-stat-lbl">总记录</div></div>
+      <div class="iss-stat"><div class="iss-stat-val" style="color:var(--warning);">${pending}</div><div class="iss-stat-lbl">待处理</div></div>
+      <div class="iss-stat"><div class="iss-stat-val">${manual}</div><div class="iss-stat-lbl">手动留言</div></div>
+      <div class="iss-stat"><div class="iss-stat-val" style="color:var(--info);">${auto}</div><div class="iss-stat-lbl">自动捕获</div></div>
+    </div>
+
+    <div class="me-tab-bar">
+      <div class="me-tab ${mode==='report'?'active':''}" onclick="APP._issMode='report';renderIssues();">📝 留言反馈</div>
+      <div class="me-tab ${mode==='records'?'active':''}" onclick="APP._issMode='records';renderIssues();">🗂 BUG 记录监控</div>
+    </div>
+
+    ${mode==='report' ? `
+      <div class="iss-card">
+        <div class="iss-card-title">📝 提交问题 / 留言</div>
+        <div class="iss-field">
+          <label for="issLoc">问题所在位置</label>
+          <select id="issLoc">${LOC_OPTS}</select>
+        </div>
+        <div class="iss-field">
+          <label for="issMsg">问题描述 / 留言内容</label>
+          <textarea id="issMsg" placeholder="请描述遇到的问题、操作步骤、期望效果等，便于定位与修复……"></textarea>
+        </div>
+        <button class="iss-submit" onclick="submitIssue()">✈️ 提交留言</button>
+        <div class="iss-legend">💡 提示：提交后记录将留存于「问题集合 · BUG 记录监控」中，随时可查看与追踪处理状态。</div>
+      </div>
+    ` : `
+      <div class="iss-card">
+        <div class="iss-card-title">🗂 BUG 记录监控 <span style="margin-left:auto;font-size:.76rem;color:var(--text3);font-weight:400;">自动捕获运行时异常 · 本地留存</span></div>
+        ${listHtml}
+      </div>
+    `}
+  `;
+}
+function submitIssue(){
+  const loc = document.getElementById('issLoc').value || '其他';
+  const msg = (document.getElementById('issMsg').value || '').trim();
+  if(!msg){ toast('请填写问题描述或留言内容','warning'); return; }
+  addIssue({ loc, msg, source:'manual', status:'pending' });
+  toast('✅ 留言已提交并留存，感谢反馈！','success');
+  renderIssues();
+}
+function markIssueDone(id){
+  const arr = loadIssues();
+  const it = arr.find(x=>x.id===id);
+  if(it){ it.status='done'; saveIssues(arr); }
+  toast('已标记为已处理','success');
+  renderIssues();
+}
+function deleteIssue(id){
+  const arr = loadIssues().filter(x=>x.id!==id);
+  saveIssues(arr);
+  toast('记录已删除','info');
+  renderIssues();
+}
+function formatTime(iso){
+  try{
+    const d = new Date(iso);
+    const p = n => (n<10?'0':'')+n;
+    return `${d.getFullYear()}-${p(d.getMonth()+1)}-${p(d.getDate())} ${p(d.getHours())}:${p(d.getMinutes())}`;
+  }catch(e){ return iso||''; }
+}
+/* 自动捕获运行时异常 → 问题集合记录（仔细监控留存 BUG 记录） */
+function _captureRuntimeError(type, msg, src){
+  try{
+    addIssue({ loc:'系统运行时', msg:`[${type}] ${msg}`, source:'auto', status:'pending' });
+  }catch(e){}
+}
+window.addEventListener('error', function(ev){
+  _captureRuntimeError('JS错误', (ev.message||'未知错误') + ' @ ' + (ev.filename||'') + ':' + (ev.lineno||''), 'runtime');
+});
+window.addEventListener('unhandledrejection', function(ev){
+  const reason = ev && ev.reason;
+  let msg = '';
+  try{ msg = reason && reason.message ? reason.message : String(reason); }catch(e){ msg = String(reason||'未知'); }
+  _captureRuntimeError('Promise异常', msg, 'runtime');
+});
+
 /* ===== RENDER: SETTINGS ===== */
 function renderSettings(){
   const usage = getStorageUsage();
@@ -11900,6 +12090,7 @@ function isOnbDone(){
 
 let onbIndex = 0;
 let _onbPrevScrollY = 0;   // 记录进入引导前的滚动位置（修复 iPad 引导结束后页面停留在半屏、开始按钮不可见）
+let _onbAutoTimer = null;  // 最后一步「开始旅程」自动触发计时器
 function startOnboarding(force){
   if(!force && isOnbDone()) return;
   onbIndex = 0;
@@ -11914,6 +12105,8 @@ function startOnboarding(force){
 function renderOnboardingStep(){
   const step = ONB_STEPS[onbIndex];
   const total = ONB_STEPS.length;
+  // 清除上一次的自动触发计时器（切换步骤时取消未执行的自动开始）
+  if(_onbAutoTimer){ clearTimeout(_onbAutoTimer); _onbAutoTimer = null; }
   // 步骤指示
   document.getElementById('onbStep').innerHTML = `<span class="onb-step-icon">${onbIndex+1}</span> STEP ${onbIndex+1} / ${total}`;
   document.getElementById('onbTitle').textContent = step.title;
@@ -11937,6 +12130,14 @@ function renderOnboardingStep(){
     else if(i === onbIndex) cls += ' active';
     return `<div class="${cls}"></div>`;
   }).join('');
+  // 最后一步「开始旅程」：自动触发，无需使用者点击（停留提示后自动开始）
+  if(onbIndex === total-1){
+    document.getElementById('onbDesc').textContent = step.desc + ' 即将自动开始旅程……';
+    _onbAutoTimer = setTimeout(()=>{
+      _onbAutoTimer = null;
+      endOnboarding();
+    }, 3000);
+  }
 
   const spotlight = document.getElementById('onbSpotlight');
   const tooltip = document.getElementById('onbTooltip');
@@ -12169,6 +12370,8 @@ function prevOnboarding(){
 function endOnboarding(){
   // 无论后续是否异常，都必须结束引导 → 先写完成标记，再强制关闭
   _onbStorageWrite();
+  // 清除最后一步「开始旅程」的自动触发计时器，避免重复触发
+  if(_onbAutoTimer){ clearTimeout(_onbAutoTimer); _onbAutoTimer = null; }
   try{
     document.getElementById('onbOverlay').classList.remove('show');
     document.body.style.overflow = '';
