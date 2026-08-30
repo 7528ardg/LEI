@@ -1,4 +1,4 @@
-﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿<!DOCTYPE html>
+﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿<!DOCTYPE html>
 <html lang="zh-CN">
 <head>
     <meta charset="UTF-8">
@@ -20777,14 +20777,14 @@ html += `<div class="mb-6"><div class="flex items-center justify-between mb-3"><
                     html += `<div class="p-12 text-center text-gray-400"><span class="text-6xl"></span><p class="mt-3 text-lg">暂无竞品数据</p><p class="text-sm mt-1">点击"新增竞品"添加竞品信息</p></div>`;
                 } else {
                     // 筛选和搜索区域
-                    html += `<div class="mb-4 bg-white rounded-xl border border-gray-200 p-3">
+                                                            html += `<div class="mb-4 bg-white rounded-xl border border-gray-200 p-3">
                         <div class="flex flex-col md:flex-row gap-3">
                             <div class="flex-1">
                                 <div class="relative">
                                     <span class="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400">🔍</span>
                                     <input type="text" id="competitor-search" placeholder="搜索产品名称、品牌、分类..." 
                                         value="${state.competitorSearchQuery||''}"
-                                        oninput="state.competitorSearchQuery=this.value;window.clearTimeout(window.__csDeb);window.__csDeb=window.setTimeout(function(){render();var e=document.getElementById('competitor-search');if(e){e.focus();try{var L=e.value.length;e.setSelectionRange(L,L);}catch(_){}}},300)"
+                                        oninput="state.competitorSearchQuery=this.value;window.clearTimeout(window.__csDeb);window.__csDeb=window.setTimeout(function(){refreshCompetitorResults()},200)"
                                         class="w-full pl-9 pr-3 py-2 bg-gray-50 border border-gray-200 rounded-lg text-sm focus:border-cyan-300 focus:outline-none">
                                 </div>
                             </div>
@@ -20811,128 +20811,19 @@ html += `<div class="mb-6"><div class="flex items-center justify-between mb-3"><
                         </div>
                         ${state.competitorSearchQuery || state.competitorCategoryFilter !== 'all' || state.competitorBrandFilter !== 'all' ? 
                         `<div class="mt-2 flex items-center gap-2 text-xs text-gray-500">
-                            <span>已筛选 ${filteredCompetitors.length} / ${allCompetitors.length} 款</span>
+                            <span id="competitor-filter-info">已筛选 ${filteredCompetitors.length} / ${allCompetitors.length} 款</span>
                             <button onclick="state.competitorSearchQuery='';state.competitorCategoryFilter='all';state.competitorBrandFilter='all';render()" 
                                 class="px-2 py-0.5 bg-red-50 text-red-600 rounded hover:bg-red-100 transition-colors">✕ 清除筛选</button>
                         </div>` : ''}
-                    </div>
-                    <!-- 一键展开/关闭按钮 -->
-                    <div class="mb-3 flex items-center justify-between">
-                        <span class="text-sm text-gray-500">共 ${filteredCompetitors.length} 款竞品，价格默认隐藏，点击展开查看</span>
-                        <button onclick="toggleAllCompetitorPrices(!allExpanded)" class="px-3 py-1.5 bg-cyan-100 text-cyan-700 rounded-lg text-xs font-medium hover:bg-cyan-200 transition-colors">${allExpanded ? '🔒 全部收起' : '🔓 全部展开'}</button>
                     </div>`;
 
-                    html += `<div class="space-y-3">`;
-                    filteredCompetitors.forEach(function(c) {
-                        const isExpanded = state.expandedCompetitorPrices[c.id];
-                        const isCustom = !competitorData.find(d => d.id === c.id);
-
-                        // 平台颜色映射
-                        const platformColor = {
-                            '天猫旗舰店': 'red', '京东自营': 'blue', '日上免税': 'purple',
-                            '三亚免税城': 'teal', '天猫国际': 'orange'
-                        };
-                        const platformIcon = {
-                            '天猫旗舰店': '🔴', '京东自营': '🔵', '日上免税': '🟣',
-                            '三亚免税城': '🟢', '天猫国际': '🟠'
-                        };
-
-                        html += `<div class="bg-white rounded-xl border border-gray-200 overflow-hidden hover:shadow-md transition-shadow">
-                            <div class="p-4 cursor-pointer hover:bg-gray-50 transition-colors" onclick="toggleCompetitorPrice('${c.id}')">
-                                <div class="flex items-center justify-between">
-                                    <div class="flex items-center gap-3">
-                                        <div class="w-10 h-10 bg-gradient-to-br from-cyan-100 to-blue-100 rounded-lg flex items-center justify-center text-lg"></div>
-                                        <div>
-                                            <div class="text-sm font-bold text-gray-800">${c.brand}</div>
-                                            <div class="text-xs text-gray-500">${c.name} · ${c.category}</div>
-                                        </div>
-                                    </div>
-                                    <div class="flex items-center gap-2">
-                                        <span class="text-xs text-gray-400">${getCompetitorPrices(c).length} 个价格</span>
-                                        ${state.competitorPriceOverrides && state.competitorPriceOverrides[c.id] ? `<span class="text-[10px] px-1.5 py-0.5 bg-emerald-100 text-emerald-700 rounded-full">🤖 AI 更新 · ${state.competitorPriceOverrides[c.id].updatedAt || ''}</span>` : ''}
-                                        <span class="text-lg transition-transform ${isExpanded ? 'rotate-180' : ''}">▾</span>
-                                    </div>
-                                </div>
-                            </div>`;
-
-                        if (isExpanded) {
-                            html += `<div class="border-t border-gray-100 bg-gray-50/50">
-                                <div class="p-4">
-                                    <div class="space-y-3">`;
-
-                            const dispPrices = getCompetitorPrices(c);
-                            if (dispPrices && dispPrices.length > 0) {
-                            // 按平台分组
-                            const grouped = {};
-                            dispPrices.forEach(function(p) {
-                                if (!grouped[p.platform]) grouped[p.platform] = [];
-                                grouped[p.platform].push(p);
-                            });
-
-                            Object.keys(grouped).forEach(function(platform) {
-                                const pColor = platformColor[platform] || 'gray';
-                                const pIcon = platformIcon[platform] || '⚪';
-                                const prices = grouped[platform];
-
-                                html += `<div>
-                                    <div class="flex items-center gap-2 mb-2">
-                                        <span class="text-sm">${pIcon}</span>
-                                        <span class="text-sm font-semibold text-${pColor}-700">${platform}</span>
-                                        <span class="text-xs text-gray-400">${prices.length} 个规格</span>
-                                    </div>
-                                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2">`;
-
-                                prices.forEach(function(p) {
-                                    const upTime = p.updateTime || c.updateTime || '';
-                                    html += `<div class="bg-white rounded-lg p-2.5 border border-gray-200">
-                                        <div class="flex items-center justify-between mb-1">
-                                            <span class="text-xs font-medium text-gray-700">${p.size}</span>
-                                            <span class="text-sm font-bold text-red-600">¥${p.price} <span class="text-xs text-orange-500 font-normal">（不叠券）</span></span>
-                                        </div>
-                                        <div class="text-xs text-gray-400">${p.store}</div>
-                                        <div class="text-xs text-gray-400">${p.note}${upTime ? ' · '+upTime : ''}</div>
-                                    </div>`;
-                                });
-
-                                html += `</div></div>`;
-                            });
-                        } else {
-                            // 兼容旧数据格式
-                            html += `<div class="grid grid-cols-3 gap-3">
-                                <div class="bg-white rounded-lg p-3 text-center"><div class="text-xs text-gray-500 mb-1">🔴 天猫</div><div class="text-sm font-bold text-gray-700">${c.priceTaobao?'¥'+c.priceTaobao:'-'}</div></div>
-                                <div class="bg-white rounded-lg p-3 text-center"><div class="text-xs text-gray-500 mb-1">🔵 京东</div><div class="text-sm font-bold text-gray-700">${c.priceJD?'¥'+c.priceJD:'-'}</div></div>
-                                <div class="bg-white rounded-lg p-3 text-center"><div class="text-xs text-gray-500 mb-1">🟣 免税店</div><div class="text-sm font-bold text-gray-700">${c.priceDutyFree?'¥'+c.priceDutyFree:'-'}</div></div>
-                            </div>`;
-                        }
-
-                        html += `</div>
-                                    <div class="mt-3 pt-3 border-t border-gray-200">
-                                        <div class="flex flex-wrap gap-1 mb-2">`;
-                            (c.ingredients||[]).slice(0,4).forEach(function(i) {
-                                html += `<span class="px-2 py-0.5 bg-blue-50 text-blue-700 rounded text-xs">${i}</span>`;
-                            });
-                            html += `</div>
-                                        <div class="grid grid-cols-2 gap-2 text-xs">
-                                            <div><span class="text-green-600 font-medium">✓ 优势：</span><span class="text-gray-600">${(c.advantages||[]).slice(0,2).join(' · ')}</span></div>
-                                            <div><span class="text-red-500 font-medium">✗ 劣势：</span><span class="text-gray-600">${(c.disadvantages||[]).slice(0,2).join(' · ')}</span></div>
-                                        </div>
-                                    </div>
-                                    <div class="flex flex-wrap gap-2 mt-3 pt-3 border-t border-gray-200">
-                                        <button onclick="aiUpdateCompetitorPrice('${c.id}')" class="flex-1 py-1.5 bg-emerald-50 text-emerald-700 rounded-lg text-xs font-medium">🤖 AI 更新价格</button>
-                                        <button onclick="generateCompareScript('${c.id}')" class="flex-1 py-1.5 bg-gradient-to-r from-cyan-500 to-blue-500 text-gray-800 rounded-lg text-xs font-medium">✨ 生成对比话术</button>
-                                        ${isCustom ? `<button onclick="editCompetitor('${c.id}')" class="px-3 py-1.5 bg-gray-100 text-gray-700 rounded-lg text-xs">✏️ 编辑</button>` : ''}
-                                        ${isCustom ? `<button onclick="deleteCompetitor('${c.id}')" class="px-3 py-1.5 bg-red-50 text-red-600 rounded-lg text-xs">🗑️ 删除</button>` : ''}
-                                        ${!isCustom && state.competitorPriceOverrides && state.competitorPriceOverrides[c.id] ? `<button onclick="revertCompetitorPrices('${c.id}')" class="px-3 py-1.5 bg-gray-100 text-gray-600 rounded-lg text-xs">↩ 恢复默认</button>` : ''}
-                                    </div>
-                                </div>`;
-                        }
-
-                        html += `</div>`;
-                    });
-                    html += `</div></div>`;
+                    // 结果容器：独立 DOM 节点，搜索输入时仅重建该容器，避免重建搜索框导致失焦
+                    html += `<div id="competitor-results" class="space-y-3 mb-3">
+`;
+                    html += buildResultsHtml(filteredCompetitors, allCompetitors.length);
+                    html += `</div>`;
                 }
-
-                // 生成对比话术结果
+// 生成对比话术结果
                 if (state.generatedCompareScript) {
                     html += `<div class="mt-4 bg-cyan-50 rounded-xl border-2 border-cyan-200 overflow-hidden">
                         <div class="bg-gradient-to-r from-cyan-500 to-blue-500 p-3">
@@ -22556,6 +22447,146 @@ html += `<div class="mb-6"><div class="flex items-center justify-between mb-3"><
             render();
         };
 
+        
+        // ===== 竞品结果区渲染（供 render 首屏与刷新搜索框局部刷新共用）=====
+// buildResultsHtml: 生成"展开/收起行 + 竞品卡片列表"的 HTML 字符串（不含外层容器 div）
+function buildResultsHtml(filtered, total) {
+    const allExpanded = filtered.every(c => state.expandedCompetitorPrices[c.id]);
+    let html = '';
+    if (filtered.length === 0) {
+        html += `<div class="p-8 text-center text-gray-400">未找到匹配的竞品，换个关键词试试</div>`;
+        return html;
+    }
+    html += `<div class="flex items-center justify-between">
+        <span class="text-sm text-gray-500">共 ${filtered.length} 款竞品，价格默认隐藏，点击展开查看</span>
+        <button onclick="toggleAllCompetitorPrices(!${allExpanded})" class="px-3 py-1.5 bg-cyan-100 text-cyan-700 rounded-lg text-xs font-medium hover:bg-cyan-200 transition-colors">${allExpanded ? '🔒 全部收起' : '🔓 全部展开'}</button>
+    </div>`;
+    filtered.forEach(function(c) {
+        const isExpanded = state.expandedCompetitorPrices[c.id];
+        const isCustom = !competitorData.find(d => d.id === c.id);
+
+        const platformColor = {
+            '天猫旗舰店': 'red', '京东自营': 'blue', '日上免税': 'purple',
+            '三亚免税城': 'teal', '天猫国际': 'orange'
+        };
+        const platformIcon = {
+            '天猫旗舰店': '🔴', '京东自营': '🔵', '日上免税': '🟣',
+            '三亚免税城': '🟢', '天猫国际': '🟠'
+        };
+
+        html += `<div class="bg-white rounded-xl border border-gray-200 overflow-hidden hover:shadow-md transition-shadow">
+                            <div class="p-4 cursor-pointer hover:bg-gray-50 transition-colors" onclick="toggleCompetitorPrice('${c.id}')">
+                                <div class="flex items-center justify-between">
+                                    <div class="flex items-center gap-3">
+                                        <div class="w-10 h-10 bg-gradient-to-br from-cyan-100 to-blue-100 rounded-lg flex items-center justify-center text-lg"></div>
+                                        <div>
+                                            <div class="text-sm font-bold text-gray-800">${c.brand}</div>
+                                            <div class="text-xs text-gray-500">${c.name} · ${c.category}</div>
+                                        </div>
+                                    </div>
+                                    <div class="flex items-center gap-2">
+                                        <span class="text-xs text-gray-400">${getCompetitorPrices(c).length} 个价格</span>
+                                        ${state.competitorPriceOverrides && state.competitorPriceOverrides[c.id] ? `<span class="text-[10px] px-1.5 py-0.5 bg-emerald-100 text-emerald-700 rounded-full">🤖 AI 更新 · ${state.competitorPriceOverrides[c.id].updatedAt || ''}</span>` : ''}
+                                        <span class="text-lg transition-transform ${isExpanded ? 'rotate-180' : ''}">▾</span>
+                                    </div>
+                                </div>
+                            </div>`;
+
+                        if (isExpanded) {
+                            html += `<div class="border-t border-gray-100 bg-gray-50/50">
+                                <div class="p-4">
+                                    <div class="space-y-3">`;
+
+                            const dispPrices = getCompetitorPrices(c);
+                            if (dispPrices && dispPrices.length > 0) {
+                            const grouped = {};
+                            dispPrices.forEach(function(p) {
+                                if (!grouped[p.platform]) grouped[p.platform] = [];
+                                grouped[p.platform].push(p);
+                            });
+
+                            Object.keys(grouped).forEach(function(platform) {
+                                const pColor = platformColor[platform] || 'gray';
+                                const pIcon = platformIcon[platform] || '⚪';
+                                const prices = grouped[platform];
+
+                                html += `<div>
+                                    <div class="flex items-center gap-2 mb-2">
+                                        <span class="text-sm">${pIcon}</span>
+                                        <span class="text-sm font-semibold text-${pColor}-700">${platform}</span>
+                                        <span class="text-xs text-gray-400">${prices.length} 个规格</span>
+                                    </div>
+                                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2">`;
+
+                                prices.forEach(function(p) {
+                                    const upTime = p.updateTime || c.updateTime || '';
+                                    html += `<div class="bg-white rounded-lg p-2.5 border border-gray-200">
+                                        <div class="flex items-center justify-between mb-1">
+                                            <span class="text-xs font-medium text-gray-700">${p.size}</span>
+                                            <span class="text-sm font-bold text-red-600">¥${p.price} <span class="text-xs text-orange-500 font-normal">（不叠券）</span></span>
+                                        </div>
+                                        <div class="text-xs text-gray-400">${p.store}</div>
+                                        <div class="text-xs text-gray-400">${p.note}${upTime ? ' · '+upTime : ''}</div>
+                                    </div>`;
+                                });
+
+                                html += `</div></div>`;
+                            });
+                        } else {
+                            html += `<div class="grid grid-cols-3 gap-3">
+                                <div class="bg-white rounded-lg p-3 text-center"><div class="text-xs text-gray-500 mb-1">🔴 天猫</div><div class="text-sm font-bold text-gray-700">${c.priceTaobao?'¥'+c.priceTaobao:'-'}</div></div>
+                                <div class="bg-white rounded-lg p-3 text-center"><div class="text-xs text-gray-500 mb-1">🔵 京东</div><div class="text-sm font-bold text-gray-700">${c.priceJD?'¥'+c.priceJD:'-'}</div></div>
+                                <div class="bg-white rounded-lg p-3 text-center"><div class="text-xs text-gray-500 mb-1">🟣 免税店</div><div class="text-sm font-bold text-gray-700">${c.priceDutyFree?'¥'+c.priceDutyFree:'-'}</div></div>
+                            </div>`;
+                        }
+
+                        html += `</div>
+                                    <div class="mt-3 pt-3 border-t border-gray-200">
+                                        <div class="flex flex-wrap gap-1 mb-2">`;
+                            (c.ingredients||[]).slice(0,4).forEach(function(i) {
+                                html += `<span class="px-2 py-0.5 bg-blue-50 text-blue-700 rounded text-xs">${i}</span>`;
+                            });
+                            html += `</div>
+                                        <div class="grid grid-cols-2 gap-2 text-xs">
+                                            <div><span class="text-green-600 font-medium">✓ 优势：</span><span class="text-gray-600">${(c.advantages||[]).slice(0,2).join(' · ')}</span></div>
+                                            <div><span class="text-red-500 font-medium">✗ 劣势：</span><span class="text-gray-600">${(c.disadvantages||[]).slice(0,2).join(' · ')}</span></div>
+                                        </div>
+                                    </div>
+                                    <div class="flex flex-wrap gap-2 mt-3 pt-3 border-t border-gray-200">
+                                        <button onclick="aiUpdateCompetitorPrice('${c.id}')" class="flex-1 py-1.5 bg-emerald-50 text-emerald-700 rounded-lg text-xs font-medium">🤖 AI 更新价格</button>
+                                        <button onclick="generateCompareScript('${c.id}')" class="flex-1 py-1.5 bg-gradient-to-r from-cyan-500 to-blue-500 text-gray-800 rounded-lg text-xs font-medium">✨ 生成对比话术</button>
+                                        ${isCustom ? `<button onclick="editCompetitor('${c.id}')" class="px-3 py-1.5 bg-gray-100 text-gray-700 rounded-lg text-xs">✏️ 编辑</button>` : ''}
+                                        ${isCustom ? `<button onclick="deleteCompetitor('${c.id}')" class="px-3 py-1.5 bg-red-50 text-red-600 rounded-lg text-xs">🗑️ 删除</button>` : ''}
+                                        ${!isCustom && state.competitorPriceOverrides && state.competitorPriceOverrides[c.id] ? `<button onclick="revertCompetitorPrices('${c.id}')" class="px-3 py-1.5 bg-gray-100 text-gray-600 rounded-lg text-xs">↩ 恢复默认</button>` : ''}
+                                    </div>
+                                </div>`;
+                        }
+
+                        html += `</div>`;
+                    });
+    return html;
+}
+// 搜索输入时仅重建结果容器 #competitor-results，搜索框节点保持不动，杜绝失焦
+window.refreshCompetitorResults = window.refreshCompetitorResults || function() {
+    const box = document.getElementById('competitor-results');
+    if (!box) return;
+    const allCompetitors = [...competitorData, ...state.competitorProducts];
+    const filtered = allCompetitors.filter(function(c) {
+        if (state.competitorCategoryFilter !== 'all' && c.category !== state.competitorCategoryFilter) return false;
+        if (state.competitorBrandFilter !== 'all' && c.brand !== state.competitorBrandFilter) return false;
+        if (state.competitorSearchQuery) {
+            const q = state.competitorSearchQuery.toLowerCase();
+            return (c.name||'').toLowerCase().includes(q) ||
+                   (c.brand||'').toLowerCase().includes(q) ||
+                   (c.category||'').toLowerCase().includes(q);
+        }
+        return true;
+    });
+    box.innerHTML = buildResultsHtml(filtered, allCompetitors.length);
+    const fInfo = document.getElementById('competitor-filter-info');
+    if (fInfo) fInfo.textContent = '已筛选 ' + filtered.length + ' / ' + allCompetitors.length + ' 款';
+};
+
         const deleteCompetitor = (competitorId) => {
             showConfirm('确认删除', '确定要删除该竞品信息吗？', function() {
                 state.competitorProducts = state.competitorProducts.filter(c => c.id !== competitorId);
@@ -22657,6 +22688,60 @@ html += `<div class="mb-6"><div class="flex items-center justify-between mb-3"><
                 };
             }).filter(function(p) { return p.price > 0 && (p.platform || p.size); });
         };
+        // ===== 免 Key 兜底：仅从搜索摘要中确定性抽取价格（绝不编造、绝不用知识库估算）=====
+        const parseSearchPrices = (text, comp) => {
+            if (!text) return [];
+            const res = [];
+            const seen = new Set();
+            const entries = String(text).split(/\n\s*(?=\d+\.\s)/).map(function(s){ return s.trim(); }).filter(Boolean);
+            const detectPlatform = function(s) {
+                s = String(s || '').toLowerCase();
+                const map = [
+                    ['天猫', /天猫|tmall/], ['京东', /京东|jd\.com|jingdong/],
+                    ['日上免税', /日上|risun/], ['三亚免税', /三亚|sanya|cdf/],
+                    ['淘宝', /淘宝|taobao/], ['小红书', /小红书|xiaohongshu/],
+                    ['苏宁', /苏宁|suning/], ['唯品会', /唯品会|vip\.com/],
+                    ['丝芙兰', /丝芙兰|sephora/], ['官网', /官网|官方|official/],
+                    ['拼多多', /拼多多|pinduoduo/], ['网易考拉', /考拉|kaola/],
+                    ['免税店', /免税|duty|dfs/]
+                ];
+                for (let k = 0; k < map.length; k++) { if (map[k][1].test(s)) return map[k][0]; }
+                return '';
+            };
+            const detectSize = function(s) {
+                let m = String(s).match(/(\d+(?:\.\d+)?)\s*(?:ml|毫升)/i);
+                if (m) return m[1] + 'ml';
+                m = String(s).match(/(\d+(?:\.\d+)?)\s*(?:克|g\b)/i);
+                return m ? m[1] + 'g' : '';
+            };
+            const push = function(platform, size, price) {
+                if (!(price >= 10 && price <= 9999)) return;
+                const key = platform + '|' + size + '|' + price;
+                if (seen.has(key)) return;
+                seen.add(key);
+                res.push({ platform: platform || '电商平台', store: '', size: size, price: Math.round(price), note: '联网参考价' });
+            };
+            entries.forEach(function(entry) {
+                const body = String(entry).replace(/^\d+\.\s*/, '');
+                const platform = detectPlatform(body) || detectPlatform(comp.name + ' ' + comp.brand);
+                const size = detectSize(body);
+                const prices = [];
+                const m1 = body.match(/[¥￥]\s*\d{2,6}(?:\.\d+)?/g) || [];
+                const m2 = body.match(/\d{2,6}(?:\.\d+)?\s*(?:元|rmb|人民币)/gi) || [];
+                const m3 = body.match(/price[:：]\s*(\d{2,6}(?:\.\d+)?)/i);
+                m1.forEach(function(x){ prices.push(parseFloat(x.replace(/[¥￥]/g, ''))); });
+                m2.forEach(function(x){ const mm = x.match(/(\d{2,6}(?:\.\d+)?)/); if (mm) prices.push(parseFloat(mm[1])); });
+                if (m3) prices.push(parseFloat(m3[1]));
+                if (!prices.length) {
+                    // 无 ¥/元/price: 标记时：仅当正文同时含平台关键词才把 3-6 位数字视为价格，避免把规格/条码/编号误当价格
+                    if (/[天猫京东淘宝日上三亚免税苏宁唯品会丝芙兰小红书考拉官网官方拼多多|tmall|jd|suning|vip|sephora|kaola]/i.test(body)) {
+                        (body.match(/\d{3,6}(?:\.\d+)?/g) || []).forEach(function(n){ const v = parseFloat(n); if (v >= 10 && v <= 9999) prices.push(v); });
+                    }
+                }
+                [...new Set(prices.map(function(p){ return Math.round(p); }))].forEach(function(p){ push(platform, size, p); });
+            });
+            return res.slice(0, 10);
+        };
         // ===== 免费价格搜索通道（全部免注册免 key、免费额度，无任何收费路径）=====
 // 源1：Firecrawl Keyless（api.firecrawl.dev/v2/search，CORS 放行，每月免费额度）
 // 源2：Tavily Keyless（api.tavily.com/search + X-Tavily-Access-Mode:keyless，CORS 放行，免注册免费额度）
@@ -22736,11 +22821,18 @@ const aiFetchPrices = async (comp) => {
         '------',
         '请抽取各渠道真实在售价（人民币）输出 JSON 数组。'
     ].join('\n');
-    const resp = await SpringAI.chatLLM([
-        { role: 'system', content: sys },
-        { role: 'user', content: user }
-    ], { temperature: 0.1, maxTokens: 1200, timeout: 45000 });
-    return parseAiPriceJson(resp);
+    // AI 已配置：优先用 GLM-4-Flash 抽取；未配置或调用失败 → 免 Key 本地解析（仅从搜索结果取数，绝不编造）
+    if (SpringAI.isEnabled()) {
+        try {
+            const resp = await SpringAI.chatLLM([
+                { role: 'system', content: sys },
+                { role: 'user', content: user }
+            ], { temperature: 0.1, maxTokens: 1200, timeout: 45000 });
+            const parsed = parseAiPriceJson(resp);
+            if (parsed.length) return parsed;
+        } catch(e) { /* AI 调用失败，回退本地解析 */ }
+    }
+    return parseSearchPrices(search.text, comp);
 };
 // 应用价格：预设竞品写入覆盖层（可恢复默认），自定义竞品直接更新
         const applyCompetitorPrices = (comp, prices) => {
@@ -22880,8 +22972,7 @@ const aiFetchPrices = async (comp) => {
             const comp = allCompetitors.find(function(c) { return c.id === competitorId; });
             if (!comp) return;
             if (!SpringAI.isEnabled()) {
-                showConfirm('AI 未配置', '在线 AI 价格更新需要接入 GLM-4-Flash。是否现在打开「AI 设置」完成配置？', function(ok) { if (ok) SpringAI.openSettings(); });
-                return;
+                showAlert('⚠️ 未配置 AI Key，将使用免费联网搜索 + 本地智能解析直接获取参考价（Firecrawl / Tavily 双免费源，无需 Key）。');
             }
             aiPriceStop = false;
             const ov = showAiLoading('⏳ AI 正在分析「' + (comp.brand || '') + ' ' + (comp.name || '') + '」的最新参考价格…');
@@ -22906,8 +22997,7 @@ const aiFetchPrices = async (comp) => {
         // 批量 AI 更新价格（按当前筛选范围顺序更新）
         const aiUpdateAllCompetitorPrices = async () => {
             if (!SpringAI.isEnabled()) {
-                showConfirm('AI 未配置', '批量更新需要接入在线 AI（GLM-4-Flash）。是否现在打开「AI 设置」？', function(ok) { if (ok) SpringAI.openSettings(); });
-                return;
+                showAlert('⚠️ 未配置 AI Key，将使用免费联网搜索 + 本地智能解析批量获取参考价（Firecrawl / Tavily 双免费源，无需 Key）。');
             }
             const allCompetitors = [...competitorData, ...state.competitorProducts];
             const targets = allCompetitors.filter(function(c) {
