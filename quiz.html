@@ -5390,6 +5390,38 @@ function acJumpAndFlip(targetI){
   jumpTo(targetI);
 }
 
+/* ===== 答题卡导航条：上一题 / 下一题 =====
+   跳转后同步答题卡分页（题型 + 页），使"当前"题始终落在可视网格内，
+   避免点击下一题后答题卡仍停留在旧页导致当前题高亮消失 */
+function _acLocatePage(targetI){
+  const qz = APP.quiz; if(!qz) return null;
+  const groups = _acGetGroups(qz);
+  for(let ti=0; ti<groups.length; ti++){
+    const found = groups[ti].items.findIndex(it => it.i === targetI);
+    if(found >= 0) return { typeIdx: ti, innerPage: Math.floor(found / AC_PAGE_SIZE) };
+  }
+  return null;
+}
+function acNavPrev(){
+  const qz = APP.quiz; if(!qz) return;
+  if(qz.mode==='exam' && qz.noBack){ toast('考试模式不可回退上一题','warning'); return; }
+  if(qz.current <= 0) return;
+  const target = qz.current - 1;
+  const loc = _acLocatePage(target);
+  qz.current = target;
+  if(loc){ APP._acTypeIdx = loc.typeIdx; APP._acInnerPage = loc.innerPage; }
+  renderQuiz();
+}
+function acNavNext(){
+  const qz = APP.quiz; if(!qz) return;
+  if(qz.current >= qz.indices.length - 1) return;
+  const target = qz.current + 1;
+  const loc = _acLocatePage(target);
+  qz.current = target;
+  if(loc){ APP._acTypeIdx = loc.typeIdx; APP._acInnerPage = loc.innerPage; }
+  renderQuiz();
+}
+
 /* ===== 题目页 ⭐ 一键收藏 ===== */
 function quickToggleFav(idx){
   if(APP.showQuickFav === false){ toggleFav(idx); return; }
@@ -7500,7 +7532,7 @@ function renderQuiz(){
       </div>
       `}
       <div>
-        <div class="seat-map ac-card bc-card" id="answerCardPanel" onclick="if(event.target.closest('.seat-grid') || event.target.closest('.ac-page-btn') || event.target.closest('.ac-dot') || event.target.closest('.ac-jump-btn') || event.target.closest('.ac-stab') || event.target.closest('.ac-end-btn')) return; toggleAnswerCard();">
+        <div class="seat-map ac-card bc-card" id="answerCardPanel" onclick="if(event.target.closest('.seat-grid') || event.target.closest('.ac-page-btn') || event.target.closest('.ac-dot') || event.target.closest('.ac-jump-btn') || event.target.closest('.ac-stab') || event.target.closest('.ac-end-btn') || event.target.closest('.ac-nav-bar') || event.target.closest('.ac-nav-btn')) return; toggleAnswerCard();">
           <h3 class="ac-title" title="点击收起/展开答题卡">
             <span class="ac-title-text">🎫 答题卡</span>
             <span class="ac-current-badge">第 <strong>${cur+1}</strong> / ${total} 题</span>
@@ -7523,10 +7555,10 @@ function renderQuiz(){
             <div class="ac-stat" data-type="flagged"><b>${stats.flagged}</b><span>标记</span></div>
           </div>
           <div class="ac-nav-bar">
-            <button class="ac-nav-btn" onclick="prevQ()" ${cur===0?'disabled':''} title="上一题">⬅ 上一题</button>
+            <button class="ac-nav-btn" onclick="acNavPrev()" ${cur===0?'disabled':''} title="上一题">⬅ 上一题</button>
             <button class="ac-nav-btn ac-nav-flag ${isFlagged?'is-flag':''}" onclick="toggleFlag()" title="标记本题">${isFlagged?'🚩 已标记':'⚑ 标记'}</button>
             ${cur<total-1
-              ? `<button class="ac-nav-btn ac-nav-next" onclick="nextQ()" title="下一题">下一题 ➡</button>`
+              ? `<button class="ac-nav-btn ac-nav-next" onclick="acNavNext()" title="下一题">下一题 ➡</button>`
               : (isExam || isMock)
                 ? `<button class="ac-nav-btn ac-nav-gold" onclick="confirmFinish()" title="交卷">🏁 交卷</button>`
                 : `<button class="ac-nav-btn ac-nav-gold" onclick="confirmFinish()" title="完成训练">🏁 完成</button>`
