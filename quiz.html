@@ -1758,6 +1758,10 @@ a{color:var(--primary);text-decoration:none;}
 .ac-nav-btn.ac-nav-next:hover:not(:disabled){background:var(--primary);color:#fff;}
 .ac-nav-btn.ac-nav-gold{background:linear-gradient(135deg,var(--gold),#E67E22);color:#fff;border-color:transparent;font-weight:700;}
 
+/* 答题卡折叠/展开状态（点击标题或顶栏 📋 收起/展开） */
+.seat-map.ac-drawer-open{display:block;}
+.seat-map.ac-drawer-closed{display:none;}
+
 /* 答题卡按题型分组 */
 .ac-type-section{margin-bottom:14px;background:var(--bg);border:1px solid var(--border);border-radius:10px;overflow:hidden;}
 .ac-type-section:last-child{margin-bottom:0;}
@@ -5255,14 +5259,18 @@ function applyMEPreset(preset){
 function toggleAnswerCard(force){
   const panel = document.getElementById('answerCardPanel');
   if(!panel) return;
-  const isOpen = panel.classList.contains('ac-drawer-open');
-  if(force === true || !isOpen){
+  // 默认（无类）视为展开：首次点击即收起
+  const isOpen = !panel.classList.contains('ac-drawer-closed');
+  const willOpen = (force === true || !isOpen);
+  if(willOpen){
     panel.classList.add('ac-drawer-open');
     panel.classList.remove('ac-drawer-closed');
   } else {
     panel.classList.remove('ac-drawer-open');
     panel.classList.add('ac-drawer-closed');
   }
+  // 记录折叠状态，供 renderQuiz 重建面板时保留（避免每次翻题/切题被重置为展开）
+  APP._acDrawerOpen = willOpen;
 }
 
 /* ===== 答题卡翻页导航（双层：题型 + 10题/页） ===== */
@@ -5320,8 +5328,7 @@ function acGoType(typeIdx){
   const oldGlobal = _acGlobalPage();
   APP._acTypeIdx = typeIdx;
   APP._acInnerPage = 0;
-  _acFlipAnimate(_acGlobalPage(), oldGlobal);
-  renderQuiz();
+  _acRenderFlipped(_acGlobalPage(), oldGlobal);
 }
 
 /* 跳转到全局页码（1-based） */
@@ -5336,11 +5343,19 @@ function acJumpToGlobalPage(page){
   if(APP._acTypeIdx === info.typeIdx && APP._acInnerPage === info.innerPage) return;
   APP._acTypeIdx = info.typeIdx;
   APP._acInnerPage = info.innerPage;
-  _acFlipAnimate(_acGlobalPage(), oldGlobal);
-  renderQuiz();
+  _acRenderFlipped(_acGlobalPage(), oldGlobal);
 }
 
-/* 翻页动画（无渲染延迟） */
+/* 渲染新页并施加翻页动画：先 renderQuiz 生成新轨道，再用 rAF 对"新轨道"加动画类，
+   避免旧实现先加动画类再 renderQuiz 重建 DOM 导致动画被吞掉 */
+function _acRenderFlipped(newPage, oldPage){
+  renderQuiz();
+  requestAnimationFrame(()=>{
+    _acFlipAnimate(newPage, oldPage);
+  });
+}
+
+/* 翻页动画（作用于当前轨道，需在渲染之后调用） */
 function _acFlipAnimate(newPage, oldPage){
   const track = document.getElementById('acPageTrack');
   if(!track) return;
@@ -5368,21 +5383,25 @@ function acNextPage(){
 function acJumpAndFlip(targetI){
   const qz = APP.quiz;
   if(!qz) { jumpTo(targetI); return; }
+  // 考试禁回退：先拦截，避免分页已切换后才发现被拒
+  if(qz.mode==='exam' && qz.noBack && targetI < qz.current){
+    toast('考试模式不可回退','warning');
+    return;
+  }
   const groups = _acGetGroups(qz);
   for(let ti=0; ti<groups.length; ti++){
     const idx = groups[ti].items.findIndex(({i})=>i===targetI);
     if(idx >= 0){
       const targetPage = Math.floor(idx / AC_PAGE_SIZE);
-      const oldGlobal = _acGlobalPage();
-      const needRender = APP._acTypeIdx !== ti || APP._acInnerPage !== targetPage;
-      if(needRender){
+      const pageChanged = APP._acTypeIdx !== ti || APP._acInnerPage !== targetPage;
+      qz.current = targetI;
+      if(pageChanged){
+        const oldGlobal = _acGlobalPage();
         APP._acTypeIdx = ti;
         APP._acInnerPage = targetPage;
-        _acFlipAnimate(_acGlobalPage(), oldGlobal);
-        setTimeout(()=>{ jumpTo(targetI); renderQuiz(); }, 60);
+        _acRenderFlipped(_acGlobalPage(), oldGlobal);
       } else {
-        jumpTo(targetI);
-        setTimeout(()=>{ renderQuiz(); }, 30);
+        renderQuiz();
       }
       return;
     }
@@ -7133,6 +7152,7 @@ function startQuiz(idxs){
   APP.examTimer = null;
   APP._acTypeIdx = 0;
   APP._acInnerPage = 0;
+  APP._acDrawerOpen = undefined;
   go('quiz');
 }
 
@@ -7164,6 +7184,7 @@ function startExam(idxs, timeLimit){
   APP.examTimer = null;
   APP._acTypeIdx = 0;
   APP._acInnerPage = 0;
+  APP._acDrawerOpen = undefined;
   go('quiz');
 }
 
@@ -7183,6 +7204,7 @@ function startStudyMode(idxs){
   APP.examTimer = null;
   APP._acTypeIdx = 0;
   APP._acInnerPage = 0;
+  APP._acDrawerOpen = undefined;
   go('quiz');
 }
 
@@ -7532,7 +7554,7 @@ function renderQuiz(){
       </div>
       `}
       <div>
-        <div class="seat-map ac-card bc-card" id="answerCardPanel" onclick="if(event.target.closest('.seat-grid') || event.target.closest('.ac-page-btn') || event.target.closest('.ac-dot') || event.target.closest('.ac-jump-btn') || event.target.closest('.ac-stab') || event.target.closest('.ac-end-btn') || event.target.closest('.ac-nav-bar') || event.target.closest('.ac-nav-btn')) return; toggleAnswerCard();">
+        <div class="seat-map ac-card bc-card${APP._acDrawerOpen===false?' ac-drawer-closed':''}" id="answerCardPanel" onclick="if(event.target.closest('.ac-title')){ toggleAnswerCard(); }">
           <h3 class="ac-title" title="点击收起/展开答题卡">
             <span class="ac-title-text">🎫 答题卡</span>
             <span class="ac-current-badge">第 <strong>${cur+1}</strong> / ${total} 题</span>
@@ -10586,6 +10608,7 @@ function startMockExam(){
   APP.examTimer = null;
   APP._acTypeIdx = 0;
   APP._acInnerPage = 0;
+  APP._acDrawerOpen = undefined;
   go('quiz');
   toast(`已生成 ${totalQ} 题模拟试卷，总分 ${totalScore} 分`,'success');
 }
