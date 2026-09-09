@@ -138,7 +138,7 @@ html[data-theme="dark"] .ans mark{background:#8a7300;color:#ffe374;}
 <header class="topbar">
   <div class="t-title"><span class="ic">❓</span>日常问题</div>
   <span class="t-count" id="totalCount">– 条知识点</span>
-  <span class="t-sub">销售 · 配送 · 病假 · 电子发票 速查</span>
+  <span class="t-sub">销售 · 配送 · 病假 · 体检 · 电子发票 速查</span>
 </header>
 
 <div class="wrap">
@@ -189,9 +189,10 @@ const CATS = [
   {id:'qrscan', name:'桌面扫码', ic:'📱'},
   {id:'aftersale', name:'售后服务', ic:'🛎️'},
   {id:'sick', name:'病假管理', ic:'🏥'},
+  {id:'physical', name:'体检注意事项', ic:'🩺'},
   {id:'invoice', name:'电子发票', ic:'🧾'}
 ];
-const HOT = ['转账附言','现金缴存','病假材料','SMP占位','开电子发票','WIFI订单','销转保','退税退款','医疗观察期','值班经理','网订餐','跨境','退货退款','扫码','绿翼客服','批次号','补款','问题餐食'];
+const HOT = ['转账附言','现金缴存','病假材料','SMP占位','开电子发票','WIFI订单','销转保','退税退款','医疗观察期','值班经理','网订餐','跨境','退货退款','扫码','绿翼客服','批次号','补款','问题餐食','体检','用药史','二甲双胍'];
 
 const DATA = [
 /* ============ 💰 销售收款 ============ */
@@ -652,6 +653,45 @@ const DATA = [
    <li>综合行政专员于<strong>工作日收取</strong>病假单据，并在<strong>月初</strong>完成复核。</li>
    <li>分队需关注 SMP 内的病假推送信息，持续监控病假人员情况。</li>
    </ul>`},
+
+/* ============ 🩺 体检注意事项 ============ */
+{id:'p1',cat:'physical',hot:true,src:'2026-09 通知',q:'体检要提前多久完成？晚了会怎样？',
+ t:['体检','提前','30天','航班运行','时限'],
+ a:`<div class="box warn">⏰ 请务必至少提前 <strong>30 天</strong>完成体检，避免影响后续航班运行。</div>`},
+{id:'p2',cat:'physical',hot:true,src:'2026-09 通知',q:'民航监管APP 提交体检申请，用药怎么申报？',
+ t:['民航监管APP','APP','申报','用药','用药史','报备','分部','航卫'],
+ a:`<ul>
+   <li>在「<strong>民航监管APP</strong>」提交体检申请时，务必<strong>如实确认自身用药情况</strong>：如有用药记录，须在 APP 中勾选「<strong>用药史</strong>」。</li>
+   <li>同时，须<strong>第一时间向分部及航卫部门报备</strong>。</li>
+ </ul>`},
+{id:'p3',cat:'physical',hot:true,src:'2026-09 通知',q:'体检前用药有什么特别注意（避免停飞）？',
+ t:['用药','感冒药','止咳药','止痛药','二甲双胍','糖尿病','减肥','停飞','航卫报备','报备'],
+ a:`<div class="box warn">💊 为避免不必要的<strong>停飞</strong>，请注意以下事项：</div>
+ <ul>
+   <li>体检前<strong>一周内</strong>如有服用任何药物（包括<strong>感冒药、止咳药、止痛药</strong>等，以及用于<strong>糖尿病或减肥的二甲双胍</strong>），请务必及时向<strong>航卫</strong>报备。</li>
+ </ul>`},
+{id:'p4',cat:'physical',hot:true,src:'2026-09 通知',q:'体检前饮食有什么特别注意（避免停飞）？',
+ t:['饮食','火锅','麻辣烫','牛羊肉汤','三天','停飞'],
+ a:`<div class="box warn">🍲 为避免不必要的<strong>停飞</strong>，请注意以下事项：</div>
+ <ul>
+   <li>体检前<strong>三天内</strong>请避免在外食用<strong>火锅、麻辣烫、牛羊肉汤</strong>等食物，以免影响检查结果。</li>
+ </ul>`},
+{id:'p5',cat:'physical',hot:true,src:'2026-09 通知',q:'非协议医院复查/加项检查怎么走流程？',
+ t:['非协议医院','复查','加项','承诺书','亲笔签署','邮寄','值班航医'],
+ a:`<ul>
+   <li>若需在<strong>非协议医院</strong>进行复查或加项检查，须由本人<strong>亲笔签署纸质版《复查承诺书》</strong>。</li>
+   <li>将承诺书与复查结果<strong>一同邮寄至值班航医处</strong>。</li>
+ </ul>`},
+{id:'p6',cat:'physical',hot:false,src:'2026-09 通知',q:'体检注意事项有哪些（一图速览）？',
+ t:['体检','提前30天','用药史','APP','报备','饮食','承诺书','一图速览','汇总'],
+ a:`<div class="box tip">🩺 <strong>体检注意事项速览</strong>：</div>
+ <ul>
+   <li>⏰ <strong>提前 30 天</strong>完成体检，避免影响航班运行。</li>
+   <li>📱 <strong>民航监管APP</strong>如实勾选「用药史」，并向分部及航卫报备。</li>
+   <li>💊 体检前<strong>一周内</strong>用药（含感冒/止咳/止痛药、二甲双胍）→ 向航卫报备。</li>
+   <li>🍲 体检前<strong>三天内</strong>避免火锅、麻辣烫、牛羊肉汤。</li>
+   <li>🏥 非协议医院复查/加项 → 亲笔签《复查承诺书》+ 结果一并邮寄值班航医。</li>
+ </ul>`},
 
 /* ============ 🧾 电子发票 ============ */
 {id:'n1',cat:'invoice',hot:true,src:'8月OJT / 新增',q:'扫码订单如何开具电子发票？',
