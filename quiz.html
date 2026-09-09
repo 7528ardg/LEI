@@ -12875,20 +12875,47 @@ if('serviceWorker' in navigator && location.protocol.startsWith('http')){
 /* ===================== 错题薄弱点分析 Agent（浏览器直调 LLM；未配置/失败降级为规则统计） ===================== */
 const QuizSpringAI = (function(){
   const CFG_KEY = 'spring_ai_cfg';
+  const BUILTIN_AI_KEY = '4986b92798774dcdb6f5905f44e41ec9.xnKZOZwivngMxIDL';
   const PROVIDERS = {
     zhipu:       { base:'https://open.bigmodel.cn/api/paas/v4', model:'glm-4-flash-250414' },
-    siliconflow: { base:'https://api.siliconflow.cn/v1', model:'THUDM/GLM-4-9B-0414' }
+    siliconflow: { base:'https://api.siliconflow.cn/v1', model:'THUDM/GLM-4-9B-0414' },
+    glm47:       { base:'https://open.bigmodel.cn/api/paas/v4', model:'glm-4.7-flash' }
   };
   const getCfg = () => {
-    try{ const c = JSON.parse(localStorage.getItem(CFG_KEY) || '{}'); return Object.assign({ provider:'zhipu', apiKey:'', endpoint:'', model:'' }, c); }
-    catch(e){ return { provider:'zhipu', apiKey:'', endpoint:'', model:'' }; }
+    try{ const c = JSON.parse(localStorage.getItem(CFG_KEY) || '{}'); return Object.assign({ provider:'glm47', apiKey:BUILTIN_AI_KEY, endpoint:'', model:'' }, c); }
+    catch(e){ return { provider:'glm47', apiKey:BUILTIN_AI_KEY, endpoint:'', model:'' }; }
   };
   const isEnabled = () => { const c = getCfg(); return !!(c.apiKey && String(c.apiKey).trim().length > 10); };
   const resolve = (c) => {
     const p = PROVIDERS[c.provider] || PROVIDERS.zhipu;
     return { base:(c.endpoint || p.base).replace(/\/+$/,''), model:(c.model || p.model) };
   };
+  // GLM-4.7-Flash 免费额度偶发 429（智谱错误码 1305 访问量过大）→ 自动退避重试
+  var AI_RETRY_BACKOFF = [1500, 4000, 9000];
+  var AI_FALLBACK_MODEL = 'glm-4.5-flash';
+  function aiRetryable(e){
+    var s = String((e && e.message) || e || '');
+    return /1305|429|访问量过大|速率限制|限流|频率|too many|rate.?limit|系统繁忙|繁忙/i.test(s);
+  }
   async function chatLLM(messages, opts){
+    opts = opts || {};
+    var lastErr = null;
+    // 前 2 次打主模型（GLM-4.7-Flash），第 3 次起降级到同为免费的 GLM-4.5-Flash
+    var onZhipu = String(resolve(getCfg()).base || '').indexOf('bigmodel.cn') >= 0;
+    var chain = onZhipu ? [null, null, AI_FALLBACK_MODEL, AI_FALLBACK_MODEL] : [null, null, null, null];
+    for(var _i = 0; _i < chain.length; _i++){
+      try {
+        var o = chain[_i] ? Object.assign({}, opts, { _model: chain[_i] }) : opts;
+        return await chatLLMOnce(messages, o);
+      } catch(e){
+        lastErr = e;
+        if(!aiRetryable(e) || _i === chain.length - 1) break;
+        await new Promise(function(r){ setTimeout(r, AI_RETRY_BACKOFF[_i] || 9000); });
+      }
+    }
+    throw lastErr;
+  }
+  async function chatLLMOnce(messages, opts){
     opts = opts || {};
     const c = getCfg();
     const r = resolve(c);
@@ -12899,7 +12926,7 @@ const QuizSpringAI = (function(){
       const res = await fetch(r.base + '/chat/completions', {
         method:'POST',
         headers:{ 'Content-Type':'application/json', 'Authorization':'Bearer ' + c.apiKey },
-        body: JSON.stringify({ model:r.model, messages:messages, temperature:t, max_tokens:(opts.maxTokens || 800), stream:false }),
+        body: JSON.stringify({ model:(opts._model || r.model), messages:messages, temperature:t, max_tokens:(opts.maxTokens || 800), stream:false }),
         signal: ctrl.signal
       });
       if(!res.ok){

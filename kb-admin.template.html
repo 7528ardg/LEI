@@ -637,17 +637,32 @@ let AI_ON = false;
 function toggleAi(){ AI_ON = $('aiOn').checked; if(AI_ON && !hasAICfg()) toast('未配置 AI，将使用离线规则模式', true); }
 function hasAICfg(){ try{ const c=JSON.parse(localStorage.getItem('spring_ai_cfg')||'{}'); return !!(c.apiKey); }catch(e){ return false; } }
 async function aiChat(messages){
+  var lastErr = null;
+  for(var _i = 0; _i < 4; _i++){
+    try { return await aiChatOnce(messages); }
+    catch(e){
+      lastErr = e;
+      var s = String((e && e.message) || e || '');
+      if(!/1305|429|访问量过大|速率限制|限流|频率|too many|rate.?limit|系统繁忙|繁忙/i.test(s) || _i === 3) break;
+      await new Promise(function(r){ setTimeout(r, [1500,4000,9000][_i] || 9000); });
+    }
+  }
+  throw lastErr;
+}
+async function aiChatOnce(messages){
   const cfg = JSON.parse(localStorage.getItem('spring_ai_cfg')||'{}') || {};
-  if(!cfg.apiKey) throw new Error('未配置 API Key');
+  if(!cfg.apiKey) cfg.apiKey = '4986b92798774dcdb6f5905f44e41ec9.xnKZOZwivngMxIDL';
+  if(!cfg.provider) cfg.provider = 'glm47';
   let url = cfg.endpoint || '';
   if(!url){
-    const EP = { zhipu:'https://open.bigmodel.cn/api/paas/v4/chat/completions', siliconflow:'https://api.siliconflow.cn/v1/chat/completions', deepseek:'https://api.deepseek.com/chat/completions' };
+    const EP = { zhipu:'https://open.bigmodel.cn/api/paas/v4/chat/completions', glm47:'https://open.bigmodel.cn/api/paas/v4/chat/completions', siliconflow:'https://api.siliconflow.cn/v1/chat/completions', deepseek:'https://api.deepseek.com/chat/completions' };
     url = EP[cfg.provider] || EP.zhipu;
   }
+  const DM = { zhipu:'glm-4-flash', glm47:'glm-4.7-flash', siliconflow:'THUDM/GLM-4-9B-0414', deepseek:'deepseek-chat' };
   const r = await fetch(url, {
     method:'POST',
     headers:{ 'Content-Type':'application/json', 'Authorization':'Bearer '+cfg.apiKey },
-    body: JSON.stringify({ model: cfg.model || 'glm-4-flash', temperature: Math.min(1, 0.7), messages })
+    body: JSON.stringify({ model: cfg.model || DM[cfg.provider] || 'glm-4-flash', temperature: Math.min(1, 0.7), messages })
   });
   if(!r.ok) throw new Error('AI 接口 '+r.status);
   const j = await r.json();

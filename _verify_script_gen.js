@@ -87,6 +87,12 @@ const sandbox = {
 sandbox.window = sandbox;
 vm.createContext(sandbox);
 try {
+  vm.runInContext(fs.readFileSync('docs/_season_engine.js', 'utf8'), sandbox, { filename: 'season_engine.js' });
+} catch (e) {
+  console.error('时节引擎注入失败:', e.message);
+  process.exit(1);
+}
+try {
   vm.runInContext(engineCode, sandbox, { filename: 'beauty_engine.js' });
 } catch (e) {
   console.error('引擎注入失败:', e.message);

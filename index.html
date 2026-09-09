@@ -1,17 +1,17 @@
 <!DOCTYPE html>
-<html lang="zh-CN" data-theme="light">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-<meta name="theme-color" content="#148453">
-<meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<meta name="apple-mobile-web-app-title" content="客舱小助手">
-<meta name="mobile-web-app-capable" content="yes">
-<meta name="application-name" content="春秋航空广州分队客舱小助手">
-<meta name="description" content="春秋航空广州分队客舱小助手 - 你问我答·培训考核·绩效管理·美妆话术·医疗急救·风险预警·日常问题·手册奖惩·事件报告（快速拆分版）">
-<meta name="format-detection" content="telephone=no">
-<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<html lang="zh-CN" data-theme="light" data-page-node-id="VSLj8BdQgy2DWknsJxLUQw">
+<head data-page-node-id="0xbXcYtQxSV8bUz18cVPOi">
+<meta charset="UTF-8" data-page-node-id="RhmiGUxXKJMyUyWAEXl1eK">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" data-page-node-id="LLNnj8nlQNdDZbi0nfhkfj">
+<meta name="theme-color" content="#148453" data-page-node-id="JNtjTuL8GGfnMi8jRVTuAF">
+<meta name="apple-mobile-web-app-capable" content="yes" data-page-node-id="YPmL6PXkDa30BbpyyT7Ous">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" data-page-node-id="p5edaBm2FLdUYHer1Gjxfx">
+<meta name="apple-mobile-web-app-title" content="客舱小助手" data-page-node-id="itkruqlUaLE0fxuiELjMFW">
+<meta name="mobile-web-app-capable" content="yes" data-page-node-id="WzjeQAXpN85ha75zTVwBwH">
+<meta name="application-name" content="春秋航空广州分队客舱小助手" data-page-node-id="VuNDtgiCs1CfpcHhu8kV7j">
+<meta name="description" content="春秋航空广州分队客舱小助手 - 你问我答·培训考核·绩效管理·美妆话术·医疗急救·风险预警·日常问题·手册奖惩·事件报告（快速拆分版）" data-page-node-id="1WCCikVLof57NinkU5g8ur">
+<meta name="format-detection" content="telephone=no" data-page-node-id="WqMPAoAzgtQAK7bIf7L3Rn">
+<meta http-equiv="X-UA-Compatible" content="IE=edge" data-page-node-id="vUVuyOeqgjJsgAaZqaKGKG">
 <title>春秋航空 · 广州分队客舱小助手</title>
 <style>
 :root{
@@ -48,6 +48,11 @@ body{font-family:var(--font-sans);background:var(--bg);color:var(--text);min-hei
 .net-status{display:flex;align-items:center;gap:5px;font-size:.76rem;color:var(--text2);padding:5px 10px;border-radius:14px;background:var(--primary-soft);font-weight:500;}
 .net-status .net-dot{width:7px;height:7px;border-radius:50%;background:var(--primary);flex-shrink:0;box-shadow:0 0 8px var(--primary);}
 .net-status.offline{background:var(--danger-soft);color:var(--danger);}
+.sys-clock{display:flex;align-items:center;gap:7px;font-size:.74rem;color:var(--text2);padding:5px 10px;border-radius:14px;background:var(--primary-soft);font-weight:600;white-space:nowrap;}
+.sys-clock .sc-time{font-variant-numeric:tabular-nums;font-weight:800;color:var(--primary);}
+.sys-clock .sc-tag{padding:1px 7px;border-radius:9px;background:var(--gold-soft);color:#7a5c00;font-weight:700;font-size:.7rem;}
+.sys-clock .sc-tag.none{background:transparent;color:var(--text3);}
+@media(max-width:900px){.sys-clock .sc-date{display:none;}}
 .net-status.offline .net-dot{background:var(--danger);box-shadow:0 0 8px var(--danger);}
 .theme-btn{width:36px;height:36px;border-radius:50%;border:1px solid var(--border);background:var(--bg);cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:1.05rem;transition:all .25s cubic-bezier(.34,1.56,.64,1);}
 .theme-btn:hover{border-color:var(--primary);background:var(--primary-soft);transform:rotate(30deg) scale(1.1);}
@@ -57,6 +62,8 @@ body{font-family:var(--font-sans);background:var(--bg);color:var(--text);min-hei
 .sys-wrap{width:100%;height:100%;display:none;position:relative;}
 .sys-wrap.active{display:block;animation:sysFade .22s ease-out;}
 @keyframes sysFade{from{opacity:.35;}to{opacity:1;}}
+@media (prefers-reduced-motion:reduce){.sys-wrap.active{animation:none}.theme-btn,.mod-tab,.net-status,.user-chip{-webkit-transition:none!important;transition:none!important}}
+.mod-tab:focus-visible,.theme-btn:focus-visible,.user-chip:focus-visible,.jump-btn:focus-visible{outline:2px solid var(--primary);outline-offset:2px}
 .sys-frame{width:100%;height:100%;border:none;display:block;}
 .sys-loader{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;background:var(--bg);z-index:5;transition:opacity .4s;gap:14px;}
 .sys-loader.hidden{opacity:0;pointer-events:none;}
@@ -94,6 +101,8 @@ body{font-family:var(--font-sans);background:var(--bg);color:var(--text);min-hei
 .modal-mask.show{display:flex;}
 .modal-card{background:var(--bg-card);border:1px solid var(--border);border-radius:16px;box-shadow:var(--shadow-lg);width:100%;max-width:400px;padding:24px;box-sizing:border-box;}
 .modal-card h3{margin:0 0 6px;font-size:1.05rem;color:var(--text);}
+.modal-x{width:28px;height:28px;border-radius:8px;border:none;background:var(--primary-mist);color:var(--text2);font-size:.9rem;line-height:1;cursor:pointer;display:inline-flex;align-items:center;justify-content:center;flex-shrink:0;transition:all .2s;font-family:var(--font-sans);margin-left:8px}
+.modal-x:hover{background:var(--danger-soft);color:var(--danger)}
 .modal-card .m-sub{font-size:.82rem;color:var(--text2);line-height:1.7;margin:0 0 16px;}
 .m-actions{display:flex;flex-direction:column;gap:10px;}
 .m-btn{display:flex;align-items:center;justify-content:center;gap:8px;width:100%;padding:12px;border-radius:10px;border:none;cursor:pointer;font-size:.9rem;font-weight:700;font-family:var(--font-sans);transition:all .2s;}
@@ -116,6 +125,253 @@ body{font-family:var(--font-sans);background:var(--bg);color:var(--text);min-hei
 .pf-field input[type=text]:focus{border-color:var(--primary);box-shadow:0 0 0 3px var(--primary-soft);}
 </style>
 <script>
+/* ===== SEASON_ENGINE_BEGIN ===== */
+/* =============================================================
+ * 时节引擎（节气 / 节假日 自动匹配）—— 单一来源
+ * 生成方式：python _build_season_engine.py（读 _season_data.json）
+ * 数据由天文算法生成（太阳视黄经 + 农历换算），禁止手工改动
+ * 注入目标：index.html / qa.html / beauty.html
+ * ============================================================= */
+window.SeasonEngine = (function () {
+    // 24节气日期表（2026-09-09 天文算法生成）
+  var TERMS = {
+    '2026': { '小寒':'01-06', '大寒':'01-20', '立春':'02-04', '雨水':'02-19', '惊蛰':'03-06', '春分':'03-21', '清明':'04-05', '谷雨':'04-20', '立夏':'05-06', '小满':'05-21', '芒种':'06-06', '夏至':'06-22', '小暑':'07-07', '大暑':'07-23', '立秋':'08-08', '处暑':'08-23', '白露':'09-08', '秋分':'09-23', '寒露':'10-08', '霜降':'10-24', '立冬':'11-08', '小雪':'11-23', '大雪':'12-07', '冬至':'12-22' },
+    '2027': { '小寒':'01-06', '大寒':'01-21', '立春':'02-04', '雨水':'02-19', '惊蛰':'03-06', '春分':'03-21', '清明':'04-05', '谷雨':'04-21', '立夏':'05-06', '小满':'05-21', '芒种':'06-06', '夏至':'06-22', '小暑':'07-08', '大暑':'07-23', '立秋':'08-08', '处暑':'08-24', '白露':'09-08', '秋分':'09-23', '寒露':'10-09', '霜降':'10-24', '立冬':'11-08', '小雪':'11-23', '大雪':'12-08', '冬至':'12-22' },
+    '2028': { '小寒':'01-06', '大寒':'01-21', '立春':'02-05', '雨水':'02-19', '惊蛰':'03-05', '春分':'03-20', '清明':'04-04', '谷雨':'04-20', '立夏':'05-05', '小满':'05-21', '芒种':'06-05', '夏至':'06-21', '小暑':'07-07', '大暑':'07-23', '立秋':'08-07', '处暑':'08-23', '白露':'09-07', '秋分':'09-23', '寒露':'10-08', '霜降':'10-23', '立冬':'11-07', '小雪':'11-22', '大雪':'12-07', '冬至':'12-22' },
+    '2029': { '小寒':'01-05', '大寒':'01-20', '立春':'02-04', '雨水':'02-19', '惊蛰':'03-06', '春分':'03-21', '清明':'04-05', '谷雨':'04-20', '立夏':'05-05', '小满':'05-21', '芒种':'06-06', '夏至':'06-21', '小暑':'07-07', '大暑':'07-23', '立秋':'08-07', '处暑':'08-23', '白露':'09-08', '秋分':'09-23', '寒露':'10-08', '霜降':'10-23', '立冬':'11-07', '小雪':'11-22', '大雪':'12-07', '冬至':'12-22' },
+    '2030': { '小寒':'01-06', '大寒':'01-20', '立春':'02-04', '雨水':'02-19', '惊蛰':'03-06', '春分':'03-21', '清明':'04-05', '谷雨':'04-20', '立夏':'05-06', '小满':'05-21', '芒种':'06-06', '夏至':'06-22', '小暑':'07-07', '大暑':'07-23', '立秋':'08-08', '处暑':'08-23', '白露':'09-08', '秋分':'09-23', '寒露':'10-09', '霜降':'10-24', '立冬':'11-08', '小雪':'11-23', '大雪':'12-07', '冬至':'12-22' },
+    '2031': { '小寒':'01-06', '大寒':'01-21', '立春':'02-04', '雨水':'02-19', '惊蛰':'03-06', '春分':'03-21', '清明':'04-05', '谷雨':'04-21', '立夏':'05-06', '小满':'05-22', '芒种':'06-06', '夏至':'06-22', '小暑':'07-08', '大暑':'07-23', '立秋':'08-08', '处暑':'08-24', '白露':'09-08', '秋分':'09-24', '寒露':'10-09', '霜降':'10-24', '立冬':'11-08', '小雪':'11-23', '大雪':'12-08', '冬至':'12-22' },
+    '2032': { '小寒':'01-06', '大寒':'01-21', '立春':'02-05', '雨水':'02-19', '惊蛰':'03-05', '春分':'03-20', '清明':'04-05', '谷雨':'04-20', '立夏':'05-05', '小满':'05-21', '芒种':'06-05', '夏至':'06-21', '小暑':'07-07', '大暑':'07-23', '立秋':'08-07', '处暑':'08-23', '白露':'09-07', '秋分':'09-23', '寒露':'10-08', '霜降':'10-23', '立冬':'11-07', '小雪':'11-22', '大雪':'12-07', '冬至':'12-22' },
+    '2033': { '小寒':'01-05', '大寒':'01-20', '立春':'02-04', '雨水':'02-19', '惊蛰':'03-06', '春分':'03-21', '清明':'04-05', '谷雨':'04-20', '立夏':'05-05', '小满':'05-21', '芒种':'06-06', '夏至':'06-21', '小暑':'07-07', '大暑':'07-23', '立秋':'08-07', '处暑':'08-23', '白露':'09-08', '秋分':'09-23', '寒露':'10-08', '霜降':'10-23', '立冬':'11-07', '小雪':'11-22', '大雪':'12-07', '冬至':'12-22' },
+    '2034': { '小寒':'01-06', '大寒':'01-20', '立春':'02-04', '雨水':'02-19', '惊蛰':'03-06', '春分':'03-21', '清明':'04-05', '谷雨':'04-20', '立夏':'05-06', '小满':'05-21', '芒种':'06-06', '夏至':'06-22', '小暑':'07-07', '大暑':'07-23', '立秋':'08-08', '处暑':'08-23', '白露':'09-08', '秋分':'09-23', '寒露':'10-09', '霜降':'10-24', '立冬':'11-08', '小雪':'11-23', '大雪':'12-07', '冬至':'12-22' },
+    '2035': { '小寒':'01-06', '大寒':'01-21', '立春':'02-04', '雨水':'02-19', '惊蛰':'03-06', '春分':'03-21', '清明':'04-05', '谷雨':'04-21', '立夏':'05-06', '小满':'05-22', '芒种':'06-06', '夏至':'06-22', '小暑':'07-08', '大暑':'07-23', '立秋':'08-08', '处暑':'08-24', '白露':'09-08', '秋分':'09-24', '寒露':'10-09', '霜降':'10-24', '立冬':'11-08', '小雪':'11-23', '大雪':'12-08', '冬至':'12-22' },
+    '2036': { '小寒':'01-06', '大寒':'01-21', '立春':'02-05', '雨水':'02-19', '惊蛰':'03-05', '春分':'03-20', '清明':'04-05', '谷雨':'04-20', '立夏':'05-05', '小满':'05-21', '芒种':'06-05', '夏至':'06-21', '小暑':'07-07', '大暑':'07-23', '立秋':'08-07', '处暑':'08-23', '白露':'09-07', '秋分':'09-23', '寒露':'10-08', '霜降':'10-23', '立冬':'11-07', '小雪':'11-22', '大雪':'12-07', '冬至':'12-22' },
+    '2037': { '小寒':'01-05', '大寒':'01-20', '立春':'02-04', '雨水':'02-19', '惊蛰':'03-06', '春分':'03-21', '清明':'04-05', '谷雨':'04-20', '立夏':'05-06', '小满':'05-21', '芒种':'06-06', '夏至':'06-21', '小暑':'07-07', '大暑':'07-23', '立秋':'08-08', '处暑':'08-23', '白露':'09-08', '秋分':'09-23', '寒露':'10-08', '霜降':'10-23', '立冬':'11-07', '小雪':'11-22', '大雪':'12-07', '冬至':'12-22' },
+    '2038': { '小寒':'01-06', '大寒':'01-20', '立春':'02-04', '雨水':'02-19', '惊蛰':'03-06', '春分':'03-21', '清明':'04-05', '谷雨':'04-20', '立夏':'05-06', '小满':'05-21', '芒种':'06-06', '夏至':'06-22', '小暑':'07-07', '大暑':'07-23', '立秋':'08-08', '处暑':'08-23', '白露':'09-08', '秋分':'09-23', '寒露':'10-09', '霜降':'10-24', '立冬':'11-08', '小雪':'11-23', '大雪':'12-07', '冬至':'12-22' },
+    '2039': { '小寒':'01-06', '大寒':'01-21', '立春':'02-04', '雨水':'02-19', '惊蛰':'03-06', '春分':'03-21', '清明':'04-05', '谷雨':'04-21', '立夏':'05-06', '小满':'05-22', '芒种':'06-06', '夏至':'06-22', '小暑':'07-08', '大暑':'07-23', '立秋':'08-08', '处暑':'08-24', '白露':'09-08', '秋分':'09-24', '寒露':'10-09', '霜降':'10-24', '立冬':'11-08', '小雪':'11-23', '大雪':'12-08', '冬至':'12-22' },
+    '2040': { '小寒':'01-06', '大寒':'01-21', '立春':'02-05', '雨水':'02-19', '惊蛰':'03-05', '春分':'03-20', '清明':'04-05', '谷雨':'04-20', '立夏':'05-05', '小满':'05-21', '芒种':'06-05', '夏至':'06-21', '小暑':'07-07', '大暑':'07-23', '立秋':'08-07', '处暑':'08-23', '白露':'09-07', '秋分':'09-23', '寒露':'10-08', '霜降':'10-23', '立冬':'11-07', '小雪':'11-22', '大雪':'12-07', '冬至':'12-22' }
+  };
+
+  // 农历节日公历日期表（2026-09-09 天文算法生成）
+  var LUNAR = {
+    '2026': { spring:'02-17', yuanxiao:'03-03', duanwu:'06-19', qixi:'08-19', midautumn:'09-25', chongyang:'10-18', laba:'01-26', xiaonian:'02-10', chuxi:'02-16' },
+    '2027': { spring:'02-06', yuanxiao:'02-20', duanwu:'06-09', qixi:'08-08', midautumn:'09-15', chongyang:'10-08', laba:'01-15', xiaonian:'01-30', chuxi:'02-05' },
+    '2028': { spring:'01-26', yuanxiao:'02-09', duanwu:'05-28', qixi:'08-26', midautumn:'10-03', chongyang:'10-26', laba:'01-04', xiaonian:'01-19', chuxi:'01-25' },
+    '2029': { spring:'02-13', yuanxiao:'02-27', duanwu:'06-16', qixi:'08-16', midautumn:'09-22', chongyang:'10-16', laba:'01-22', xiaonian:'02-06', chuxi:'02-12' },
+    '2030': { spring:'02-03', yuanxiao:'02-17', duanwu:'06-05', qixi:'08-05', midautumn:'09-12', chongyang:'10-05', laba:'01-11', xiaonian:'01-26', chuxi:'02-02' },
+    '2031': { spring:'01-23', yuanxiao:'02-06', duanwu:'06-24', qixi:'08-24', midautumn:'10-01', chongyang:'10-24', laba:'01-01', xiaonian:'01-16', chuxi:'01-22' },
+    '2032': { spring:'02-11', yuanxiao:'02-25', duanwu:'06-12', qixi:'08-12', midautumn:'09-19', chongyang:'10-12', laba:'01-20', xiaonian:'02-04', chuxi:'02-10' },
+    '2033': { spring:'01-31', yuanxiao:'02-14', duanwu:'06-01', qixi:'08-01', midautumn:'09-08', chongyang:'10-01', laba:'01-08', xiaonian:'01-23', chuxi:'01-30' },
+    '2034': { spring:'02-19', yuanxiao:'03-05', duanwu:'06-20', qixi:'08-20', midautumn:'09-27', chongyang:'10-20', laba:'01-27', xiaonian:'02-11', chuxi:'02-18' },
+    '2035': { spring:'02-08', yuanxiao:'02-22', duanwu:'06-10', qixi:'08-10', midautumn:'09-16', chongyang:'10-09', laba:'01-16', xiaonian:'01-31', chuxi:'02-07' },
+    '2036': { spring:'01-28', yuanxiao:'02-11', duanwu:'05-30', qixi:'08-28', midautumn:'10-04', chongyang:'10-27', laba:'01-05', xiaonian:'01-20', chuxi:'01-27' },
+    '2037': { spring:'02-15', yuanxiao:'03-01', duanwu:'06-18', qixi:'08-17', midautumn:'09-24', chongyang:'10-17', laba:'01-23', xiaonian:'02-07', chuxi:'02-14' },
+    '2038': { spring:'02-04', yuanxiao:'02-18', duanwu:'06-07', qixi:'08-07', midautumn:'09-13', chongyang:'10-07', laba:'01-12', xiaonian:'01-27', chuxi:'02-03' },
+    '2039': { spring:'01-24', yuanxiao:'02-07', duanwu:'05-27', qixi:'08-26', midautumn:'10-02', chongyang:'10-26', laba:'01-02', xiaonian:'01-17', chuxi:'01-23' },
+    '2040': { spring:'02-12', yuanxiao:'02-26', duanwu:'06-14', qixi:'08-14', midautumn:'09-20', chongyang:'10-14', laba:'01-21', xiaonian:'02-05', chuxi:'02-11' }
+  };
+
+  // 24节气开场话术
+  var OPEN_TERMS = {
+    '冬至': ['冬至一阳生，数九开始。各位旅客，机上好物来点温暖的——把最长的夜，过出最好的样子。', '冬至这天夜最长。机上备了几款温润好物，长夜里也把自己照顾好。'],
+    '处暑': ['处暑出暑，秋意初显。各位旅客，机上好物正适合换季——润燥养身，从这一程开始。', '处暑的意思是"暑气到此为止"。天开始转凉，护肤也该跟着换季了。'],
+    '夏至': ['夏至昼长夜短。各位旅客，机上备了清爽舒心的小物——把夏天过舒服，也是一种讲究。', '夏至这天白昼最长。趁着天亮得早、夜来得晚，给自己添点好物，日子更有滋味。'],
+    '大寒': ['大寒岁末，迎新在望。各位旅客，机上好物收个尾——把一年的辛苦，犒劳在这一程。', '大寒是最后一个节气，过了就是新春。机上好物备一份，也算给这一年交了份答卷。'],
+    '大暑': ['大暑三伏天，心静自然凉。各位旅客，停下来喝杯茶、挑件好物，暑气也就散了。', '大暑是一年里最热的时候。机上备了几款舒缓好物，给燥热的夏天降降温。'],
+    '大雪': ['大雪漫的是节气，暖的是人心。各位旅客，机上备了点暖心好物——旅途不冷，心意不凉。', '大雪时节，最想的就是一口热乎的。机上好物也一样，图的是那份暖意。'],
+    '寒露': ['寒露风凉，添衣加暖。各位旅客，机上好物给您添点温度——旅途暖，心上也暖。', '寒露的露气已经带寒了。机上这几款温润好物，正好给换季的皮肤加点呵护。'],
+    '小寒': ['小寒料峭，注意添衣。各位旅客，机上备了点滋润好物——冷天里，也把自己照顾周到。', '小寒是一年里冷的开始。机上这几款滋养度高，正是冷天里需要的。'],
+    '小暑': ['小暑温风至。各位旅客，机上好物选得清爽——清凉一夏，从机上开始。', '小暑一到，热风就来了。机上这几款用着清爽，不油不闷。'],
+    '小满': ['小满，小得盈满。各位旅客，这一程刚刚好——机上好物不多不少，合心意就正好。', '小满的意思是"将满未满"，是个刚刚好的状态。机上挑的这几款，也是这个分寸。'],
+    '小雪': ['小雪纷飞，围炉正好。各位旅客，机上好物伴您归途——到家就有暖意接住。', '小雪节气，天开始冷了。机上备了几款养护好物，给自己、给家人都带上。'],
+    '惊蛰': ['惊蛰到，万物醒。各位旅客，机上备了几款提神醒脑的好物——人醒着，精气神也在线。', '春雷一响，蛰虫都醒了。这趟航班也给您备了点"唤醒肌肤"的好物，睡意散了，人也精神。'],
+    '春分': ['春分前后，昼夜平分。各位旅客，机上好物正当时——一半留给自己，一半送给在乎的人。', '春分这天，白天黑夜一样长。机上几款好物，白天用得上，晚上也用得上，一样都不落。'],
+    '清明': ['清明时节，天清气明。各位旅客，一路顺风——机上好物带着春意，踏青归来，正好带份心意。', '清明前后，出门踏青的人多。机上备了几款轻巧好带的好物，路上用、回家用，都合适。'],
+    '白露': ['白露凝珠，秋燥渐起。各位旅客，机上备了点滋润好物——把水润和舒爽都安排上。', '白露一过，早晚温差大了，皮肤也容易发干。机上这几款补水好物，正好用得上。'],
+    '秋分': ['秋分昼夜平分，也是丰收时节。各位旅客，这一程的收获，就藏在您挑中的好物里。', '秋分过后，夜比昼长。机上备了几款滋润好物，陪您把秋天过得舒服些。'],
+    '立冬': ['立冬进补暖身心。各位旅客，机上备了点温暖好物——这一程，先把冬天过暖。', '立冬了，冬天正式开始。机上这几款滋润度更高，冷天用正合适。'],
+    '立夏': ['立夏到，天渐暖。各位旅客，机上备了点清爽好物——从里到外，都透着夏天的轻盈。', '立夏一过，天就热起来了。机上这几款质地轻薄，夏天用着不黏不腻。'],
+    '立春': ['各位旅客，立春好！一年之计在于春——这趟航班上备了点春日好物，讨个开年好运，带份好心情回家。', '立春了，万物开始冒头。机上这几款，正适合给新的一年开个好头——人精神了，气色也跟着好。'],
+    '立秋': ['立秋到，暑热渐收。各位旅客，机上备了点应季好物——换季养护，正是时候。', '立秋了，早晚开始有凉意。机上这几款，正好帮您把夏天的疲惫收一收。'],
+    '芒种': ['芒种忙种，勤耕不辍。各位旅客，旅途辛苦了——机上好物，犒劳一下奔波的人。', '芒种前后，是农人最忙的时候。各位在外奔波，也别忘了照顾自己。'],
+    '谷雨': ['谷雨润万物，好物也养人。各位旅客，机上这几款，正适合给生活加点滋润。', '谷雨是春天的最后一个节气，雨水足、万物长。机上这几款补水好物，也正赶上时候。'],
+    '雨水': ['各位旅客，雨水节气，万物萌动。机上好物也正应景——润一润、养一养，把春天的好状态接住。', '雨水一到，空气都润了几分。机上备了几款补水好物，跟这节气一样，润物细无声。'],
+    '霜降': ['霜降降霜，秋深了。各位旅客，机上备了几款温润好物——把深秋的日子过出滋味。', '霜降是秋天最后一个节气。机上好物不多，但都是这个季节用得上的。']
+  };
+
+  // 节假日开场话术
+  var OPEN_FESTS = {
+    'children': ['各位旅客儿童节快乐！今天机上的大朋友小朋友，都值得一份小惊喜。机上备了几款温和好物，给孩子、给家人都合适。', '六一快乐！谁还不是个孩子呢。机上这几款好物，给自己留一份童心也好。'],
+    'chongyang': ['各位旅客重阳好！登高望远，敬老情长。机上备了点贴心好物——给长辈的孝心，随时都能带上。', '重阳节好！这个节日讲究敬老。机上这几款温和好物，给爸妈带一份，最实用。'],
+    'chuxi': ['各位旅客除夕好！一年守岁到今宵。机上好物是份好彩头——带着新的好状态，迎新年进门。', '除夕快乐！今天能在这趟航班上一起跨年，也算缘分。机上好物带一份，给新年开个好头。'],
+    'duanwu': ['各位旅客端午好！粽子飘香，艾草悠长。机上备了几款应景好物——节日里的心意，带回家正合适。', '端午安康，各位！这个节日本人讲"安康"，图的就是平安顺遂。机上好物也是这个心意。'],
+    'fathers': ['各位旅客父亲节好！父爱不说出口，心意得看得见。机上备了几款实用好物，给爸爸带一份，他嘴上不说，心里高兴。', '父亲节快乐！给爸爸挑东西，实用最重要。机上这几款，正好是那个路子。'],
+    'laba': ['各位旅客腊八好！腊八粥暖，年味渐浓。机上好物也飘着年味——提前备点年货，回家更从容。', '腊八到了，年就近了。机上这几款好物，正好当年货先备上，省得到时候手忙脚乱。'],
+    'labor': ['各位旅客劳动节快乐！辛苦了一年，假期就该好好犒劳自己。机上好物，就是这份心意。', '五一劳动节好！劳动的人最该被犒劳。机上备了几款实在好物，用完就知道值。'],
+    'midautumn': ['各位旅客中秋好！天上月圆，人间团圆。这趟航班上，我给您备了几款适合团圆时刻的好物——带回家，跟家人一起，好物配好心情。', '中秋快乐，各位！月圆人圆事事圆，机上这几款好物，正好给团圆添点仪式感。送礼自用两相宜，您就顺着心意挑。'],
+    'mothers': ['各位旅客好！母亲节快到了，礼物的心意，机上有现成的。给妈妈挑一款养护好物，她嘴上说浪费，心里乐开花。', '母亲节这趟航班，我特意备了些温和好用的护理好物——孝敬妈妈，也善待自己。礼物在心，心意在行。'],
+    'national': ['各位旅客假期快乐！国庆出行，图的就是舒心。机上的好物我也给您备好了——旅途顺风，带份心意回家或送人，都是好彩头。', '国庆长假好！各位不是出游就是探亲，路上辛苦。机上这几款好物，跨境正品、包税到家，正好给假期添点小惊喜。'],
+    'newyear': ['各位旅客新年好！跨年航班，辞旧迎新。这一趟，我陪您跨过旧岁——机上好物带一份，把新一年的好状态提前备上。', '新年好！零点前后飞在天上，也算浪漫。给您备了机上好物，送自己、送亲友，都寓意新气象。'],
+    'qixi': ['各位旅客七夕好！鹊桥相会的日子，机上也多点浪漫。给心上人带份好物，比什么甜言蜜语都实在。', '七夕快乐！今天在天上飞，离鹊桥倒也近了些。机上备了几款礼物感十足的好物，送人最合适。'],
+    'spring': ['各位旅客新年好！这趟航班赶上春运前后，大伙儿都在往家赶。在家门口候着的心意，我替您提前备好了——几款机上好物，带份礼物回家，团团圆圆更添喜气。', '新年好，各位！春节航班，路上的人都是为了团圆。机上准备了点心意好物，您带一份回去，走亲访友、孝敬长辈，都拿得出手。'],
+    'teachers': ['各位旅客教师节好！桃李满天下，师恩记心间。机上备了点心意好物——送到老师心坎上，也送到自己心上。', '教师节快乐！给老师挑礼物，讲究的是体面又实用。机上这几款，正好对得上。'],
+    'valentine': ['各位旅客好！又到情人节，巧的是您正在这趟航班上。不管有没有伴儿，爱自己这件事都值得——机上好物，给心爱的人，也给自己一份。', '情人节快乐！香水、口红、护理好物，今天的机上清单格外应景。单身的朋友更该对自己好——爱自己，永远不会亏。'],
+    'women': ['各位旅客节日快乐！今天是为她喝彩的日子。机上备了点悦己好物——对自己好，才是头等大事。', '女神节好！机上这几款，都是给自己添点好心情的。辛苦一年，值得。'],
+    'xiaonian': ['各位旅客小年好！小年扫尘，迎新纳福。机上好物带一份，年货备齐，好心情也备齐。', '小年一过，家家户户开始忙年了。机上好物备一份，回家也添份喜气。'],
+    'yuanxiao': ['各位旅客元宵好！正月十五闹花灯，天上的航班也沾了喜气。机上备了点好意头的好物——团团圆圆，月圆人更圆。', '元宵节好！过了十五，这个年才算真正过完。机上这几款好物，给年味收个漂亮的尾。']
+  };
+
+  // 公历固定节日
+  var GREG_FESTS = {
+    '01-01': 'newyear', '02-14': 'valentine', '03-08': 'women',
+    '05-01': 'labor', '06-01': 'children', '09-10': 'teachers', '10-01': 'national'
+  };
+  var FEST_NAMES = {
+    newyear: '元旦', spring: '春节', yuanxiao: '元宵节', valentine: '情人节',
+    women: '妇女节', labor: '劳动节', children: '儿童节', fathers: '父亲节',
+    teachers: '教师节', national: '国庆节', duanwu: '端午节', qixi: '七夕节',
+    midautumn: '中秋节', chongyang: '重阳节', laba: '腊八节',
+    xiaonian: '小年', chuxi: '除夕', mothers: '母亲节'
+  };
+  var WEEK = ['星期日', '星期一', '星期二', '星期三', '星期四', '星期五', '星期六'];
+
+  function pad(n) { return n < 10 ? '0' + n : '' + n; }
+  function md(dt) { return pad(dt.getMonth() + 1) + '-' + pad(dt.getDate()); }
+
+  // 第 n 个星期几：nth=2, dow=0(周日)
+  function nthWeekday(y, month, nth, dow) {
+    var first = new Date(y, month - 1, 1).getDay();
+    return ((dow - first + 7) % 7) + 1 + (nth - 1) * 7;
+  }
+
+  // 精确 24 节气（优先查表；超出表范围退回区间估算）
+  var TERM_ORDER = ['小寒', '大寒', '立春', '雨水', '惊蛰', '春分', '清明', '谷雨', '立夏', '小满',
+    '芒种', '夏至', '小暑', '大暑', '立秋', '处暑', '白露', '秋分', '寒露', '霜降',
+    '立冬', '小雪', '大雪', '冬至'];
+  var TERM_RANGE = {
+    '小寒': [1, 5, 7], '大寒': [1, 19, 21], '立春': [2, 3, 5], '雨水': [2, 18, 20],
+    '惊蛰': [3, 5, 7], '春分': [3, 20, 22], '清明': [4, 4, 6], '谷雨': [4, 19, 21],
+    '立夏': [5, 5, 7], '小满': [5, 20, 22], '芒种': [6, 5, 7], '夏至': [6, 20, 22],
+    '小暑': [7, 6, 8], '大暑': [7, 22, 24], '立秋': [8, 7, 9], '处暑': [8, 22, 24],
+    '白露': [9, 7, 9], '秋分': [9, 22, 24], '寒露': [10, 7, 9], '霜降': [10, 22, 24],
+    '立冬': [11, 6, 8], '小雪': [11, 21, 23], '大雪': [12, 6, 8], '冬至': [12, 21, 23]
+  };
+  // 节气延伸窗口：节气当日及之后 2 天都算"这个节气里"
+  var TERM_SPAN = 3;
+
+  function solarTermOf(dt) {
+    var y = dt.getFullYear(), key = md(dt), row = TERMS[String(y)];
+    if (row) {
+      for (var i = 0; i < TERM_ORDER.length; i++) {
+        var name = TERM_ORDER[i];
+        var start = row[name];
+        if (!start) continue;
+        var p = start.split('-');
+        var sd = new Date(y, parseInt(p[0], 10) - 1, parseInt(p[1], 10));
+        var ed = new Date(sd.getTime() + (TERM_SPAN - 1) * 86400000);
+        var cur = new Date(dt.getFullYear(), dt.getMonth(), dt.getDate());
+        if (cur >= sd && cur <= ed) return name;
+      }
+      return '';
+    }
+    var m = dt.getMonth() + 1, d = dt.getDate();
+    for (var k in TERM_RANGE) {
+      var t = TERM_RANGE[k];
+      if (t[0] === m && d >= t[1] && d <= t[2]) return k;
+    }
+    return '';
+  }
+
+  function festOf(dt) {
+    var y = dt.getFullYear(), key = md(dt);
+    if (GREG_FESTS[key]) return GREG_FESTS[key];
+    if (dt.getMonth() === 4 && dt.getDate() === nthWeekday(y, 5, 2, 0)) return 'mothers';
+    if (dt.getMonth() === 5 && dt.getDate() === nthWeekday(y, 6, 3, 0)) return 'fathers';
+    var lf = LUNAR[String(y)];
+    if (lf) {
+      for (var k in lf) { if (lf[k] === key) return k; }
+    }
+    return '';
+  }
+
+  // 匹配当日：公历节日 > 农历节日 > 24 节气
+  function match(dt) {
+    dt = dt || new Date();
+    var f = festOf(dt);
+    if (f) return { kind: 'festival', key: f, name: FEST_NAMES[f] || f };
+    var t = solarTermOf(dt);
+    if (t) return { kind: 'solar', key: t, name: t };
+    return null;
+  }
+
+  function timeOfDay(dt) {
+    var h = (dt || new Date()).getHours();
+    if (h >= 5 && h < 11) return 'morning';
+    if (h >= 11 && h < 14) return 'noon';
+    if (h >= 14 && h < 18) return 'afternoon';
+    return 'evening';
+  }
+  var TIME_NAMES = { morning: '清晨', noon: '午间', afternoon: '午后', evening: '晚间' };
+
+  function pick(arr) { return arr[Math.floor(Math.random() * arr.length)]; }
+
+  // 取开场白：优先节日，其次节气，最后按时段
+  function opening(dt, opts) {
+    opts = opts || {};
+    dt = dt || new Date();
+    if (opts.fest && OPEN_FESTS[opts.fest]) return pick(OPEN_FESTS[opts.fest]);
+    if (opts.term && OPEN_TERMS[opts.term]) return pick(OPEN_TERMS[opts.term]);
+    var m = match(dt);
+    if (m && m.kind === 'festival' && OPEN_FESTS[m.key]) return pick(OPEN_FESTS[m.key]);
+    if (m && m.kind === 'solar' && OPEN_TERMS[m.key]) return pick(OPEN_TERMS[m.key]);
+    return null;
+  }
+
+  function clockText(dt) {
+    dt = dt || new Date();
+    return pad(dt.getHours()) + ':' + pad(dt.getMinutes());
+  }
+  function dateText(dt) {
+    dt = dt || new Date();
+    return dt.getFullYear() + '年' + (dt.getMonth() + 1) + '月' + dt.getDate() + '日 ' + WEEK[dt.getDay()];
+  }
+  // 顶栏/标题用的一行标签：日期 + 节气或节日
+  function todayLabel(dt) {
+    dt = dt || new Date();
+    var m = match(dt);
+    return dateText(dt) + (m ? ' · ' + m.name : '');
+  }
+  function todayTag(dt) {
+    var m = match(dt || new Date());
+    return m ? m.name : '常规航班';
+  }
+
+  var FEST_OPTS = [
+    { k: 'none', l: '常规航班' },
+    { k: 'spring', l: '🧧 春节' }, { k: 'yuanxiao', l: '🏮 元宵节' },
+    { k: 'chuxi', l: '🎆 除夕' }, { k: 'xiaonian', l: '🧹 小年' },
+    { k: 'laba', l: '🍲 腊八节' }, { k: 'duanwu', l: '🎋 端午节' },
+    { k: 'qixi', l: '🌌 七夕' }, { k: 'midautumn', l: '🥮 中秋' },
+    { k: 'chongyang', l: '⛰ 重阳节' }, { k: 'newyear', l: '🎊 元旦' },
+    { k: 'valentine', l: '💝 情人节' }, { k: 'women', l: '🌷 妇女节' },
+    { k: 'mothers', l: '🌸 母亲节' }, { k: 'fathers', l: '👔 父亲节' },
+    { k: 'children', l: '🎈 儿童节' }, { k: 'labor', l: '🛠 劳动节' },
+    { k: 'teachers', l: '🍎 教师节' }, { k: 'national', l: '🇨🇳 国庆' }
+  ];
+
+  return {
+    TERMS: TERMS, LUNAR: LUNAR, TERM_ORDER: TERM_ORDER,
+    OPEN_TERMS: OPEN_TERMS, OPEN_FESTS: OPEN_FESTS,
+    FEST_NAMES: FEST_NAMES, FEST_OPTS: FEST_OPTS,
+    solarTermOf: solarTermOf, festOf: festOf, match: match,
+    timeOfDay: timeOfDay, TIME_NAMES: TIME_NAMES,
+    opening: opening, pick: pick,
+    clockText: clockText, dateText: dateText, todayLabel: todayLabel, todayTag: todayTag
+  };
+})();
+
+/* ===== SEASON_ENGINE_END ===== */
+
 /* 客舱小助手数据包引擎（_sync_packs.py 自动注入；改 docs/_packs_engine.js 后重跑 python _sync_packs.py） */
 //__PACKS_ENGINE_START__
 /* =============================================================================
@@ -418,142 +674,143 @@ body{font-family:var(--font-sans);background:var(--bg);color:var(--text);min-hei
 //__PACKS_ENGINE_END__
 </script>
 </head>
-<body>
+<body data-page-node-id="FLxiHeQI5kmsKgyNL5hpnW">
 
-<div class="livery-stripe"></div>
+<div class="livery-stripe" data-page-node-id="mtousEj7ZN4Xi2uM9vjLkB"></div>
 
-<header class="topbar">
-  <div class="logo-wrap" onclick="switchModule('quiz')">
-    <svg viewBox="0 0 40 40" width="36" height="36">
-      <defs><linearGradient id="lg" x1="0%" y1="0%" x2="100%" y2="0%"><stop offset="0%" stop-color="#148453"/><stop offset="33%" stop-color="#4FA86C"/><stop offset="66%" stop-color="#F5B800"/><stop offset="100%" stop-color="#E64A19"/></linearGradient></defs>
-      <path d="M8 28 Q12 8 20 18 Q28 8 32 28" fill="none" stroke="url(#lg)" stroke-width="4" stroke-linecap="round"/>
-      <path d="M5 30 Q14 14 20 22 Q26 14 35 30" fill="none" stroke="url(#lg)" stroke-width="3" stroke-linecap="round" opacity=".5"/>
-      <path d="M11 26 Q16 12 20 20 Q24 12 29 26" fill="none" stroke="url(#lg)" stroke-width="2.5" stroke-linecap="round" opacity=".7"/>
+<header class="topbar" data-page-node-id="nEnHIwBZCdN9arpgAxqVcb">
+  <div class="logo-wrap" onclick="switchModule('quiz')" data-page-node-id="XlflVJepGPHH4QbLrG67LR">
+    <svg viewBox="0 0 40 40" width="36" height="36" data-page-node-id="Evk5CHhFKjo36n3v7S4y7O">
+      <defs data-page-node-id="8P19eI8zMxUdAjTAMqj9va"><linearGradient id="lg" x1="0%" y1="0%" x2="100%" y2="0%" data-page-node-id="nxTHcgY25wbySpmM5bpWY4"><stop offset="0%" stop-color="#148453" data-page-node-id="oWP4D3LUNhSwN0F5hd7INC"/><stop offset="33%" stop-color="#4FA86C" data-page-node-id="s0G7JC2ml6ExqWpaItZhC5"/><stop offset="66%" stop-color="#F5B800" data-page-node-id="jphmzWMaSvWIKP2EqHoxhR"/><stop offset="100%" stop-color="#E64A19" data-page-node-id="5rzG3T3JBLAfTSwSPHBmdE"/></linearGradient></defs>
+      <path d="M8 28 Q12 8 20 18 Q28 8 32 28" fill="none" stroke="url(#lg)" stroke-width="4" stroke-linecap="round" data-page-node-id="T9hIGbtqQw3Yf3Ty8kpn9v"/>
+      <path d="M5 30 Q14 14 20 22 Q26 14 35 30" fill="none" stroke="url(#lg)" stroke-width="3" stroke-linecap="round" opacity=".5" data-page-node-id="GsQukTGpDb5kplSr6nPS6T"/>
+      <path d="M11 26 Q16 12 20 20 Q24 12 29 26" fill="none" stroke="url(#lg)" stroke-width="2.5" stroke-linecap="round" opacity=".7" data-page-node-id="9jDFXqhewFL3KjH8XnFgm3"/>
     </svg>
-    <div>
-      <div class="brand-name">春秋航空 <span class="brand-sub">客舱小助手</span></div>
+    <div data-page-node-id="FA9jDC56lcSlSRmwYp3fvv">
+      <div class="brand-name" data-page-node-id="Ur5K9SQBurA6e7ERW235RM">春秋航空 <span class="brand-sub" data-page-node-id="SMbvhcAnleBH2vToyfHXDY">客舱小助手</span></div>
     </div>
   </div>
 
-  <nav class="module-tabs" id="moduleTabs">
-    <button class="mod-tab" data-mod="qa" onclick="switchModule('qa')">💬 你问我答</button>
-    <button class="mod-tab active" data-mod="quiz" onclick="switchModule('quiz')">📚 培训考核</button>
-    <button class="mod-tab" data-mod="performance" onclick="switchModule('performance')">📊 绩效管理</button>
-    <button class="mod-tab" data-mod="beauty" onclick="switchModule('beauty')">💄 美妆话术</button>
-    <button class="mod-tab" data-mod="risk" onclick="switchModule('risk')">⚠️ 风险预警</button>
-    <button class="mod-tab" data-mod="medical" onclick="switchModule('medical')">🚑 医疗急救</button>
-    <button class="mod-tab" data-mod="daily" onclick="switchModule('daily')">❓ 日常问题</button>
-    <button class="mod-tab" data-mod="manual" onclick="switchModule('manual')">📕 手册奖惩</button>
-    <button class="mod-tab" data-mod="report" onclick="switchModule('report')">🗂 事件报告</button>
-    <button class="mod-tab" data-mod="kbadmin" onclick="switchModule('kbadmin')">📇 库管理</button>
+  <nav class="module-tabs" id="moduleTabs" data-page-node-id="BsxJNHUQnwWWkzX8mQ7PdA">
+    <button class="mod-tab" data-mod="qa" onclick="switchModule('qa')" data-page-node-id="ThWuLHNdXekrpR8s6aKg4k">💬 你问我答</button>
+    <button class="mod-tab active" data-mod="quiz" onclick="switchModule('quiz')" data-page-node-id="AfTAaJatoJoPJYGMUFg51D">📚 培训考核</button>
+    <button class="mod-tab" data-mod="performance" onclick="switchModule('performance')" data-page-node-id="cTO8HrxlLuSrzd9nDy4qrp">📊 绩效管理</button>
+    <button class="mod-tab" data-mod="beauty" onclick="switchModule('beauty')" data-page-node-id="maSEZIZaLq7esXXJABvoUv">💄 美妆话术</button>
+    <button class="mod-tab" data-mod="risk" onclick="switchModule('risk')" data-page-node-id="zBc8alWHgO1Jtz1ynUv3Nd">⚠️ 风险预警</button>
+    <button class="mod-tab" data-mod="medical" onclick="switchModule('medical')" data-page-node-id="YKyirJlt3f6LRF1fmROJfP">🚑 医疗急救</button>
+    <button class="mod-tab" data-mod="daily" onclick="switchModule('daily')" data-page-node-id="0ZQKCzL3CGxL5gcbwW8vpU">❓ 日常问题</button>
+    <button class="mod-tab" data-mod="manual" onclick="switchModule('manual')" data-page-node-id="16VCdRNReCMYPnJQ1m9LZd">📕 手册奖惩</button>
+    <button class="mod-tab" data-mod="report" onclick="switchModule('report')" data-page-node-id="zuRGGdaicD84fn0TQmDPKC">🗂 事件报告</button>
+    <button class="mod-tab" data-mod="kbadmin" onclick="switchModule('kbadmin')" data-page-node-id="tx5VFathdAJZK2NlztrCsA">📇 库管理</button>
   </nav>
 
-  <div class="actions">
-    <div class="net-status" id="netStatus"><span class="net-dot"></span><span id="netText">在线</span></div>
-    <button class="bk-btn" id="packsBadge" style="display:none" onclick="openPacksModal()" title="有新的数据包可安装">📦<span>新数据包</span></button>
-    <button class="bk-btn" onclick="openBackupModal()" title="数据备份 / 恢复">💾<span>备份</span></button>
-    <button class="theme-btn" id="themeBtn" onclick="cycleTheme()" title="切换主题">☀️</button>
-    <div class="user-chip" id="userChip" onclick="openProfileModal()" title="点击编辑姓名 / 头像">
-      <div class="avatar"><div id="avatarLetter">乘</div><img id="avatarImg" alt="" style="display:none"></div>
-      <span id="userName">乘务员</span>
+  <div class="actions" data-page-node-id="xvsfdyRVOsuES5oDEHTAxU">
+    <div class="sys-clock" id="sysClock" title="跟随本机系统时间；自动匹配今日节气/节假日" data-page-node-id="YcWUcjjvl8tXBH9OHVEJmv"><span class="sc-time" id="scTime" data-page-node-id="QIGEHR28sZNyYPC6CXIxDB">--:--</span><span class="sc-date" id="scDate" data-page-node-id="KvFc3yOf1fd3eZ4Z6E1mCb"></span><span class="sc-tag none" id="scTag" data-page-node-id="riZ1tAMXHe3AbUojpRyaeC"></span></div>
+    <div class="net-status" id="netStatus" data-page-node-id="vkrxK1uBwhkYGKD0uhiCmp"><span class="net-dot" data-page-node-id="tCVfoaLMzGGyADvUivJb33"></span><span id="netText" data-page-node-id="bTFVLcLuAOrQnh9aLGPNvP">在线</span></div>
+    <button class="bk-btn" id="packsBadge" style="display:none" onclick="openPacksModal()" title="有新的数据包可安装" data-page-node-id="cKVCTY9YLeyrS4xZioIgs3">📦<span data-page-node-id="EtGXfvydpaS6Cvfs8jxPCA">新数据包</span></button>
+    <button class="bk-btn" onclick="openBackupModal()" title="数据备份 / 恢复" data-page-node-id="yJEzRlHehPesFrCYNcuR2w">💾<span data-page-node-id="D8dPr7NsCFVzN5sv77yABH">备份</span></button>
+    <button class="theme-btn" id="themeBtn" onclick="cycleTheme()" title="切换主题" data-page-node-id="nKFuYQoLJzNJX7tUXNbM92">☀️</button>
+    <div class="user-chip" id="userChip" onclick="openProfileModal()" title="点击编辑姓名 / 头像" data-page-node-id="Ur7gOsSYWSPqAs1rVeKZdU">
+      <div class="avatar" data-page-node-id="55JJfKYQLvolbLuBnShvLA"><div id="avatarLetter" data-page-node-id="d9A7oxFJVUcBBdYXREsfH7">乘</div><img id="avatarImg" alt="" style="display:none" data-page-node-id="QUb2UZh2NTAzjpTGTVYi1C"></div>
+      <span id="userName" data-page-node-id="kapg4qXiKzfZXEKqnDjuMq">乘务员</span>
     </div>
   </div>
 </header>
 
-<main class="sys-area" id="sysArea">
-  <div class="sys-wrap" id="wrap-qa">
-    <div class="sys-loader" id="loader-qa"><div class="sys-spinner"></div><div class="sl-text">正在进入 你问我答 …</div></div>
-    <iframe class="sys-frame" id="frame-qa"></iframe>
+<main class="sys-area" id="sysArea" data-page-node-id="XSWaKvwCq4MA05Fu1JSQ71">
+  <div class="sys-wrap" id="wrap-qa" data-page-node-id="GwgjLW14ktHie3nHv7jO5s">
+    <div class="sys-loader" id="loader-qa" data-page-node-id="ZRD03i38QjWgBMUyEZJXWs"><div class="sys-spinner" data-page-node-id="wiJ4PcdC5gCyVCTuz3EIqU"></div><div class="sl-text" data-page-node-id="lIWoPnqFTXlQMn6B5ioBbz">正在进入 你问我答 …</div></div>
+    <iframe class="sys-frame" id="frame-qa" data-page-node-id="SSrdizLOYnjKX7IhO8mUp6"></iframe>
   </div>
-  <div class="sys-wrap active" id="wrap-quiz">
-    <div class="sys-loader" id="loader-quiz"><div class="sys-spinner"></div><div class="sl-text">正在进入 培训考核 …</div></div>
-    <iframe class="sys-frame" id="frame-quiz"></iframe>
+  <div class="sys-wrap active" id="wrap-quiz" data-page-node-id="8rSBkUt5GL83LMJBXNhCXR">
+    <div class="sys-loader" id="loader-quiz" data-page-node-id="3r6vzxpO7lVdbkV5OGVnIT"><div class="sys-spinner" data-page-node-id="h2xQOHG532keHmnqLtQjk8"></div><div class="sl-text" data-page-node-id="r9zheqO2IK7wweyGTuQS5z">正在进入 培训考核 …</div></div>
+    <iframe class="sys-frame" id="frame-quiz" data-page-node-id="XEFOPhWj26kwD0iylVEcvX"></iframe>
   </div>
-  <div class="sys-wrap" id="wrap-performance">
-    <div class="sys-loader" id="loader-performance"><div class="sys-spinner"></div><div class="sl-text">正在进入 绩效管理 …</div></div>
-    <iframe class="sys-frame" id="frame-performance"></iframe>
+  <div class="sys-wrap" id="wrap-performance" data-page-node-id="FrEdnUArKFsZOMbDGgLzAj">
+    <div class="sys-loader" id="loader-performance" data-page-node-id="2lBrRR5vvlPPxJO0xeWqdZ"><div class="sys-spinner" data-page-node-id="d9vGUL55BEdMZfujv7V3N2"></div><div class="sl-text" data-page-node-id="0ZE3iujN3oXUxiS9TFR53m">正在进入 绩效管理 …</div></div>
+    <iframe class="sys-frame" id="frame-performance" data-page-node-id="BKPE0zQveIgZz7oBqog9UZ"></iframe>
   </div>
-  <div class="sys-wrap" id="wrap-beauty">
-    <div class="sys-loader" id="loader-beauty"><div class="sys-spinner"></div><div class="sl-text">正在进入 美妆话术 …</div></div>
-    <iframe class="sys-frame" id="frame-beauty"></iframe>
+  <div class="sys-wrap" id="wrap-beauty" data-page-node-id="OXCI5rDcEZMh6MGqhqHHQ8">
+    <div class="sys-loader" id="loader-beauty" data-page-node-id="VSvlCQMVLZxXXNI8VikLwR"><div class="sys-spinner" data-page-node-id="sIxnKcS1LdNIKw2v9K2Ybh"></div><div class="sl-text" data-page-node-id="m4kRBCedzqe11Jrf0pweND">正在进入 美妆话术 …</div></div>
+    <iframe class="sys-frame" id="frame-beauty" data-page-node-id="P8nztWZ9qgaNgDB08FMaR6"></iframe>
   </div>
-  <div class="sys-wrap" id="wrap-risk">
-    <div class="sys-loader" id="loader-risk"><div class="sys-spinner"></div><div class="sl-text">正在进入 风险预警（精简版）…</div></div>
-    <iframe class="sys-frame" id="frame-risk"></iframe>
+  <div class="sys-wrap" id="wrap-risk" data-page-node-id="2a1YNFbNKaFGaK75GMfrVn">
+    <div class="sys-loader" id="loader-risk" data-page-node-id="85qS5nSrVtBYsrBXj2NNGJ"><div class="sys-spinner" data-page-node-id="vJDVCjVgVcaFyjC1trnA5p"></div><div class="sl-text" data-page-node-id="pEJeejfowYmy4DrbrgfcHQ">正在进入 风险预警（精简版）…</div></div>
+    <iframe class="sys-frame" id="frame-risk" data-page-node-id="Y7lM6GaWn71QnzgVVr2X3x"></iframe>
   </div>
-  <div class="sys-wrap" id="wrap-medical">
-    <div class="sys-loader" id="loader-medical"><div class="sys-spinner"></div><div class="sl-text">正在进入 医疗急救 …</div></div>
-    <iframe class="sys-frame" id="frame-medical"></iframe>
+  <div class="sys-wrap" id="wrap-medical" data-page-node-id="hCWBwJZrUbRxyR9BdHHIAe">
+    <div class="sys-loader" id="loader-medical" data-page-node-id="uu8qRj8PxjwanEytKaFOig"><div class="sys-spinner" data-page-node-id="aTqSB2P3lqKsn1DVd4lXjC"></div><div class="sl-text" data-page-node-id="4DoWFGYhmY1z76TCv2FkOR">正在进入 医疗急救 …</div></div>
+    <iframe class="sys-frame" id="frame-medical" data-page-node-id="jznuAXSPHHI8fpC7NIbgQ1"></iframe>
   </div>
-  <div class="sys-wrap" id="wrap-daily">
-    <div class="sys-loader" id="loader-daily"><div class="sys-spinner"></div><div class="sl-text">正在进入 日常问题 …</div></div>
-    <iframe class="sys-frame" id="frame-daily"></iframe>
+  <div class="sys-wrap" id="wrap-daily" data-page-node-id="08DIsfb2PS1I7K0wI8vBuA">
+    <div class="sys-loader" id="loader-daily" data-page-node-id="oRUctHTLHcCCG8mXXIKzYg"><div class="sys-spinner" data-page-node-id="JDWmkL5FdbEWAQ9EjVwNhA"></div><div class="sl-text" data-page-node-id="IpFE1pwbnMij3X0cLcnlzc">正在进入 日常问题 …</div></div>
+    <iframe class="sys-frame" id="frame-daily" data-page-node-id="6vSRQtvHwYdBikjDo6aDJJ"></iframe>
   </div>
-  <div class="sys-wrap" id="wrap-manual">
-    <div class="sys-loader" id="loader-manual"><div class="sys-spinner"></div><div class="sl-text">正在进入 手册奖惩 …</div></div>
-    <iframe class="sys-frame" id="frame-manual"></iframe>
+  <div class="sys-wrap" id="wrap-manual" data-page-node-id="gMXmdcSay6EGEAIC7zicgd">
+    <div class="sys-loader" id="loader-manual" data-page-node-id="5yOGIWT7kF3szEzlzy2sKZ"><div class="sys-spinner" data-page-node-id="G6DFyYZTdAU40JYX1lmvyl"></div><div class="sl-text" data-page-node-id="mYTDZGS027H3JVwX8rxQkG">正在进入 手册奖惩 …</div></div>
+    <iframe class="sys-frame" id="frame-manual" data-page-node-id="Oc9dq8OkA2ONZsBXiGGv1U"></iframe>
   </div>
-  <div class="sys-wrap" id="wrap-report">
-    <div class="sys-loader" id="loader-report"><div class="sys-spinner"></div><div class="sl-text">正在进入 事件报告 …</div></div>
-    <iframe class="sys-frame" id="frame-report"></iframe>
+  <div class="sys-wrap" id="wrap-report" data-page-node-id="ao6CrJ84OS8pDVaxr9RsD6">
+    <div class="sys-loader" id="loader-report" data-page-node-id="9EVqHIz9FaABTsh75OIRFC"><div class="sys-spinner" data-page-node-id="PblKklWwN6Rk1J588u5RM6"></div><div class="sl-text" data-page-node-id="r5z3jlJoaJiV5DFupBgQ4e">正在进入 事件报告 …</div></div>
+    <iframe class="sys-frame" id="frame-report" data-page-node-id="kXEwCALAlkZ5en9eIGNUXB"></iframe>
   </div>
-  <div class="sys-wrap" id="wrap-kbadmin">
-    <div class="sys-loader" id="loader-kbadmin"><div class="sys-spinner"></div><div class="sl-text">正在进入 库管理 …</div></div>
-    <iframe class="sys-frame" id="frame-kbadmin"></iframe>
+  <div class="sys-wrap" id="wrap-kbadmin" data-page-node-id="YFf1FLL59AypSlFjl3MrT6">
+    <div class="sys-loader" id="loader-kbadmin" data-page-node-id="82UDFi4F6Lx9nCsTUaewCE"><div class="sys-spinner" data-page-node-id="DyRHgpKzSyImGCST0JubJM"></div><div class="sl-text" data-page-node-id="advWN40lqoStM0V3jl6wEn">正在进入 库管理 …</div></div>
+    <iframe class="sys-frame" id="frame-kbadmin" data-page-node-id="vA4yUapkclkXCRjkH7VnhQ"></iframe>
   </div>
 </main>
 
-<div class="toast-container" id="toastContainer"></div>
+<div class="toast-container" id="toastContainer" data-page-node-id="AerawCVWWcwZLY3UZqOgsE"></div>
 
 <!-- ===== 全局数据备份 / 恢复 ===== -->
-<div class="modal-mask" id="backupModal" onclick="if(event.target===this)closeBackupModal()">
-  <div class="modal-card">
-    <h3>💾 数据备份与恢复</h3>
-    <p class="m-sub">备份包含：错题本与成绩、绩效数据、美妆收藏与定制话术、AI 配置、手册收藏、风险预警设置等全部本地数据。<br>内容数据包（知识/销售/题库）随团队发布更新，不随个人备份迁移。<br><br>换手机时：导出备份文件 → 通过微信「文件传输助手」或网盘发送给自己 → 在新手机打开助手后导入。</p>
-    <div class="m-actions">
-      <button class="m-btn primary" onclick="exportBackup()">⬇️ 导出备份文件</button>
-      <button class="m-btn ghost" onclick="document.getElementById('bkFile').click()">⬆️ 从文件恢复备份</button>
+<div class="modal-mask" id="backupModal" onclick="if(event.target===this)closeBackupModal()" data-page-node-id="zhtR6CTZmE2ix1Vn6Wbgm9">
+  <div class="modal-card" data-page-node-id="GoqRqhgXT8P2qHu4BqdN6b">
+    <h3 style="display:flex;align-items:center;justify-content:space-between;gap:8px" data-page-node-id="dpNwbELDo0hWADgCIjFblr">💾 数据备份与恢复<button class="modal-x" onclick="closeModalId('backupModal')" title="关闭" aria-label="关闭" data-page-node-id="aDjEwBMK7R2x8Y8Enh9ZLW">✕</button></h3>
+    <p class="m-sub" data-page-node-id="GFKsbCpngedqGtZxZYmQyH">备份包含：错题本与成绩、绩效数据、美妆收藏与定制话术、AI 配置、手册收藏、风险预警设置等全部本地数据。<br data-page-node-id="FTfTtSrfJwep9K99oYTvTm">内容数据包（知识/销售/题库）随团队发布更新，不随个人备份迁移。<br data-page-node-id="gnCaH5BGmH0pnBu84jcaLp"><br data-page-node-id="canX1hQF0ixWW4b2DCLCaz">换手机时：导出备份文件 → 通过微信「文件传输助手」或网盘发送给自己 → 在新手机打开助手后导入。</p>
+    <div class="m-actions" data-page-node-id="bvdgmw1TH37kh9Vboplq0u">
+      <button class="m-btn primary" onclick="exportBackup()" data-page-node-id="XCA9vxqZw6vEfkPrGvwHDB">⬇️ 导出备份文件</button>
+      <button class="m-btn ghost" onclick="document.getElementById('bkFile').click()" data-page-node-id="GwtRtWL5qLXnwwhyBICBN6">⬆️ 从文件恢复备份</button>
     </div>
-    <input type="file" id="bkFile" accept=".json,application/json" style="display:none" onchange="importBackup(this.files[0])">
-    <div class="m-meta" id="bkMeta"></div>
+    <input type="file" id="bkFile" accept=".json,application/json" style="display:none" onchange="importBackup(this.files[0])" data-page-node-id="34yYOtnHGNimmJ1lY6q14E">
+    <div class="m-meta" id="bkMeta" data-page-node-id="kyfH9poSivU0q10Uar99gK"></div>
   </div>
 </div>
 
 <!-- ===== 数据包在线更新（M2） ===== -->
-<div class="modal-mask" id="packsModal" onclick="if(event.target===this)closePacksModal()">
-  <div class="modal-card">
-    <h3>📦 发现可用数据包更新</h3>
-    <p class="m-sub" id="packsModalBody"></p>
-    <div class="m-actions">
-      <button class="m-btn primary" id="packsInstallBtn" onclick="installPacksUpdates()">⬇️ 全部安装</button>
-      <button class="m-btn ghost" onclick="closePacksModal()">稍后再说</button>
+<div class="modal-mask" id="packsModal" onclick="if(event.target===this)closePacksModal()" data-page-node-id="ujIExK0gMIJU68CECzKv3q">
+  <div class="modal-card" data-page-node-id="YFrBTLvzYwHUVMLJOVwGYP">
+    <h3 style="display:flex;align-items:center;justify-content:space-between;gap:8px" data-page-node-id="aVrahwZ667HEUFPS5F1peM">📦 发现可用数据包更新<button class="modal-x" onclick="closeModalId('packsModal')" title="关闭" aria-label="关闭" data-page-node-id="gPwX2AJJLsHrBA5TkNVG30">✕</button></h3>
+    <p class="m-sub" id="packsModalBody" data-page-node-id="A0NsUA1PvLBV8kdIofp1Za"></p>
+    <div class="m-actions" data-page-node-id="aTjTFRhll5M8TrVcM1dZnH">
+      <button class="m-btn primary" id="packsInstallBtn" onclick="installPacksUpdates()" data-page-node-id="nEPyd2miT0I58F0u30W6nG">⬇️ 全部安装</button>
+      <button class="m-btn ghost" onclick="closePacksModal()" data-page-node-id="kd7hC9hnUGGIb4TxxjJ4TE">稍后再说</button>
     </div>
-    <div class="m-meta" id="packsModalMeta">来源：团队发布 · https + sha256 校验 · 不随个人备份迁移</div>
+    <div class="m-meta" id="packsModalMeta" data-page-node-id="eWDjGlorsxCm27ho8MAfEo">来源：团队发布 · https + sha256 校验 · 不随个人备份迁移</div>
   </div>
 </div>
 
 <!-- ===== 个人资料（姓名 / 头像） ===== -->
-<div class="modal-mask" id="profileModal" onclick="if(event.target===this)closeProfileModal()">
-  <div class="modal-card">
-    <h3>👤 个人资料</h3>
-    <p class="m-sub">设置顶栏显示的姓名与头像，本地保存，并随 💾 备份恢复迁移。</p>
-    <div class="profile-avatar-preview" id="profileAvatar" onclick="document.getElementById('pfFile').click()" title="点击选择图片">
-      <img id="profileAvatarImg" alt="" style="display:none">
-      <span id="profileAvatarLetter">乘</span>
-      <div class="cam">📷 更换</div>
+<div class="modal-mask" id="profileModal" onclick="if(event.target===this)closeProfileModal()" data-page-node-id="NQXhNTfTFBTHO5IgxH80FI">
+  <div class="modal-card" data-page-node-id="ogcgG8NyZcJJC7ukvt4xE4">
+    <h3 style="display:flex;align-items:center;justify-content:space-between;gap:8px" data-page-node-id="ayygluzqhHYE0hfFEFKx84">👤 个人资料<button class="modal-x" onclick="closeModalId('profileModal')" title="关闭" aria-label="关闭" data-page-node-id="huIb3owHHUD8q8KHvGbEuP">✕</button></h3>
+    <p class="m-sub" data-page-node-id="HAVBvuAftG55j05prcZ6Jf">设置顶栏显示的姓名与头像，本地保存，并随 💾 备份恢复迁移。</p>
+    <div class="profile-avatar-preview" id="profileAvatar" onclick="document.getElementById('pfFile').click()" title="点击选择图片" data-page-node-id="SU49LTOHj3oRhlkJzHva7A">
+      <img id="profileAvatarImg" alt="" style="display:none" data-page-node-id="1DpeHOHymCzRCwy5DdngcC">
+      <span id="profileAvatarLetter" data-page-node-id="MUj6mKOuARlZIUBby13F96">乘</span>
+      <div class="cam" data-page-node-id="Uqzr6EL3BGnDei4Sly0RM4">📷 更换</div>
     </div>
-    <div style="text-align:center">
-      <button class="pf-del" type="button" onclick="clearAvatar()">🗑 删除头像</button>
+    <div style="text-align:center" data-page-node-id="081mazxtSpDqE1TswEXOB5">
+      <button class="pf-del" type="button" onclick="clearAvatar()" data-page-node-id="yX1A00g4Yj9nS9hyT0irYI">🗑 删除头像</button>
     </div>
-    <div class="pf-field">
-      <label for="pfName">姓名</label>
-      <input type="text" id="pfName" maxlength="12" placeholder="请输入姓名">
+    <div class="pf-field" data-page-node-id="o6wucszHpeOw0kVHwTNymn">
+      <label for="pfName" data-page-node-id="mSiVF19TfwewwEwU1ewv42">姓名</label>
+      <input type="text" id="pfName" maxlength="12" placeholder="请输入姓名" data-page-node-id="YghtQkpY7vRax0zJGDyeFL">
     </div>
-    <div class="m-actions">
-      <button class="m-btn primary" onclick="saveProfile()">💾 保存</button>
-      <button class="m-btn ghost" onclick="closeProfileModal()">取消</button>
+    <div class="m-actions" data-page-node-id="uCefO9ywobmlri8hgHGw8K">
+      <button class="m-btn primary" onclick="saveProfile()" data-page-node-id="CKywFN1hdhkH0PRE0axqOW">💾 保存</button>
+      <button class="m-btn ghost" onclick="closeProfileModal()" data-page-node-id="NBFxoKmwxQPXs1sMfCEC7X">取消</button>
     </div>
-    <input type="file" id="pfFile" accept="image/*" style="display:none" onchange="handleAvatarFile(this.files[0])">
+    <input type="file" id="pfFile" accept="image/*" style="display:none" onchange="handleAvatarFile(this.files[0])" data-page-node-id="DnEZL94qWWee6pX88sKGuy">
   </div>
 </div>
 
@@ -800,6 +1057,7 @@ function showPacksBadge(ready){
   b.style.display = '';
   const span = b.querySelector('span');
   if(span) span.textContent = '新数据包(' + ready.length + ')';
+  try{ toast('发现 ' + ready.length + ' 个新数据包，点击顶栏 📦 可查看安装'); }catch(e){}
 }
 function readManifestCache(){
   try{
@@ -849,6 +1107,8 @@ function openPacksModal(){
   document.getElementById('packsModal').classList.add('show');
 }
 function closePacksModal(){ document.getElementById('packsModal').classList.remove('show'); }
+function closeModalId(id){ const m=document.getElementById(id); if(m) m.classList.remove('show'); }
+document.addEventListener('keydown',function(e){ if(e.key==='Escape'){ ['packsModal','backupModal','profileModal'].forEach(function(id){ closeModalId(id); }); } });
 async function fetchPackText(p, sha256){
   // p 为清单条目；依次尝试 源站 → 镜像，sha256 校验通过才返回（镜像缓存过期自动跳过）
   const rel = p && p.url;
@@ -925,6 +1185,8 @@ const BACKUP_VER = 1;
 // 易失/临时类键不随备份恢复（缓存、首次引导标记等，恢复后会自动重建）
 const BACKUP_EXCLUDE = {
   'cabin_first_time_seen': 1,   // 首次使用引导标记
+  'cabin_session_v1': 1,        // 登录会话（不随备份迁移，避免换机恢复旧登录态）
+  'cabin_users_v1': 1,          // 本机账号（个人凭证不随备份迁移）
   '_app_last_version': 1,       // 风险模块版本标记（用于版本更新清缓存）
   'filtered_overview_v1': 1,    // 风险模块首页概览缓存
   'briefing_today_v1_cache': 1,  // 今日简报缓存
@@ -1135,6 +1397,360 @@ window.addEventListener('focus', checkPacksUpdate); // 回到前台时重新检�
 checkPacksUpdate();
 renderUserChip();
 switchModule('quiz');
+</script>
+<script>
+/* ============================================================
+ * 壳层增强 v1（2026-09-08）：全局注册/登录门禁 + 新手教程（含免责声明3秒倒计时）+ 视觉升级
+ * 注入点：spring-assistant / 4合1 / index 三个外壳的 </body> 之前
+ * 自包含：不依赖壳层既有 JS（除 switchModule / 主题切换外无耦合）
+ * ============================================================ */
+(function(){
+'use strict';
+var KEY_USERS = 'cabin_users_v1';
+var KEY_SESSION = 'cabin_session_v1';
+var KEY_TUTORIAL = 'cabin_tutorial_seen';
+var USERS_MAGIC = 'cabin-users-v1';
+var ADMIN = { 工号:'028981', 姓名:'管理员', 手机号:'', 密码:'LWH' };
+
+function lsGet(k){ try{ return localStorage.getItem(k); }catch(e){ return null; } }
+function lsSet(k,v){ try{ localStorage.setItem(k, v); }catch(e){} }
+function lsDel(k){ try{ localStorage.removeItem(k); }catch(e){} }
+
+/* ---------- 用户库 ---------- */
+function readUsers(){
+  try{
+    var d = JSON.parse(lsGet(KEY_USERS) || 'null');
+    if(d && d.magic === USERS_MAGIC && Array.isArray(d.users)) return d.users;
+  }catch(e){}
+  var users = [ADMIN];
+  lsSet(KEY_USERS, JSON.stringify({ magic: USERS_MAGIC, users: users }));
+  return users;
+}
+function saveUsers(users){ lsSet(KEY_USERS, JSON.stringify({ magic: USERS_MAGIC, users: users })); }
+function readSession(){ try{ return JSON.parse(lsGet(KEY_SESSION) || 'null'); }catch(e){ return null; } }
+function saveSession(u){ if(u){ lsSet(KEY_SESSION, JSON.stringify(u)); }else{ lsDel(KEY_SESSION); } }
+
+/* ---------- 样式 ---------- */
+var css = [
+'.auth-overlay{position:fixed;top:0;left:0;right:0;bottom:0;z-index:5000;background:var(--bg,#F5F8F6);display:flex;align-items:center;justify-content:center;padding:20px;overflow:hidden;}',
+'.auth-aurora{position:absolute;top:-160px;left:-140px;width:520px;height:520px;border-radius:50%;background:radial-gradient(circle,rgba(20,132,83,.30),transparent 65%);filter:blur(70px);animation:aaDrift1 24s ease-in-out infinite alternate;pointer-events:none;}',
+'.auth-aurora.a2{top:auto;left:auto;right:-140px;bottom:-160px;background:radial-gradient(circle,rgba(245,184,0,.22),transparent 65%);animation:aaDrift2 28s ease-in-out infinite alternate;}',
+'@keyframes aaDrift1{from{transform:translate(0,0) rotate(0deg)}to{transform:translate(80px,60px) rotate(24deg)}}',
+'@keyframes aaDrift2{from{transform:translate(0,0) rotate(0deg)}to{transform:translate(-70px,-50px) rotate(-20deg)}}',
+'.auth-card{position:relative;width:100%;max-width:400px;background:rgba(255,255,255,.82);-webkit-backdrop-filter:blur(24px);backdrop-filter:blur(24px);border:1px solid rgba(255,255,255,.6);border-radius:24px;box-shadow:0 24px 80px rgba(20,60,40,.14);padding:32px 30px 26px;box-sizing:border-box;animation:authPop .32s cubic-bezier(.34,1.56,.64,1);}',
+'html[data-theme="dark"] .auth-card{background:rgba(22,36,32,.9);border-color:rgba(255,255,255,.08)}',
+'@keyframes authPop{from{opacity:0;transform:translateY(14px) scale(.97)}to{opacity:1;transform:none}}',
+'.auth-logo{display:flex;flex-direction:column;align-items:center;gap:8px;margin-bottom:22px;}',
+'.auth-logo .al-icon{width:58px;height:58px;border-radius:18px;background:linear-gradient(135deg,#148453,#1FA56A);display:flex;align-items:center;justify-content:center;font-size:28px;box-shadow:0 10px 26px rgba(20,132,83,.35);}',
+'.auth-logo .al-name{font-size:1.15rem;font-weight:800;color:var(--text,#0F2A1F);}',
+'.auth-logo .al-sub{font-size:.72rem;color:var(--text2,#5A6F65);text-align:center;}',
+'.auth-tabs{display:flex;background:var(--primary-mist,#F4F9F6);border-radius:14px;padding:4px;margin-bottom:18px;}',
+'.auth-tab{flex:1;border:none;background:transparent;padding:9px 0;border-radius:10px;font-weight:700;font-size:.9rem;color:var(--text2,#5A6F65);cursor:pointer;transition:all .22s cubic-bezier(.34,1.56,.64,1);font-family:var(--font-sans);}',
+'.auth-tab.on{background:linear-gradient(135deg,#148453,#1FA56A);color:#fff;box-shadow:0 6px 14px rgba(20,132,83,.28);}',
+'.auth-field{margin-bottom:14px;}',
+'.auth-field label{display:block;font-size:.78rem;font-weight:700;color:var(--text2,#5A6F65);margin-bottom:6px;}',
+'.auth-field input{width:100%;box-sizing:border-box;padding:11px 14px;border:1px solid var(--border,#E5EDE9);border-radius:12px;font-size:.95rem;color:var(--text,#0F2A1F);background:var(--bg-card,#fff);outline:none;transition:border-color .2s,box-shadow .2s;font-family:var(--font-sans);}',
+'.auth-field input:focus{border-color:#148453;box-shadow:0 0 0 3px rgba(20,132,83,.14);}',
+'.auth-btn{width:100%;padding:12px;border:none;border-radius:12px;background:linear-gradient(135deg,#148453,#1FA56A);color:#fff;font-size:.98rem;font-weight:800;cursor:pointer;margin-top:6px;transition:transform .18s cubic-bezier(.34,1.56,.64,1),box-shadow .2s;font-family:var(--font-sans);}',
+'.auth-btn:active{transform:scale(.97);}',
+'.auth-err{display:none;background:var(--danger-soft,#FEE7DE);color:#C0392B;border-radius:10px;padding:9px 12px;font-size:.82rem;margin-bottom:12px;font-weight:600;}',
+'.auth-foot{margin-top:16px;text-align:center;font-size:.76rem;color:var(--text3,#B5C2BC);}',
+'.tour-overlay{position:fixed;top:0;left:0;right:0;bottom:0;z-index:5200;background:rgba(8,22,16,.55);-webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px);display:none;align-items:center;justify-content:center;padding:20px;box-sizing:border-box;}',
+'.tour-overlay.show{display:flex;animation:authFade .3s ease-out;}',
+'@keyframes authFade{from{opacity:0}to{opacity:1}}',
+'.tour-card{width:100%;max-width:440px;background:var(--bg-card,#fff);border-radius:24px;box-shadow:0 30px 90px rgba(0,0,0,.32);padding:30px 28px 22px;box-sizing:border-box;animation:authPop .32s cubic-bezier(.34,1.56,.64,1);max-height:86vh;overflow-y:auto;}',
+'.tour-ic{width:56px;height:56px;border-radius:16px;background:linear-gradient(135deg,#148453,#1FA56A);display:flex;align-items:center;justify-content:center;font-size:26px;margin-bottom:14px;box-shadow:0 10px 24px rgba(20,132,83,.3);}',
+'.tour-title{font-size:1.08rem;font-weight:800;color:var(--text,#0F2A1F);margin-bottom:8px;}',
+'.tour-desc{font-size:.9rem;color:var(--text2,#5A6F65);line-height:1.85;}',
+'.tour-dots{display:flex;gap:6px;justify-content:center;margin-top:18px;}',
+'.tour-dot{width:7px;height:7px;border-radius:50%;background:var(--border,#E5EDE9);transition:all .25s;}',
+'.tour-dot.on{background:#148453;width:20px;border-radius:4px;}',
+'.tour-nav{display:flex;gap:10px;margin-top:20px;}',
+'.tour-nav button{flex:1;padding:11px 0;border-radius:12px;border:none;font-weight:800;font-size:.9rem;cursor:pointer;transition:transform .18s cubic-bezier(.34,1.56,.64,1),box-shadow .2s;font-family:var(--font-sans);}',
+'.tour-nav button:active{transform:scale(.97);}',
+'.tour-next{background:linear-gradient(135deg,#148453,#1FA56A);color:#fff;box-shadow:0 8px 18px rgba(20,132,83,.28);}',
+'.tour-prev{background:var(--primary-mist,#F4F9F6);color:#148453;}',
+'.tour-skip{background:transparent;color:var(--text3,#B5C2BC);}',
+'.tour-countdown{display:inline-flex;align-items:center;gap:6px;background:var(--primary-soft,#E8F3EE);color:#148453;border-radius:20px;padding:4px 12px;font-weight:800;font-size:.8rem;}',
+'.tour-tip{font-size:.78rem;color:var(--text2,#5A6F65);background:var(--primary-mist,#F4F9F6);border-radius:10px;padding:8px 12px;margin-top:14px;line-height:1.6;}',
+'.disclaimer-box{background:#FFFBF0;border:1px solid rgba(245,184,0,.45);border-left:4px solid #F5B800;border-radius:14px;padding:16px 18px;font-size:.92rem;line-height:1.95;color:#5a4a10;margin-top:6px;}',
+'html[data-theme="dark"] .disclaimer-box{background:rgba(245,184,0,.08);color:#e6d9a8;border-color:rgba(245,184,0,.35)}',
+'.mod-tab.tour-target,.bk-btn.tour-target,.theme-btn.tour-target{outline:3px solid rgba(245,184,0,.9);outline-offset:2px;border-radius:12px;animation:tourPulse 1.4s ease-in-out infinite;}',
+'@keyframes tourPulse{0%,100%{box-shadow:0 0 0 0 rgba(245,184,0,.5)}50%{box-shadow:0 0 0 8px rgba(245,184,0,0)}}',
+'.topbar{box-shadow:0 1px 0 var(--border,#E5EDE9);}',
+'.bg-aurora{position:fixed;top:0;left:0;right:0;bottom:0;z-index:0;pointer-events:none;overflow:hidden;}',
+'.bg-aurora::before,.bg-aurora::after{content:\'\';position:absolute;border-radius:50%;filter:blur(90px);opacity:.45;}',
+'.bg-aurora::before{width:480px;height:480px;left:-120px;top:-140px;background:radial-gradient(circle,rgba(20,132,83,.35),transparent 65%);animation:auDrift1 26s ease-in-out infinite alternate;}',
+'.bg-aurora::after{width:420px;height:420px;right:-110px;bottom:-120px;background:radial-gradient(circle,rgba(245,184,0,.26),transparent 65%);animation:auDrift2 30s ease-in-out infinite alternate;}',
+'@keyframes auDrift1{from{transform:translate(0,0) rotate(0deg)}to{transform:translate(70px,50px) rotate(30deg)}}',
+'@keyframes auDrift2{from{transform:translate(0,0) rotate(0deg)}to{transform:translate(-60px,-40px) rotate(-24deg)}}',
+'.modal-card{animation:authPop .28s cubic-bezier(.34,1.56,.64,1);}',
+'.mod-tab,.bk-btn,.theme-btn{transition:transform .18s cubic-bezier(.34,1.56,.64,1),box-shadow .2s,background .2s,color .2s;}',
+'.mod-tab:active,.bk-btn:active,.theme-btn:active{transform:scale(.96);}',
+'.logout-btn{margin-left:auto;padding:9px 14px;border:1px solid var(--danger,#E64A19);background:transparent;color:var(--danger,#E64A19);border-radius:12px;font-weight:700;font-size:.84rem;cursor:pointer;transition:all .2s;font-family:var(--font-sans);}',
+'.logout-btn:hover{background:var(--danger-soft,#FEE7DE);}',
+'@media(max-width:720px){.auth-card{padding:24px 20px 20px}.tour-card{padding:22px 18px 18px}}'
+].join('\n');
+
+var styleEl = document.createElement('style');
+styleEl.id = 'shell-enhance-css';
+styleEl.textContent = css;
+(document.head || document.documentElement).appendChild(styleEl);
+
+/* ---------- 背景氛围 ---------- */
+(function(){
+  var aur = document.createElement('div');
+  aur.className = 'bg-aurora';
+  aur.setAttribute('aria-hidden', 'true');
+  document.body.insertBefore(aur, document.body.firstChild);
+})();
+
+/* ---------- 账号体系 ---------- */
+var authOverlay = null, tourOverlay = null, authMode = 'login';
+
+function el(id){ return document.getElementById(id); }
+function updateChip(){
+  var s = readSession();
+  var nameEl = el('userName'), letterEl = el('avatarLetter');
+  if(s && s.姓名){
+    if(nameEl) nameEl.textContent = s.姓名;
+    if(letterEl) letterEl.textContent = String(s.姓名).charAt(0);
+  }
+}
+function esc(s){ return String(s == null ? '' : s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+
+function showAuth(){
+  if(authOverlay){ authOverlay.style.display = 'flex'; renderAuth(); return; }
+  authOverlay = document.createElement('div');
+  authOverlay.className = 'auth-overlay';
+  authOverlay.innerHTML =
+    '<div class="auth-aurora"></div><div class="auth-aurora a2"></div>' +
+    '<div class="auth-card" id="authCard">' +
+      '<div class="auth-logo"><div class="al-icon">✈️</div><div class="al-name">客舱小助手</div><div class="al-sub">春秋航空 · 广州分队一线工具融合平台</div></div>' +
+      '<div class="auth-tabs" id="authTabs"><button class="auth-tab on" data-m="login" onclick="shellAuthSetMode(\'login\')">登 录</button><button class="auth-tab" data-m="register" onclick="shellAuthSetMode(\'register\')">注 册</button></div>' +
+      '<div id="authBody"></div>' +
+      '<div class="auth-foot">账号仅保存在本机（localStorage），不联网上传</div>' +
+    '</div>';
+  document.body.appendChild(authOverlay);
+  renderAuth();
+}
+function renderAuth(){
+  if(!authOverlay) return;
+  var mode = authMode;
+  var tabs = authOverlay.querySelectorAll('.auth-tab');
+  for(var i=0;i<tabs.length;i++) tabs[i].className = 'auth-tab' + (tabs[i].getAttribute('data-m') === mode ? ' on' : '');
+  var body = authOverlay.querySelector('#authBody');
+  if(mode === 'register'){
+    body.innerHTML =
+      '<div class="auth-err" id="authErr"></div>' +
+      '<div class="auth-field"><label>工号 *</label><input id="afId" type="text" placeholder="如 028981" maxlength="10"></div>' +
+      '<div class="auth-field"><label>姓名 *</label><input id="afName" type="text" placeholder="请输入真实姓名" maxlength="12"></div>' +
+      '<div class="auth-field"><label>手机号 *</label><input id="afPhone" type="tel" placeholder="11 位手机号" maxlength="11"></div>' +
+      '<div class="auth-field"><label>密码（≥6位）*</label><input id="afPwd" type="password" placeholder="请设置密码" maxlength="20"></div>' +
+      '<div class="auth-field"><label>确认密码 *</label><input id="afPwd2" type="password" placeholder="再次输入密码" maxlength="20"></div>' +
+      '<button class="auth-btn" onclick="shellAuthSubmit()">创建账号并进入</button>';
+  } else {
+    body.innerHTML =
+      '<div class="auth-err" id="authErr"></div>' +
+      '<div class="auth-field"><label>工号 / 手机号</label><input id="afId" type="text" placeholder="工号或手机号" autocomplete="username"></div>' +
+      '<div class="auth-field"><label>密码</label><input id="afPwd" type="password" placeholder="请输入密码" autocomplete="current-password"></div>' +
+      '<button class="auth-btn" onclick="shellAuthSubmit()">进入小助手</button>';
+  }
+  var first = body.querySelector('input');
+  if(first) setTimeout(function(){ try{ first.focus(); }catch(e){} }, 120);
+}
+window.shellAuthSetMode = function(m){
+  authMode = m;
+  renderAuth();
+};
+window.shellAuthSubmit = function(){
+  var err = authOverlay ? authOverlay.querySelector('#authErr') : null;
+  var showErr = function(msg){ if(err){ err.style.display = 'block'; err.textContent = msg; } };
+  var users = readUsers();
+  if(authMode === 'register'){
+    var id = (el('afId') || {}).value || '', name = (el('afName') || {}).value || '',
+        phone = (el('afPhone') || {}).value || '', pwd = (el('afPwd') || {}).value || '', pwd2 = (el('afPwd2') || {}).value || '';
+    if(!id.trim()) return showErr('请输入工号');
+    if(!/^\d{4,8}$/.test(id.trim())) return showErr('工号应为 4-8 位数字');
+    if(!name.trim()) return showErr('请输入姓名');
+    if(!/^1\d{10}$/.test(phone)) return showErr('请输入正确的 11 位手机号');
+    if(pwd.length < 6) return showErr('密码至少 6 位');
+    if(pwd !== pwd2) return showErr('两次输入的密码不一致');
+    var dup = users.some(function(u){ return u.工号 === id.trim(); });
+    if(dup) return showErr('该工号已注册，请直接登录');
+    var user = { 工号: id.trim(), 姓名: name.trim(), 手机号: phone, 密码: pwd };
+    users.push(user);
+    saveUsers(users);
+    finishAuth(user);
+  } else {
+    var acc = (el('afId') || {}).value || '', pwd = (el('afPwd') || {}).value || '';
+    if(!acc.trim() || !pwd) return showErr('请输入工号/手机号和密码');
+    var found = users.filter(function(u){
+      return (u.工号 === acc.trim() || u.手机号 === acc.trim()) && u.密码 === pwd;
+    })[0];
+    if(!found) return showErr('账号或密码错误');
+    finishAuth(found);
+  }
+};
+function finishAuth(user){
+  saveSession({ 工号: user.工号, 姓名: user.姓名, 手机号: user.手机号 || '' });
+  if(authOverlay){ authOverlay.style.display = 'none'; }
+  updateChip();
+  try{ var t = el('userName'); if(t && t.style) t.style.display = ''; }catch(e){}
+  maybeStartTour();
+  try{ if(typeof toast === 'function') toast('欢迎回来，' + user.姓名 + ' ✈️'); }catch(e){}
+  console.log('[账号] 登录成功：', user.工号, user.姓名);
+}
+window.shellLogout = function(){
+  saveSession(null);
+  var pm = el('profileModal');
+  if(pm) pm.classList.remove('show');
+  showAuth();
+  console.log('[账号] 已退出登录');
+};
+
+/* ---------- 新手教程 ---------- */
+var TOUR_STEPS = [
+  { mod:'beauty', icon:'💄', title:'美妆话术库', desc:'场景化话术一键生成：选择品类/效果/品牌 → 生成「像朋友聊天」式的销售话术。支持 <b>严格版/宽松版</b> 合规口径切换（默认严格版，无医美类比），生成后可以 👍 点赞、👎 提意见，话术会越用越懂你的风格。' },
+  { mod:'qa', icon:'💬', title:'你问我答', desc:'四库知识问答 + 智能查询增强：<br>· 输入「张露2026年7月的绩效」→ 自动解析姓名/时间/类型，返回结构化数据卡片；<br>· 输入「来10道第三章的题」→ 在线组卷、作答、自动批改；<br>· 可用 <code>/导入绩效</code> 上传自己的绩效数据。' },
+  { mod:'performance', icon:'📊', title:'绩效看板', desc:'汇总 / 绩效 / 飞行小时 / 销售 / 个人分析 / 班组排名 / 个人画像全维度数据，支持导入导出与备份恢复。' },
+  { mod:'quiz', icon:'📚', title:'培训中心', desc:'题库 / 顺序练习 / 背题 / 错题重练 / 模拟考试 / 章节专项，配合成就系统高效备考。' },
+  { mod:null, icon:'⚖️', title:'免责声明', desc:'<div class="disclaimer-box">本系统中存在的数据均为预测和模拟，并非真实数据。一切数据以官方提供的数据和文件为最终参考，本系统数据仅供参考和娱乐，如有雷同纯属巧合。感谢您的理解与使用。</div>' }
+];
+var tourStep = 0, tourTimer = null, tourCount = 3;
+function maybeStartTour(){
+  var seen = lsGet(KEY_TUTORIAL);
+  if(seen === '1'){ lsSet('spring_onb_done', '1'); return; }
+  showTour();
+}
+function showTour(){
+  tourStep = 0;
+  tourCount = 3;
+  if(!tourOverlay){
+    tourOverlay = document.createElement('div');
+    tourOverlay.className = 'tour-overlay';
+    tourOverlay.innerHTML =
+      '<div class="tour-card" id="tourCard">' +
+        '<div id="tourBody"></div>' +
+        '<div class="tour-dots" id="tourDots"></div>' +
+        '<div class="tour-nav">' +
+          '<button class="tour-skip" id="tourSkip" onclick="shellTourSkip()">跳过</button>' +
+          '<button class="tour-prev" id="tourPrev" onclick="shellTourPrev()">← 上一步</button>' +
+          '<button class="tour-next" id="tourNext" onclick="shellTourNext()">下一步 →</button>' +
+        '</div>' +
+      '</div>';
+    document.body.appendChild(tourOverlay);
+  }
+  tourOverlay.classList.add('show');
+  renderTour();
+}
+function renderTour(){
+  var st = TOUR_STEPS[tourStep];
+  var body = tourOverlay.querySelector('#tourBody');
+  var isLast = tourStep === TOUR_STEPS.length - 1;
+  body.innerHTML =
+    '<div class="tour-ic">' + st.icon + '</div>' +
+    '<div class="tour-title">' + (tourStep + 1) + ' / ' + TOUR_STEPS.length + ' · ' + st.title + '</div>' +
+    '<div class="tour-desc">' + st.desc + '</div>' +
+    (isLast ? '<div class="tour-tip">⏳ 教程即将结束，<span class="tour-countdown">⏱ <b id="tourCd">' + tourCount + '</b> 秒</span>后自动进入主界面。</div>' : '');
+  // 高亮对应模块页签
+  var prev = tourOverlay.querySelector('.tour-target');
+  if(prev) prev.classList.remove('tour-target');
+  var tabs = document.querySelectorAll('.mod-tab');
+  for(var i=0;i<tabs.length;i++) tabs[i].classList.remove('tour-target');
+  if(st.mod){
+    var tab = document.querySelector('.mod-tab[data-mod="' + st.mod + '"]');
+    if(tab){ tab.classList.add('tour-target'); try{ tab.scrollIntoView({ behavior:'smooth', inline:'center', block:'nearest' }); }catch(e){} }
+  }
+  // 点与按钮
+  var dots = tourOverlay.querySelector('#tourDots');
+  dots.innerHTML = TOUR_STEPS.map(function(_, i){ return '<span class="tour-dot' + (i === tourStep ? ' on' : '') + '"></span>'; }).join('');
+  var prevBtn = tourOverlay.querySelector('#tourPrev'), nextBtn = tourOverlay.querySelector('#tourNext'), skipBtn = tourOverlay.querySelector('#tourSkip');
+  prevBtn.style.display = tourStep === 0 ? 'none' : '';
+  nextBtn.textContent = isLast ? '✓ 我已了解' : '下一步 →';
+  if(isLast){ nextBtn.style.display = 'none'; skipBtn.style.display = 'none'; startCountdown(); }
+  else{ stopCountdown(); nextBtn.style.display = ''; skipBtn.style.display = ''; }
+}
+function startCountdown(){
+  stopCountdown();
+  tourCount = 3;
+  var cd = document.getElementById('tourCd');
+  if(cd) cd.textContent = tourCount;
+  tourTimer = setInterval(function(){
+    tourCount--;
+    var el2 = document.getElementById('tourCd');
+    if(el2) el2.textContent = Math.max(0, tourCount);
+    if(tourCount <= 0){ stopCountdown(); finishTour(); }
+  }, 1000);
+}
+function stopCountdown(){ if(tourTimer){ clearInterval(tourTimer); tourTimer = null; } }
+window.shellTourNext = function(){
+  if(tourStep < TOUR_STEPS.length - 1){ tourStep++; renderTour(); }
+  else finishTour();
+};
+window.shellTourPrev = function(){
+  if(tourStep > 0){ tourStep--; renderTour(); }
+};
+window.shellTourSkip = function(){ finishTour(); };
+function finishTour(){
+  stopCountdown();
+  if(tourOverlay) tourOverlay.classList.remove('show');
+  lsSet(KEY_TUTORIAL, '1');
+  lsSet('spring_onb_done', '1');   // 覆盖旧版（quiz 模块）引导
+  console.log('[教程] 新手教程已完成');
+}
+
+/* ---------- 退出登录按钮注入个人资料弹窗 ---------- */
+(function(){
+  var pm = el('profileModal');
+  if(!pm) return;
+  var acts = pm.querySelector('.m-actions');
+  if(!acts) return;
+  var btn = document.createElement('button');
+  btn.type = 'button';
+  btn.className = 'logout-btn';
+  btn.textContent = '🚪 退出登录';
+  btn.setAttribute('onclick', 'shellLogout()');
+  acts.appendChild(btn);
+})();
+
+/* ---------- 启动 ---------- */
+(function init(){
+  // 覆盖旧版（quiz 模块）Onboarding 引导：嵌入模式下统一由壳层教程接管，不再单独弹窗
+  lsSet('spring_onb_done', '1');
+  if(readSession()){
+    updateChip();
+    maybeStartTour();
+  } else {
+    showAuth();
+  }
+})();
+})();
+
+
+/* ===================== 顶栏系统时间（跟随本机系统时间 + 今日节气/节假日） ===================== */
+(function(){
+  function tick(){
+    var el = document.getElementById('sysClock');
+    if(!el) return;
+    var d = new Date();
+    var t = document.getElementById('scTime');
+    var dt = document.getElementById('scDate');
+    var tg = document.getElementById('scTag');
+    if(t) t.textContent = SeasonEngine.clockText(d);
+    if(dt) dt.textContent = (d.getMonth()+1) + '月' + d.getDate() + '日';
+    var m = null;
+    try { m = SeasonEngine.match(d); } catch(e){ m = null; }
+    if(tg){
+      if(m){ tg.textContent = (m.kind === 'festival' ? '🎉 ' : '🍃 ') + m.name; tg.className = 'sc-tag'; }
+      else { tg.textContent = '常规航班'; tg.className = 'sc-tag none'; }
+    }
+    el.title = SeasonEngine.dateText(d) + (m ? ' · ' + m.name : '') + '（跟随本机系统时间）';
+  }
+  tick();
+  setInterval(tick, 20000);
+  window.__seasonTick = tick;
+})();
 </script>
 </body>
 </html>

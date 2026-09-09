@@ -40,6 +40,8 @@ const sandbox = { console, Math, Date, JSON, Set, Map, Array, Object, String, Nu
   showAlert: () => {}, render: () => {}, getProductById: (id) => products.find(p => p.id === id), getTemplateForProduct: () => null, fillTemplate: () => null };
 sandbox.window = sandbox;
 vm.createContext(sandbox);
+try { vm.runInContext(fs.readFileSync('docs/_season_engine.js', 'utf8'), sandbox, { filename: 'season_engine.js' }); }
+catch (e) { console.error('时节引擎注入失败:', e.message); process.exit(1); }
 try { vm.runInContext(engineCode, sandbox, { filename: 'beauty_full_engine.js' }); }
 catch (e) { console.error('引擎注入失败:', e.message); process.exit(1); }
 const generateScript = sandbox.window.generateScript;

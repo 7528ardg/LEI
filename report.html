@@ -58,6 +58,36 @@ body{font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei
 .empty{text-align:center;padding:48px 16px;color:var(--text3)}
 .empty .e-ic{font-size:3rem;display:block;margin-bottom:10px}
 footer{color:var(--text3);font-size:.68rem;text-align:center;line-height:1.8;padding:20px 10px 8px;border-top:1px dashed var(--border);margin-top:16px}
+
+/* ===== 移动端适配（≤720px，与壳层断点对齐） ===== */
+@media(max-width:720px){
+  .container{padding:10px 10px 56px}
+  .top{padding:11px 12px 9px}
+  .t-title{font-size:.98rem;margin-bottom:8px}
+  .search input{padding:9px 12px;font-size:.86rem}
+  .menu{top:52px;padding:6px 8px}
+  .m-tab{padding:6px 11px;font-size:.76rem}
+  .stats{grid-template-columns:repeat(2,1fr);gap:6px;padding:10px}
+  .stat b{font-size:1rem}
+  .stat span{font-size:.7rem}
+  .filters{padding:10px;margin:10px 0}
+  .ev{padding:12px;margin-bottom:10px}
+  .ev-title{font-size:.9rem;min-width:0}
+  .step-body{font-size:.78rem}
+  .step-body li{margin-left:12px}
+  .ded{padding:7px 9px}
+  footer{padding:16px 8px 6px}
+}
+
+/* ===== 事件报告表单 ===== */
+.ri{width:100%;padding:9px 11px;border:1px solid var(--border);border-radius:10px;font-size:.86rem;outline:none;background:var(--bg);color:var(--text);box-sizing:border-box;font-family:inherit}
+.ri:focus{border-color:var(--primary);box-shadow:0 0 0 3px rgba(20,132,83,.12)}
+textarea.ri{resize:vertical;line-height:1.6}
+.rp-label{display:block;font-size:.72rem;font-weight:700;color:var(--text2);margin:0 0 4px}
+.rp-btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;padding:9px 0;border-radius:10px;border:none;font-size:.85rem;font-weight:700;cursor:pointer;font-family:inherit;transition:all .2s;color:#fff}
+.rp-btn.primary{background:var(--grad);box-shadow:0 4px 12px rgba(20,132,83,.22)}
+.rp-btn.ghost{background:var(--primary-soft);color:var(--primary);border:1px solid var(--primary-light)}
+.rp-btn.danger{background:var(--danger-soft);color:var(--danger)}
 </style>
 </head>
 <body>
@@ -75,7 +105,8 @@ footer{color:var(--text3);font-size:.68rem;text-align:center;line-height:1.8;pad
   <div class="stat"><b id="st-phone">6</b><span>报告渠道</span></div>
 </div>
 <div class="menu" id="menu">
-  <button class="m-tab active" data-v="all">🗂 全部流程</button>
+  <button class="m-tab active" data-v="form">📝 事件报告</button>
+  <button class="m-tab" data-v="all">🗂 全部流程</button>
   <button class="m-tab" data-v="hot">🔥 高频重点</button>
   <button class="m-tab" data-v="phone">📞 报告渠道</button>
 </div>
@@ -233,7 +264,7 @@ const PHONES = [
 
 /* ============ 渲染 ============ */
 const $ = id => document.getElementById(id);
-let state = { v:'all', kw:'' };
+let state = { v:'form', kw:'' };
 const CATS = [...new Set(EVENTS.map(e=>e.cat))];
 function esc(s){ return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
 function hl(s){ if(!state.kw) return s; const k=state.kw.toLowerCase(); let o=s; try{ o = s.replace(new RegExp('('+k.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')+')','gi'), '<em>$1</em>'); }catch(e){} return o; }
@@ -254,6 +285,7 @@ function hotHtml(){
   return '<div class="hotbar">' + kws.slice(0,20).map(k=>'<span class="hot" onclick="setKw(\''+k.replace(/'/g,"\\'")+'\')">'+k+'</span>').join('') + '</div>';
 }
 function render(){
+  if(state.v==='form'){ renderReportForm(); return; }
   let list = EVENTS;
   if(state.kw){
     const k=state.kw.toLowerCase();
@@ -272,6 +304,119 @@ function render(){
   $('st-n').textContent = EVENTS.length;
   $('st-cat').textContent = CATS.length;
   $('st-ded').textContent = EVENTS.reduce((s,e)=>s+(e.ded?e.ded.length:0),0);
+}
+
+/* ============ 事件报告填写（本地保存，不联网） ============ */
+const REPORT_KEY='report_records_v1';
+const REPORT_MAGIC='cabin-report-v1';
+const REPORT_TYPES=['旅客紧急医学事件','航空卫生不安全事件（机组）','机上事件（a）-(e)类','非法干扰/机闹/其他安保','其他事件'];
+function rpRead(){
+  try{
+    const d=JSON.parse(localStorage.getItem(REPORT_KEY)||'null');
+    if(d&&d.magic===REPORT_MAGIC&&Array.isArray(d.records)) return d.records;
+  }catch(e){}
+  return [];
+}
+function rpWrite(list){
+  try{ localStorage.setItem(REPORT_KEY, JSON.stringify({magic:REPORT_MAGIC,records:list})); return true; }catch(e){ return false; }
+}
+function rpToast(msg){
+  const old=document.getElementById('rpToast');
+  if(old) old.remove();
+  const t=document.createElement('div');
+  t.id='rpToast';
+  t.style.cssText='position:fixed;bottom:16px;left:50%;transform:translateX(-50%);background:rgba(15,42,31,.92);color:#fff;padding:9px 16px;border-radius:10px;font-size:.82rem;z-index:999;box-shadow:0 6px 18px rgba(0,0,0,.2)';
+  t.textContent=msg;
+  document.body.appendChild(t);
+  setTimeout(()=>t.remove(),2400);
+}
+function rpField(label,inner){
+  return '<div><label class="rp-label">'+label+'</label>'+inner+'</div>';
+}
+function renderReportForm(){
+  const today=new Date().toJSON().slice(0,10);
+  const recs=rpRead();
+  const typeOpts=REPORT_TYPES.map(t=>'<option>'+t+'</option>').join('');
+  const formHtml=
+    '<div class="filters">'+
+      '<div class="f-label" style="font-size:.8rem;font-weight:800;color:var(--text)">📝 事件报告单 · 本地保存不联网，航后请按流程补录 SQM / 智慧客舱</div>'+
+      '<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:8px">'+
+        rpField('事件类型 *','<select id="rf-type" class="ri">'+typeOpts+'</select>')+
+        rpField('航班号 *','<input id="rf-flight" class="ri" placeholder="如 9C8921">')+
+        rpField('航段','<input id="rf-sector" class="ri" placeholder="如 广州-上海">')+
+        rpField('事件日期 *','<input id="rf-date" class="ri" type="date" value="'+today+'">')+
+        rpField('事件时间','<input id="rf-time" class="ri" type="time">')+
+        rpField('飞行阶段','<select id="rf-phase" class="ri"><option>巡航</option><option>起飞</option><option>下降/落地</option><option>地面/候机</option></select>')+
+      '</div>'+
+      '<div style="margin-top:8px">'+rpField('事件描述 *','<textarea id="rf-desc" class="ri" rows="3" placeholder="客观描述：发生时间、位置、事件具体情况…"></textarea>')+'</div>'+
+      '<div style="margin-top:8px">'+rpField('处置过程','<textarea id="rf-action" class="ri" rows="3" placeholder="已采取措施与报告路径：乘务员→乘务长→机长→AOC…"></textarea>')+'</div>'+
+      '<div style="margin-top:8px">'+rpField('涉及人员','<input id="rf-people" class="ri" placeholder="姓名 / 座位 / 联系方式">')+'</div>'+
+      '<div style="margin-top:8px">'+rpField('见证旅客（至少一名）','<input id="rf-witness" class="ri" placeholder="姓名 / 座位 / 联系方式">')+'</div>'+
+      '<div style="margin-top:8px">'+rpField('疑似传染病：同排及前后三排旅客','<textarea id="rf-close" class="ri" rows="2" placeholder="非必填：姓名/性别/年龄/联系方式/座位号"></textarea>')+'</div>'+
+      '<div style="margin-top:8px">'+rpField('是否使用应急医疗设备/药品','<select id="rf-em" class="ri"><option>否</option><option>是（需填《知情同意书》）</option></select>')+'</div>'+
+      '<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:8px">'+
+        rpField('填报人姓名 *','<input id="rf-name" class="ri" placeholder="乘务长/填报人">')+
+        rpField('工号','<input id="rf-no" class="ri" placeholder="如 028981">')+
+      '</div>'+
+      '<div style="display:flex;gap:8px;margin-top:10px">'+
+        '<button class="rp-btn primary" style="flex:1" onclick="rpSave()">💾 保存报告</button>'+
+        '<button class="rp-btn ghost" style="flex:1" onclick="renderReportForm()">🗑 清空</button>'+
+      '</div>'+
+    '</div>'+
+    '<div class="f-label" style="font-size:.8rem;font-weight:800;color:var(--text);margin:12px 0 6px">📋 我的报告记录（'+recs.length+'）</div>'+
+    (recs.length===0
+      ? '<div class="empty" style="padding:24px 12px"><span class="e-ic">🗂️</span><div class="e-s">还没有保存过报告。填写上方表单后点击保存。</div></div>'
+      : recs.map(rpCard).join('') +
+        '<div style="display:flex;gap:8px;margin-top:10px">'+
+          '<button class="rp-btn ghost" style="flex:1" onclick="rpExport()">⬇️ 导出 JSON</button>'+
+          '<button class="rp-btn danger" style="flex:1" onclick="rpClearAll()">🗑 清空全部</button>'+
+        '</div>');
+  $('app').innerHTML = formHtml;
+}
+function rpCard(r,i){
+  return '<div class="ev" style="margin-bottom:10px">'+
+    '<div class="ev-head"><div class="ev-title">'+esc(r.type||'事件')+'</div><div class="ev-badges">'+
+      '<span class="badge b-src">'+esc(r.flight||'—')+'</span>'+
+      (r.date?'<span class="badge b-cat">'+esc(r.date)+'</span>':'')+
+      (r.time?'<span class="badge b-cat">'+esc(r.time)+'</span>':'')+
+    '</div></div>'+
+    '<div class="step-body" style="padding:8px 10px">'+
+      '<strong>航段：</strong>'+esc(r.sector||'—')+' · <strong>阶段：</strong>'+esc(r.phase||'—')+'<br>'+
+      (r.desc?'<strong>描述：</strong>'+esc(r.desc)+'<br>':'')+
+      (r.action?'<strong>处置：</strong>'+esc(r.action)+'<br>':'')+
+      (r.people?'<strong>涉及人员：</strong>'+esc(r.people)+'<br>':'')+
+      (r.witness?'<strong>见证旅客：</strong>'+esc(r.witness)+'<br>':'')+
+      (r.close?'<strong>三排旅客：</strong>'+esc(r.close)+'<br>':'')+
+      '<strong>填报：</strong>'+esc(r.name||'')+(r.no?'（'+esc(r.no)+'）':'')+(r.em&&r.em!=='否'?' · '+esc(r.em):'')+
+    '</div>'+
+    '<div style="display:flex;gap:6px;padding:8px 10px;border-top:1px dashed var(--border)">'+
+      '<button class="rp-btn ghost" style="flex:1;padding:7px 0;font-size:.78rem" onclick="rpDel('+i+')">🗑 删除</button>'+
+    '</div></div>';
+}
+function rpSave(){
+  const g=id=>{const el=document.getElementById(id);return el?el.value.trim():'';};
+  const rec={type:g('rf-type'),flight:g('rf-flight'),sector:g('rf-sector'),date:g('rf-date'),time:g('rf-time'),phase:g('rf-phase'),desc:g('rf-desc'),action:g('rf-action'),people:g('rf-people'),witness:g('rf-witness'),close:g('rf-close'),em:g('rf-em'),name:g('rf-name'),no:g('rf-no'),ts:Date.now()};
+  if(!rec.flight||!rec.desc||!rec.name){ rpToast('请填写必填项：航班号、事件描述、填报人姓名'); return; }
+  const list=rpRead(); list.unshift(rec); rpWrite(list);
+  renderReportForm(); rpToast('✅ 报告已保存到本机');
+}
+function rpDel(i){ const list=rpRead(); list.splice(i,1); rpWrite(list); renderReportForm(); rpToast('已删除'); }
+function rpClearAll(){
+  const list=rpRead();
+  if(!list.length){ rpToast('暂无记录'); return; }
+  if(confirm('确定清空全部 '+list.length+' 条报告记录？此操作不可恢复。')){
+    rpWrite([]); renderReportForm(); rpToast('已清空全部');
+  }
+}
+function rpExport(){
+  const list=rpRead();
+  if(!list.length){ rpToast('暂无记录可导出'); return; }
+  const blob=new Blob([JSON.stringify({magic:REPORT_MAGIC,records:list},null,2)],{type:'application/json'});
+  const a=document.createElement('a');
+  a.href=URL.createObjectURL(blob);
+  a.download='客舱事件报告_'+new Date().toJSON().slice(0,10)+'.json';
+  document.body.appendChild(a); a.click(); a.remove();
+  rpToast('✅ 已导出 '+list.length+' 条记录');
 }
 function doSearch(){ state.kw=$('kw').value.trim(); render(); }
 function setKw(k){ $('kw').value=k; state.kw=k; render(); }

@@ -4,6 +4,18 @@ __check_*
 __pycache__/
 .DS_Store
 
+# 依赖与 IDE/AI 工作目录（不入库）
+node_modules/
+.trae/
+.workbuddy/
+
+# 本地备份与回归截图（不入库）
+_bak_*/
+_ux_shots/
+_verify_shots/
+beauty.worktree_*.bak
+quiz.bak_r*.html
+
 # kb-admin 真实 PDF 验证套件（含生成的测试 PDF，不入库；node_modules 勿提交）
 __pdfqa/
 

@@ -76,6 +76,8 @@ body{font-family:var(--font-sans);background:var(--bg);color:var(--text);min-hei
 .sys-wrap{width:100%;height:100%;display:none;position:relative;}
 .sys-wrap.active{display:block;animation:sysFade .22s ease-out;}
 @keyframes sysFade{from{opacity:.35;}to{opacity:1;}}
+@media (prefers-reduced-motion:reduce){.sys-wrap.active{animation:none}.theme-btn,.mod-tab,.net-status,.user-chip{-webkit-transition:none!important;transition:none!important}}
+.mod-tab:focus-visible,.theme-btn:focus-visible,.user-chip:focus-visible,.jump-btn:focus-visible{outline:2px solid var(--primary);outline-offset:2px}
 .sys-frame{width:100%;height:100%;border:none;display:block;}
 .sys-loader{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;background:var(--bg);z-index:5;transition:opacity .4s;gap:14px;}
 .sys-loader.hidden{opacity:0;pointer-events:none;}
@@ -112,6 +114,8 @@ body{font-family:var(--font-sans);background:var(--bg);color:var(--text);min-hei
 .modal-mask.show{display:flex;}
 .modal-card{background:var(--bg-card);border:1px solid var(--border);border-radius:16px;box-shadow:var(--shadow-lg);width:100%;max-width:400px;padding:24px;box-sizing:border-box;}
 .modal-card h3{margin:0 0 6px;font-size:1.05rem;color:var(--text);}
+.modal-x{width:28px;height:28px;border-radius:8px;border:none;background:var(--primary-mist);color:var(--text2);font-size:.9rem;line-height:1;cursor:pointer;display:inline-flex;align-items:center;justify-content:center;flex-shrink:0;transition:all .2s;font-family:var(--font-sans);margin-left:8px}
+.modal-x:hover{background:var(--danger-soft);color:var(--danger)}
 .modal-card .m-sub{font-size:.82rem;color:var(--text2);line-height:1.7;margin:0 0 16px;}
 .m-actions{display:flex;flex-direction:column;gap:10px;}
 .m-btn{display:flex;align-items:center;justify-content:center;gap:8px;width:100%;padding:12px;border-radius:10px;border:none;cursor:pointer;font-size:.9rem;font-weight:700;font-family:var(--font-sans);transition:all .2s;}
@@ -540,7 +544,7 @@ body{font-family:var(--font-sans);background:var(--bg);color:var(--text);min-hei
 <!-- ===== 数据包在线更新（M2） ===== -->
 <div class="modal-mask" id="packsModal" onclick="if(event.target===this)closePacksModal()">
   <div class="modal-card">
-    <h3>📦 发现可用数据包更新</h3>
+    <h3 style="display:flex;align-items:center;justify-content:space-between;gap:8px">📦 发现可用数据包更新<button class="modal-x" onclick="closeModalId('packsModal')" title="关闭" aria-label="关闭">✕</button></h3>
     <p class="m-sub" id="packsModalBody"></p>
     <div class="m-actions">
       <button class="m-btn primary" id="packsInstallBtn" onclick="installPacksUpdates()">⬇️ 全部安装</button>
@@ -600,8 +604,7 @@ function _b64ToBytes(b64){
 }
 // 内嵌 pako 解压库（约 47KB）：DecompressionStream 不可用的旧浏览器（Safari < 16.4 等）降级用
 __PAKO_SRC__
-async function _b64ToHtml(b64){
-  const bytes = _b64ToBytes(b64);
+async function _bytesToHtml(bytes){
   // gzip 数据头部：0x1f 0x8b
   if(bytes[0] === 0x1f && bytes[1] === 0x8b){
     // 优先使用原生 DecompressionStream（Chrome 80+ / Safari 16.4+ / Firefox 113+）
@@ -626,6 +629,51 @@ async function _b64ToHtml(b64){
   }
   return new TextDecoder('utf-8').decode(bytes);
 }
+async function _b64ToHtml(b64){
+  return _bytesToHtml(_b64ToBytes(b64));
+}
+/* ===================== 在线模式：瘦壳按需拉取 mods/<id>.gz + Cache API 缓存 =====================
+   （离线单文件 MODULES 内嵌数据非空时不受影响；GitHub Pages 等静态托管部署时首屏只需下载瘦壳，
+    各模块按需加载并缓存到 Cache Storage，二次打开/切页签秒开） */
+async function _fetchModule(id){
+  const url = './mods/' + id + '.gz';
+  try{
+    if('caches' in window){
+      const cache = await caches.open('kz-mod-v1');
+      let r = await cache.match(url);
+      if(!r){
+        const resp = await fetch(url, {cache:'no-cache'});
+        if(!resp.ok) throw new Error('HTTP ' + resp.status);
+        await cache.put(url, resp.clone());
+        r = resp;
+      }
+      return await _bytesToHtml(new Uint8Array(await r.arrayBuffer()));
+    }
+  }catch(e){ /* 缓存链路失败，直接拉取，不缓存 */ }
+  const resp = await fetch(url);
+  if(!resp.ok) throw new Error('模块 [' + id + '] 下载失败（HTTP ' + resp.status + '）。请检查网络连接，或确认已上传 mods 目录（对应在线版部署包）。');
+  return await _bytesToHtml(new Uint8Array(await resp.arrayBuffer()));
+}
+async function _loadModule(id){
+  if(MODULES[id]) return await _b64ToHtml(MODULES[id]);      // 离线单文件：内嵌数据直接解压
+  return await _fetchModule(id);                             // 在线瘦壳：按需加载并缓存
+}
+/* 在线模式空闲预取：首屏尽量轻，进入后悄悄缓存其余模块，切换页签时秒开 */
+(function(){
+  var hasEmbed = Object.keys(MODULES).some(function(k){ return !!MODULES[k]; });
+  if(hasEmbed) return;
+  if(!('caches' in window)) return;
+  setTimeout(function(){
+    var keys = Object.keys(MODULES).filter(function(k){ return !MODULES[k]; });
+    var i = 0;
+    (function next(){
+      if(i >= keys.length) return;
+      var id = keys[i++];
+      _loadModule(id).catch(function(){});
+      setTimeout(next, 700);
+    })();
+  }, 1500);
+})();
 
 /* ===================== 模块切换（懒加载 + 缓存 + 解压） ===================== */
 let currentMod = null;
@@ -686,7 +734,7 @@ function switchModule(id){
   if(!_frames[id]){
     const loader = document.getElementById('loader-'+id);
     const frame = document.getElementById('frame-'+id);
-    _b64ToHtml(MODULES[id]).then(function(html){
+    _loadModule(id).then(function(html){
       if(loader) loader.classList.remove('hidden');
       frame.srcdoc = html;
       frame.onload = function(){
@@ -762,6 +810,8 @@ const BACKUP_VER = 1;
 // 易失/临时类键不随备份恢复（缓存、首次引导标记等，恢复后会自动重建）
 const BACKUP_EXCLUDE = {
   'cabin_first_time_seen': 1,   // 首次使用引导标记
+  'cabin_session_v1': 1,        // 登录会话（不随备份迁移，避免换机恢复旧登录态）
+  'cabin_users_v1': 1,          // 本机账号（个人凭证不随备份迁移）
   '_app_last_version': 1,       // 风险模块版本标记（用于版本更新清缓存）
   'filtered_overview_v1': 1,    // 风险模块首页概览缓存
   'briefing_today_v1_cache': 1,  // 今日简报缓存
@@ -932,6 +982,7 @@ function showPacksBadge(ready){
   b.style.display = '';
   const span = b.querySelector('span');
   if(span) span.textContent = '新数据包(' + ready.length + ')';
+  try{ toast('发现 ' + ready.length + ' 个新数据包，点击顶栏 📦 可查看安装'); }catch(e){}
 }
 function readManifestCache(){
   try{
@@ -981,6 +1032,8 @@ function openPacksModal(){
   document.getElementById('packsModal').classList.add('show');
 }
 function closePacksModal(){ document.getElementById('packsModal').classList.remove('show'); }
+function closeModalId(id){ const m=document.getElementById(id); if(m) m.classList.remove('show'); }
+document.addEventListener('keydown',function(e){ if(e.key==='Escape'){ ['packsModal','backupModal','profileModal'].forEach(function(id){ closeModalId(id); }); } });
 async function fetchPackText(p, sha256){
   // p 为清单条目；依次尝试 源站 → 镜像，sha256 校验通过才返回（镜像缓存过期自动跳过）
   const rel = p && p.url;
@@ -1162,6 +1215,7 @@ checkPacksUpdate();
 renderUserChip();
 switchModule('quiz');
 </script>
+<script>__SHELL_ENHANCE__</script>
 </body>
 </html>
 '''
@@ -1199,6 +1253,8 @@ def build():
     pako_src = io.open(os.path.join(BASE, u'_pako.min.js'), 'rb').read().decode('utf-8')
     assert '__PAKO_SRC__' in t, 'placeholder missing __PAKO_SRC__'
     t = t.replace('__PAKO_SRC__', pako_src)
+    enhance_src = io.open(os.path.join(BASE, u'_shell_enhance.js'), 'rb').read().decode('utf-8')
+    t = t.replace('__SHELL_ENHANCE__', enhance_src)
     for key, path in SOURCES.items():
         raw = io.open(os.path.join(BASE, path), 'rb').read()
         if key == 'risk':

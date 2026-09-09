@@ -54,7 +54,7 @@ const sandbox = {
   localStorage: memStore(),
   navigator: { onLine: true },
   window: { PACKS, addEventListener() {} },
-  document: { getElementById: id => (id === 'packsBadge' ? badgeStub : (els[id] = els[id] || elStub())) }
+  document: { getElementById: id => (id === 'packsBadge' ? badgeStub : (els[id] = els[id] || elStub())), addEventListener() {} }
 };
 vm.createContext(sandbox);
 vm.runInContext(block, sandbox, { filename: 'packs-m2.js' });
@@ -187,7 +187,7 @@ sandbox.fetch = async (url) => {
       localStorage: engStore,
       navigator: { onLine: true },
       addEventListener() {},        // 浏览器里 window 即全局对象：window 自引用后 engine 的 window.PACKS=PACKS 直接挂全局
-      document: { getElementById: id => (id === 'packsBadge' ? { style: {}, classList: { add() {}, remove() {} }, querySelector: () => engBadgeSpan } : (engEls[id] = engEls[id] || elStub())) }
+      document: { getElementById: id => (id === 'packsBadge' ? { style: {}, classList: { add() {}, remove() {} }, querySelector: () => engBadgeSpan } : (engEls[id] = engEls[id] || elStub())), addEventListener() {} }
     };
     engSandbox.window = engSandbox;   // 模拟浏览器：window 引用即全局对象
     vm.createContext(engSandbox);

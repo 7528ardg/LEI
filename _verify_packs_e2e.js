@@ -60,7 +60,7 @@ const qaHtml = fs.readFileSync('qa.html', 'utf8');
 
 /* ============ 2. quiz 题库包 ============ */
 {
-  const bank = parseArray(quizHtml, /const sampleQuestions = \[([\s\S]*?)\n\];/);
+  const bank = parseArray(quizHtml, /const sampleQuestions = \[([\s\S]*?)\];\s*(\/\/[^\n]*)?/);
   const firstKey = bank[0].origNum || bank[0].q;
   const baseCount = bank.length;
   check('quiz 题库基线非空(>100)', baseCount > 100, 'count=' + baseCount);

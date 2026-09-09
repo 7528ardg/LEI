@@ -13878,13 +13878,8 @@ async clearAll() {
                     updateUserInfo();
                     PermissionManager.applyPermissions();
                     showNotification('登录成功', 'success');
-                    // 登录成功后，如果欢迎引导未显示过，延迟弹出
-                    if (!localStorage.getItem('dontShow_guide')) {
-                        setTimeout(() => {
-                            const welcomeModal = new bootstrap.Modal(document.getElementById('welcomeGuideModal'));
-                            welcomeModal.show();
-                        }, 800);
-                    }
+                    // 登录成功后：无数据时展示首次引导 + 空状态横幅
+                    setTimeout(() => { maybeShowWelcomeGuide(); }, 800);
                 } catch (e) {
                     showNotification(e.message, 'danger');
                     const passwordInput = document.getElementById('loginPassword');
@@ -30659,22 +30654,66 @@ async clearAll() {
                     if (progressModal) progressModal.hide();
                 });
                 
-                // 新手引导相关事件
+                // ===== 空状态：无数据提示 + 欢迎引导（仅无数据时自动弹） =====
+                function showEmptyDataBanner(){
+                  if(document.getElementById('emptyDataBanner')) return;
+                  const mc = document.getElementById('mainContent');
+                  if(!mc) return;
+                  const b = document.createElement('div');
+                  b.id = 'emptyDataBanner';
+                  b.className = 'alert alert-warning d-flex align-items-center gap-3 rounded-4 shadow-sm mx-3 mt-3 mb-0';
+                  b.style.cssText = 'border-left:5px solid #f39c12;';
+                  b.innerHTML =
+                    '<i class="bi bi-inbox fs-4 text-warning"></i>' +
+                    '<div class="flex-grow-1"><strong>暂无绩效数据</strong>' +
+                    '<br><small class="text-muted">当前没有已导入的月份数据，KPI 显示 0.00 属正常。请先导入 Excel，或下载模板填写后导入，导入后自动生成绩效图表与排名。</small></div>' +
+                    '<div class="d-flex gap-2 flex-shrink-0">' +
+                      '<button type="button" class="btn btn-sm btn-outline-primary rounded-pill" onclick="downloadImportTemplate()">下载模板</button>' +
+                      '<button type="button" class="btn btn-sm btn-primary rounded-pill" onclick="handleImportExcel()">导入数据</button>' +
+                    '</div>';
+                  mc.insertBefore(b, mc.firstChild);
+                }
+                function hideEmptyDataBanner(){
+                  const b = document.getElementById('emptyDataBanner');
+                  if(b) b.remove();
+                }
+                function checkEmptyBanner(){
+                  try{
+                    Storage.getAllMonths().then(function(months){
+                      if(Array.isArray(months) && months.length === 0) showEmptyDataBanner();
+                      else hideEmptyDataBanner();
+                    }).catch(function(){});
+                  }catch(e){}
+                }
+                function maybeShowWelcomeGuide(){
+                  const loginContainer = document.getElementById('loginContainer');
+                  if(loginContainer && loginContainer.style.display !== 'none') return;
+                  if(localStorage.getItem('dontShow_guide')){ checkEmptyBanner(); return; }
+                  try{
+                    Storage.getAllMonths().then(function(months){
+                      const hasData = Array.isArray(months) && months.length > 0;
+                      if(hasData){ hideEmptyDataBanner(); return; }
+                      showEmptyDataBanner();
+                      try{
+                        const m = new bootstrap.Modal(document.getElementById('welcomeGuideModal'));
+                        m.show();
+                      }catch(e){}
+                    }).catch(function(){ checkEmptyBanner(); });
+                  }catch(e){ checkEmptyBanner(); }
+                }
+                                window.maybeShowWelcomeGuide = maybeShowWelcomeGuide;
+                window.checkEmptyBanner = checkEmptyBanner;
+                window.showEmptyDataBanner = showEmptyDataBanner;
+                window.hideEmptyDataBanner = hideEmptyDataBanner;
+                                // 新手引导相关事件
                 document.getElementById('downloadTemplateBtn')?.addEventListener('click', downloadImportTemplate);
                 
-                // 检查是否需要显示新手引导
-                // 关键修复：当登录界面可见时，不弹出欢迎模态框，避免backdrop覆盖登录输入框导致无法输入
+                // 新手引导：仅无数据时自动展示（有数据不打扰）；无数据同时显示空状态横幅
                 const dontShowGuide = localStorage.getItem('dontShow_guide');
                 if (!dontShowGuide) {
-                    setTimeout(() => {
-                        const loginContainer = document.getElementById('loginContainer');
-                        // 如果登录界面正在显示，跳过欢迎引导，等用户登录后再显示
-                        if (loginContainer && loginContainer.style.display !== 'none') {
-                            return;
-                        }
-                        const welcomeModal = new bootstrap.Modal(document.getElementById('welcomeGuideModal'));
-                        welcomeModal.show();
-                    }, 1000);
+                    setTimeout(() => { maybeShowWelcomeGuide(); }, 800);
+                } else {
+                    setTimeout(() => { checkEmptyBanner(); }, 800);
                 }
                 
                 // 不再显示引导复选框

@@ -38,7 +38,7 @@ function normalizeRouteCat(c){
   if (mapped !== s) return mapped;
   return ROUTE_CATEGORY_CN[s] || (['国内','国际','地区','港澳','干线','支线'].includes(s) ? s : (s.length<=3 ? '国内' : s));
 }
-console.log('%c[系统] 启动版本: ' + APP_VERSION + ' (构建时间: ' + APP_BUILD_TIME + ')', 'color:#2E8BFF;font-weight:bold;font-size:13px');
+console.log('%c[系统] 启动版本: ' + APP_VERSION + ' (构建时间: ' + APP_BUILD_TIME + ')', 'color:#148453;font-weight:bold;font-size:13px');
 // 版本缓存冲突检测
 (function(){
   try {
@@ -74,8 +74,8 @@ console.log('%c[系统] 启动版本: ' + APP_VERSION + ' (构建时间: ' + APP
   --color-text-secondary:#B8C8DE;
   --color-text-disabled:#5C6E8C;
   --color-border:#22365A;
-  --color-brand:#3E9BFF;
-  --color-brand-2:#18A7FF;
+  --color-brand:#148453;
+  --color-brand-2:#1fa56a;
   /* 语义色板·风险等级（冷→暖渐变：绿→蓝→橙→红，提升层级区分度） */
   --color-risk-low:#3DD46A;
   --color-risk-medium:#1E9BFF;
@@ -86,7 +86,7 @@ console.log('%c[系统] 启动版本: ' + APP_VERSION + ' (构建时间: ' + APP
   --color-success:#3DD46A;
   /* 操作按钮专用色（与风险等级分离，避免红色语义混淆） */
   --color-action-delete:#93A5C0;
-  --color-action-confirm:#3E9BFF;
+  --color-action-confirm:#148453;
   --color-action-warn:#FF9F2E;
   /* 气象专用色码 */
   --color-turb-light:#8FD14F;
@@ -125,10 +125,10 @@ html[data-theme="light"] body,html[data-theme="light"] .app,html[data-theme="lig
   --color-text-secondary:#5A6B85;
   --color-text-disabled:#A8B6C8;
   --color-border:#DCE4EF;
-  --color-brand:#1677FF;
-  --color-brand-2:#18A7FF;
+  --color-brand:#148453;
+  --color-brand-2:#1fa56a;
   --glass-bg:rgba(255,255,255,.85);
-  --glass-border:rgba(22,119,255,.14);
+  --glass-border:rgba(20,132,83,.14);
 }
 html[data-theme="light"] .map-canvas{filter:none}
 html[data-theme="light"] .map-canvas #leafletMap .leaflet-tile{filter:none}
@@ -146,15 +146,15 @@ button:active:not(:disabled),.btn:active:not(:disabled),input[type="button"]:act
 .btn-danger:active{transform:scale(.96)}
 input[type="text"],input[type="date"],input[type="number"],select,textarea{height:38px;border-radius:6px;border:1px solid var(--color-border);background:var(--color-bg-elevated);color:var(--color-text-primary);padding:0 12px;font:var(--font-body);transition:border-color .2s;outline:none}
 textarea{height:auto;padding:8px 12px;resize:vertical}
-input:focus,select:focus,textarea:focus{border-color:var(--color-brand);box-shadow:0 0 0 3px rgba(46,139,255,.12)}
+input:focus,select:focus,textarea:focus{border-color:var(--color-brand);box-shadow:0 0 0 3px rgba(20,132,83,.12)}
 input[type="date"]{color-scheme:dark}
 
 *{margin:0;padding:0;box-sizing:border-box}
 html,body{height:100%}
 body{
   background:
-    radial-gradient(1200px 600px at 85% -10%, rgba(62,155,255,.10), transparent 60%),
-    radial-gradient(1000px 500px at -10% 10%, rgba(24,167,255,.08), transparent 55%),
+    radial-gradient(1200px 600px at 85% -10%, rgba(20,132,83,.10), transparent 60%),
+    radial-gradient(1000px 500px at -10% 10%, rgba(31,165,106,.08), transparent 55%),
     var(--color-bg-primary);
   color:var(--color-text-primary);
   font:var(--font-body);
@@ -171,15 +171,15 @@ body{
   gap:var(--space-md);
 }
 .logo{display:flex;align-items:center;gap:var(--space-sm);font:var(--font-h2);color:var(--color-brand)}
-.logo .mark{width:28px;height:28px;border-radius:6px;background:linear-gradient(135deg,#2E8BFF,#1890FF);display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:700;color:#fff}
+.logo .mark{width:28px;height:28px;border-radius:6px;background:linear-gradient(135deg,#148453,#1fa56a);display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:700;color:#fff}
 .breadcrumb{display:flex;align-items:center;gap:var(--space-xs);flex:1;margin-left:var(--space-lg)}
 .breadcrumb a{color:var(--color-text-secondary);text-decoration:none;font:var(--font-body);padding:4px 10px;border-radius:var(--radius-sm);cursor:pointer;transition:all .2s}
 .breadcrumb a:hover{background:var(--color-bg-elevated);color:var(--color-text-primary)}
 .breadcrumb a.active{background:var(--color-bg-elevated);color:var(--color-brand)}
 .breadcrumb .sep{color:var(--color-text-disabled)}
 .topbar .right{display:flex;align-items:center;gap:var(--space-md)}
-.btn-briefing{background:linear-gradient(135deg,#2E8BFF,#1890FF);color:#fff;border:none;padding:7px 14px;border-radius:var(--radius-sm);font:var(--font-body);cursor:pointer;display:flex;align-items:center;gap:6px;transition:all .2s}
-.btn-briefing:hover{transform:translateY(-1px);box-shadow:0 4px 12px rgba(46,139,255,.4)}
+.btn-briefing{background:linear-gradient(135deg,#148453,#1fa56a);color:#fff;border:none;padding:7px 14px;border-radius:var(--radius-sm);font:var(--font-body);cursor:pointer;display:flex;align-items:center;gap:6px;transition:all .2s}
+.btn-briefing:hover{transform:translateY(-1px);box-shadow:0 4px 12px rgba(20,132,83,.4)}
 
 .icon-btn{width:34px;height:34px;border-radius:var(--radius-sm);background:var(--color-bg-elevated);border:1px solid var(--color-border);color:var(--color-text-secondary);cursor:pointer;display:flex;align-items:center;justify-content:center;position:relative;z-index:20;user-select:none;transition:transform .15s,box-shadow .15s}
 .icon-btn:hover{color:var(--color-text-primary);transform:scale(1.08);box-shadow:0 2px 8px rgba(0,0,0,.15)}
@@ -218,7 +218,7 @@ body{
 .nav-group .title{font:var(--font-caption);color:var(--color-text-disabled);text-transform:uppercase;letter-spacing:1px;padding:0 var(--space-sm);margin-bottom:var(--space-xs)}
 .nav-item{display:flex;align-items:center;gap:10px;padding:9px 12px;border-radius:var(--radius-sm);cursor:pointer;color:var(--color-text-secondary);transition:all .2s;font:var(--font-body)}
 .nav-item:hover{background:var(--color-bg-elevated);color:var(--color-text-primary)}
-.nav-item.active{background:linear-gradient(90deg,rgba(46,139,255,.15),transparent);color:var(--color-brand);border-left:3px solid var(--color-brand);padding-left:9px}
+.nav-item.active{background:linear-gradient(90deg,rgba(20,132,83,.15),transparent);color:var(--color-brand);border-left:3px solid var(--color-brand);padding-left:9px}
 .nav-item .ico{width:18px;text-align:center;font-size:15px}
 .nav-item .badge-num{margin-left:auto;background:var(--color-bg-elevated);color:var(--color-text-secondary);font:var(--font-caption);padding:1px 6px;border-radius:10px}
 .nav-item .badge-num.critical{background:var(--color-risk-critical);color:#fff}
@@ -314,8 +314,8 @@ body{
 .measure-card .btn.na.active{background:var(--color-warn-data);border-color:var(--color-warn-data);color:#fff}
 
 /* ========== M5: 条款引用链接 ========== */
-.clause-ref-link{display:inline-flex;align-items:center;gap:3px;font:var(--font-caption);color:var(--color-brand);cursor:pointer;padding:2px 8px;border-radius:var(--radius-sm);background:rgba(46,139,255,.08);border:1px solid rgba(46,139,255,.2);transition:all .2s;margin-top:8px;user-select:none}
-.clause-ref-link:hover{background:rgba(46,139,255,.18);border-color:var(--color-brand)}
+.clause-ref-link{display:inline-flex;align-items:center;gap:3px;font:var(--font-caption);color:var(--color-brand);cursor:pointer;padding:2px 8px;border-radius:var(--radius-sm);background:rgba(20,132,83,.08);border:1px solid rgba(20,132,83,.2);transition:all .2s;margin-top:8px;user-select:none}
+.clause-ref-link:hover{background:rgba(20,132,83,.18);border-color:var(--color-brand)}
 .clause-ref-link .arrow{transition:transform .25s;font-size:10px}
 .clause-ref-link.expanded .arrow{transform:rotate(180deg)}
 .clause-detail{margin-top:8px;padding:10px 14px;background:var(--color-bg-elevated);border-radius:var(--radius-sm);border-left:3px solid var(--color-brand);font:var(--font-caption);display:none;line-height:1.7}
@@ -341,7 +341,7 @@ body{
 .map-section .head .layer-toggle{display:flex;gap:6px;flex-wrap:wrap}
 .map-section .layer-chip{font:var(--font-caption);padding:3px 10px;border-radius:var(--radius-sm);background:var(--color-bg-elevated);border:1px solid var(--color-border);color:var(--color-text-secondary);cursor:pointer;transition:all .2s;display:flex;align-items:center;gap:4px;user-select:none}
 .map-section .layer-chip:hover{color:var(--color-text-primary);border-color:var(--color-brand)}
-.map-section .layer-chip.active{background:rgba(46,139,255,.15);border-color:var(--color-brand);color:var(--color-brand)}
+.map-section .layer-chip.active{background:rgba(20,132,83,.15);border-color:var(--color-brand);color:var(--color-brand)}
 .map-section .layer-chip .dot{width:8px;height:8px;border-radius:2px}
 .map-canvas{height:50vh;min-height:300px;max-height:520px;background:radial-gradient(ellipse at 30% 40%,#1A2740 0%,#0F1B2D 70%);position:relative;overflow:hidden;transition:background-position .6s ease}
 /* Leaflet 实际地图容器 */
@@ -365,7 +365,7 @@ body{
 .map-canvas .route.r2{top:60%;left:20%;width:45%;transform:rotate(12deg)}
 .map-canvas .route.r3{top:30%;left:25%;width:40%;transform:rotate(5deg)}
 /* 动态航线（带流动光点） */
-.map-canvas .dyn-route{position:absolute;height:2px;background:linear-gradient(90deg,rgba(46,139,255,.2),var(--color-brand),rgba(46,139,255,.2));transform-origin:left center;opacity:.8;pointer-events:none}
+.map-canvas .dyn-route{position:absolute;height:2px;background:linear-gradient(90deg,rgba(20,132,83,.2),var(--color-brand),rgba(20,132,83,.2));transform-origin:left center;opacity:.8;pointer-events:none}
 .map-canvas .dyn-route-flow{position:absolute;height:2px;background:linear-gradient(90deg,transparent 0%,#fff 50%,transparent 100%);transform-origin:left center;opacity:0;animation:routeFlow 2.5s linear infinite;pointer-events:none}
 @keyframes routeFlow{0%{opacity:0;transform:translateX(-30%)}30%{opacity:1}70%{opacity:1}100%{opacity:0;transform:translateX(30%)}}
 /* 模拟机场点 */
@@ -376,7 +376,7 @@ body{
 .map-canvas .airport.yellow{background:var(--color-risk-medium);border-color:var(--color-risk-medium)}
 .map-canvas .airport.red{background:var(--color-risk-critical);border-color:var(--color-risk-critical);box-shadow:0 0 12px var(--color-risk-critical)}
 /* 中心标记（脉冲动画） */
-@keyframes pulse{0%,100%{box-shadow:0 0 0 0 rgba(46,139,255,.6)}50%{box-shadow:0 0 0 12px rgba(46,139,255,0)}}
+@keyframes pulse{0%,100%{box-shadow:0 0 0 0 rgba(20,132,83,.6)}50%{box-shadow:0 0 0 12px rgba(20,132,83,0)}}
 .map-canvas .center-mark{animation:pulse 1.8s infinite}
 /* 风场箭头（轻微摆动动画） */
 .map-canvas .wind-field-layer{pointer-events:none}
@@ -413,10 +413,10 @@ body{
 .drawer.collapsed{transform:translateX(100%);box-shadow:none}
 .drawer .head-actions{display:flex;align-items:center;gap:4px}
 .drawer .head .btn-toggle{background:none;border:none;color:var(--color-text-secondary);cursor:pointer;font-size:18px;line-height:1;padding:2px 6px;border-radius:var(--radius-sm)}
-.drawer .head .btn-toggle:hover{color:var(--color-brand);background:rgba(46,139,255,.08)}
+.drawer .head .btn-toggle:hover{color:var(--color-brand);background:rgba(20,132,83,.08)}
 /* 右侧常驻"展开"标签：抽屉收起时显示，便于一键重新展开 */
 #drawerExpandTab{position:fixed;right:0;top:50%;transform:translateY(-50%);writing-mode:vertical-rl;background:var(--color-bg-surface);border:1px solid var(--color-border);border-right:none;border-radius:10px 0 0 10px;padding:16px 7px;cursor:pointer;font:var(--font-caption);color:var(--color-text-secondary);z-index:49;display:none;letter-spacing:2px;box-shadow:var(--shadow-card);transition:all .2s;user-select:none}
-#drawerExpandTab:hover{color:var(--color-brand);border-color:var(--color-brand);background:rgba(46,139,255,.06)}
+#drawerExpandTab:hover{color:var(--color-brand);border-color:var(--color-brand);background:rgba(20,132,83,.06)}
 .drawer .head{padding:var(--space-md) var(--space-lg);border-bottom:1px solid var(--color-border);display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;background:var(--color-bg-surface);z-index:2}
 .drawer .head .title{font:var(--font-h2)}
 .drawer .head .btn-close{background:none;border:none;color:var(--color-text-secondary);cursor:pointer;font-size:20px}
@@ -427,12 +427,12 @@ body{
 .factor-list{display:flex;flex-direction:column;gap:var(--space-sm)}
 .factor-item{background:var(--color-bg-elevated);border-radius:var(--radius-sm);padding:10px 12px;cursor:pointer;transition:all .2s;border:1px solid transparent}
 .factor-item:hover{border-color:var(--color-brand)}
-.factor-item.active{border-color:var(--color-brand);background:rgba(46,139,255,.1)}
+.factor-item.active{border-color:var(--color-brand);background:rgba(20,132,83,.1)}
 .factor-item .row{display:flex;justify-content:space-between;align-items:center;margin-bottom:6px}
 .factor-item .name{font:var(--font-body);color:var(--color-text-primary)}
 .factor-item .weight{font:var(--font-data);color:var(--color-brand)}
 .factor-item .bar{height:4px;background:var(--color-bg-primary);border-radius:2px;overflow:hidden}
-.factor-item .bar .fill{height:100%;background:linear-gradient(90deg,var(--color-brand),#1890FF);border-radius:2px;transition:width .6s}
+.factor-item .bar .fill{height:100%;background:linear-gradient(90deg,var(--color-brand),#1fa56a);border-radius:2px;transition:width .6s}
 .factor-item .src{font:var(--font-caption);color:var(--color-text-disabled);margin-top:4px}
 /* 天气报文 */
 .weather-report{background:var(--color-bg-primary);border-radius:var(--radius-sm);padding:12px;font:var(--font-mono);color:var(--color-text-secondary);line-height:1.8;border:1px solid var(--color-border)}
@@ -491,10 +491,10 @@ body{
   font-weight:700;color:var(--color-text-secondary);
   letter-spacing:1.5px;padding:6px 8px 4px;
 }
-.nav-group .title::before{content:'';width:8px;height:8px;border-radius:2px;background:linear-gradient(135deg,var(--color-brand),var(--color-brand-2));box-shadow:0 0 8px rgba(62,155,255,.5)}
+.nav-group .title::before{content:'';width:8px;height:8px;border-radius:2px;background:linear-gradient(135deg,var(--color-brand),var(--color-brand-2));box-shadow:0 0 8px rgba(20,132,83,.5)}
 .nav-item{border-radius:var(--radius-sm);margin:1px 0;position:relative}
 .nav-item:hover{background:var(--color-bg-hover)}
-.nav-item.active{background:linear-gradient(90deg,rgba(62,155,255,.18),rgba(62,155,255,.02));border-left:3px solid var(--color-brand);box-shadow:inset 0 0 0 1px rgba(62,155,255,.12);padding-left:9px}
+.nav-item.active{background:linear-gradient(90deg,rgba(20,132,83,.18),rgba(20,132,83,.02));border-left:3px solid var(--color-brand);box-shadow:inset 0 0 0 1px rgba(20,132,83,.12);padding-left:9px}
 .nav-item .ico{width:20px;text-align:center;font-size:15px}
 /* 主内容卡片玻璃化（仅针对通用的 surface 卡片容器） */
 .main .chart-card,
@@ -506,18 +506,18 @@ body{
   box-shadow:var(--shadow-card);
 }
 .main .risk-card:hover{transform:translateY(-3px);box-shadow:0 10px 28px rgba(2,8,20,.45)}
-.section-title h2 .accent{background:linear-gradient(180deg,var(--color-brand),var(--color-brand-2));box-shadow:0 0 8px rgba(62,155,255,.5)}
+.section-title h2 .accent{background:linear-gradient(180deg,var(--color-brand),var(--color-brand-2));box-shadow:0 0 8px rgba(20,132,83,.5)}
 /* 按钮统一圆角与过渡 */
 .btn-primary,.btn-secondary,.btn-danger{border-radius:8px;font-weight:600}
-.btn-primary{background:linear-gradient(135deg,var(--color-brand),var(--color-brand-2));box-shadow:0 4px 14px rgba(62,155,255,.28)}
-.btn-primary:hover{filter:brightness(1.08);box-shadow:0 6px 18px rgba(62,155,255,.4);transform:translateY(-1px)}
+.btn-primary{background:linear-gradient(135deg,var(--color-brand),var(--color-brand-2));box-shadow:0 4px 14px rgba(20,132,83,.28)}
+.btn-primary:hover{filter:brightness(1.08);box-shadow:0 6px 18px rgba(20,132,83,.4);transform:translateY(-1px)}
 .icon-btn{border-radius:8px;background:var(--color-bg-elevated)}
 .icon-btn:hover{transform:translateY(-1px) scale(1.05)}
-.logo .mark{background:linear-gradient(135deg,var(--color-brand),var(--color-brand-2));box-shadow:0 4px 12px rgba(62,155,255,.4);border-radius:8px}
+.logo .mark{background:linear-gradient(135deg,var(--color-brand),var(--color-brand-2));box-shadow:0 4px 12px rgba(20,132,83,.4);border-radius:8px}
 .btn-briefing{background:linear-gradient(135deg,var(--color-brand),var(--color-brand-2));border-radius:8px}
 /* 输入框圆角 */
 input[type="text"],input[type="date"],input[type="number"],select,textarea{border-radius:8px;background:var(--color-bg-elevated)}
-input:focus,select:focus,textarea:focus{border-color:var(--color-brand);box-shadow:0 0 0 3px rgba(62,155,255,.14)}
+input:focus,select:focus,textarea:focus{border-color:var(--color-brand);box-shadow:0 0 0 3px rgba(20,132,83,.14)}
 /* 弹窗外壳 */
 .modal-overlay .modal{box-shadow:var(--shadow-overlay);border:1px solid var(--glass-border)}
 /* 层级导航折叠：组级折叠切换按钮 */
@@ -540,7 +540,7 @@ input:focus,select:focus,textarea:focus{border-color:var(--color-brand);box-shad
   cursor:pointer;
   z-index:2; /* 保证位于nav-item上层，优先捕获点击 */
 }
-.nav-item.nav-parent .expand-icon:hover{background:rgba(46,139,255,.08)}
+.nav-item.nav-parent .expand-icon:hover{background:rgba(20,132,83,.08)}
 .nav-item.nav-parent.expanded .expand-icon{transform:translateY(-50%) rotate(90deg)}
 .nav-children{padding-left:20px;background:rgba(0,0,0,.15)}
 .nav-item.nav-child{font-size:13px;padding:7px 12px}
@@ -563,12 +563,12 @@ input:focus,select:focus,textarea:focus{border-color:var(--color-brand);box-shad
 .float-nav-item:hover{background:var(--color-bg-elevated)}
 .float-nav-item:hover .fn-dot{background:var(--color-brand);transform:scale(1.3)}
 .float-nav-item:hover .fn-label{color:#E4EDF7}
-.float-nav-item.active .fn-dot{background:var(--color-brand);border-color:rgba(46,139,255,.3);box-shadow:0 0 0 4px rgba(46,139,255,.18);transform:scale(1.25)}
+.float-nav-item.active .fn-dot{background:var(--color-brand);border-color:rgba(20,132,83,.3);box-shadow:0 0 0 4px rgba(20,132,83,.18);transform:scale(1.25)}
 .float-nav-item.active .fn-label{color:#fff;font-weight:600}
 .float-nav-item.hidden{display:none}
 /* ========== 浮动导航栏 收起/展开（风险维度等快速导航整体收起） ========== */
 .float-nav .float-nav-toggle{display:flex;align-items:center;justify-content:center;width:26px;height:26px;border-radius:50%;cursor:pointer;color:#B8C8DC;font-size:12px;line-height:1;border:1px solid var(--color-border);background:rgba(255,255,255,.06);flex-shrink:0;transition:all .2s;user-select:none;margin:0 auto 4px}
-.float-nav .float-nav-toggle:hover{color:var(--color-brand);border-color:var(--color-brand);background:rgba(46,139,255,.12)}
+.float-nav .float-nav-toggle:hover{color:var(--color-brand);border-color:var(--color-brand);background:rgba(20,132,83,.12)}
 .float-nav.collapsed{width:44px;padding:8px 6px}
 .float-nav.collapsed .float-nav-item{display:none}
 .float-nav.collapsed .float-nav-toggle{margin-bottom:0}
@@ -580,7 +580,7 @@ input:focus,select:focus,textarea:focus{border-color:var(--color-brand);box-shad
 .route-toolbar .head .title{font:var(--font-h2);display:flex;align-items:center;gap:8px}
 .route-toolbar .head .actions{display:flex;gap:var(--space-sm)}
 .route-toolbar .btn-add{background:var(--color-brand);color:#fff;border:none;padding:6px 14px;border-radius:var(--radius-sm);cursor:pointer;font:var(--font-body);display:flex;align-items:center;gap:4px;transition:all .2s}
-.route-toolbar .btn-add:hover{background:#1890FF}
+.route-toolbar .btn-add:hover{background:#1fa56a}
 .route-toolbar .btn-edit-mode{background:var(--color-bg-elevated);border:1px solid var(--color-border);color:var(--color-text-primary);padding:6px 14px;border-radius:var(--radius-sm);cursor:pointer;font:var(--font-caption);transition:all .2s}
 .route-toolbar .btn-edit-mode.active{background:var(--color-risk-medium);border-color:var(--color-risk-medium);color:#fff}
 .route-table{width:100%;border-collapse:collapse}
@@ -617,14 +617,14 @@ input:focus,select:focus,textarea:focus{border-color:var(--color-brand);box-shad
 .modal .actions{display:flex;gap:var(--space-sm);justify-content:flex-end;padding:var(--space-md) var(--space-lg);border-top:1px solid var(--color-border)}
 .modal .btn{padding:8px 18px;border-radius:var(--radius-sm);cursor:pointer;font:var(--font-body);border:1px solid var(--color-border);background:var(--color-bg-elevated);color:var(--color-text-primary);transition:all .2s}
 .modal .btn.primary{background:var(--color-brand);border-color:var(--color-brand);color:#fff}
-.modal .btn.primary:hover{background:#1890FF}
+.modal .btn.primary:hover{background:#1fa56a}
 
 /* ========== 天气报文中文化 ========== */
 .weather-zh{background:var(--color-bg-primary);border-radius:var(--radius-sm);padding:12px;margin-top:8px;border:1px solid var(--color-border)}
 .weather-zh .zh-title{font:var(--font-h3);color:var(--color-brand);margin-bottom:6px;display:flex;align-items:center;gap:6px}
 .weather-zh .zh-body{font:var(--font-body);color:var(--color-text-primary);line-height:1.8}
 .weather-zh .zh-impact{background:rgba(250,84,28,.1);border-left:3px solid var(--color-risk-high);padding:6px 10px;margin-top:6px;border-radius:var(--radius-sm);font:var(--font-caption);color:var(--color-risk-high)}
-.weather-zh .zh-rec{background:rgba(46,139,255,.1);border-left:3px solid var(--color-brand);padding:6px 10px;margin-top:6px;border-radius:var(--radius-sm);font:var(--font-caption);color:var(--color-text-primary)}
+.weather-zh .zh-rec{background:rgba(20,132,83,.1);border-left:3px solid var(--color-brand);padding:6px 10px;margin-top:6px;border-radius:var(--radius-sm);font:var(--font-caption);color:var(--color-text-primary)}
 .weather-zh .glossary{margin-top:8px;padding-top:8px;border-top:1px dashed var(--color-border)}
 .weather-zh .glossary .item{font:var(--font-caption);color:var(--color-text-secondary);display:flex;gap:6px;margin-bottom:2px}
 .weather-zh .glossary .item .term{color:var(--color-turb-severe);font-weight:600;min-width:120px}
@@ -671,7 +671,7 @@ input:focus,select:focus,textarea:focus{border-color:var(--color-brand);box-shad
 .time-range-controls input[type=time]{background:var(--color-bg-primary);border:1px solid var(--color-border);color:var(--color-text-primary);padding:4px 8px;border-radius:var(--radius-sm);font:var(--font-mono)}
 .time-range-controls .time-sep{color:var(--color-text-disabled)}
 .btn-apply-time{background:var(--color-brand);color:#fff;border:none;padding:5px 14px;border-radius:var(--radius-sm);cursor:pointer;font:var(--font-caption);transition:all .2s}
-.btn-apply-time:hover{background:#1890FF}
+.btn-apply-time:hover{background:#1fa56a}
 .btn-reset-time{background:var(--color-bg-surface);border:1px solid var(--color-border);color:var(--color-text-secondary);padding:5px 14px;border-radius:var(--radius-sm);cursor:pointer;font:var(--font-caption)}
 .time-range-info{margin-left:auto;font:var(--font-caption);color:var(--color-text-secondary);font-family:var(--font-mono)}
 
@@ -679,7 +679,7 @@ input:focus,select:focus,textarea:focus{border-color:var(--color-brand);box-shad
 .dim-tool-btn{background:var(--color-bg-elevated);border:1px solid var(--color-border);color:var(--color-text-secondary);padding:4px 10px;border-radius:var(--radius-sm);cursor:pointer;font:var(--font-caption);transition:all .2s;font-size:11px}
 .dim-tool-btn:hover{border-color:var(--color-brand);color:var(--color-brand)}
 .dim-tool-btn.primary{background:var(--color-brand);border-color:var(--color-brand);color:#fff}
-.dim-tool-btn.primary:hover{background:#1890FF}
+.dim-tool-btn.primary:hover{background:#1fa56a}
 
 /* ========== 风险维度统计面板 ========== */
 .dim-stats-panel{background:var(--color-bg-surface);border-radius:var(--radius-md);padding:var(--space-md) var(--space-lg);box-shadow:var(--shadow-card);margin-bottom:var(--space-lg)}
@@ -701,7 +701,7 @@ input:focus,select:focus,textarea:focus{border-color:var(--color-brand);box-shad
 .dim-stat-card .sop-clause-tag:hover{background:rgba(114,46,209,.2);border-color:rgba(114,46,209,.5);transform:scale(1.05)}
 /* L11: 弹窗中SOP条款字段 */
 .dim-modal .event-row .evt-sop{font:var(--font-mono);font-size:11px;color:var(--color-brand);cursor:pointer;text-decoration:underline;white-space:nowrap;position:relative}
-.dim-modal .event-row .evt-sop:hover{color:#1890FF}
+.dim-modal .event-row .evt-sop:hover{color:#1fa56a}
 .dim-modal .event-row .sop-detail{display:none;width:100%;background:rgba(114,46,209,.06);border:1px solid rgba(114,46,209,.15);border-radius:var(--radius-sm);padding:6px 10px;margin-top:4px;font:var(--font-caption);color:var(--color-text-primary);line-height:1.6}
 .dim-modal .event-row .sop-detail.open{display:block}
 /* L12: 处置指引按钮 */
@@ -715,8 +715,8 @@ input:focus,select:focus,textarea:focus{border-color:var(--color-brand);box-shad
 .emergency-section-title{font:var(--font-h2);color:var(--color-risk-critical);margin-bottom:12px;padding-bottom:6px;border-bottom:2px solid var(--color-risk-critical);margin-top:16px}
 .emergency-section-title:first-child{margin-top:0}
 /* L13: 培训记录链接 */
-.dim-stat-card .btn-training-record{display:inline-block;margin-top:6px;padding:3px 10px;border-radius:var(--radius-sm);border:1px solid var(--color-brand);background:rgba(46,139,255,.08);color:var(--color-brand);cursor:pointer;font:var(--font-caption);font-weight:600;transition:all .15s}
-.dim-stat-card .btn-training-record:hover{background:rgba(46,139,255,.15);border-color:var(--color-brand);transform:scale(1.03)}
+.dim-stat-card .btn-training-record{display:inline-block;margin-top:6px;padding:3px 10px;border-radius:var(--radius-sm);border:1px solid var(--color-brand);background:rgba(20,132,83,.08);color:var(--color-brand);cursor:pointer;font:var(--font-caption);font-weight:600;transition:all .15s}
+.dim-stat-card .btn-training-record:hover{background:rgba(20,132,83,.15);border-color:var(--color-brand);transform:scale(1.03)}
 .dim-stat-card .btn-fatigue-report{display:inline-block;margin-top:6px;padding:3px 10px;border-radius:var(--radius-sm);border:1px solid var(--color-risk-medium);background:rgba(250,173,20,.08);color:var(--color-risk-medium);cursor:pointer;font:var(--font-caption);font-weight:600;transition:all .15s}
 .dim-stat-card .btn-fatigue-report:hover{background:rgba(250,173,20,.15);border-color:var(--color-risk-medium);transform:scale(1.03)}
 /* L13: 培训记录列表 */
@@ -761,7 +761,7 @@ input:focus,select:focus,textarea:focus{border-color:var(--color-brand);box-shad
 .dim-modal .event-row .evt-sev.中{background:rgba(250,173,20,.15);color:var(--color-risk-medium)}
 .dim-modal .event-row .evt-sev.重{background:rgba(245,34,45,.15);color:var(--color-risk-critical)}
 .dim-modal .event-row .btn-evt-detail{background:var(--color-brand);color:#fff;border:none;padding:4px 12px;border-radius:var(--radius-sm);cursor:pointer;font:var(--font-caption)}
-.dim-modal .event-row .btn-evt-detail:hover{background:#1890FF}
+.dim-modal .event-row .btn-evt-detail:hover{background:#1fa56a}
 .dim-modal .event-row .btn-evt-del{background:transparent;border:1px solid var(--color-border);color:var(--color-text-secondary);padding:4px 10px;border-radius:var(--radius-sm);cursor:pointer;font:var(--font-caption)}
 .dim-modal .event-row .btn-evt-del:hover{border-color:var(--color-risk-critical);color:var(--color-risk-critical)}
 .dim-modal .event-row .btn-evt-edit{background:transparent;border:1px solid var(--color-brand);color:var(--color-brand);padding:4px 10px;border-radius:var(--radius-sm);cursor:pointer;font:var(--font-caption)}
@@ -794,7 +794,7 @@ input:focus,select:focus,textarea:focus{border-color:var(--color-brand);box-shad
 .checklist-modal .modal-foot{padding:12px 24px;border-top:1px solid var(--color-border);display:flex;align-items:center;justify-content:flex-end;gap:8px}
 .checklist-modal .btn-foot{padding:8px 18px;border-radius:var(--radius-sm);cursor:pointer;font:var(--font-body);border:1px solid var(--color-border);background:var(--color-bg-elevated);color:var(--color-text-primary);transition:all .2s}
 .checklist-modal .btn-foot.primary{background:var(--color-brand);border-color:var(--color-brand);color:#fff}
-.checklist-modal .btn-foot.primary:hover{background:#1890FF}
+.checklist-modal .btn-foot.primary:hover{background:#1fa56a}
 .checklist-modal .btn-foot:hover{border-color:var(--color-brand);color:var(--color-brand)}
 .checklist-modal .cl-summary{background:var(--color-bg-elevated);border-radius:var(--radius-sm);padding:10px 14px;margin-bottom:16px;font:var(--font-body);color:var(--color-text-secondary);border:1px solid var(--color-border)}
 .checklist-modal .cl-summary strong{color:var(--color-text-primary)}
@@ -942,21 +942,62 @@ input:focus,select:focus,textarea:focus{border-color:var(--color-brand);box-shad
   .nav-group .title{display:none}
 }
 
+/* ===== 移动端适配（≤720px，与壳层断点对齐） ===== */
+@media(max-width:720px){
+  .topbar{height:52px;padding:0 var(--space-md);gap:var(--space-sm)}
+  .topbar .right{gap:var(--space-sm)}
+  .layout{height:calc(100vh - 52px)}
+  .layout.with-banner{height:calc(100vh - 52px - 42px)}
+  .sidebar{display:none}
+  .main{padding:var(--space-md)}
+  .section-title h2{font-size:18px}
+  .risk-card .body{padding:12px;gap:10px;flex-wrap:wrap}
+  .risk-card .score-box{min-width:64px}
+  .risk-card .score-val{font-size:20px}
+  .risk-card .actions{flex-direction:row;gap:8px;align-items:center}
+  .float-nav{right:6px;top:auto;bottom:12px;transform:none;flex-direction:row;flex-wrap:wrap;gap:4px;border-radius:18px;max-width:calc(100vw - 12px);padding:6px 8px}
+  .float-nav.drawer-open{right:6px}
+  .float-nav-item{padding:5px 7px}
+  .float-nav-item .fn-label{display:none}
+  .float-nav.collapsed{width:auto;padding:6px 8px}
+  .float-nav.collapsed .float-nav-item{display:none}
+  .map-canvas{height:38vh;min-height:240px;max-height:400px}
+  .route-toolbar{padding:var(--space-md)}
+  .route-toolbar .head{flex-wrap:wrap;gap:8px}
+  .route-toolbar .head .actions{flex-wrap:wrap}
+  .route-table{display:block;overflow-x:auto}
+  .modal,.sched-check-modal,.briefing-review-modal{width:94vw;max-width:94vw}
+  .ty-grid{grid-template-columns:1fr 1fr}
+  .time-range-bar{padding:8px 10px;gap:8px}
+  .dim-stats-grid{grid-template-columns:1fr 1fr;gap:6px}
+  .dept-grid{grid-template-columns:1fr}
+  .charts-row .chart-card{padding:var(--space-md)}
+  .login-card{padding:28px 22px}
+  .login-card .login-logo{width:48px;height:48px;font-size:24px}
+}
+@media(max-width:480px){
+  .dim-stats-grid{grid-template-columns:1fr}
+  .risk-card .body{flex-direction:column;align-items:stretch}
+  .risk-card .score-box{flex-direction:row;justify-content:space-between;min-width:0}
+  .section-title .meta{display:none}
+}
+
+
 /* ========== 登录界面 ========== */
 .login-overlay{position:fixed;inset:0;z-index:99999;background:linear-gradient(135deg,#0A1628 0%,#0F1B2D 40%,#152238 100%);display:flex;align-items:center;justify-content:center;transition:opacity .4s,visibility .4s}
 .login-overlay.hidden{opacity:0;visibility:hidden;pointer-events:none}
 .login-card{background:var(--color-bg-surface);border-radius:var(--radius-lg);box-shadow:0 16px 48px rgba(0,0,0,.5);width:420px;max-width:92vw;padding:40px 36px;border:1px solid var(--color-border)}
 .login-card .login-header{text-align:center;margin-bottom:32px}
-.login-card .login-header .login-logo{width:56px;height:56px;border-radius:12px;background:linear-gradient(135deg,#2E8BFF,#1890FF);display:inline-flex;align-items:center;justify-content:center;font-size:28px;font-weight:700;color:#fff;margin-bottom:12px}
+.login-card .login-header .login-logo{width:56px;height:56px;border-radius:12px;background:linear-gradient(135deg,#148453,#1fa56a);display:inline-flex;align-items:center;justify-content:center;font-size:28px;font-weight:700;color:#fff;margin-bottom:12px}
 .login-card .login-header h2{font:var(--font-h1);color:var(--color-text-primary);margin-bottom:4px}
 .login-card .login-header p{font:var(--font-caption);color:var(--color-text-secondary)}
 .login-card .login-field{margin-bottom:20px}
 .login-card .login-field label{display:block;font:var(--font-caption);color:var(--color-text-secondary);margin-bottom:6px;font-weight:600}
 .login-card .login-field input{width:100%;background:var(--color-bg-primary);border:1px solid var(--color-border);border-radius:var(--radius-sm);padding:12px 14px;color:var(--color-text-primary);font:var(--font-body);font-size:15px;transition:border-color .2s}
-.login-card .login-field input:focus{border-color:var(--color-brand);outline:none;box-shadow:0 0 0 3px rgba(46,139,255,.15)}
+.login-card .login-field input:focus{border-color:var(--color-brand);outline:none;box-shadow:0 0 0 3px rgba(20,132,83,.15)}
 .login-card .login-error{color:var(--color-risk-critical);font:var(--font-caption);text-align:center;margin-bottom:12px;min-height:20px;transition:all .2s}
-.login-card .btn-login{width:100%;background:linear-gradient(135deg,#2E8BFF,#1890FF);color:#fff;border:none;padding:12px;border-radius:var(--radius-sm);font:var(--font-body);font-size:15px;font-weight:600;cursor:pointer;transition:all .2s;letter-spacing:1px}
-.login-card .btn-login:hover{transform:translateY(-1px);box-shadow:0 6px 20px rgba(46,139,255,.4)}
+.login-card .btn-login{width:100%;background:linear-gradient(135deg,#148453,#1fa56a);color:#fff;border:none;padding:12px;border-radius:var(--radius-sm);font:var(--font-body);font-size:15px;font-weight:600;cursor:pointer;transition:all .2s;letter-spacing:1px}
+.login-card .btn-login:hover{transform:translateY(-1px);box-shadow:0 6px 20px rgba(20,132,83,.4)}
 .login-card .btn-login:active{transform:translateY(0)}
 .login-card .login-hint{text-align:center;margin-top:16px;font:var(--font-caption);color:var(--color-text-disabled)}
 
@@ -1002,7 +1043,7 @@ input:focus,select:focus,textarea:focus{border-color:var(--color-brand);box-shad
 
 /* 航线排班检测按钮 */
 .btn-sched-check{background:var(--color-bg-elevated);border:1px solid var(--color-border);color:var(--color-text-secondary);padding:3px 8px;border-radius:var(--radius-sm);cursor:pointer;font:var(--font-caption);margin-left:6px;transition:all .2s}
-.btn-sched-check:hover{color:var(--color-brand);border-color:var(--color-brand);background:rgba(46,139,255,.1)}
+.btn-sched-check:hover{color:var(--color-brand);border-color:var(--color-brand);background:rgba(20,132,83,.1)}
 
 /* ========== L9: 乘务员个人安全档案 ========== */
 .crew-profile-panel{background:var(--color-bg-surface);border-radius:var(--radius-md);padding:var(--space-lg);box-shadow:var(--shadow-card);margin-bottom:var(--space-lg)}
@@ -1014,7 +1055,7 @@ input:focus,select:focus,textarea:focus{border-color:var(--color-brand);box-shad
 .crew-card{background:var(--color-bg-elevated);border-radius:var(--radius-md);border:1px solid var(--color-border);cursor:pointer;transition:all .2s;overflow:hidden}
 .crew-card:hover{transform:translateY(-2px);box-shadow:var(--shadow-card);border-color:var(--color-brand)}
 .crew-card .crew-card-header{display:flex;align-items:center;gap:var(--space-md);padding:var(--space-md)}
-.crew-card .crew-avatar{width:42px;height:42px;border-radius:50%;background:linear-gradient(135deg,var(--color-brand),#1890FF);display:flex;align-items:center;justify-content:center;font-size:16px;font-weight:600;color:#fff;flex-shrink:0}
+.crew-card .crew-avatar{width:42px;height:42px;border-radius:50%;background:linear-gradient(135deg,var(--color-brand),#1fa56a);display:flex;align-items:center;justify-content:center;font-size:16px;font-weight:600;color:#fff;flex-shrink:0}
 .crew-card .crew-info{flex:1;min-width:0}
 .crew-card .crew-info .crew-name{font:var(--font-h3);color:var(--color-text-primary)}
 .crew-card .crew-info .crew-id{font:var(--font-caption);color:var(--color-text-secondary)}
@@ -1077,7 +1118,7 @@ input:focus,select:focus,textarea:focus{border-color:var(--color-brand);box-shad
 .crew-edit-modal .actions{display:flex;gap:8px;justify-content:flex-end;padding:var(--space-md) var(--space-lg);border-top:1px solid var(--color-border)}
 .crew-edit-modal .btn{padding:8px 18px;border-radius:var(--radius-sm);cursor:pointer;font:var(--font-body);border:1px solid var(--color-border);background:var(--color-bg-elevated);color:var(--color-text-primary);transition:all .2s}
 .crew-edit-modal .btn.primary{background:var(--color-brand);border-color:var(--color-brand);color:#fff}
-.crew-edit-modal .btn.primary:hover{background:#1890FF}
+.crew-edit-modal .btn.primary:hover{background:#1fa56a}
 .crew-edit-modal .btn.key-toggle{background:rgba(245,34,45,.1);border-color:var(--color-risk-critical);color:var(--color-risk-critical)}
 .crew-edit-modal .btn.key-toggle:hover{background:rgba(245,34,45,.2)}
 .crew-edit-modal .btn.key-toggle.active{background:var(--color-risk-critical);color:#fff}
@@ -1188,7 +1229,7 @@ input:focus,select:focus,textarea:focus{border-color:var(--color-brand);box-shad
 <!-- 顶部栏 -->
 <div class="topbar">
   <div class="logo"><div class="mark">春</div><span>广州分队 · 风险预警</span></div>
-  <span id="appVersionBadge" title="系统构建时间: 2026-08-06 09:15" style="display:inline-block;margin-left:10px;padding:3px 10px;border-radius:100px;background:linear-gradient(135deg,#2E8BFF,#1677FF);color:#fff;font:600 11px/16px 'Inter',sans-serif;letter-spacing:0.3px;box-shadow:0 2px 8px rgba(46,139,255,0.25)">v2026.08.06-v3</span>
+  <span id="appVersionBadge" title="系统构建时间: 2026-08-06 09:15" style="display:inline-block;margin-left:10px;padding:3px 10px;border-radius:100px;background:linear-gradient(135deg,#148453,#148453);color:#fff;font:600 11px/16px 'Inter',sans-serif;letter-spacing:0.3px;box-shadow:0 2px 8px rgba(20,132,83,0.25)">v2026.08.06-v3</span>
   <nav class="breadcrumb" id="breadcrumbNav">
     <a class="active" id="crumbLevel0" onclick="selectBase('','总部全景')">总部</a>
     <span class="sep" id="crumbSep1" style="display:none">/</span>
@@ -1232,8 +1273,8 @@ input:focus,select:focus,textarea:focus{border-color:var(--color-brand);box-shad
     <div style="padding:18px 20px">
       <div id="backupSummary" style="font:var(--font-caption,12px/1.6 sans-serif);color:var(--color-text-secondary);background:var(--color-bg-elevated);border:1px solid var(--color-border);border-radius:8px;padding:10px 12px;margin-bottom:14px">正在读取数据概要…</div>
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
-        <button onclick="doExportBackup()" id="btnDoExport" style="padding:12px;border-radius:10px;border:none;background:var(--color-brand,#2e8bff);color:#fff;cursor:pointer;font-size:14px;font-weight:600">⬇️ 导出备份（下载 .json）</button>
-        <button onclick="document.getElementById('backupFileInput').click()" id="btnDoImport" style="padding:12px;border-radius:10px;border:1px solid var(--color-brand,#2e8bff);background:transparent;color:var(--color-brand,#2e8bff);cursor:pointer;font-size:14px;font-weight:600">⬆️ 导入备份（恢复）</button>
+        <button onclick="doExportBackup()" id="btnDoExport" style="padding:12px;border-radius:10px;border:none;background:var(--color-brand,#148453);color:#fff;cursor:pointer;font-size:14px;font-weight:600">⬇️ 导出备份（下载 .json）</button>
+        <button onclick="document.getElementById('backupFileInput').click()" id="btnDoImport" style="padding:12px;border-radius:10px;border:1px solid var(--color-brand,#148453);background:transparent;color:var(--color-brand,#148453);cursor:pointer;font-size:14px;font-weight:600">⬆️ 导入备份（恢复）</button>
       </div>
       <input type="file" id="backupFileInput" accept=".json,application/json" style="display:none" onchange="doImportBackupFile(this)">
       <div style="margin-top:8px;font:var(--font-caption,11px/1.6 sans-serif);color:var(--color-text-secondary)">导入将覆盖当前本地数据（可提前导出备份）。切换真实后端前，建议定期导出以防浏览器清缓存丢失。</div>
@@ -1588,7 +1629,7 @@ input:focus,select:focus,textarea:focus{border-color:var(--color-brand);box-shad
       <div style="padding:12px;display:flex;flex-direction:column;gap:10px">
         <div style="display:flex;align-items:center;gap:12px"><span style="min-width:140px;font:var(--font-body);color:var(--color-text-secondary)">晨间简报推送时间</span><input type="time" id="settingsBriefingTime" value="07:00" style="background:var(--color-bg-primary);border:1px solid var(--color-border);color:var(--color-text-primary);padding:6px 10px;border-radius:var(--radius-sm)"></div>
         <div style="display:flex;align-items:center;gap:12px"><span style="min-width:140px;font:var(--font-body);color:var(--color-text-secondary)">飞书目标用户ID</span><input type="text" id="settingsFeishuUserId" name="feishu_user_id" value="828cd2ef" style="background:var(--color-bg-primary);border:1px solid var(--color-border);color:var(--color-text-primary);padding:6px 10px;border-radius:var(--radius-sm);width:200px"></div>
-        <div style="display:flex;align-items:center;gap:12px"><span style="min-width:140px;font:var(--font-body);color:var(--color-text-secondary)">天气数据缓存周期</span><span style="font:var(--font-body);color:var(--color-brand)">3 小时（WeatherAPI 国际源）</span><button id="settingsWeatherRefreshBtn" onclick="refreshWeatherData()" style="margin-left:8px;padding:4px 12px;border-radius:var(--radius-sm);border:1px solid var(--color-brand);background:rgba(46,139,255,.1);color:var(--color-brand);cursor:pointer;font:var(--font-caption);font-weight:600">🔄 手动更新</button></div>
+        <div style="display:flex;align-items:center;gap:12px"><span style="min-width:140px;font:var(--font-body);color:var(--color-text-secondary)">天气数据缓存周期</span><span style="font:var(--font-body);color:var(--color-brand)">3 小时（WeatherAPI 国际源）</span><button id="settingsWeatherRefreshBtn" onclick="refreshWeatherData()" style="margin-left:8px;padding:4px 12px;border-radius:var(--radius-sm);border:1px solid var(--color-brand);background:rgba(20,132,83,.1);color:var(--color-brand);cursor:pointer;font:var(--font-caption);font-weight:600">🔄 手动更新</button></div>
         <div style="display:flex;align-items:center;gap:12px"><span style="min-width:140px;font:var(--font-body);color:var(--color-text-secondary)">主数据源</span><span style="font:var(--font-body);color:var(--color-text-secondary)">民航气象服务（METAR/TAF/SIGMET）<span style="color:var(--color-risk-medium);font-size:11px;margin-left:4px">[待接入]</span></span></div>
         <div style="display:flex;align-items:center;gap:12px"><span style="min-width:140px;font:var(--font-body);color:var(--color-text-secondary)">补充数据源</span><span style="font:var(--font-body);color:var(--color-text-secondary)">WeatherAPI.com（主源）+ Open-Meteo（备用源，免 Key 永久免费）· 缓存 3 小时</span></div>
         <div style="display:flex;align-items:center;gap:12px"><span style="min-width:140px;font:var(--font-body);color:var(--color-text-secondary)">疲劳管理数据源</span><span style="font:var(--font-body);color:var(--color-text-secondary)">CCMS 排班系统 <span style="color:var(--color-risk-medium);font-size:11px;margin-left:4px">[待接入]</span></span></div>
@@ -1597,7 +1638,7 @@ input:focus,select:focus,textarea:focus{border-color:var(--color-brand);box-shad
     <div class="chart-card" style="margin-bottom:16px">
       <div class="head" style="display:flex;justify-content:space-between;align-items:center">
         <span class="title">📊 评分模型说明</span>
-        <button onclick="openScoringModelModal()" style="padding:3px 10px;border-radius:var(--radius-sm);border:1px solid var(--color-brand);background:rgba(46,139,255,.1);color:var(--color-brand);cursor:pointer;font:var(--font-caption);font-weight:600">查看详情</button>
+        <button onclick="openScoringModelModal()" style="padding:3px 10px;border-radius:var(--radius-sm);border:1px solid var(--color-brand);background:rgba(20,132,83,.1);color:var(--color-brand);cursor:pointer;font:var(--font-caption);font-weight:600">查看详情</button>
       </div>
       <div style="padding:8px;font:var(--font-caption);color:var(--color-text-secondary)">
         <div>评分范围：<strong>0-27分</strong> · 权重：各维度权重 × 维度得分</div>
@@ -2275,7 +2316,7 @@ function toastWithUndo(msg, durationMs, commitCallback, undoCallback){
   countdownEl.style.cssText='margin-left:8px;color:var(--color-text-secondary);font-size:11px;font-weight:500';
   const undoBtn=document.createElement('button');
   undoBtn.textContent='撤销';
-  undoBtn.style.cssText='margin-left:10px;padding:4px 12px;border-radius:6px;border:1px solid var(--color-brand);background:rgba(46,139,255,.1);color:var(--color-brand);cursor:pointer;font-size:12px;font-weight:700;';
+  undoBtn.style.cssText='margin-left:10px;padding:4px 12px;border-radius:6px;border:1px solid var(--color-brand);background:rgba(20,132,83,.1);color:var(--color-brand);cursor:pointer;font-size:12px;font-weight:700;';
   t.innerHTML=`<span style="color:var(--color-text-primary)"></span>`;
   t.querySelector('span').textContent=msg;
   t.appendChild(countdownEl);
@@ -2767,7 +2808,7 @@ function showEmptyStateHint(containerId, hint, actionText, actionFn){
   el.innerHTML=`<div style="text-align:center;padding:32px 16px;color:var(--color-text-secondary);background:var(--color-bg-surface);border-radius:var(--radius-md);border:1px dashed var(--color-border)">
     <div style="font-size:36px;margin-bottom:8px;opacity:0.6">📭</div>
     <div style="font:var(--font-body);margin-bottom:12px">${hint||'当前无数据'}</div>
-    ${actionText?`<button onclick="${actionFn||''}" style="padding:6px 16px;border-radius:var(--radius-sm);border:1px solid var(--color-brand);background:rgba(46,139,255,.1);color:var(--color-brand);cursor:pointer;font:var(--font-body);font-weight:600">${actionText}</button>`:''}
+    ${actionText?`<button onclick="${actionFn||''}" style="padding:6px 16px;border-radius:var(--radius-sm);border:1px solid var(--color-brand);background:rgba(20,132,83,.1);color:var(--color-brand);cursor:pointer;font:var(--font-body);font-weight:600">${actionText}</button>`:''}
   </div>`;
 }
 
@@ -2830,7 +2871,7 @@ function renderRiskCards(riskList, baseId){
         可能原因：① 尚未导入历史事件数据 ② 当日出港航线风险均为低（未进Top6）③ 气象API暂时无响应
       </div>
       <div style="display:flex;gap:8px;justify-content:center;flex-wrap:wrap">
-        <button onclick="document.getElementById('btnGlobalRefresh')?.click()" style="padding:7px 16px;border-radius:var(--radius-sm);border:1px solid var(--color-brand);background:rgba(46,139,255,.1);color:var(--color-brand);cursor:pointer;font:var(--font-caption);font-weight:600">🔄 立即刷新数据</button>
+        <button onclick="document.getElementById('btnGlobalRefresh')?.click()" style="padding:7px 16px;border-radius:var(--radius-sm);border:1px solid var(--color-brand);background:rgba(20,132,83,.1);color:var(--color-brand);cursor:pointer;font:var(--font-caption);font-weight:600">🔄 立即刷新数据</button>
         <button onclick="try{document.getElementById('navHistoryData')?.click()}catch(_){document.documentElement.scrollTop=0}" style="padding:7px 16px;border-radius:var(--radius-sm);border:1px solid var(--color-border);background:var(--color-bg-elevated);color:var(--color-text-primary);cursor:pointer;font:var(--font-caption);font-weight:600">📥 导入历史数据</button>
       </div>
     </div>`;
@@ -3017,7 +3058,7 @@ async function renderMeasureCards(riskList, baseId){
   container.innerHTML=measures.map((m,i)=>{
     const statusText=m.status==='pushed'?'已推送':m.status==='adopted'?'已采纳':m.status==='executed'?'已执行':m.source==='event'?'事件生成':'待处理';
     const factors=(m.basis||[]).map(f=>`<span>${f}</span>`).join('');
-    const sourceTag=m.source==='event'?'<span style="font-size:10px;padding:1px 6px;border-radius:3px;background:rgba(46,139,255,.15);color:var(--color-brand);margin-left:4px">事件关联</span>':'';
+    const sourceTag=m.source==='event'?'<span style="font-size:10px;padding:1px 6px;border-radius:3px;background:rgba(20,132,83,.15);color:var(--color-brand);margin-left:4px">事件关联</span>':'';
     const clauses=matchClauses(m.text||m.action,m.detail||'');
     const clauseItems=clauses.map(c=>`<div class="clause-item"><span class="clause-manual">${c.manual}</span><span class="clause-num">${c.id}</span><span class="clause-summary">${c.summary}</span></div>`).join('');
     return `<div class="measure-card">
@@ -3334,7 +3375,7 @@ function renderRouteTable(){
         </tr>`;
       }).join('');
       // 分组分隔行（可点击筛选该基地）
-      return `<tr style="background:rgba(46,139,255,.06)"><td colspan="9" style="padding:8px 12px;font-weight:700;color:var(--color-brand);cursor:pointer" onclick="selectBase('${bid}','${baseName}')">🏢 ${baseName}（${routes.length} 条航线）· 点击筛选该基地 →</td></tr>${routeRows}`;
+      return `<tr style="background:rgba(20,132,83,.06)"><td colspan="9" style="padding:8px 12px;font-weight:700;color:var(--color-brand);cursor:pointer" onclick="selectBase('${bid}','${baseName}')">🏢 ${baseName}（${routes.length} 条航线）· 点击筛选该基地 →</td></tr>${routeRows}`;
     }).join('');
     return;
   }
@@ -3713,8 +3754,8 @@ function renderTrendChart(range){
           <line x1="0" y1="40" x2="600" y2="40" stroke="#2D3E5C" stroke-dasharray="2 4"/>
           <line x1="0" y1="80" x2="600" y2="80" stroke="#2D3E5C" stroke-dasharray="2 4"/>
           <line x1="0" y1="120" x2="600" y2="120" stroke="#2D3E5C" stroke-dasharray="2 4"/>
-          <path d="${pathD}" fill="none" stroke="#2E8BFF" stroke-width="2"/>
-          ${dataPoints.map((p,i)=>`<circle cx="${p.x}" cy="${p.y}" r="${i===6||i===7?5:3}" fill="${i===6||i===7?'#F5222D':'#2E8BFF'}"/><text x="${p.x}" y="156" fill="#9FB3CC" font-size="9" text-anchor="middle">${p.label}</text><text x="${p.x}" y="${p.y-6}" fill="#E8EEF7" font-size="9" text-anchor="middle" font-weight="600">${p.count}</text>`).join('')}
+          <path d="${pathD}" fill="none" stroke="#148453" stroke-width="2"/>
+          ${dataPoints.map((p,i)=>`<circle cx="${p.x}" cy="${p.y}" r="${i===6||i===7?5:3}" fill="${i===6||i===7?'#F5222D':'#148453'}"/><text x="${p.x}" y="156" fill="#9FB3CC" font-size="9" text-anchor="middle">${p.label}</text><text x="${p.x}" y="${p.y-6}" fill="#E8EEF7" font-size="9" text-anchor="middle" font-weight="600">${p.count}</text>`).join('')}
           <text x="4" y="12" fill="#9FB3CC" font-size="9">${maxTotal}</text>
           <text x="4" y="156" fill="#9FB3CC" font-size="9">0</text>
         `;
@@ -3761,9 +3802,9 @@ function renderTrendChart(range){
         <line x1="0" y1="40" x2="600" y2="40" stroke="#2D3E5C" stroke-dasharray="2 4"/>
         <line x1="0" y1="80" x2="600" y2="80" stroke="#2D3E5C" stroke-dasharray="2 4"/>
         <line x1="0" y1="120" x2="600" y2="120" stroke="#2D3E5C" stroke-dasharray="2 4"/>
-        <path d="${bandPath}" fill="rgba(46,139,255,.12)"/>
-        <path d="${pastPath}" fill="none" stroke="#2E8BFF" stroke-width="2"/>
-        <path d="${futurePath}" fill="none" stroke="#2E8BFF" stroke-width="2" stroke-dasharray="4 3" opacity="0.7"/>
+        <path d="${bandPath}" fill="rgba(20,132,83,.12)"/>
+        <path d="${pastPath}" fill="none" stroke="#148453" stroke-width="2"/>
+        <path d="${futurePath}" fill="none" stroke="#148453" stroke-width="2" stroke-dasharray="4 3" opacity="0.7"/>
         <line x1="${nowX}" y1="0" x2="${nowX}" y2="160" stroke="#fff" stroke-width="1" stroke-dasharray="2 2" opacity="0.5"/>
         <text x="${nowX+5}" y="14" fill="#fff" font-size="10" opacity="0.7">NOW</text>
         ${dataPoints.filter((p,i)=>i%Math.max(1,Math.floor(days/10))===0||i===days).map(p=>`<circle cx="${p.x}" cy="${p.y}" r="3" fill="${p.count>3?'#FA541C':p.count>0?'#FAAD14':'#52C41A'}"/><text x="${p.x}" y="${p.y-5}" fill="#E8EEF7" font-size="8" text-anchor="middle">${p.count}</text>`).join('')}
@@ -3979,7 +4020,7 @@ async function loadHqOverview(){
     renderHqOverview(res.data);
   }catch(e){
     if(!_hqOverviewData){
-      content.innerHTML='<div style="text-align:center;padding:20px;color:var(--color-risk-critical)">加载失败：'+e.message+'<br><button onclick="loadHqOverview()" style="margin-top:8px;padding:4px 12px;border-radius:6px;border:1px solid var(--color-brand);background:rgba(46,139,255,.1);color:var(--color-brand);cursor:pointer">重试</button></div>';
+      content.innerHTML='<div style="text-align:center;padding:20px;color:var(--color-risk-critical)">加载失败：'+e.message+'<br><button onclick="loadHqOverview()" style="margin-top:8px;padding:4px 12px;border-radius:6px;border:1px solid var(--color-brand);background:rgba(20,132,83,.1);color:var(--color-brand);cursor:pointer">重试</button></div>';
     } else {
       // 已有缓存数据，网络失败时保持缓存显示
       CacheStatus.showOffline();
@@ -4283,7 +4324,7 @@ function renderHqOverview(d){
       <div style="display:flex;gap:4px;flex-wrap:wrap;align-items:center">
         ${TIME_RANGE_OPTS.map(opt=>{
           const active = STATE.timeRange===opt.k || (!STATE.timeRange && opt.k==='this_month_vs_prev');
-          return `<button onclick="switchTrendRange('${opt.k}')" style="padding:4px 10px;border-radius:var(--radius-sm);border:1px solid ${active?'var(--color-brand)':'var(--color-border)'};background:${active?'rgba(46,139,255,.12)':'var(--color-bg-primary)'};color:${active?'var(--color-brand)':'var(--color-text-secondary)'};cursor:pointer;font:var(--font-caption);font-weight:${active?600:400}">${opt.label}</button>`;
+          return `<button onclick="switchTrendRange('${opt.k}')" style="padding:4px 10px;border-radius:var(--radius-sm);border:1px solid ${active?'var(--color-brand)':'var(--color-border)'};background:${active?'rgba(20,132,83,.12)':'var(--color-bg-primary)'};color:${active?'var(--color-brand)':'var(--color-text-secondary)'};cursor:pointer;font:var(--font-caption);font-weight:${active?600:400}">${opt.label}</button>`;
         }).join('')}
       </div>
       <div id="trendCustomBox" style="display:${STATE.timeRange==='custom'?'flex':'none'};gap:4px;align-items:center;flex-wrap:wrap;margin-left:auto">
@@ -4394,7 +4435,7 @@ function renderHqOverview(d){
 
   // 1) 7 大维度每月具体数量与占比
   const dimMonthRows=dims.map(dim=>{
-    const cells=dim.monthly.map(m=>`<td style="padding:6px 8px;border-bottom:1px solid var(--color-border);text-align:center;${m.month===(d.current_month)?'background:rgba(46,139,255,.08);font-weight:600':''}">${m.count||'-'}<div style="font-size:10px;color:var(--color-text-disabled)">${m.percent>0?m.percent+'%':''}</div></td>`).join('');
+    const cells=dim.monthly.map(m=>`<td style="padding:6px 8px;border-bottom:1px solid var(--color-border);text-align:center;${m.month===(d.current_month)?'background:rgba(20,132,83,.08);font-weight:600':''}">${m.count||'-'}<div style="font-size:10px;color:var(--color-text-disabled)">${m.percent>0?m.percent+'%':''}</div></td>`).join('');
     return `<tr>
       <td style="padding:6px 8px;border-bottom:1px solid var(--color-border)">${dim.icon} ${dim.dimension_name}</td>
       <td style="padding:6px 8px;border-bottom:1px solid var(--color-border);text-align:center;color:${dim.color};font-weight:700">${dim.year_total}</td>
@@ -4443,7 +4484,7 @@ function renderHqOverview(d){
   const yearRows=yearly.filter(y=>[2024,2025,2026].includes(y.year)).map(y=>{
     const cells=dims.map(d=>`<td style="padding:6px 8px;border-bottom:1px solid var(--color-border);text-align:center">${y.dimensions[d.dimension_id]||0}</td>`).join('');
     const isCur=y.year===curYearForCompare;
-    return `<tr style="${isCur?'background:rgba(46,139,255,.06)':''}"><td style="padding:6px 8px;border-bottom:1px solid var(--color-border);font-weight:600">${y.year}${isCur?' (本年)':''}</td><td style="padding:6px 8px;border-bottom:1px solid var(--color-border);text-align:center;color:var(--color-brand);font-weight:700">${y.total}</td>${cells}</tr>`;
+    return `<tr style="${isCur?'background:rgba(20,132,83,.06)':''}"><td style="padding:6px 8px;border-bottom:1px solid var(--color-border);font-weight:600">${y.year}${isCur?' (本年)':''}</td><td style="padding:6px 8px;border-bottom:1px solid var(--color-border);text-align:center;color:var(--color-brand);font-weight:700">${y.total}</td>${cells}</tr>`;
   }).join('')||'<tr><td colspan="10" style="text-align:center;padding:20px;color:var(--color-text-secondary)">无数据</td></tr>';
   const yearlyTable=`<div class="chart-box" style="background:var(--color-bg-elevated);border-radius:var(--radius-sm);padding:12px;margin-bottom:16px;border:1px solid var(--color-border)">
     <div style="display:flex;align-items:center;gap:12px;margin-bottom:8px;flex-wrap:wrap">
@@ -4481,7 +4522,7 @@ function renderHqOverview(d){
     const cells=dims.map(dm=>`<td style="padding:6px 8px;border-bottom:1px solid var(--color-border);text-align:center">${b.dimensions[dm.dimension_id]||0}</td>`).join('');
     const barColor=b.month_total>0?'var(--color-brand)':'var(--color-border)';
     const tagColor = (groupInfo && groupInfo.group) ? groupInfo.group.textColor : 'var(--color-brand)';
-    const tagBg = (groupInfo && groupInfo.group) ? groupInfo.group.color : 'rgba(46,139,255,.15)';
+    const tagBg = (groupInfo && groupInfo.group) ? groupInfo.group.color : 'rgba(20,132,83,.15)';
     return `<tr><td style="padding:6px 8px;border-bottom:1px solid var(--color-border);font-weight:600">${b.division_name}<span style="font-size:9px;padding:1px 5px;border-radius:3px;background:${tagBg};color:${tagColor};margin-left:4px">${baseLabel}</span></td><td style="padding:6px 8px;border-bottom:1px solid var(--color-border);text-align:center;color:var(--color-brand);font-weight:700">${b.month_total}</td><td style="padding:6px 8px;border-bottom:1px solid var(--color-border);text-align:center"><div style="display:flex;align-items:center;gap:6px"><div style="flex:1;height:8px;background:var(--color-bg-primary);border-radius:4px;overflow:hidden;min-width:50px"><div style="height:100%;width:${barWidth}%;background:${barColor};border-radius:4px;transition:width .3s"></div></div><span style="min-width:36px;text-align:right">${percent}%</span></div></td>${cells}</tr>`;
   };
   let divRows='';
@@ -4495,11 +4536,11 @@ function renderHqOverview(d){
   // 汇总行
   const divTotalCells=dims.map(dm=>`<td style="padding:6px 8px;border-top:2px solid var(--color-brand);text-align:center;font-weight:700;color:var(--color-brand)">${divBd.reduce((s,b)=>s+(b.dimensions[dm.dimension_id]||0),0)}</td>`).join('');
   const divTotalSumRow=divBd.reduce((s,b)=>s+(b.month_total||0),0);
-  divRows+=`<tr style="background:rgba(46,139,255,.06)"><td style="padding:6px 8px;border-top:2px solid var(--color-brand);font-weight:700">全部分队合计</td><td style="padding:6px 8px;border-top:2px solid var(--color-brand);text-align:center;color:var(--color-brand);font-weight:700">${divTotalSumRow}</td><td style="padding:6px 8px;border-top:2px solid var(--color-brand);text-align:center;font-weight:700">100%</td>${divTotalCells}</tr>`;
+  divRows+=`<tr style="background:rgba(20,132,83,.06)"><td style="padding:6px 8px;border-top:2px solid var(--color-brand);font-weight:700">全部分队合计</td><td style="padding:6px 8px;border-top:2px solid var(--color-brand);text-align:center;color:var(--color-brand);font-weight:700">${divTotalSumRow}</td><td style="padding:6px 8px;border-top:2px solid var(--color-brand);text-align:center;font-weight:700">100%</td>${divTotalCells}</tr>`;
   const divisionTable=`<div class="chart-box" style="background:var(--color-bg-elevated);border-radius:var(--radius-sm);padding:12px;margin-bottom:16px;border:1px solid var(--color-border)">
     <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;flex-wrap:wrap">
       <div style="font:var(--font-h3);color:var(--color-text-primary);flex:1">🏢 分队风险矩阵表 · 占比视图（含7大维度具体事件数量 · ${d.year}年${d.current_month}月 · 共 ${divBd.length} 个分队）</div>
-      <button onclick="document.getElementById('squadRiskDetailPanel')?.scrollIntoView({behavior:'smooth',block:'start'})" style="padding:3px 10px;border-radius:var(--radius-sm);border:1px solid var(--color-brand);background:rgba(46,139,255,.1);color:var(--color-brand);cursor:pointer;font:var(--font-caption);font-weight:600;white-space:nowrap">🎯 查看明细视图 →</button>
+      <button onclick="document.getElementById('squadRiskDetailPanel')?.scrollIntoView({behavior:'smooth',block:'start'})" style="padding:3px 10px;border-radius:var(--radius-sm);border:1px solid var(--color-brand);background:rgba(20,132,83,.1);color:var(--color-brand);cursor:pointer;font:var(--font-caption);font-weight:600;white-space:nowrap">🎯 查看明细视图 →</button>
     </div>
     <div style="overflow-x:auto">
       <table style="width:100%;border-collapse:collapse;font:var(--font-body);font-size:12px;min-width:700px">
@@ -4617,7 +4658,7 @@ function renderHqOverview(d){
         <div style="font:var(--font-h3);margin-bottom:10px">⚠️ 总部全景数据渲染失败</div>
         <div style="font:var(--font-body);margin-bottom:12px">错误信息：${e.message || '未知错误'}</div>
         <div style="font:var(--font-caption);color:var(--color-text-secondary);margin-bottom:16px">请尝试刷新或检查数据格式。详细错误请查看浏览器控制台。</div>
-        <button onclick="loadHqOverview()" style="padding:6px 18px;border-radius:var(--radius-sm);border:1px solid var(--color-brand);background:rgba(46,139,255,.12);color:var(--color-brand);cursor:pointer;font:var(--font-caption);font-weight:600">🔄 重新加载总览数据</button>
+        <button onclick="loadHqOverview()" style="padding:6px 18px;border-radius:var(--radius-sm);border:1px solid var(--color-brand);background:rgba(20,132,83,.12);color:var(--color-brand);cursor:pointer;font:var(--font-caption);font-weight:600">🔄 重新加载总览数据</button>
       </div>`;
     }
   }
@@ -4867,9 +4908,9 @@ window.renderDimTopRankPanel = function renderDimTopRankPanel(divBd, baseBd, opt
       </div>`;
     }).join('');
     const rangeBadge = (opts && opts.scopeLabel)
-      ? `<span style="font-size:11px;padding:2px 10px;border-radius:999px;background:rgba(46,139,255,.12);color:var(--color-brand);font-weight:700;border:1px solid rgba(46,139,255,.3)">数据范围：${opts.scopeLabel}</span>`
+      ? `<span style="font-size:11px;padding:2px 10px;border-radius:999px;background:rgba(20,132,83,.12);color:var(--color-brand);font-weight:700;border:1px solid rgba(20,132,83,.3)">数据范围：${opts.scopeLabel}</span>`
       : '';
-    return `<div class="chart-box" id="hqDimTopRankPanel" style="background:linear-gradient(135deg,rgba(46,139,255,.05),rgba(46,139,255,.01));border-radius:var(--radius-sm);padding:16px;margin-bottom:16px;border:1px solid var(--color-border);box-shadow:0 2px 6px rgba(0,0,0,.02)">
+    return `<div class="chart-box" id="hqDimTopRankPanel" style="background:linear-gradient(135deg,rgba(20,132,83,.05),rgba(20,132,83,.01));border-radius:var(--radius-sm);padding:16px;margin-bottom:16px;border:1px solid var(--color-border);box-shadow:0 2px 6px rgba(0,0,0,.02)">
       <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;gap:10px;flex-wrap:wrap">
         <div style="display:flex;align-items:center;gap:8px">
           <span style="font-size:18px">🏆</span>
@@ -4988,11 +5029,11 @@ window.buildOpTimeFilterStandalone = function buildOpTimeFilterStandalone(d, cur
     const opTabHtml = OP_TAB.map(t => {
       const active = tr.mode === t.k;
       return `<button class="op-tab ${active?'active':''}" data-mode="${t.k}"
-        style="padding:5px 14px;border-radius:8px;border:1px solid ${active?'var(--color-brand)':'var(--color-border)'};background:${active?'rgba(46,139,255,.12)':'var(--color-bg-primary)'};color:${active?'var(--color-brand)':'var(--color-text-secondary)'};cursor:pointer;font-size:13px;font-weight:${active?600:400}">${t.label}</button>`;
+        style="padding:5px 14px;border-radius:8px;border:1px solid ${active?'var(--color-brand)':'var(--color-border)'};background:${active?'rgba(20,132,83,.12)':'var(--color-bg-primary)'};color:${active?'var(--color-brand)':'var(--color-text-secondary)'};cursor:pointer;font-size:13px;font-weight:${active?600:400}">${t.label}</button>`;
     }).join('');
     const quickHtml = quickBtns.map(b => `<button class="op-quick" data-quick="${b.k}" style="padding:3px 10px;border-radius:6px;border:1px solid var(--color-border);background:var(--color-bg-primary);cursor:pointer;font-size:12px;color:var(--color-text-secondary)">${b.label}</button>`).join('');
     const customBox = tr.mode === 'custom' ? 'flex' : 'none';
-    const opTopFilter = `<div id="opsConsoleTop" style="background:linear-gradient(180deg, rgba(46,139,255,.10), rgba(46,139,255,.02));border:1px solid rgba(46,139,255,.30);border-radius:10px;padding:12px 14px;margin-bottom:14px">
+    const opTopFilter = `<div id="opsConsoleTop" style="background:linear-gradient(180deg, rgba(20,132,83,.10), rgba(20,132,83,.02));border:1px solid rgba(20,132,83,.30);border-radius:10px;padding:12px 14px;margin-bottom:14px">
       <div style="display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap">
         <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">
           <div style="font:var(--font-h3);color:var(--color-text-primary)">⏱ 风险管理操作台 · 时间筛选</div>
@@ -5081,20 +5122,20 @@ window.buildOpTimeFilterStandalone = function buildOpTimeFilterStandalone(d, cur
           </select>
           <input type="date" id="trendCustA" value="${tc.customDate1||''}" placeholder="A日期" style="display:${tc.base==='custom1'?'inline-block':'none'};padding:3px 6px;border-radius:6px;border:1px solid var(--color-border);background:var(--color-bg-primary);color:var(--color-text-primary);font:var(--font-caption)">
           <input type="date" id="trendCustB" value="${tc.customDate2||''}" placeholder="B日期" style="display:${tc.ref==='custom2'?'inline-block':'none'};padding:3px 6px;border-radius:6px;border:1px solid var(--color-border);background:var(--color-bg-primary);color:var(--color-text-primary);font:var(--font-caption)">
-          <button id="opSwapTrendBtn" style="padding:4px 10px;border-radius:6px;border:1px solid var(--color-brand);background:rgba(46,139,255,.08);color:var(--color-brand);cursor:pointer;font-size:12px;font-weight:600" title="交换对比期 A⇅B">⇅ 交换</button>
+          <button id="opSwapTrendBtn" style="padding:4px 10px;border-radius:6px;border:1px solid var(--color-brand);background:rgba(20,132,83,.08);color:var(--color-brand);cursor:pointer;font-size:12px;font-weight:600" title="交换对比期 A⇅B">⇅ 交换</button>
           <button id="opApplyTrendBtn" style="padding:5px 14px;border-radius:8px;border:none;background:linear-gradient(90deg,#FA8C16,#D46B08);color:#fff;cursor:pointer;font-weight:700;font-size:12px">📈 应用趋势对比</button>
           <span id="opRangeHint" style="margin-left:4px;font:var(--font-caption);color:var(--color-text-disabled);margin-right:auto">计算范围：默认 ${year} 年 ${month} 月（与数据源 current_month 同步）</span>
         </div>
       </div>
       <!-- 分队矩阵筛选统一入口 -->
-      <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-top:10px;padding-top:10px;border-top:1px dashed rgba(46,139,255,.25);${DISP_SQUAD_MATRIX_FILTER}">
+      <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-top:10px;padding-top:10px;border-top:1px dashed rgba(20,132,83,.25);${DISP_SQUAD_MATRIX_FILTER}">
         <div style="font:var(--font-caption);font-weight:600;color:var(--color-brand);white-space:nowrap">🎯 分队矩阵统一筛选</div>
         <div id="opSquadFilterGroup" style="display:flex;gap:6px;align-items:center;flex-wrap:wrap;flex:1;min-width:0">
           <label style="font:var(--font-caption);color:var(--color-text-secondary)">一级基地：</label>
           <select id="opSvfBaseGroup" style="padding:4px 8px;border-radius:6px;border:1px solid var(--color-border);background:var(--color-bg-primary);color:var(--color-text-primary);font:var(--font-caption);min-width:230px">
             <option value="">全部一级基地</option>
             ${(function(){
-                const hqGroups = (typeof groupDivisionsByHQ === 'function') ? groupDivisionsByHQ(scopedDivBd.length ? scopedDivBd : divBd) : [{ group: { shortLabel:'总', displayName:'全部基地', textColor:'#fff', color:'#1890ff' }, divisions: (scopedDivBd.length ? scopedDivBd : divBd).slice() }];
+                const hqGroups = (typeof groupDivisionsByHQ === 'function') ? groupDivisionsByHQ(scopedDivBd.length ? scopedDivBd : divBd) : [{ group: { shortLabel:'总', displayName:'全部基地', textColor:'#fff', color:'#1fa56a' }, divisions: (scopedDivBd.length ? scopedDivBd : divBd).slice() }];
                 const out = []; const seen = new Set(['']);
                 hqGroups.forEach(gi=>{
                   const gid = gi.group.root || gi.group.shortLabel || '';
@@ -5137,13 +5178,13 @@ window.buildOpTimeFilterStandalone = function buildOpTimeFilterStandalone(d, cur
         return (r && r.label) ? r.label : (year + '年' + month + '月');
       } catch { return year + '年' + month + '月'; }
     })();
-    return `<div class="chart-box" id="opsTimeFilterStandalone" style="background:linear-gradient(180deg, rgba(46,139,255,.10), rgba(46,139,255,.02));border:1px solid rgba(46,139,255,.30);border-radius:10px;padding:12px 14px;margin-bottom:14px">
+    return `<div class="chart-box" id="opsTimeFilterStandalone" style="background:linear-gradient(180deg, rgba(20,132,83,.10), rgba(20,132,83,.02));border:1px solid rgba(20,132,83,.30);border-radius:10px;padding:12px 14px;margin-bottom:14px">
       <div style="display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;margin-bottom:8px">
         <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">
           <div style="font:var(--font-h3);color:var(--color-text-primary)">⏱ 风险管理操作台 · 时间筛选</div>
           <div style="font-size:11px;color:var(--color-brand);font-weight:600">🔴 作用范围：Top3 排名 + 维度统计 + 机场天气与可能影响 · <b style="color:var(--color-success)">🧠 智能总结 & 分队矩阵同步联动（动态渲染）</b></div>
         </div>
-        <span id="opsTimeFilterRangeBadge" style="font-size:12px;padding:2px 10px;border-radius:999px;background:rgba(46,139,255,.12);color:var(--color-brand);font-weight:700;border:1px solid rgba(46,139,255,.3)">当前范围：${_rangeLabel}</span>
+        <span id="opsTimeFilterRangeBadge" style="font-size:12px;padding:2px 10px;border-radius:999px;background:rgba(20,132,83,.12);color:var(--color-brand);font-weight:700;border:1px solid rgba(20,132,83,.3)">当前范围：${_rangeLabel}</span>
       </div>
       ${opTopFilter}
     </div>`;
@@ -5281,7 +5322,7 @@ window._bindThreeStageNav = function(){
           delete b.dataset.fixed;
         });
         this.style.border = '1px solid var(--color-brand)';
-        this.style.background = 'rgba(46,139,255,.08)';
+        this.style.background = 'rgba(20,132,83,.08)';
         this.dataset.fixed = '1';
         const baseName = base === '' ? '总部' : (typeof BASE_NAMES !== 'undefined' ? (BASE_NAMES[base] || base) : base);
         // ===== 【任务2-严格限制】一级基地点击：只做本地重绘，绝对不能修改全局 STATE.currentBase，绝对不调用 selectBase =====
@@ -5354,7 +5395,7 @@ window._bindThreeStageNav = function(){
               if (header && !header.querySelector('.squad-quick-search')) {
                 const filterBox = document.createElement('div');
                 filterBox.className = 'squad-quick-search';
-                filterBox.style.cssText = 'margin-top:10px;padding:8px 10px;background:rgba(46,139,255,.06);border-radius:6px;display:flex;gap:8px;flex-wrap:wrap;align-items:center';
+                filterBox.style.cssText = 'margin-top:10px;padding:8px 10px;background:rgba(20,132,83,.06);border-radius:6px;display:flex;gap:8px;flex-wrap:wrap;align-items:center';
                 filterBox.innerHTML = `
                   <input type="text" placeholder="🔍 关键字搜索（事件描述/航班号）" style="flex:1;min-width:200px;padding:4px 8px;border-radius:6px;border:1px solid var(--color-border);font:var(--font-body);background:var(--color-bg-primary);color:var(--color-text-primary)">
                   <select style="padding:4px 8px;border-radius:6px;border:1px solid var(--color-border);font:var(--font-body);background:var(--color-bg-primary);color:var(--color-text-primary)">
@@ -5574,7 +5615,7 @@ window.renderBaseRiskThreeStage = function(divBd, baseBd, opts){
     function _riskLevelOf(v){
       v = Number(v)||0;
       if (v >= 6) return { key:'critical', label:'严重', textColor:'var(--color-risk-critical)', bg:'rgba(245,34,45,.10)', bd:'rgba(245,34,45,.30)' };
-      if (v >= 3) return { key:'mid',      label:'中高', textColor:'var(--color-brand)',         bg:'rgba(46,139,255,.12)', bd:'rgba(46,139,255,.30)' };
+      if (v >= 3) return { key:'mid',      label:'中高', textColor:'var(--color-brand)',         bg:'rgba(20,132,83,.12)', bd:'rgba(20,132,83,.30)' };
       if (v >= 1) return { key:'low2',     label:'关注', textColor:'var(--color-text-secondary)', bg:'rgba(140,140,140,.10)', bd:'var(--color-border)' };
       return               { key:'low',      label:'正常', textColor:'var(--color-success)',        bg:'rgba(82,196,26,.10)', bd:'rgba(82,196,26,.25)' };
     }
@@ -5696,7 +5737,7 @@ window.renderBaseRiskThreeStage = function(divBd, baseBd, opts){
       const _bNameArg = isHQSelected ? '' : (_bg ? _bg.displayName : viewScopeLabel.split(' · ')[0]);
       const _onClick = `try{window.openDimBaseEventsModal({dimId:'${s.id}',baseId:'${_baseArg}',baseName:'${String(_bNameArg||'').replace(/'/g,"\\'")}',scopeLabel:'${String(scopeLabel||viewScopeLabel||'').replace(/'/g,"\\'")}'})}catch(e){console.error(e)}`;
       return `<div class="stat-pill ts-top-card" data-dim="${s.id}" onclick="${_onClick}" title="点击查看：${s.meta.name} · 触发事件明细（分队/责任人/关键字搜索）" style="flex:1 1 160px;min-width:150px;background:var(--color-bg-elevated);border:1px solid var(--color-border);border-radius:var(--radius-sm);padding:10px 14px;transition:border-color .16s ease,transform .16s ease,box-shadow .16s ease;cursor:pointer"
-        onmouseenter="this.style.borderColor='var(--color-brand)';this.style.transform='translateY(-2px)';this.style.boxShadow='0 4px 14px rgba(46,139,255,.12)'"
+        onmouseenter="this.style.borderColor='var(--color-brand)';this.style.transform='translateY(-2px)';this.style.boxShadow='0 4px 14px rgba(20,132,83,.12)'"
         onmouseleave="this.style.borderColor='var(--color-border)';this.style.transform='';this.style.boxShadow=''">
         <div style="font:var(--font-caption);color:var(--color-text-secondary);font-weight:500">${s.meta.icon ? (s.meta.icon+' ') : ''}${s.meta.name}</div>
         <div style="margin-top:4px;display:flex;align-items:baseline;gap:6px">
@@ -5729,7 +5770,7 @@ window.renderBaseRiskThreeStage = function(divBd, baseBd, opts){
       const _squadLvl = _riskLevelOf(_squadTotal);
       sideNavHtml = `<div class="ts-side-nav" style="display:flex;flex-direction:column;gap:6px;position:sticky;top:8px">
         <button class="ts-side-btn" data-base="" style="text-align:left;padding:8px 10px;border-radius:var(--radius-sm);border:1px solid var(--color-border);background:var(--color-bg-primary);cursor:pointer;transition:all .16s ease;display:flex;align-items:center;gap:8px"
-          onmouseenter="this.style.borderColor='var(--color-brand)';this.style.background='rgba(46,139,255,.05)'"
+          onmouseenter="this.style.borderColor='var(--color-brand)';this.style.background='rgba(20,132,83,.05)'"
           onmouseleave="this.style.borderColor='var(--color-border)';this.style.background='var(--color-bg-primary)'">
           <span style="width:10px;height:10px;border-radius:999px;background:var(--color-brand);border:2px solid var(--color-brand);flex-shrink:0"></span>
           <span style="flex:1;min-width:0">
@@ -5753,12 +5794,12 @@ window.renderBaseRiskThreeStage = function(divBd, baseBd, opts){
     } else {
       // --- 左：基地垂直导航（新增"总部"作为第一项）--- HQ/基地级
       const hqLvl = _riskLevelOf(viewTotal);
-      const hqActive = isHQSelected ? 'border:1px solid var(--color-brand);background:rgba(46,139,255,.08);' : 'border:1px solid var(--color-border);background:var(--color-bg-primary);';
+      const hqActive = isHQSelected ? 'border:1px solid var(--color-brand);background:rgba(20,132,83,.08);' : 'border:1px solid var(--color-border);background:var(--color-bg-primary);';
       const hqGlobalTotalForNav = ORDER.reduce((s,id)=>{
         return s + baseAggList.reduce((bs,b)=>bs+(b.dimCounts[id]||0),0);
       },0);
       const hqNavItem = `<button class="ts-side-btn" data-base="" style="text-align:left;padding:8px 10px;border-radius:var(--radius-sm);${hqActive}cursor:pointer;transition:all .16s ease;display:flex;align-items:center;gap:8px"
-          onmouseenter="if(!this.dataset.fixed){this.style.borderColor='var(--color-brand)';this.style.background='rgba(46,139,255,.05)'}"
+          onmouseenter="if(!this.dataset.fixed){this.style.borderColor='var(--color-brand)';this.style.background='rgba(20,132,83,.05)'}"
           onmouseleave="if(!this.dataset.fixed){this.style.borderColor='var(--color-border)';this.style.background='var(--color-bg-primary)'}">
           <span style="width:10px;height:10px;border-radius:999px;background:var(--color-brand);border:2px solid var(--color-brand);flex-shrink:0"></span>
           <span style="flex:1;min-width:0">
@@ -5781,7 +5822,7 @@ window.renderBaseRiskThreeStage = function(divBd, baseBd, opts){
           const safeName = String(childDiv.nm || '').replace(/'/g, '&#39;');
           const safeId = String(childDiv.id || '').replace(/'/g, '&#39;');
           return `<div data-act="open-squad" data-squad="${safeId}" data-squad-name="${safeName}" style="padding-left:24px;padding-right:10px;padding-top:4px;padding-bottom:4px;font-size:11px;color:var(--color-text-secondary);cursor:pointer;display:flex;align-items:center;gap:6px;border-radius:4px;transition:background .15s"
-            onmouseenter="this.style.background='rgba(46,139,255,.06)'"
+            onmouseenter="this.style.background='rgba(20,132,83,.06)'"
             onmouseleave="this.style.background=''">
             <span style="width:6px;height:6px;border-radius:999px;background:${bg.group.color};opacity:.7;flex-shrink:0"></span>
             <span style="flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${childDiv.nm||childDiv.id}</span>
@@ -5789,9 +5830,9 @@ window.renderBaseRiskThreeStage = function(divBd, baseBd, opts){
           </div>`;
         }).join('');
         return `<div class="ts-base-node" data-base="${bg.root}" style="border:1px solid ${isActive?'var(--color-brand)':'var(--color-border)'};border-radius:var(--radius-sm);overflow:hidden;background:var(--color-bg-primary)">
-          <button class="ts-side-btn" data-base="${bg.root}" style="text-align:left;padding:8px 10px;border:none;background:${isActive?'rgba(46,139,255,.08)':'transparent'};cursor:pointer;transition:all .16s ease;display:flex;align-items:center;gap:8px;width:100%;border-radius:var(--radius-sm)"
-              onmouseenter="if(!this.dataset.fixed){this.style.background='rgba(46,139,255,.05)'}"
-              onmouseleave="if(!this.dataset.fixed){this.style.background='${isActive?'rgba(46,139,255,.08)':'transparent'}'}">
+          <button class="ts-side-btn" data-base="${bg.root}" style="text-align:left;padding:8px 10px;border:none;background:${isActive?'rgba(20,132,83,.08)':'transparent'};cursor:pointer;transition:all .16s ease;display:flex;align-items:center;gap:8px;width:100%;border-radius:var(--radius-sm)"
+              onmouseenter="if(!this.dataset.fixed){this.style.background='rgba(20,132,83,.05)'}"
+              onmouseleave="if(!this.dataset.fixed){this.style.background='${isActive?'rgba(20,132,83,.08)':'transparent'}'}">
               <span class="ts-base-arrow" data-arrow-base="${bg.root}" title="${_baseCollapsed?'展开分队列表':'收起分队列表'}" style="cursor:pointer;font-size:10px;color:var(--color-text-disabled);width:18px;height:18px;border-radius:4px;display:inline-flex;align-items:center;justify-content:center;flex-shrink:0">${_baseCollapsed?'▸':'▾'}</span>
               <span style="width:10px;height:10px;border-radius:999px;background:${bg.group.color};border:2px solid ${bg.group.color};flex-shrink:0"></span>
               <span style="flex:1;min-width:0">
@@ -5831,7 +5872,7 @@ window.renderBaseRiskThreeStage = function(divBd, baseBd, opts){
         const lvl = _riskLevelOf(dimTotal);
         // Top3 行
         const rowsHtml = dimTop3.map((t3, idx) => {
-          const tagBg = t3.group && t3.group.color ? t3.group.color : 'rgba(46,139,255,.15)';
+          const tagBg = t3.group && t3.group.color ? t3.group.color : 'rgba(20,132,83,.15)';
           const tagText = t3.group && t3.group.textColor ? t3.group.textColor : 'var(--color-brand)';
           const pct = dimTotal>0 ? Math.max(6, Math.round(t3.v/dimTotal*100)) : 0;
           // 【需求2升级】Top3行可点击，弹窗：维度 + 基地 → 展示该基地此维度下触发的分队/事件
@@ -5872,7 +5913,7 @@ window.renderBaseRiskThreeStage = function(divBd, baseBd, opts){
           // 其他维度：显示二级问题类型
           : (subCats && subCats.length) ? `<div style="margin:6px 0 2px 0;padding-top:4px;border-top:1px dashed var(--color-border);display:flex;gap:3px;flex-wrap:wrap">${subCats.map(sc => `<span style="font-size:9px;padding:1px 6px;border-radius:4px;background:${meta.color}10;color:${meta.color};border:1px solid ${meta.color}33;font-weight:600">${sc}</span>`).join('')}</div>` : '';
         return `<div data-anchor-dim="${dimId}" class="stat-pill ts-dim-panel" style="background:var(--color-bg-elevated);border:1px solid var(--color-border);border-top:3px solid ${meta.color};border-radius:var(--radius-sm);padding:10px 12px;display:flex;flex-direction:column;gap:4px;transition:transform .16s ease, box-shadow .16s ease"
-          onmouseenter="this.style.transform='translateY(-2px)';this.style.boxShadow='0 4px 12px rgba(46,139,255,.08)'"
+          onmouseenter="this.style.transform='translateY(-2px)';this.style.boxShadow='0 4px 12px rgba(20,132,83,.08)'"
           onmouseleave="this.style.transform='';this.style.boxShadow=''">
           <div style="display:flex;align-items:center;gap:6px;margin-bottom:2px">
             <span style="font-size:15px">${meta.icon||'📌'}</span>
@@ -5887,7 +5928,7 @@ window.renderBaseRiskThreeStage = function(divBd, baseBd, opts){
       }).join('');
       const legendHtml = `<div style="display:flex;gap:6px;flex-wrap:wrap;padding-left:2px;margin-bottom:6px">
         <span style="font-size:10px;padding:2px 8px;border-radius:999px;background:rgba(245,34,45,.10);color:var(--color-risk-critical);font-weight:700;border:1px solid rgba(245,34,45,.30)">严重 ≥6</span>
-        <span style="font-size:10px;padding:2px 8px;border-radius:999px;background:rgba(46,139,255,.12);color:var(--color-brand);font-weight:700;border:1px solid rgba(46,139,255,.30)">中高 ≥3</span>
+        <span style="font-size:10px;padding:2px 8px;border-radius:999px;background:rgba(20,132,83,.12);color:var(--color-brand);font-weight:700;border:1px solid rgba(20,132,83,.30)">中高 ≥3</span>
         <span style="font-size:10px;padding:2px 8px;border-radius:999px;background:rgba(140,140,140,.10);color:var(--color-text-secondary);font-weight:700;border:1px solid var(--color-border)">关注 ≥1</span>
         <span style="font-size:10px;padding:2px 8px;border-radius:999px;background:rgba(82,196,26,.10);color:var(--color-success);font-weight:700;border:1px solid rgba(82,196,26,.25)">正常</span>
       </div>`;
@@ -5979,7 +6020,7 @@ window.renderBaseRiskThreeStage = function(divBd, baseBd, opts){
             ORDER.forEach(id => tmpDimCounts[id] += Number((d.dimensions&&d.dimensions[id])||0)||0);
             tmpSubOrgs.push({ nm: d.division_name||d.base_name||d.division_id||'分队', id: d.division_id||d.base_id||'', v: mt, dims: Object.assign({}, d.dimensions||{}) });
           });
-          const tmpBg = { root: curBaseId, displayName: typeof BASE_NAMES !== 'undefined' ? (BASE_NAMES[curBaseId] || curBaseId) : curBaseId, shortLabel: typeof BASE_NAMES !== 'undefined' ? (BASE_NAMES[curBaseId] || curBaseId) : curBaseId, group: { color: '#2e8bff', textColor: '#fff' }, total: tmpTotal, dimCounts: tmpDimCounts, subOrgs: tmpSubOrgs, childrenIds: tmpSubOrgs.map(x=>x.id) };
+          const tmpBg = { root: curBaseId, displayName: typeof BASE_NAMES !== 'undefined' ? (BASE_NAMES[curBaseId] || curBaseId) : curBaseId, shortLabel: typeof BASE_NAMES !== 'undefined' ? (BASE_NAMES[curBaseId] || curBaseId) : curBaseId, group: { color: '#148453', textColor: '#fff' }, total: tmpTotal, dimCounts: tmpDimCounts, subOrgs: tmpSubOrgs, childrenIds: tmpSubOrgs.map(x=>x.id) };
           // 按复合或单基地处理
           const isCompoundOrg = (tmpBg.childrenIds && tmpBg.childrenIds.length > 1) || (tmpBg.subOrgs && tmpBg.subOrgs.length > 1);
           if (isCompoundOrg) {
@@ -5994,7 +6035,7 @@ window.renderBaseRiskThreeStage = function(divBd, baseBd, opts){
               const sqIdSafe = String(sq.id||'').replace(/'/g,'&#39;');
               const sqNmSafe = String(sq.nm||'').replace(/'/g,'&#39;');
               return `<div data-act="open-squad" data-squad="${sqIdSafe}" data-squad-name="${sqNmSafe}" title="点击查看 ${sq.nm} 分队全部事件明细" style="background:var(--color-bg-elevated);border:1px solid var(--color-border);border-left:3px solid ${sqLvl.textColor};border-radius:var(--radius-sm);padding:10px 12px;cursor:pointer;transition:border-color .16s ease,transform .16s ease,box-shadow .16s ease"
-                onmouseenter="this.style.borderColor='var(--color-brand)';this.style.transform='translateY(-1px)';this.style.boxShadow='0 2px 8px rgba(46,139,255,.15)'"
+                onmouseenter="this.style.borderColor='var(--color-brand)';this.style.transform='translateY(-1px)';this.style.boxShadow='0 2px 8px rgba(20,132,83,.15)'"
                 onmouseleave="this.style.borderColor='var(--color-border)';this.style.transform='';this.style.boxShadow=''">
                 <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px">
                   <span style="font-weight:700;font-size:12px;color:var(--color-text-primary);flex:1">${sq.nm}</span>
@@ -6056,7 +6097,7 @@ window.renderBaseRiskThreeStage = function(divBd, baseBd, opts){
             const sqIdSafe = String(sq.id||'').replace(/'/g,'&#39;');
             const sqNmSafe = String(sq.nm||'').replace(/'/g,'&#39;');
             return `<div data-act="open-squad" data-squad="${sqIdSafe}" data-squad-name="${sqNmSafe}" title="点击查看 ${sq.nm} 分队全部事件明细" style="background:var(--color-bg-elevated);border:1px solid var(--color-border);border-left:3px solid ${sqLvl.textColor};border-radius:var(--radius-sm);padding:10px 12px;cursor:pointer;transition:border-color .16s ease,transform .16s ease,box-shadow .16s ease"
-              onmouseenter="this.style.borderColor='var(--color-brand)';this.style.transform='translateY(-1px)';this.style.boxShadow='0 2px 8px rgba(46,139,255,.15)'"
+              onmouseenter="this.style.borderColor='var(--color-brand)';this.style.transform='translateY(-1px)';this.style.boxShadow='0 2px 8px rgba(20,132,83,.15)'"
               onmouseleave="this.style.borderColor='var(--color-border)';this.style.transform='';this.style.boxShadow=''">
               <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px">
                 <span style="font-weight:700;font-size:12px;color:var(--color-text-primary);flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${sq.nm}</span>
@@ -6265,7 +6306,7 @@ window.renderBaseRiskThreeStage = function(divBd, baseBd, opts){
             root: curBaseId,
             displayName: typeof BASE_NAMES !== 'undefined' ? (BASE_NAMES[curBaseId] || curBaseId) : curBaseId,
             shortLabel: typeof BASE_NAMES !== 'undefined' ? (BASE_NAMES[curBaseId] || curBaseId) : curBaseId,
-            group: { color: '#2e8bff', textColor: '#fff' },
+            group: { color: '#148453', textColor: '#fff' },
             total: tmpTotal, dimCounts: tmpDimCounts, subOrgs: tmpSubOrgs
           }];
         }
@@ -6317,7 +6358,7 @@ window.renderBaseRiskThreeStage = function(divBd, baseBd, opts){
       })
       .map(bg => {
       const lvl = _riskLevelOf(bg.total);
-      const tagBg = bg.group.color || 'rgba(46,139,255,.15)';
+      const tagBg = bg.group.color || 'rgba(20,132,83,.15)';
       const tagText = bg.group.textColor || 'var(--color-brand)';
       // 根据该基地实际触发事件，灵活生成需要注意的维度（6大核心 + 偏离程序）
       const triggeredDims = ORDER.map(id => {
@@ -6398,7 +6439,7 @@ window.renderBaseRiskThreeStage = function(divBd, baseBd, opts){
             <div style="font-size:11px;color:var(--color-text-secondary);margin-top:1px">${bg.subOrgs.length} 个分队 · 合计 <b>${bg.total}</b> 件触发 · <b style="color:${lvl.textColor}">${urgencyText}</b></div>
           </div>
           <span style="font-size:10px;padding:2px 8px;border-radius:999px;background:${lvl.bg};color:${lvl.textColor};border:1px solid ${lvl.bd};font-weight:700;flex-shrink:0">${lvl.label}</span>
-          <button type="button" class="ts-personnel-btn" data-base-root="${bg.root}" data-base-name="${bg.displayName}" title="查看该基地全部触发事件责任人（预警人员）" style="flex-shrink:0;font-size:10px;padding:2px 8px;border-radius:999px;border:1px solid rgba(46,139,255,.35);background:rgba(46,139,255,.08);color:var(--color-brand);font-weight:700;cursor:pointer">👤 预警人员</button>
+          <button type="button" class="ts-personnel-btn" data-base-root="${bg.root}" data-base-name="${bg.displayName}" title="查看该基地全部触发事件责任人（预警人员）" style="flex-shrink:0;font-size:10px;padding:2px 8px;border-radius:999px;border:1px solid rgba(20,132,83,.35);background:rgba(20,132,83,.08);color:var(--color-brand);font-weight:700;cursor:pointer">👤 预警人员</button>
         </div>
         ${coreRiskHtml}
         ${devRiskHtml}
@@ -6439,7 +6480,7 @@ window.renderBaseRiskThreeStage = function(divBd, baseBd, opts){
         </div>
         <div style="display:flex;gap:4px;flex-wrap:wrap;flex-shrink:0">
           <span style="font-size:10px;padding:2px 8px;border-radius:999px;background:rgba(245,34,45,.10);color:var(--color-risk-critical);font-weight:700;border:1px solid rgba(245,34,45,.30)">严重 ≥6</span>
-          <span style="font-size:10px;padding:2px 8px;border-radius:999px;background:rgba(46,139,255,.12);color:var(--color-brand);font-weight:700;border:1px solid rgba(46,139,255,.30)">中高 ≥3</span>
+          <span style="font-size:10px;padding:2px 8px;border-radius:999px;background:rgba(20,132,83,.12);color:var(--color-brand);font-weight:700;border:1px solid rgba(20,132,83,.30)">中高 ≥3</span>
           <span style="font-size:10px;padding:2px 8px;border-radius:999px;background:rgba(140,140,140,.10);color:var(--color-text-secondary);font-weight:700;border:1px solid var(--color-border)">关注 ≥1</span>
         </div>
       </div>
@@ -6582,7 +6623,7 @@ window.showWarningPersonnelModal = function(baseRoot, baseName){
 
     const rankStyleOf = (rank) => {
       if (rank === 1) return { bg: 'rgba(250,173,20,.16)', tx: 'rgba(217,103,36,.95)', bd: '1px solid rgba(217,103,36,.35)' };
-      if (rank <= 3) return { bg: 'rgba(46,139,255,.12)', tx: 'var(--color-brand)', bd: '1px solid rgba(46,139,255,.30)' };
+      if (rank <= 3) return { bg: 'rgba(20,132,83,.12)', tx: 'var(--color-brand)', bd: '1px solid rgba(20,132,83,.30)' };
       return { bg: 'rgba(140,140,140,.10)', tx: 'var(--color-text-secondary)', bd: '1px solid var(--color-border)' };
     };
 
@@ -6730,7 +6771,7 @@ window.showWarningPersonnelModal = function(baseRoot, baseName){
         return '<div style="border:1px solid var(--color-border);border-radius:var(--radius-sm);padding:8px 10px;background:var(--color-bg-elevated)">'
           + '<div style="display:flex;align-items:center;gap:8px;margin-bottom:4px;flex-wrap:wrap">'
           +   '<span title="第 ' + (pi + 1) + ' 名" style="width:22px;height:22px;border-radius:50%;background:' + pr.bg + ';color:' + pr.tx + ';border:' + pr.bd + ';display:inline-flex;align-items:center;justify-content:center;font-weight:800;font-size:11px;flex-shrink:0">' + (pi + 1) + '</span>'
-          +   '<span style="width:26px;height:26px;border-radius:50%;background:rgba(46,139,255,.12);color:var(--color-brand);display:inline-flex;align-items:center;justify-content:center;font-weight:800;font-size:12px;flex-shrink:0">' + escapeHtml(p.name.slice(0, 1)) + '</span>'
+          +   '<span style="width:26px;height:26px;border-radius:50%;background:rgba(20,132,83,.12);color:var(--color-brand);display:inline-flex;align-items:center;justify-content:center;font-weight:800;font-size:12px;flex-shrink:0">' + escapeHtml(p.name.slice(0, 1)) + '</span>'
           +   '<span style="font-weight:700;font-size:13px;color:var(--color-text-primary)">' + escapeHtml(p.name) + '</span>'
           +   '<span style="font-size:11px;color:var(--color-text-secondary)">触发 <b style="color:var(--color-risk-medium)">' + p.count + '</b> 件</span>'
           +   '<span style="font-size:10px;color:var(--color-text-secondary);margin-left:auto;opacity:.7">▸ 点击分类可查看案例明细</span>'
@@ -6797,7 +6838,7 @@ window.showWarningPersonnelModal = function(baseRoot, baseName){
         { key: 'dev',  label: '偏离程序', cnt: countTabOf(sq, 'dev') }
       ];
       const tabBar = '<div style="display:flex;gap:6px;margin:2px 0 8px;flex-wrap:wrap">' + tabDefs.map((t, i) =>
-        '<button type="button" class="pw-tab" data-pw-tab="' + t.key + '" style="font-size:11px;padding:4px 12px;border-radius:999px;border:1px solid ' + (i === 0 ? 'rgba(46,139,255,.35)' : 'var(--color-border)') + ';background:' + (i === 0 ? 'rgba(46,139,255,.12)' : 'var(--color-bg-primary)') + ';color:' + (i === 0 ? 'var(--color-brand)' : 'var(--color-text-primary)') + ';font-weight:700;cursor:pointer">' + t.label + ' <span style="opacity:.75">' + t.cnt + '</span></button>'
+        '<button type="button" class="pw-tab" data-pw-tab="' + t.key + '" style="font-size:11px;padding:4px 12px;border-radius:999px;border:1px solid ' + (i === 0 ? 'rgba(20,132,83,.35)' : 'var(--color-border)') + ';background:' + (i === 0 ? 'rgba(20,132,83,.12)' : 'var(--color-bg-primary)') + ';color:' + (i === 0 ? 'var(--color-brand)' : 'var(--color-text-primary)') + ';font-weight:700;cursor:pointer">' + t.label + ' <span style="opacity:.75">' + t.cnt + '</span></button>'
       ).join('') + '</div>';
       const tabHint = {
         all:  '综合排名 · 按该人员全部触发事件数（事件越多排名越高） · 每名人员的分类按「六大核心 / 偏离程序」归类展示',
@@ -6843,9 +6884,9 @@ window.showWarningPersonnelModal = function(baseRoot, baseName){
           const t = tab.dataset.pwTab || 'all';
           step2El.querySelectorAll('.pw-tab').forEach(b => {
             const act = b.dataset.pwTab === t;
-            b.style.background = act ? 'rgba(46,139,255,.12)' : 'var(--color-bg-primary)';
+            b.style.background = act ? 'rgba(20,132,83,.12)' : 'var(--color-bg-primary)';
             b.style.color = act ? 'var(--color-brand)' : 'var(--color-text-primary)';
-            b.style.border = act ? '1px solid rgba(46,139,255,.35)' : '1px solid var(--color-border)';
+            b.style.border = act ? '1px solid rgba(20,132,83,.35)' : '1px solid var(--color-border)';
           });
           step2El.querySelectorAll('.pw-panel').forEach(panel => {
             panel.style.display = panel.dataset.pwTab === t ? '' : 'none';
@@ -6978,11 +7019,11 @@ function renderRiskOpsConsole(d, curTrend, opts){
     const opTabHtml = OP_TAB.map(t => {
       const active = tr.mode === t.k;
       return `<button class="op-tab ${active?'active':''}" data-mode="${t.k}"
-        style="padding:5px 14px;border-radius:8px;border:1px solid ${active?'var(--color-brand)':'var(--color-border)'};background:${active?'rgba(46,139,255,.12)':'var(--color-bg-primary)'};color:${active?'var(--color-brand)':'var(--color-text-secondary)'};cursor:pointer;font-size:13px;font-weight:${active?600:400}">${t.label}</button>`;
+        style="padding:5px 14px;border-radius:8px;border:1px solid ${active?'var(--color-brand)':'var(--color-border)'};background:${active?'rgba(20,132,83,.12)':'var(--color-bg-primary)'};color:${active?'var(--color-brand)':'var(--color-text-secondary)'};cursor:pointer;font-size:13px;font-weight:${active?600:400}">${t.label}</button>`;
     }).join('');
     const quickHtml = quickBtns.map(b => `<button class="op-quick" data-quick="${b.k}" style="padding:3px 10px;border-radius:6px;border:1px solid var(--color-border);background:var(--color-bg-primary);cursor:pointer;font-size:12px;color:var(--color-text-secondary)">${b.label}</button>`).join('');
     const customBox = tr.mode === 'custom' ? 'flex' : 'none';
-    const opTopFilter = `<div id="opsConsoleTop" style="background:linear-gradient(180deg, rgba(46,139,255,.10), rgba(46,139,255,.02));border:1px solid rgba(46,139,255,.30);border-radius:10px;padding:12px 14px;margin-bottom:14px">
+    const opTopFilter = `<div id="opsConsoleTop" style="background:linear-gradient(180deg, rgba(20,132,83,.10), rgba(20,132,83,.02));border:1px solid rgba(20,132,83,.30);border-radius:10px;padding:12px 14px;margin-bottom:14px">
       <div style="display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap">
         <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">
           <div style="font:var(--font-h3);color:var(--color-text-primary)">⏱ 操作台统一时间筛选</div>
@@ -7063,12 +7104,12 @@ function renderRiskOpsConsole(d, curTrend, opts){
         </select>
         <input type="date" id="trendCustA" value="${tc.customDate1||''}" placeholder="A日期" style="display:${tc.base==='custom1'?'inline-block':'none'};padding:3px 6px;border-radius:6px;border:1px solid var(--color-border);background:var(--color-bg-primary);color:var(--color-text-primary);font:var(--font-caption)">
         <input type="date" id="trendCustB" value="${tc.customDate2||''}" placeholder="B日期" style="display:${tc.ref==='custom2'?'inline-block':'none'};padding:3px 6px;border-radius:6px;border:1px solid var(--color-border);background:var(--color-bg-primary);color:var(--color-text-primary);font:var(--font-caption)">
-        <button id="opSwapTrendBtn" style="padding:4px 10px;border-radius:6px;border:1px solid var(--color-brand);background:rgba(46,139,255,.08);color:var(--color-brand);cursor:pointer;font-size:12px;font-weight:600" title="交换对比期 A⇅B">⇅ 交换</button>
+        <button id="opSwapTrendBtn" style="padding:4px 10px;border-radius:6px;border:1px solid var(--color-brand);background:rgba(20,132,83,.08);color:var(--color-brand);cursor:pointer;font-size:12px;font-weight:600" title="交换对比期 A⇅B">⇅ 交换</button>
         <button id="opApplyTrendBtn" style="padding:5px 14px;border-radius:8px;border:none;background:linear-gradient(90deg,#FA8C16,#D46B08);color:#fff;cursor:pointer;font-weight:700;font-size:12px">📈 应用趋势对比</button>
         <span id="opRangeHint" style="margin-left:4px;font:var(--font-caption);color:var(--color-text-disabled);margin-right:auto">计算范围：默认 ${year} 年 ${month} 月（与数据源 current_month 同步）</span>
       </div>
       <!-- 【需求4】第二行：分队矩阵筛选统一入口（原 renderSquadRiskFocus 独立 filterBar 删除，全部整合于此 → 筛选功能融合为一） -->
-      <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-top:10px;padding-top:10px;border-top:1px dashed rgba(46,139,255,.25)">
+      <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-top:10px;padding-top:10px;border-top:1px dashed rgba(20,132,83,.25)">
         <div style="font:var(--font-caption);font-weight:600;color:var(--color-brand);white-space:nowrap">🎯 分队矩阵统一筛选</div>
         <div id="opSquadFilterGroup" style="display:flex;gap:6px;align-items:center;flex-wrap:wrap;flex:1;min-width:0">
           <label style="font:var(--font-caption);color:var(--color-text-secondary)">一级基地：</label>
@@ -7076,7 +7117,7 @@ function renderRiskOpsConsole(d, curTrend, opts){
             <option value="">全部一级基地</option>
             ${(function(){
                 // 同步自 renderSquadRiskFocus：基于 HQ_BASE_GROUPS 分组构建
-                const hqGroups = (typeof groupDivisionsByHQ === 'function') ? groupDivisionsByHQ(divBd) : [{ group: { shortLabel:'总', displayName:'全部基地', textColor:'#fff', color:'#1890ff' }, divisions: divBd.slice() }];
+                const hqGroups = (typeof groupDivisionsByHQ === 'function') ? groupDivisionsByHQ(divBd) : [{ group: { shortLabel:'总', displayName:'全部基地', textColor:'#fff', color:'#1fa56a' }, divisions: divBd.slice() }];
                 const out = []; const seen = new Set(['']);
                 hqGroups.forEach(gi=>{
                   const gid = gi.group.root || gi.group.shortLabel || '';
@@ -7190,7 +7231,7 @@ function renderRiskOpsConsole(d, curTrend, opts){
     })();
     const gridCols = STATE.opRightCollapsed ? 'minmax(0,1fr)' : 'minmax(0, 6fr) minmax(0, 4fr)';
     const rightColInner = STATE.opRightCollapsed
-      ? `<div id="opsRightCollapseBar" onclick="window.toggleRight(false)" style="padding:6px 12px;background:linear-gradient(90deg, rgba(82,196,26,.10), rgba(46,139,255,.08));border:1px solid rgba(46,139,255,.25);border-radius:8px;display:flex;align-items:center;gap:8px;cursor:pointer;margin-bottom:12px" title="展开趋势对比（占40%宽度），便于对比 7 维度方向走势">
+      ? `<div id="opsRightCollapseBar" onclick="window.toggleRight(false)" style="padding:6px 12px;background:linear-gradient(90deg, rgba(82,196,26,.10), rgba(20,132,83,.08));border:1px solid rgba(20,132,83,.25);border-radius:8px;display:flex;align-items:center;gap:8px;cursor:pointer;margin-bottom:12px" title="展开趋势对比（占40%宽度），便于对比 7 维度方向走势">
            <span style="font:var(--font-caption);font-weight:700;color:var(--color-brand)">◂ 展开趋势对比</span>
            <span style="padding:2px 10px;border-radius:999px;background:rgba(245,34,45,.10);color:var(--color-risk-critical);font:var(--font-caption);font-weight:700">↑ 上升 ${trendSum.up}/7</span>
            <span style="padding:2px 10px;border-radius:999px;background:rgba(140,140,140,.10);color:var(--color-text-secondary);font:var(--font-caption);font-weight:700">→ 持平 ${trendSum.flat}/7</span>
@@ -7225,7 +7266,7 @@ function renderRiskOpsConsole(d, curTrend, opts){
       </div>
       <div style="display:flex;gap:8px;align-items:center">
         <button onclick="refreshOpsConsole()" style="padding:4px 12px;border-radius:6px;border:1px solid var(--color-border);background:var(--color-bg-primary);cursor:pointer;font-size:12px;color:var(--color-text-secondary)">🔄 刷新操作台</button>
-        <button onclick="exportOpsConsoleSnapshot()" style="padding:4px 12px;border-radius:6px;border:1px solid var(--color-brand);background:rgba(46,139,255,.08);color:var(--color-brand);cursor:pointer;font-size:12px;font-weight:600">📥 导出当前视图</button>
+        <button onclick="exportOpsConsoleSnapshot()" style="padding:4px 12px;border-radius:6px;border:1px solid var(--color-brand);background:rgba(20,132,83,.08);color:var(--color-brand);cursor:pointer;font-size:12px;font-weight:600">📥 导出当前视图</button>
       </div>
     </div>`;
 
@@ -7243,13 +7284,13 @@ function renderRiskOpsConsole(d, curTrend, opts){
     // 【需求2】布局调整：时间筛选置于🧠智能风险总结之上
     //   新顺序：⏱ 时间筛选器（独立浮动卡片）→ 🧠 智能风险总结 → 🎛 操作台主卡片（分队矩阵+趋势对比）
     //   同时让时间筛选联动"各大基地机场天气信息"面板（下方 _repaintWeatherWithFilter 钩子）
-    const timeFilterStandalone = `<div class="chart-box" id="opsTimeFilterStandalone" style="background:linear-gradient(180deg, rgba(46,139,255,.10), rgba(46,139,255,.02));border:1px solid rgba(46,139,255,.30);border-radius:10px;padding:12px 14px;margin-bottom:14px">
+    const timeFilterStandalone = `<div class="chart-box" id="opsTimeFilterStandalone" style="background:linear-gradient(180deg, rgba(20,132,83,.10), rgba(20,132,83,.02));border:1px solid rgba(20,132,83,.30);border-radius:10px;padding:12px 14px;margin-bottom:14px">
       <div style="display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;margin-bottom:8px">
         <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">
           <div style="font:var(--font-h3);color:var(--color-text-primary)">⏱ 风险管理操作台 · 时间筛选</div>
           <div style="font-size:11px;color:var(--color-brand);font-weight:600">🔴 作用范围：Top3 排名 + 趋势对比/总结 + 机场天气与可能影响 · <b style="color:var(--color-success)">🧠 智能总结 & 分队矩阵同步联动（数据驱动·动态渲染）</b></div>
         </div>
-        <span id="opsTimeFilterRangeBadge" style="font-size:12px;padding:2px 10px;border-radius:999px;background:rgba(46,139,255,.12);color:var(--color-brand);font-weight:700;border:1px solid rgba(46,139,255,.3)">当前范围：${_rangeLabel}</span>
+        <span id="opsTimeFilterRangeBadge" style="font-size:12px;padding:2px 10px;border-radius:999px;background:rgba(20,132,83,.12);color:var(--color-brand);font-weight:700;border:1px solid rgba(20,132,83,.3)">当前范围：${_rangeLabel}</span>
       </div>
       ${opTopFilter}
     </div>`;
@@ -7511,7 +7552,7 @@ function buildSmartInsightPanel(d, curTrend, timeRangeLabel){
     const _lvActive = (lv) => (STATE.squadFocusFilter && STATE.squadFocusFilter.squadLevel === lv) ? 'box-shadow:0 0 0 2px currentColor;opacity:1;transform:scale(1.02)' : 'opacity:.92';
     const globalBadges = `
       <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-bottom:12px">
-        <span style="padding:3px 10px;border-radius:999px;background:rgba(46,139,255,.10);color:var(--color-brand);font-weight:700;font-size:12px;border:1px solid rgba(46,139,255,.25)">👥 总分队 ${totalSquads}</span>
+        <span style="padding:3px 10px;border-radius:999px;background:rgba(20,132,83,.10);color:var(--color-brand);font-weight:700;font-size:12px;border:1px solid rgba(20,132,83,.25)">👥 总分队 ${totalSquads}</span>
         <span class="squad-level-badge" data-level="focus" title="点击筛选：仅显示需关注分队（1-4 件）" style="cursor:pointer;user-select:none;${_lvActive('focus')};padding:3px 10px;border-radius:999px;background:rgba(250,140,22,.10);color:var(--color-risk-high);font-weight:700;font-size:12px;border:1px solid rgba(250,140,22,.25)">🎯 需关注 ${focus}（${focusPct}%）</span>
         <span class="squad-level-badge" data-level="critical" title="点击筛选：仅显示严重分队（≥5 件）" style="cursor:pointer;user-select:none;${_lvActive('critical')};padding:3px 10px;border-radius:999px;background:rgba(245,34,45,.10);color:var(--color-risk-critical);font-weight:700;font-size:12px;border:1px solid rgba(245,34,45,.25)">🔴 严重分队 ${critical}</span>
         <span class="squad-level-badge" data-level="stable" title="点击筛选：仅显示稳定分队（0 件）" style="cursor:pointer;user-select:none;${_lvActive('stable')};padding:3px 10px;border-radius:999px;background:rgba(82,196,26,.10);color:var(--color-success);font-weight:700;font-size:12px;border:1px solid rgba(82,196,26,.25)">✅ 稳定分队 ${stable}</span>
@@ -7627,7 +7668,7 @@ function buildSmartInsightPanel(d, curTrend, timeRangeLabel){
         <span style="font-size:16px">📈</span>
         <span style="font-weight:700;color:var(--color-text-primary);font-size:14px">7 维度趋势研判（上升 / 持平 / 改善）</span>
       </div>
-      <div style="padding:6px 10px;margin-bottom:10px;background:linear-gradient(90deg,rgba(46,139,255,.08),rgba(46,139,255,.02));border:1px solid rgba(46,139,255,.25);border-radius:6px;font-size:11px;color:var(--color-text-secondary);line-height:1.55">
+      <div style="padding:6px 10px;margin-bottom:10px;background:linear-gradient(90deg,rgba(20,132,83,.08),rgba(20,132,83,.02));border:1px solid rgba(20,132,83,.25);border-radius:6px;font-size:11px;color:var(--color-text-secondary);line-height:1.55">
         <b style="color:var(--color-brand)">对比口径：</b>研判百分比 = (当前期 − 参照期) ÷ 参照期 × 100%；<b>阈值：</b>变化率＞+5% 判定为「↑ 上升」，＜-5% 判定为「↓ 改善」，介于±5% 为「➡️ 持平」。
         <br><b style="color:var(--color-text-primary)">【当前期】</b>${curLabel}　<b style="margin-left:6px;color:var(--color-text-primary)">【参照期】</b>${refLabel}
       </div>
@@ -7782,11 +7823,11 @@ function generateOpsStatsBar(d, divBd){
     const focusPct = total > 0 ? Math.round(focus/total*100) : 0;
     return `<div style="display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-bottom:14px;padding:10px 14px;background:var(--color-bg-primary);border-radius:10px;border:1px solid var(--color-border)">
       <span style="font-size:13px;color:var(--color-text-secondary);font-weight:600">📊 全局统计：</span>
-      <span style="padding:3px 12px;border-radius:999px;background:rgba(46,139,255,.10);color:var(--color-brand);font-weight:700;font-size:13px;border:1px solid rgba(46,139,255,.25)">总分队 ${total}</span>
+      <span style="padding:3px 12px;border-radius:999px;background:rgba(20,132,83,.10);color:var(--color-brand);font-weight:700;font-size:13px;border:1px solid rgba(20,132,83,.25)">总分队 ${total}</span>
       <span style="padding:3px 12px;border-radius:999px;background:rgba(250,140,22,.10);color:var(--color-risk-high);font-weight:700;font-size:13px;border:1px solid rgba(250,140,22,.25)">需关注 ${focus}（${focusPct}%）</span>
       <span style="padding:3px 12px;border-radius:999px;background:rgba(245,34,45,.10);color:var(--color-risk-critical);font-weight:700;font-size:13px;border:1px solid rgba(245,34,45,.25)">🔴 严重 ${critical}</span>
       <span style="padding:3px 12px;border-radius:999px;background:rgba(82,196,26,.10);color:var(--color-success);font-weight:700;font-size:13px;border:1px solid rgba(82,196,26,.25)">✅ 稳定 ${stable}</span>
-      <span style="padding:3px 12px;border-radius:999px;background:rgba(46,139,255,.08);color:var(--color-text-primary);font-weight:700;font-size:13px;border:1px solid var(--color-border)">${totalEvents} 件（总触发）</span>
+      <span style="padding:3px 12px;border-radius:999px;background:rgba(20,132,83,.08);color:var(--color-text-primary);font-weight:700;font-size:13px;border:1px solid var(--color-border)">${totalEvents} 件（总触发）</span>
     </div>`;
   }catch(e){ return ''; }
 }
@@ -7971,7 +8012,7 @@ function initRiskOpsConsole(d, curTrend){
         // 高亮 tab（全局范围内的所有 op-tab 同步激活态）
         queryAll('.op-tab').forEach(x=>{ x.classList.remove('active'); x.style.borderColor='var(--color-border)'; x.style.background='var(--color-bg-primary)'; x.style.color='var(--color-text-secondary)'; x.style.fontWeight='400'; });
         btn.classList.add('active');
-        btn.style.borderColor='var(--color-brand)'; btn.style.background='rgba(46,139,255,.12)'; btn.style.color='var(--color-brand)'; btn.style.fontWeight='600';
+        btn.style.borderColor='var(--color-brand)'; btn.style.background='rgba(20,132,83,.12)'; btn.style.color='var(--color-brand)'; btn.style.fontWeight='600';
       });
     });
 
@@ -8036,7 +8077,7 @@ function initRiskOpsConsole(d, curTrend){
         if (target) {
           target.scrollIntoView({ behavior:'smooth', block:'center' });
           target.style.transition = 'background .6s, box-shadow .6s';
-          target.style.background = 'rgba(46,139,255,.18)';
+          target.style.background = 'rgba(20,132,83,.18)';
           target.style.boxShadow = '0 0 0 2px var(--color-brand) inset';
           setTimeout(()=>{ if(target){ target.style.background = ''; target.style.boxShadow=''; } }, 2200);
         }
@@ -8123,7 +8164,7 @@ function initRiskOpsConsole(d, curTrend){
           if (STATE.opCompactMode) {
             compactBtn.textContent = '📐 紧凑';
             compactBtn.style.borderColor = 'var(--color-brand)';
-            compactBtn.style.background = 'rgba(46,139,255,.12)';
+            compactBtn.style.background = 'rgba(20,132,83,.12)';
             compactBtn.style.color = 'var(--color-brand)';
             compactBtn.style.fontWeight = '600';
           } else {
@@ -8284,7 +8325,7 @@ function rebuildShadowTrendSummary(d, originalCurTrend){
     }
     // 在右栏顶部加上时间 A vs B 的小字说明
     const hint = document.createElement('div');
-    hint.style.cssText = 'font:var(--font-caption);color:var(--color-text-secondary);padding:4px 8px;margin:6px 0 8px;background:rgba(46,139,255,.06);border-radius:6px;border-left:3px solid var(--color-brand)';
+    hint.style.cssText = 'font:var(--font-caption);color:var(--color-text-secondary);padding:4px 8px;margin:6px 0 8px;background:rgba(20,132,83,.06);border-radius:6px;border-left:3px solid var(--color-brand)';
     hint.innerHTML = `📊 <strong>对比期</strong>：<span style="font-weight:700;color:var(--color-risk-critical)">A=${baseR.label}（${baseEvs.length}件）</span> vs <span style="font-weight:700;color:var(--color-success)">B=${refR.label}（${refEvs.length}件）</span>  ·  基于全部事件按维度计数，可随时在顶部改对比期。`;
     if (rightCol) {
       const old = rightCol.querySelector('.trend-compare-hint'); if (old) old.remove();
@@ -8709,7 +8750,7 @@ function _repaintDimStatsWithFilter() {
       let fatigueReportHtml = '';
       if (dim.id === 'RD02') fatigueReportHtml = '<button class="btn-fatigue-report" onclick="event.stopPropagation();openFatigueModal()">📊 自评上报</button>';
       if (isTotal) {
-        return `<div class="dim-stat-card" style="background:linear-gradient(135deg,rgba(46,139,255,.08),rgba(46,139,255,.02));border:1px solid rgba(46,139,255,.3)" onclick="openDimModal('${dim.id}','${baseId}')">
+        return `<div class="dim-stat-card" style="background:linear-gradient(135deg,rgba(20,132,83,.08),rgba(20,132,83,.02));border:1px solid rgba(20,132,83,.3)" onclick="openDimModal('${dim.id}','${baseId}')">
           <div class="icon">${dim.icon}</div><div class="name">${dim.name}</div>
           <div class="count" style="color:${dim.color}">${curCount}</div>
           <div class="sub">${dimStat?'时间筛选期合计 · 全维度汇总':'本月合计 · 全维度汇总'}</div>
@@ -8976,7 +9017,7 @@ window.toggleOpCompactMode = function () {
   if (btn) {
     btn.textContent = STATE.opCompactMode ? '📐 紧凑' : '📊 舒适';
     btn.style.border = `1px solid ${STATE.opCompactMode?'var(--color-brand)':'var(--color-border)'}`;
-    btn.style.background = STATE.opCompactMode ? 'rgba(46,139,255,.12)' : 'var(--color-bg-elevated)';
+    btn.style.background = STATE.opCompactMode ? 'rgba(20,132,83,.12)' : 'var(--color-bg-elevated)';
     btn.style.color = STATE.opCompactMode ? 'var(--color-brand)' : 'var(--color-text-secondary)';
     btn.style.fontWeight = STATE.opCompactMode ? 600 : 400;
   }
@@ -9290,7 +9331,7 @@ function renderSquadRiskFocus(d){
   // 按 HQ_BASE_GROUPS 分组
   const hqGroups = (typeof groupDivisionsByHQ === 'function')
     ? groupDivisionsByHQ(divBd)
-    : [{ group: { shortLabel:'总', displayName:'全部基地', textColor:'#fff', color:'#1890ff' }, divisions: divBd.slice() }];
+    : [{ group: { shortLabel:'总', displayName:'全部基地', textColor:'#fff', color:'#1fa56a' }, divisions: divBd.slice() }];
 
   // 在 hqGroups 上应用分队筛选器
   const filteredGroups = hqGroups.map(gi=>{
@@ -9397,7 +9438,7 @@ function renderSquadRiskFocus(d){
   const renderSquadRow=(b, groupInfo)=>{
     const baseLabel = (groupInfo && groupInfo.group) ? groupInfo.group.shortLabel : ((typeof mapBaseIdToHQGroup==='function')?mapBaseIdToHQGroup(b.base_id).shortLabel:b.base_id);
     const tagColor = (groupInfo && groupInfo.group) ? groupInfo.group.textColor : 'var(--color-brand)';
-    const tagBg = (groupInfo && groupInfo.group) ? groupInfo.group.color : 'rgba(46,139,255,.15)';
+    const tagBg = (groupInfo && groupInfo.group) ? groupInfo.group.color : 'rgba(20,132,83,.15)';
     const rowUid = 'srf_' + (b.division_id||Math.random().toString(36).slice(2,8));
     const sevenRisks = b._sevenRisks || [];
     // 把 sevenRisks 按 id 分桶
@@ -9427,7 +9468,7 @@ function renderSquadRiskFocus(d){
       const dimValColor = totalInDim>0 ? (r.isCritical?'var(--color-risk-critical)':dm.color) : 'var(--color-text-disabled)';
       return `<div class="sv-dim-cell"
         ${clickAction}
-        style="padding:5px 6px;border-radius:6px;border:1px solid ${cardBd};background:${cardBg};display:flex;flex-direction:column;${cursorStyle};min-height:60px;transition:all .15s;${totalInDim>0?'hover:box-shadow:0 2px 8px rgba(46,139,255,.15);hover:translateY(-1px)':''}">
+        style="padding:5px 6px;border-radius:6px;border:1px solid ${cardBd};background:${cardBg};display:flex;flex-direction:column;${cursorStyle};min-height:60px;transition:all .15s;${totalInDim>0?'hover:box-shadow:0 2px 8px rgba(20,132,83,.15);hover:translateY(-1px)':''}">
         <div style="display:flex;align-items:center;gap:3px;white-space:nowrap">
           <span style="font-size:14px;flex-shrink:0">${dm.icon||''}</span>
           <span style="font-weight:600;color:var(--color-text-primary);font-size:13px;overflow:hidden;text-overflow:ellipsis;flex:1;min-width:0">${dm.dimension_name}</span>
@@ -9579,7 +9620,7 @@ function renderSquadRiskFocus(d){
           <span style="font-size:11px;padding:1px 5px;border-radius:3px;background:${tagBg};color:${tagColor};flex-shrink:0;white-space:nowrap;font-weight:600">${baseLabel}</span>
         </div>
         <div style="display:flex;align-items:center;gap:5px;flex-shrink:0">
-          <span style="padding:1px 7px;border-radius:5px;background:linear-gradient(90deg,rgba(46,139,255,.12),rgba(46,139,255,.06));color:var(--color-brand);font-weight:800;font-size:13px;white-space:nowrap;border:1px solid rgba(46,139,255,.25)">${b.month_total||0} 件</span>
+          <span style="padding:1px 7px;border-radius:5px;background:linear-gradient(90deg,rgba(20,132,83,.12),rgba(20,132,83,.06));color:var(--color-brand);font-weight:800;font-size:13px;white-space:nowrap;border:1px solid rgba(20,132,83,.25)">${b.month_total||0} 件</span>
           ${viewAllBtn}
         </div>
       </div>
@@ -9592,7 +9633,7 @@ function renderSquadRiskFocus(d){
   filteredGroups.forEach(gi => {
     if (!gi.divisions.length) return;
     const g = gi.group;
-    rowsHtml += `<div class="squad-group-header" style="background:${g.color||'rgba(46,139,255,.15)'};padding:7px 12px;margin-bottom:6px;border-radius:8px;color:${g.textColor||'#fff'};font-size:14px;font-weight:600">🏢 ${g.displayName||g.shortLabel||gi.group.groupId||'分组'} · ${gi.divisions.length} 个分队</div>`;
+    rowsHtml += `<div class="squad-group-header" style="background:${g.color||'rgba(20,132,83,.15)'};padding:7px 12px;margin-bottom:6px;border-radius:8px;color:${g.textColor||'#fff'};font-size:14px;font-weight:600">🏢 ${g.displayName||g.shortLabel||gi.group.groupId||'分组'} · ${gi.divisions.length} 个分队</div>`;
     gi.divisions.forEach(b => { rowsHtml += renderSquadRow(b, gi); });
   });
   if (!rowsHtml) {
@@ -9620,7 +9661,7 @@ function renderSquadRiskFocus(d){
         <span style="font-size:11px;color:var(--color-text-secondary);margin-left:8px">基于 ${_labelFull} · 6 大核心风险 + 偏离程序（SOP）7 维度全展示 · ${_filterTag}</span>
       </div>
       <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
-        <div class="squad-level-badge" data-level="" title="点击：清除分队等级筛选（显示全部）" style="cursor:pointer;user-select:none;padding:4px 12px;border-radius:12px;background:rgba(46,139,255,.12);color:var(--color-brand);font-weight:600;font-size:12px;border:1px solid rgba(46,139,255,.25)">
+        <div class="squad-level-badge" data-level="" title="点击：清除分队等级筛选（显示全部）" style="cursor:pointer;user-select:none;padding:4px 12px;border-radius:12px;background:rgba(20,132,83,.12);color:var(--color-brand);font-weight:600;font-size:12px;border:1px solid rgba(20,132,83,.25)">
           ${_labelShort} 总事件 <b style="color:var(--color-brand);font-size:14px;margin-left:2px">${allRisks}</b> 件
         </div>
         <div class="squad-level-badge" data-level="stable" title="点击筛选：仅显示稳定分队（0 件）" style="cursor:pointer;user-select:none;padding:4px 12px;border-radius:12px;background:rgba(82,196,26,.12);color:var(--color-risk-low);font-weight:600;font-size:12px;border:1px solid rgba(82,196,26,.4)">
@@ -9641,7 +9682,7 @@ function renderSquadRiskFocus(d){
       </div>
     </div>
     <div id="squadCardsContainer" style="margin-top:10px;display:grid;grid-template-columns:repeat(${STATE.opCompactMode?4:3}, 1fr);gap:8px">${rowsHtml}</div>
-    <div style="margin-top:10px;padding:6px 10px;font-size:11px;color:var(--color-text-secondary);background:linear-gradient(90deg, rgba(46,139,255,.06), transparent);border-left:3px solid var(--color-brand);border-radius:0 4px 4px 0">
+    <div style="margin-top:10px;padding:6px 10px;font-size:11px;color:var(--color-text-secondary);background:linear-gradient(90deg, rgba(20,132,83,.06), transparent);border-left:3px solid var(--color-brand);border-radius:0 4px 4px 0">
       <b style="color:var(--color-text-primary)">7 个维度：</b>${sevenDims.map(dm=>`<span style="display:inline-block;padding:1px 6px;margin:1px 4px 1px 0;border-radius:6px;background:${dm.color}15;color:${dm.color};border:1px solid ${dm.color}55;font-size:10px">${dm.icon} ${dm.dimension_name}</span>`).join('')}
       &nbsp;&nbsp;<b style="color:var(--color-text-primary)">关注规则：</b>单维度触发 ≥1 件 或 高于均值（上升）→ 标「⚠️ 需关注」；≥5 件 或 超均值 2 倍 → 标「🔴 重点关注」
     </div>
@@ -9669,7 +9710,7 @@ window._buildSquadProportionMatrix = function(d, rangeLabel){
       const cells = dims.map(dm=>`<td style="padding:6px 8px;border-bottom:1px solid var(--color-border);text-align:center">${b.dimensions[dm.dimension_id]||0}</td>`).join('');
       const barColor = b.month_total>0 ? 'var(--color-brand)' : 'var(--color-border)';
       const tagColor = g0.textColor || 'var(--color-brand)';
-      const tagBg = g0.color || 'rgba(46,139,255,.15)';
+      const tagBg = g0.color || 'rgba(20,132,83,.15)';
       return `<tr><td style="padding:6px 8px;border-bottom:1px solid var(--color-border);font-weight:600">${b.division_name}<span style="font-size:9px;padding:1px 5px;border-radius:3px;background:${tagBg};color:${tagColor};margin-left:4px">${baseLabel}</span></td><td style="padding:6px 8px;border-bottom:1px solid var(--color-border);text-align:center;color:var(--color-brand);font-weight:700">${b.month_total}</td><td style="padding:6px 8px;border-bottom:1px solid var(--color-border);text-align:center"><div style="display:flex;align-items:center;gap:6px"><div style="flex:1;height:8px;background:var(--color-bg-primary);border-radius:4px;overflow:hidden;min-width:50px"><div style="height:100%;width:${barWidth}%;background:${barColor};border-radius:4px;transition:width .3s"></div></div><span style="min-width:36px;text-align:right">${percent}%</span></div></td>${cells}</tr>`;
     };
     let divRows = '';
@@ -9681,12 +9722,12 @@ window._buildSquadProportionMatrix = function(d, rangeLabel){
     });
     const divTotalCells = dims.map(dm=>`<td style="padding:6px 8px;border-top:2px solid var(--color-brand);text-align:center;font-weight:700;color:var(--color-brand)">${divBd.reduce((s,b)=>s+Number((b.dimensions&&b.dimensions[dm.dimension_id])||0),0)}</td>`).join('');
     const divTotalSumRow = divBd.reduce((s,b)=>s+Number(b.month_total||0),0);
-    divRows += `<tr style="background:rgba(46,139,255,.06)"><td style="padding:6px 8px;border-top:2px solid var(--color-brand);font-weight:700">全部分队合计</td><td style="padding:6px 8px;border-top:2px solid var(--color-brand);text-align:center;color:var(--color-brand);font-weight:700">${divTotalSumRow}</td><td style="padding:6px 8px;border-top:2px solid var(--color-brand);text-align:center;font-weight:700">100%</td>${divTotalCells}</tr>`;
+    divRows += `<tr style="background:rgba(20,132,83,.06)"><td style="padding:6px 8px;border-top:2px solid var(--color-brand);font-weight:700">全部分队合计</td><td style="padding:6px 8px;border-top:2px solid var(--color-brand);text-align:center;color:var(--color-brand);font-weight:700">${divTotalSumRow}</td><td style="padding:6px 8px;border-top:2px solid var(--color-brand);text-align:center;font-weight:700">100%</td>${divTotalCells}</tr>`;
     const timeLabel = rangeLabel || ((d.year ? d.year + '年' : '') + (d.current_month ? d.current_month + '月' : ''));
     return `<div class="chart-box" style="background:var(--color-bg-elevated);border-radius:var(--radius-sm);padding:12px;margin-bottom:16px;border:1px solid var(--color-border)">
       <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;flex-wrap:wrap">
         <div style="font:var(--font-h3);color:var(--color-text-primary);flex:1">🏢 分队风险矩阵表 · 占比视图（含7大维度具体事件数量 · ${timeLabel} · 共 ${divBd.length} 个分队）</div>
-        <button onclick="document.getElementById('squadRiskDetailPanel')?.scrollIntoView({behavior:'smooth',block:'start'})" style="padding:3px 10px;border-radius:var(--radius-sm);border:1px solid var(--color-brand);background:rgba(46,139,255,.1);color:var(--color-brand);cursor:pointer;font:var(--font-caption);font-weight:600;white-space:nowrap">🎯 查看明细视图 →</button>
+        <button onclick="document.getElementById('squadRiskDetailPanel')?.scrollIntoView({behavior:'smooth',block:'start'})" style="padding:3px 10px;border-radius:var(--radius-sm);border:1px solid var(--color-brand);background:rgba(20,132,83,.1);color:var(--color-brand);cursor:pointer;font:var(--font-caption);font-weight:600;white-space:nowrap">🎯 查看明细视图 →</button>
       </div>
       <div style="overflow-x:auto">
         <table style="width:100%;border-collapse:collapse;font:var(--font-body);font-size:12px;min-width:700px">
@@ -10002,7 +10043,7 @@ function openSquadAllEvents(divisionId, dimId){
     || div.base_id
     || '';
   const summaryHeader = `
-    <div style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:10px;padding:12px 14px;background:linear-gradient(135deg, rgba(46,139,255,.08), rgba(46,139,255,.02));border:1px solid rgba(46,139,255,.25);border-radius:10px;align-items:center;justify-content:space-between">
+    <div style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:10px;padding:12px 14px;background:linear-gradient(135deg, rgba(20,132,83,.08), rgba(20,132,83,.02));border:1px solid rgba(20,132,83,.25);border-radius:10px;align-items:center;justify-content:space-between">
       <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">
         <div style="width:40px;height:40px;border-radius:10px;background:var(--color-brand);color:#fff;display:flex;align-items:center;justify-content:center;font-size:18px;font-weight:800">${(div.division_name||'分').slice(0,1)}</div>
         <div>
@@ -10035,7 +10076,7 @@ function openSquadAllEvents(divisionId, dimId){
         <div style="font-size:40px;margin-bottom:6px">📭</div>
         <div style="font-weight:600;color:var(--color-text-primary);margin-bottom:4px">当前筛选下暂无事件</div>
         <div style="font-size:12px;color:var(--color-text-secondary)">${rangeLabel} · ${div.division_name} · ${dimName} 未发现案例记录</div>
-        ${dimId2!=='ALL'?`<button type="button" id="_set_tab_all_" data-act="tab-all" style="margin-top:10px;padding:5px 10px;border-radius:6px;border:1px solid var(--color-brand);background:rgba(46,139,255,.10);color:var(--color-brand);cursor:pointer;font-size:12px;font-weight:600">查看全部维度 →</button>`:''}
+        ${dimId2!=='ALL'?`<button type="button" id="_set_tab_all_" data-act="tab-all" style="margin-top:10px;padding:5px 10px;border-radius:6px;border:1px solid var(--color-brand);background:rgba(20,132,83,.10);color:var(--color-brand);cursor:pointer;font-size:12px;font-weight:600">查看全部维度 →</button>`:''}
       </div>`;
   } else {
     evsHtml = `<div id="_ev_list_" style="display:flex;flex-direction:column;gap:8px;max-height:62vh;overflow-y:auto;padding-right:4px">
@@ -10302,7 +10343,7 @@ function gotoEventDetail(eventId){
     const row = document.querySelector(`[data-event-id="${eventId}"]`);
     if (row) {
       row.scrollIntoView({ behavior: 'smooth', block: 'center' });
-      row.animate([{ boxShadow: '0 0 0 4px rgba(46,139,255,.35)' }, { boxShadow: 'none' }], { duration: 1600 });
+      row.animate([{ boxShadow: '0 0 0 4px rgba(20,132,83,.35)' }, { boxShadow: 'none' }], { duration: 1600 });
     } else {
       toast('已切换到对应基地，请在事件列表中查找：' + eventId, 'info');
     }
@@ -10476,7 +10517,7 @@ function openSquadAllEventsModal(divisionId, squadName) {
   // 7) 顶部摘要卡（不包含Tabs，Tabs+搜索+筛选放搜索栏）
   const total = allEvsFinal.length;
   const summaryHeader = `
-    <div class="crew-squad-header" style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:10px;padding:12px 14px;background:linear-gradient(135deg, rgba(46,139,255,.08), rgba(46,139,255,.02));border:1px solid rgba(46,139,255,.25);border-radius:10px;align-items:center;justify-content:space-between">
+    <div class="crew-squad-header" style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:10px;padding:12px 14px;background:linear-gradient(135deg, rgba(20,132,83,.08), rgba(20,132,83,.02));border:1px solid rgba(20,132,83,.25);border-radius:10px;align-items:center;justify-content:space-between">
       <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">
         <div style="width:40px;height:40px;border-radius:10px;background:var(--color-brand);color:#fff;display:flex;align-items:center;justify-content:center;font-size:18px;font-weight:800">${(div.division_name||squadName||'分').slice(0,1)}</div>
         <div>
@@ -10494,7 +10535,7 @@ function openSquadAllEventsModal(divisionId, squadName) {
 
   // 8) 搜索/筛选栏（内置）
   const filterBar = `
-    <div class="squad-quick-search" style="margin-bottom:10px;padding:10px 12px;background:rgba(46,139,255,.06);border-radius:8px;border:1px solid rgba(46,139,255,.18);display:flex;gap:8px;flex-wrap:wrap;align-items:center">
+    <div class="squad-quick-search" style="margin-bottom:10px;padding:10px 12px;background:rgba(20,132,83,.06);border-radius:8px;border:1px solid rgba(20,132,83,.18);display:flex;gap:8px;flex-wrap:wrap;align-items:center">
       <input id="_sq_search_" type="text" placeholder="🔍 关键字搜索（事件描述 / 航班号 / SOP子类）" style="flex:1;min-width:220px;padding:6px 10px;border-radius:6px;border:1px solid var(--color-border);font:var(--font-body);font-size:12px;background:var(--color-bg-primary);color:var(--color-text-primary)">
       <select id="_sq_dim_" style="padding:6px 10px;border-radius:6px;border:1px solid var(--color-border);font:var(--font-body);font-size:12px;background:var(--color-bg-primary);color:var(--color-text-primary)">
         <option value="">全部维度（${total}）</option>
@@ -11510,7 +11551,7 @@ async function loadBaseAirportWeather(){
     content.appendChild(weatherPanel);
   }
   // 【广州分队定制版】每次加载都刷新面板头部（标题 + 添加/刷新按钮），兼容已存在的旧面板
-  weatherPanel.innerHTML='<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;flex-wrap:wrap;gap:6px"><div style="font:var(--font-h3);color:var(--color-text-primary)">✈️ 广州分队 · 机场天气信息与可能影响</div><div style="display:flex;gap:6px;align-items:center"><button onclick="openAddAirportModal()" title="添加机场" style="padding:3px 10px;border-radius:var(--radius-sm);border:1px solid rgba(82,196,26,.4);background:rgba(82,196,26,.1);color:#52C41A;cursor:pointer;font:var(--font-caption);font-weight:600">➕ 添加机场</button><button onclick="refreshBaseAirportWeather()" title="刷新天气数据" id="btnRefreshWeather" style="padding:3px 10px;border-radius:var(--radius-sm);border:1px solid var(--color-brand);background:rgba(46,139,255,.1);color:var(--color-brand);cursor:pointer;font:var(--font-caption);font-weight:600">🔄 刷新</button></div></div><div id="baseAirportWeatherContent" style="font:var(--font-caption);color:var(--color-text-secondary)">加载中...</div>';
+  weatherPanel.innerHTML='<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;flex-wrap:wrap;gap:6px"><div style="font:var(--font-h3);color:var(--color-text-primary)">✈️ 广州分队 · 机场天气信息与可能影响</div><div style="display:flex;gap:6px;align-items:center"><button onclick="openAddAirportModal()" title="添加机场" style="padding:3px 10px;border-radius:var(--radius-sm);border:1px solid rgba(82,196,26,.4);background:rgba(82,196,26,.1);color:#52C41A;cursor:pointer;font:var(--font-caption);font-weight:600">➕ 添加机场</button><button onclick="refreshBaseAirportWeather()" title="刷新天气数据" id="btnRefreshWeather" style="padding:3px 10px;border-radius:var(--radius-sm);border:1px solid var(--color-brand);background:rgba(20,132,83,.1);color:var(--color-brand);cursor:pointer;font:var(--font-caption);font-weight:600">🔄 刷新</button></div></div><div id="baseAirportWeatherContent" style="font:var(--font-caption);color:var(--color-text-secondary)">加载中...</div>';
   const weatherContent=document.getElementById('baseAirportWeatherContent');
   if(!weatherContent) return;
   await _renderBaseAirportWeather(weatherContent);
@@ -11542,9 +11583,9 @@ async function _renderBaseAirportWeather(weatherContent){
     try {
       const fov = STATE.filteredOverview || null;
       if (fov && fov._filterRange && fov._filterRange.label) {
-        filterTimeNote = `<span style="font-size:10px;padding:2px 8px;border-radius:999px;background:rgba(46,139,255,.12);color:var(--color-brand);font-weight:700;margin-left:6px">⏱ 观察期：${fov._filterRange.label}</span>`;
+        filterTimeNote = `<span style="font-size:10px;padding:2px 8px;border-radius:999px;background:rgba(20,132,83,.12);color:var(--color-brand);font-weight:700;margin-left:6px">⏱ 观察期：${fov._filterRange.label}</span>`;
       } else if (fov && fov.year && fov.current_month) {
-        filterTimeNote = `<span style="font-size:10px;padding:2px 8px;border-radius:999px;background:rgba(46,139,255,.12);color:var(--color-brand);font-weight:700;margin-left:6px">⏱ 观察期：${fov.year}年${String(fov.current_month).padStart(2,'0')}月</span>`;
+        filterTimeNote = `<span style="font-size:10px;padding:2px 8px;border-radius:999px;background:rgba(20,132,83,.12);color:var(--color-brand);font-weight:700;margin-left:6px">⏱ 观察期：${fov.year}年${String(fov.current_month).padStart(2,'0')}月</span>`;
       }
     } catch(_) {}
 
@@ -11887,7 +11928,7 @@ async function refreshYearComparison(){
     const yearRows=filtered.map(y=>{
       const cells=dims.map(d=>`<td style="padding:6px 8px;border-bottom:1px solid var(--color-border);text-align:center">${y.dimensions[d.dimension_id]||0}</td>`).join('');
       const isCur=y.year===curYear;
-      return `<tr style="${isCur?'background:rgba(46,139,255,.06)':''}"><td style="padding:6px 8px;border-bottom:1px solid var(--color-border);font-weight:600">${y.year}${isCur?' (本年)':''}</td><td style="padding:6px 8px;border-bottom:1px solid var(--color-border);text-align:center;color:var(--color-brand);font-weight:700">${y.total}</td>${cells}</tr>`;
+      return `<tr style="${isCur?'background:rgba(20,132,83,.06)':''}"><td style="padding:6px 8px;border-bottom:1px solid var(--color-border);font-weight:600">${y.year}${isCur?' (本年)':''}</td><td style="padding:6px 8px;border-bottom:1px solid var(--color-border);text-align:center;color:var(--color-brand);font-weight:700">${y.total}</td>${cells}</tr>`;
     }).join('');
     tbody.innerHTML=yearRows||'<tr><td colspan="10" style="text-align:center;padding:20px;color:var(--color-text-secondary)">无数据</td></tr>';
   }catch(e){
@@ -12018,7 +12059,7 @@ async function loadRouteFeaturesForLevel1(baseId){
     // 渲染子级基地卡片（可点击）
     const cardsHtml=subUnits.map(u=>{
       const icon=u.type==='base'?'✈️':'👥';
-      return `<div class="sub-base-card" data-sub-id="${u.id}" data-sub-name="${u.name}" data-sub-type="${u.type}" style="background:var(--color-bg-elevated);border-radius:var(--radius-sm);padding:14px 16px;margin-bottom:10px;border-left:4px solid var(--color-brand);cursor:pointer;transition:all .2s" onmouseover="this.style.background='rgba(46,139,255,.08)'" onmouseout="this.style.background='var(--color-bg-elevated)'" onclick="loadSubBaseDetail('${u.id}','${u.name}',${u.type==='base'?'true':'false'})">
+      return `<div class="sub-base-card" data-sub-id="${u.id}" data-sub-name="${u.name}" data-sub-type="${u.type}" style="background:var(--color-bg-elevated);border-radius:var(--radius-sm);padding:14px 16px;margin-bottom:10px;border-left:4px solid var(--color-brand);cursor:pointer;transition:all .2s" onmouseover="this.style.background='rgba(20,132,83,.08)'" onmouseout="this.style.background='var(--color-bg-elevated)'" onclick="loadSubBaseDetail('${u.id}','${u.name}',${u.type==='base'?'true':'false'})">
         <div style="display:flex;align-items:center;gap:10px">
           <span style="font-size:22px">${icon}</span>
           <span style="font:var(--font-h2);font-size:16px;color:var(--color-text-primary);font-weight:600">${u.name}</span>
@@ -12316,7 +12357,7 @@ async function updateMultiDimProfile(baseId){
     const hqPoly=`<polygon points="${hqPts}" fill="rgba(159,179,204,.15)" stroke="#9FB3CC" stroke-width="1" stroke-dasharray="3 2"/>`;
     // 本基地画像（高亮多边形）
     const localPts=angles.map((a,i)=>`${cx+values[i]*radius*Math.cos(a)},${cy+values[i]*radius*Math.sin(a)}`).join(' ');
-    const localPoly=`<polygon points="${localPts}" fill="rgba(46,139,255,.2)" stroke="#2E8BFF" stroke-width="2"/>`;
+    const localPoly=`<polygon points="${localPts}" fill="rgba(20,132,83,.2)" stroke="#148453" stroke-width="2"/>`;
     // 顶点圆点和标签
     let vertices='';
     dims.forEach((d,i)=>{
@@ -12667,7 +12708,7 @@ function _renderUnitCard(u,baseId){
     <div style="margin-bottom:6px">${dimBars||'<span style="font:var(--font-caption);color:var(--color-text-disabled)">暂无维度事件</span>'}</div>
     ${badges.length>0?`<div style="display:flex;gap:4px;flex-wrap:wrap;margin-bottom:6px">${badges.join('')}</div>`:''}
     <div style="display:flex;gap:6px">
-      <button onclick="selectBase('${u.id}')" style="font:var(--font-caption);padding:3px 10px;border-radius:var(--radius-sm);border:1px solid var(--color-brand);background:rgba(46,139,255,.08);cursor:pointer;color:var(--color-brand)">📍 查看</button>
+      <button onclick="selectBase('${u.id}')" style="font:var(--font-caption);padding:3px 10px;border-radius:var(--radius-sm);border:1px solid var(--color-brand);background:rgba(20,132,83,.08);cursor:pointer;color:var(--color-brand)">📍 查看</button>
       <span style="font:var(--font-caption);color:var(--color-text-disabled);align-self:center">严重 ${severeCount} · 一般 ${u.totalEvents-severeCount}</span>
     </div>
   </div>`;
@@ -12773,7 +12814,7 @@ async function loadDimStats(baseId){
       grid.innerHTML = `<div style="grid-column:1/-1;text-align:center;padding:20px;color:var(--color-risk-critical)">
         加载失败：${e.message || '未知错误'}
         <div style="margin-top:8px;font:var(--font-caption);color:var(--color-text-secondary)">
-          请尝试 <button onclick="loadDimStats(STATE.currentBase||'')" style="padding:2px 10px;border-radius:4px;border:1px solid var(--color-brand);background:rgba(46,139,255,.1);color:var(--color-brand);cursor:pointer">🔄 重新加载</button>
+          请尝试 <button onclick="loadDimStats(STATE.currentBase||'')" style="padding:2px 10px;border-radius:4px;border:1px solid var(--color-brand);background:rgba(20,132,83,.1);color:var(--color-brand);cursor:pointer">🔄 重新加载</button>
         </div>
       </div>`;
     }
@@ -12814,7 +12855,7 @@ function renderDimStatsGrid(cacheData, baseId){
         const tc=s.total_comparison||{};
         const yoyTrend=tc.yoy_total_trend==='up'?'↑ 上升':tc.yoy_total_trend==='down'?'↓ 下降':'→ 持平';
         const yoyCls=tc.yoy_total_trend==='up'?'trend-up':(tc.yoy_total_trend==='down'?'trend-down':'');
-        return `<div class="dim-stat-card" style="background:linear-gradient(135deg,rgba(46,139,255,.08),rgba(46,139,255,.02));border:1px solid rgba(46,139,255,.3)" onclick="openDimModal('${dim.id}','${baseId}')">
+        return `<div class="dim-stat-card" style="background:linear-gradient(135deg,rgba(20,132,83,.08),rgba(20,132,83,.02));border:1px solid rgba(20,132,83,.3)" onclick="openDimModal('${dim.id}','${baseId}')">
           <div class="icon">${dim.icon}</div>
           <div class="name">${dim.name}</div>
           <div class="count" style="color:${dim.color}">${cur.count||0}</div>
@@ -13398,8 +13439,8 @@ function renderDimEventsList(events, dimId, filters){
   const SUBCATS = SHARED.SUBCATS || {};
   const DIMS_LIST = (typeof dimList !== 'undefined') ? dimList : [];
   const dimMeta = (META && META[dimId]) ? META[dimId] :
-    (DIMS_LIST.find(d => d.id === dimId) || { name: dimId, icon: '📌', color: '#2E8BFF' });
-  const dimColor = (dimMeta && dimMeta.color) || '#2E8BFF';
+    (DIMS_LIST.find(d => d.id === dimId) || { name: dimId, icon: '📌', color: '#148453' });
+  const dimColor = (dimMeta && dimMeta.color) || '#148453';
   const dimIcon = (dimMeta && dimMeta.icon) || '📌';
   const dimName = (dimMeta && dimMeta.name) || dimId;
   const stdSubCats = (SUBCATS && SUBCATS[dimId]) ? SUBCATS[dimId] : ((dimMeta && dimMeta.sub_categories) || []);
@@ -13590,7 +13631,7 @@ async function reloadDimEvents(dimId){
   DIM_EVENTS_ALL=events;
   const eventsList=document.getElementById('dimEventsList');
   if(eventsList) eventsList.innerHTML=renderDimEventsList(events,dimId,DIM_EVENTS_FILTERS);
-  drawDimYearlyChart(statsRes.data.yearly_comparison, '#2E8BFF');
+  drawDimYearlyChart(statsRes.data.yearly_comparison, '#148453');
   // 同时更新统计行
   const stats=statsRes.data;
   const statPills=document.querySelectorAll('.dim-modal .stat-pill .val');
@@ -13796,7 +13837,7 @@ async function openEventDetail(eventId){
     <div class="desc-block"><div class="lbl">事件经过</div><div class="txt">${e.description||'-'}</div></div>
     <div class="desc-block"><div class="lbl">原因分析</div><div class="txt">${e.cause_analysis||'-'}</div></div>
     <div class="desc-block"><div class="lbl">处理结果</div><div class="txt">${e.result||'-'}</div></div>
-    <div class="desc-block" style="background:rgba(46,139,255,.08);border:1px solid var(--color-brand);border-radius:var(--radius-sm);padding:10px 12px;margin:8px 0"><div class="lbl" style="color:var(--color-brand)">💡 关联管理建议话术</div><div class="txt" style="color:var(--color-text-primary)">${getEventRecommendation(e)}</div></div>
+    <div class="desc-block" style="background:rgba(20,132,83,.08);border:1px solid var(--color-brand);border-radius:var(--radius-sm);padding:10px 12px;margin:8px 0"><div class="lbl" style="color:var(--color-brand)">💡 关联管理建议话术</div><div class="txt" style="color:var(--color-text-primary)">${getEventRecommendation(e)}</div></div>
     <div class="stats-row" style="display:flex;gap:12px;margin-bottom:12px;flex-wrap:wrap">
       <div class="stat-pill"><div class="lbl">当月该维度占比</div><div class="val" style="color:var(--color-brand)">${ms.percent||0}%</div><div class="delta">${ms.count_in_dim||0}/${ms.count_total||0} · 排名 #${ms.rank||'-'}</div></div>
       <div class="stat-pill"><div class="lbl">上月对比</div><div class="val">${lmc.count||0}</div><div class="delta ${lmc.change>0?'trend-up':'trend-down'}">${lmc.change>0?'↑':'↓'} ${Math.abs(lmc.change||0)}</div></div>
@@ -13821,7 +13862,7 @@ async function openEventDetail(eventId){
       const h=Math.max((y.count/max)*80,2);
       const x=startX+i*(barW+gap);
       const barY=100-h;
-      bars+=`<rect x="${x}" y="${barY}" width="${barW}" height="${h}" fill="#2E8BFF" rx="2" opacity="${y.year===e.event_year?1:0.5}"/>`;
+      bars+=`<rect x="${x}" y="${barY}" width="${barW}" height="${h}" fill="#148453" rx="2" opacity="${y.year===e.event_year?1:0.5}"/>`;
       bars+=`<text x="${x+barW/2}" y="${barY-4}" fill="#E8EEF7" font-size="11" text-anchor="middle" font-weight="600">${y.count}</text>`;
       bars+=`<text x="${x+barW/2}" y="115" fill="#9FB3CC" font-size="10" text-anchor="middle">${y.year}</text>`;
     });
@@ -13859,7 +13900,7 @@ async function openEventModal(eventId, presetDimId){
       ${['轻','中','重'].map(s=>`<option ${evt&&evt.severity===s?'selected':''}>${s}</option>`).join('')}
     </select></div>
     <div class="field"><label>受伤人数</label><input type="number" id="evtModalInjury" value="${evt?evt.injury_count:0}" min="0"></div>
-    <div class="field"><label>所属基地/分队列 *</label><input type="text" id="evtModalBase" placeholder="如 浦1/虹2/宁波/沈阳 或 SHA/PVG" value="${evt?evt.base:''}" style="font-weight:600;border-color:var(--color-brand);background:rgba(46,139,255,.05)"></div>
+    <div class="field"><label>所属基地/分队列 *</label><input type="text" id="evtModalBase" placeholder="如 浦1/虹2/宁波/沈阳 或 SHA/PVG" value="${evt?evt.base:''}" style="font-weight:600;border-color:var(--color-brand);background:rgba(20,132,83,.05)"></div>
     <div class="hint" style="font-size:11px;color:var(--color-text-secondary);margin-top:-6px;margin-bottom:4px">支持缩写：浦1=浦东一分队、虹二=虹桥二分队；自动归类到对应基地；非法组织层级值会被拒绝</div>
     <div class="field"><label>风险维度 *</label><select id="evtModalDim">${dimOpts}</select></div>
     <div class="field"><label>子分类</label><input type="text" id="evtModalSub" value="${evt?evt.label_secondary:''}" placeholder="如 客舱设备伤人"></div>
@@ -14141,7 +14182,7 @@ function importEventDialog(){
     const dropZone=document.getElementById('importDropZone');
     if(!dropZone) return;
     dropZone.addEventListener('click',()=>{ document.getElementById('importFileInput').click(); });
-    dropZone.addEventListener('dragover',e=>{ e.preventDefault(); e.stopPropagation(); dropZone.style.borderColor='var(--color-brand)'; dropZone.style.background='rgba(46,139,255,.05)'; });
+    dropZone.addEventListener('dragover',e=>{ e.preventDefault(); e.stopPropagation(); dropZone.style.borderColor='var(--color-brand)'; dropZone.style.background='rgba(20,132,83,.05)'; });
     dropZone.addEventListener('dragleave',e=>{ e.preventDefault(); e.stopPropagation(); dropZone.style.borderColor='var(--color-border)'; dropZone.style.background='var(--color-bg-primary)'; });
     dropZone.addEventListener('drop',e=>{
       e.preventDefault(); e.stopPropagation();
@@ -14688,7 +14729,7 @@ async function loadWeatherTimeline(baseId){
           <span class="route-no">${r.id}</span>
           <span class="route-path">${routePath} · ${normalizeRouteCat(r.category)}${overnightTag}</span>
           <span class="route-time">${r.dep_time} - ${r.arr_time}${r.arr_time_next_day?' (+1)':''}</span>
-          <button onclick="loadRouteHourlyWeather('${r.id}')" title="查看该航程逐小时颠簸详情" style="margin-left:auto;padding:3px 10px;border-radius:var(--radius-sm);border:1px solid var(--color-brand);background:rgba(46,139,255,.1);color:var(--color-brand);cursor:pointer;font:var(--font-caption);font-weight:600">📊 单航线详情</button>
+          <button onclick="loadRouteHourlyWeather('${r.id}')" title="查看该航程逐小时颠簸详情" style="margin-left:auto;padding:3px 10px;border-radius:var(--radius-sm);border:1px solid var(--color-brand);background:rgba(20,132,83,.1);color:var(--color-brand);cursor:pointer;font:var(--font-caption);font-weight:600">📊 单航线详情</button>
         </div>
         ${weatherInfo}
         ${tip}
@@ -14960,7 +15001,7 @@ async function loadRouteHourlyWeather(routeId){
             ${hourly.map(h=>{
               const hTurbColor=h.turb_index===0?'var(--color-success)':h.turb_index<=5?'var(--color-turb-light)':h.turb_index<=14?'var(--color-turb-moderate)':'var(--color-turb-severe)';
               const phaseColor=h.phase==='起飞'?'var(--color-brand)':h.phase==='落地'?'var(--color-risk-medium)':'var(--color-text-secondary)';
-              const phaseBg=h.phase==='起飞'?'rgba(46,139,255,.15)':h.phase==='落地'?'rgba(250,173,20,.15)':'rgba(122,122,122,.15)';
+              const phaseBg=h.phase==='起飞'?'rgba(20,132,83,.15)':h.phase==='落地'?'rgba(250,173,20,.15)':'rgba(122,122,122,.15)';
               return `<div style="padding:10px 8px;border-radius:var(--radius-sm);background:var(--color-bg-primary);border:1px solid var(--color-border);border-top:3px solid ${hTurbColor};text-align:center">
                 <div style="font:var(--font-body);color:${phaseColor};font-weight:700;font-size:15px">${h.hour}</div>
                 <div style="font:var(--font-caption);color:${phaseColor};font-size:11px;margin-bottom:6px;padding:2px 8px;border-radius:var(--radius-sm);background:${phaseBg};display:inline-block">${h.phase}</div>
@@ -15176,7 +15217,7 @@ function renderRouteAlertsList(){
       <div style="font:var(--font-h3);color:var(--color-text-primary);margin-bottom:6px">所选航线暂无数据</div>
       <div style="font:var(--font-caption);margin-bottom:14px">可能是航线筛选条件过窄，或该航线近期无历史事件（符合安全预期）。</div>
       <div style="display:flex;gap:8px;justify-content:center;flex-wrap:wrap">
-        <button onclick="filterRouteAlerts('all')" style="padding:6px 14px;border-radius:var(--radius-sm);border:1px solid var(--color-brand);background:rgba(46,139,255,.1);color:var(--color-brand);cursor:pointer;font:var(--font-caption);font-weight:600">📊 查看全部航线</button>
+        <button onclick="filterRouteAlerts('all')" style="padding:6px 14px;border-radius:var(--radius-sm);border:1px solid var(--color-brand);background:rgba(20,132,83,.1);color:var(--color-brand);cursor:pointer;font:var(--font-caption);font-weight:600">📊 查看全部航线</button>
         <button onclick="try{document.getElementById('navHistoryData')?.click()}catch(_){}" style="padding:6px 14px;border-radius:var(--radius-sm);border:1px solid var(--color-border);background:var(--color-bg-elevated);color:var(--color-text-primary);cursor:pointer;font:var(--font-caption);font-weight:600">📥 导入历史事件</button>
       </div>
     </div>`;
@@ -15246,7 +15287,7 @@ function renderRouteAlertsList(){
       </div>
       <div style="font:var(--font-body);color:var(--color-text-secondary);margin-bottom:4px">最近发生：${al.latest_event_time} · ${al.related_data.flight_phase||'-'}</div>
       <div style="font:var(--font-body);color:var(--color-text-primary);margin-bottom:6px">${al.related_data.description||'-'}</div>
-      <div style="font:var(--font-body);color:var(--color-brand);background:rgba(46,139,255,.1);padding:6px 10px;border-radius:var(--radius-sm)">💡 ${al.recommendation}</div>
+      <div style="font:var(--font-body);color:var(--color-brand);background:rgba(20,132,83,.1);padding:6px 10px;border-radius:var(--radius-sm)">💡 ${al.recommendation}</div>
     </div>`).join('');
 
     return `<div class="route-alert-card" style="background:var(--color-bg-elevated);border-radius:var(--radius-sm);padding:12px 16px;margin-bottom:10px;border-left:4px solid ${alertBorderColor}">
@@ -15255,14 +15296,14 @@ function renderRouteAlertsList(){
         <span style="font:var(--font-h2);font-size:18px;color:var(--color-text-primary)">${pathDisplay}</span>
         <span style="font:var(--font-body);color:var(--color-text-secondary);font-size:13px">${a.dep_time||''} - ${a.arr_time||''} · ${a.category||''}</span>
         <span style="margin-left:auto;font:var(--font-body);padding:3px 10px;border-radius:var(--radius-sm);background:${alertBorderColor};color:#fff;font-weight:600">${levelText}${alertDiffIcon}</span>
-        <button onclick="loadRouteHourlyWeather('${a.route_id}')" title="查看该航程逐小时气象与颠簸详情" style="padding:3px 10px;border-radius:var(--radius-sm);border:1px solid var(--color-brand);background:rgba(46,139,255,.1);color:var(--color-brand);cursor:pointer;font:var(--font-caption);font-weight:600">📊 气象详情</button>
+        <button onclick="loadRouteHourlyWeather('${a.route_id}')" title="查看该航程逐小时气象与颠簸详情" style="padding:3px 10px;border-radius:var(--radius-sm);border:1px solid var(--color-brand);background:rgba(20,132,83,.1);color:var(--color-brand);cursor:pointer;font:var(--font-caption);font-weight:600">📊 气象详情</button>
       </div>
       <!-- 航线风险提醒文字（直接显示在航线下方） -->
       <div style="font:var(--font-body);font-size:15px;color:var(--color-text-primary);padding:6px 10px;background:var(--color-bg-primary);border-radius:var(--radius-sm);margin-bottom:8px;border:1px solid var(--color-border)">
         <strong style="color:${levelColor}">${a.base_name||''}·${pathDisplay}</strong>${dimSummaryText?'<span style="margin-left:4px">'+dimSummaryText+'</span>':'<span style="color:var(--color-text-secondary);margin-left:4px">（暂无历史事件）</span>'}
       </div>
       <!-- 航线特点 -->
-      ${a.route_feature?`<div style="font:var(--font-body);color:var(--color-text-primary);padding:6px 10px;background:rgba(46,139,255,.05);border-radius:var(--radius-sm);margin-bottom:8px;border-left:3px solid var(--color-brand)">
+      ${a.route_feature?`<div style="font:var(--font-body);color:var(--color-text-primary);padding:6px 10px;background:rgba(20,132,83,.05);border-radius:var(--radius-sm);margin-bottom:8px;border-left:3px solid var(--color-brand)">
         <span style="font-weight:600;color:var(--color-brand)">🛫 航线特点：</span>${a.route_feature}
       </div>`:''}
       <!-- 气象联动颠簸提醒 -->
@@ -15378,7 +15419,7 @@ async function openFactorTracePanel(routeId, dimId){
             <div style="font:var(--font-body);color:var(--color-text-primary);margin-bottom:8px;line-height:1.6">${dimAlert.related_data?.description||'-'}</div>
             ${dimAlert.related_data?.cause_analysis?`<div style="font:var(--font-caption);color:var(--color-text-secondary);margin-bottom:6px"><strong>原因分析：</strong>${dimAlert.related_data.cause_analysis}</div>`:''}
             ${dimAlert.related_data?.result?`<div style="font:var(--font-caption);color:var(--color-text-secondary);margin-bottom:8px"><strong>处置结果：</strong>${dimAlert.related_data.result}</div>`:''}
-            <div style="font:var(--font-body);color:var(--color-brand);background:rgba(46,139,255,.1);padding:8px 12px;border-radius:var(--radius-sm);border-left:3px solid var(--color-brand)">💡 <strong>建议：</strong>${dimAlert.recommendation}</div>
+            <div style="font:var(--font-body);color:var(--color-brand);background:rgba(20,132,83,.1);padding:8px 12px;border-radius:var(--radius-sm);border-left:3px solid var(--color-brand)">💡 <strong>建议：</strong>${dimAlert.recommendation}</div>
           </div>
         </div>
         <div class="section" style="margin-top:12px">
@@ -16167,7 +16208,7 @@ function renderMapOnLeaflet(baseId){
     // 【广州分队定制版】途中点标记（Leaflet 小圆点）
     (r.waypoints||[]).forEach(w=>{
       if(!w||w.lat==null||w.lon==null) return;
-      const wpDot=L.circleMarker([w.lat,w.lon],{radius:4,color:'#2E8BFF',fillColor:'#2E8BFF',fillOpacity:0.85,weight:1.5})
+      const wpDot=L.circleMarker([w.lat,w.lon],{radius:4,color:'#148453',fillColor:'#148453',fillOpacity:0.85,weight:1.5})
         .addTo(STATE.mapRoutesLayer)
         .bindTooltip(`<b>${r.id} 途经点</b><br>${w.name||w.code||''}（${w.code||''}）<br>往返航路中间停靠`,{permanent:false,sticky:true,direction:'top',className:'route-tooltip',opacity:0.95});
     });
@@ -16195,7 +16236,7 @@ function renderMapOnLeaflet(baseId){
       if(!c) return;
       const icon=L.divIcon({
         className:'map-base-marker',
-        html:`<div style="width:14px;height:14px;border-radius:50%;border:2px solid #2E8BFF;background:#2E8BFF;box-shadow:0 0 10px #2E8BFF"></div><div style="font-size:11px;color:#2E8BFF;font-weight:600;margin-top:2px;white-space:nowrap;text-shadow:0 0 3px #000">${c.name}</div>`,
+        html:`<div style="width:14px;height:14px;border-radius:50%;border:2px solid #148453;background:#148453;box-shadow:0 0 10px #148453"></div><div style="font-size:11px;color:#148453;font-weight:600;margin-top:2px;white-space:nowrap;text-shadow:0 0 3px #000">${c.name}</div>`,
         iconSize:[14,14],iconAnchor:[7,7]
       });
       L.marker([c.lat,c.lon],{icon:icon}).addTo(STATE.mapMarkersLayer).bindPopup(`<b>${c.name}基地</b>`);
@@ -16205,7 +16246,7 @@ function renderMapOnLeaflet(baseId){
     if(c){
       const icon=L.divIcon({
         className:'map-base-marker-active',
-        html:`<div style="width:16px;height:16px;border-radius:50%;border:3px solid #F5222D;background:#2E8BFF;box-shadow:0 0 16px #2E8BFF;animation:pulse 1.8s infinite"></div><div style="font-size:12px;color:#2E8BFF;font-weight:700;margin-top:2px;white-space:nowrap;text-shadow:0 0 4px #000">${c.name}</div>`,
+        html:`<div style="width:16px;height:16px;border-radius:50%;border:3px solid #F5222D;background:#148453;box-shadow:0 0 16px #148453;animation:pulse 1.8s infinite"></div><div style="font-size:12px;color:#148453;font-weight:700;margin-top:2px;white-space:nowrap;text-shadow:0 0 4px #000">${c.name}</div>`,
         iconSize:[16,16],iconAnchor:[8,8]
       });
       L.marker([c.lat,c.lon],{icon:icon}).addTo(STATE.mapMarkersLayer).bindPopup(`<b>${c.name}基地</b><br>当前选中`);
@@ -16230,7 +16271,7 @@ function renderMapOnLeaflet(baseId){
 
         L.circleMarker([latest.lat,latest.lon],{radius:8,color:'#E74C3C',fillColor:'#E74C3C',fillOpacity:0.9,weight:2})
           .addTo(_typhoonLayer)
-          .bindTooltip(`<b>${tNameCN}${tNameLabelEN}</b><br>${latest.time.slice(0,16).replace('T',' ')}<br>风速：${latest.wind}m/s · ${catLabel}<br>气压：${latest.pressure}hPa<br><span style="color:#FAAD14">⚠ 仅单点定位，无路径轨迹</span>`,{permanent:false,direction:'top'});
+          .bindTooltip(`<b>${tNameCN}${tNameLabelEN}</b><br>${_t(latest.time).slice(0,16).replace('T',' ')}<br>风速：${_n(latest.wind)}m/s · ${catLabel}<br>气压：${_n(latest.pressure)}hPa<br><span style="color:#FAAD14">⚠ 仅单点定位，无路径轨迹</span>`,{permanent:false,direction:'top'});
         const nameIcon=L.divIcon({
           className:'typhoon-label',
           html:`<div style="background:rgba(155,89,182,.9);color:#fff;padding:2px 8px;border-radius:3px;font-size:11px;font-weight:700;white-space:nowrap;text-shadow:0 0 3px #000">🌀 ${tNameCN} ${catLabel}</div>`,
@@ -16365,8 +16406,8 @@ function applyMapLayers(){
           const seed=(gx*7+gy*13)%360;
           const speed=3+((gx+gy)%5); // 3-7 m/s
           arrows.push(`<div class="wind-arrow" style="position:absolute;top:${gy}%;left:${gx}%;transform:translate(-50%,-50%) rotate(${seed}deg);display:flex;flex-direction:column;align-items:center;gap:1px">
-            <svg width="18" height="18" viewBox="0 0 18 18" style="opacity:.7"><path d="M9,2 L9,14 M5,10 L9,14 L13,10" fill="none" stroke="#2E8BFF" stroke-width="1.5" stroke-linecap="round"/></svg>
-            <span style="font:var(--font-caption);font-size:8px;color:rgba(46,139,255,.8)">${speed}</span>
+            <svg width="18" height="18" viewBox="0 0 18 18" style="opacity:.7"><path d="M9,2 L9,14 M5,10 L9,14 L13,10" fill="none" stroke="#148453" stroke-width="1.5" stroke-linecap="round"/></svg>
+            <span style="font:var(--font-caption);font-size:8px;color:rgba(20,132,83,.8)">${speed}</span>
           </div>`);
         }
       }
@@ -16408,11 +16449,13 @@ function _renderTyphoonAdvisory(){
 
   const typhoons=STATE.typhoonData;
   content.innerHTML=typhoons.map(t=>{
-    const latest=t.positions[t.positions.length-1];
+    const latest=(t.positions&&t.positions.length>0)?t.positions[t.positions.length-1]:null;
     const prev=t.positions.length>=2?t.positions[t.positions.length-2]:null;
     const fcst=(t.forecast||[]).length>0?t.forecast[0]:null;
     const fcstAll=t.forecast||[];
     const catLabelCN=t.cat_label_cn||catLabels[t.category]||t.category;
+    const _n=(v)=>(v===null||v===undefined||v===''||isNaN(Number(v)))?'—':(Number.isInteger(Number(v))?Number(v):Number(v).toFixed(1));
+    const _t=(v)=>(v===null||v===undefined||v==='')?'—':String(v);
 
     // 计算移动方向与速度
     let moveDir='—',moveSpeed='—';
@@ -16611,7 +16654,7 @@ function _renderTyphoonAdvisory(){
 
     // 预报路径摘要
     const fcstSummary=fcstAll.length>0
-      ? fcstAll.map((f,i)=>`<span style="color:${i===0?'#E74C3C':'var(--color-text-secondary)'}">${f.time.slice(5,16).replace('T',' ')} → ${f.lat.toFixed(1)}°N,${f.lon.toFixed(1)}°E · ${f.wind}m/s ${catLabels[f.category]||f.category}</span>`).join('<br>')
+      ? fcstAll.map((f,i)=>`<span style="color:${i===0?'#E74C3C':'var(--color-text-secondary)'}">${_t(f.time).slice(5,16).replace('T',' ')} → ${_n(f.lat)}°N,${_n(f.lon)}°E · ${_n(f.wind)}m/s ${catLabels[f.category]||f.category}</span>`).join('<br>')
       : '暂无预报数据';
 
     // GDACS原始描述（已翻译为中文）
@@ -16636,7 +16679,7 @@ function _renderTyphoonAdvisory(){
       tips.push(`🔔 ${nameCN} 预报路径影响范围覆盖 ${finalImpactList.length} 个机场（严重影响${severeCount}·中等${midCount}·注意${finalImpactList.length-severeCount-midCount}）`);
       if (severeCount>0) tips.push('🚫 严重影响范围内基地建议提前取消过夜航班/停场，已出港航班安排就近备降');
       if (midCount>0) tips.push('⚠ 中等影响机场起飞前增加 300kg 备降燃油，机组提前复习台风改航程序');
-      if (fcstAll.length>0) tips.push(`📈 预报路径显示台风将向 <b>${moveDir}</b> 方向移动，未来${fcstAll.length*12}小时内强度${fcstAll[fcstAll.length-1].wind>latest.wind?'继续增强':'维持或减弱'}`);
+      if (fcstAll.length>0) tips.push(`📈 预报路径显示台风将向 <b>${moveDir}</b> 方向移动，未来${fcstAll.length*12}小时内强度${(latest&&fcstAll[fcstAll.length-1].wind>latest.wind)?'继续增强':'维持或减弱'}`);
       globalAdvice = `<div class="ty-advisory" style="border-left-color:#9B59B6;margin-top:6px">🎯 <strong>综合运行建议</strong>：<br>${tips.join('<br>')}</div>`;
     }
 
@@ -16644,15 +16687,15 @@ function _renderTyphoonAdvisory(){
       <div class="ty-header">
         <span class="ty-name" title="国际命名：${nameEN || '—'}">🌀 ${nameCN}<span class="ty-name-en" style="margin-left:6px;font:var(--font-caption);color:var(--color-text-secondary);font-weight:500">(${nameEN})</span></span>
         <span class="ty-tag ${t.category}">${catLabelCN}</span>
-        <span style="font:var(--font-data);color:var(--color-text-primary)">${t.max_wind}m/s</span>
-        <span style="font:var(--font-caption);color:var(--color-text-secondary)">${t.min_pressure}hPa</span>
+        <span style="font:var(--font-data);color:var(--color-text-primary)">${_n(t.max_wind)}m/s</span>
+        <span style="font:var(--font-caption);color:var(--color-text-secondary)">${_n(t.min_pressure)}hPa</span>
         ${finalImpactList.length>0?`<span style="padding:1px 8px;border-radius:999px;background:rgba(155,89,182,.15);color:#D2B4DE;font-weight:700;font-size:11px;margin-left:auto">⚠ 影响 ${finalImpactList.length} 个机场</span>`:''}
       </div>
       <div class="ty-grid">
-        <div class="ty-item">📍 <strong>当前位置</strong>：${latest.lat.toFixed(1)}°N, ${latest.lon.toFixed(1)}°E</div>
+        <div class="ty-item">📍 <strong>当前位置</strong>：${latest?_n(latest.lat):'—'}°N, ${latest?_n(latest.lon):'—'}°E</div>
         <div class="ty-item">🧭 <strong>移动方向</strong>：${moveDir} · ${moveSpeed}公里/时</div>
-        <div class="ty-item">🕐 <strong>观测时间</strong>：${latest.time.slice(0,16).replace('T',' ')}</div>
-        <div class="ty-item">📊 <strong>当前强度</strong>：${latest.wind}m/s · ${catLabelCN} · ${latest.pressure}hPa</div>
+        <div class="ty-item">🕐 <strong>观测时间</strong>：${latest?_t(latest.time).slice(0,16).replace('T',' '):'—'}</div>
+        <div class="ty-item">📊 <strong>当前强度</strong>：${latest?_n(latest.wind):'—'}m/s · ${catLabelCN} · ${latest?_n(latest.pressure):'—'}hPa</div>
       </div>
       ${radiiHtml?`<div class="ty-radii">📐 <strong>风圈半径</strong>：${radiiHtml}</div>`:''}
       <div class="ty-advisory">📋 <strong>预警详情</strong>：${t.advisory||'暂无预警详情'}</div>
@@ -17146,7 +17189,7 @@ async function openNotificationsPanel(){
 function scrollToFocusBanner(){
   const el = document.getElementById('opsFocusBanner') || document.getElementById('riskOpsConsoleRoot');
   if (el) { el.scrollIntoView({ behavior:'smooth', block:'start' });
-    el.style.transition='box-shadow .6s'; el.style.boxShadow='0 0 0 3px rgba(46,139,255,.35)';
+    el.style.transition='box-shadow .6s'; el.style.boxShadow='0 0 0 3px rgba(20,132,83,.35)';
     setTimeout(()=>{ if(el) el.style.boxShadow=''; }, 1600);
   } else toast('操作台尚未渲染，请先进入「总部全景」或刷新页面','info');
 }
@@ -17326,7 +17369,7 @@ async function loadBriefingReport(baseId, forceRefresh){
 
       // 模块一：整体态势（一句话总结 + 统计卡片）
       const html_overall = `
-        <div style="background:linear-gradient(135deg,${st.bg},rgba(46,139,255,.05));border-radius:var(--radius-md);padding:14px 18px;margin-bottom:16px;border:1px solid ${st.bd};border-left:5px solid ${st.bd}">
+        <div style="background:linear-gradient(135deg,${st.bg},rgba(20,132,83,.05));border-radius:var(--radius-md);padding:14px 18px;margin-bottom:16px;border:1px solid ${st.bd};border-left:5px solid ${st.bd}">
           <div style="display:flex;align-items:center;gap:10px;margin-bottom:10px;flex-wrap:wrap">
             <span style="font-size:28px">${st.icon}</span>
             <div style="flex:1">
@@ -17389,9 +17432,9 @@ async function loadBriefingReport(baseId, forceRefresh){
               ?'<span style="padding:1px 8px;border-radius:10px;background:rgba(245,34,45,.12);color:var(--color-risk-critical);font-weight:600">↑ '+r.trend+' '+r.change_pct+'%</span>'
               :r.trend==='下降'
               ?'<span style="padding:1px 8px;border-radius:10px;background:rgba(82,196,26,.12);color:var(--color-risk-low);font-weight:600">↓ '+r.trend+' '+r.change_pct+'%</span>'
-              :'<span style="padding:1px 8px;border-radius:10px;background:rgba(46,139,255,.12);color:var(--color-brand);font-weight:600">→ 持平</span>';
+              :'<span style="padding:1px 8px;border-radius:10px;background:rgba(20,132,83,.12);color:var(--color-brand);font-weight:600">→ 持平</span>';
             return `<div style="background:var(--color-bg-elevated);border-radius:var(--radius-sm);margin-bottom:10px;border-left:4px solid ${color};overflow:hidden">
-              <div style="display:flex;align-items:center;gap:10px;padding:10px 14px;background:rgba(46,139,255,.02);flex-wrap:wrap">
+              <div style="display:flex;align-items:center;gap:10px;padding:10px 14px;background:rgba(20,132,83,.02);flex-wrap:wrap">
                 <span style="font-size:22px">${icon}</span>
                 <span style="font:var(--font-body);font-weight:700;color:var(--color-text-primary);min-width:90px">${r.name||key}</span>
                 <span style="font:var(--font-h3);font-size:16px;color:${color};font-weight:700">${r.count||r.cycle_count||0} 起</span>
@@ -17511,7 +17554,7 @@ async function loadBriefingReport(baseId, forceRefresh){
               ${AC.rectification.follow_up&&AC.rectification.follow_up.length?`<div style="margin-top:4px">今日跟进：<b style="color:var(--color-risk-medium)">${AC.rectification.follow_up.join(' · ')}</b></div>`:''}
             </div>`:''}
           </div>`:''}
-          ${AC.tomorrow_forecast?`<div style="padding:12px 14px;background:rgba(46,139,255,.06);border-left:3px solid var(--color-brand);border-radius:var(--radius-sm)">
+          ${AC.tomorrow_forecast?`<div style="padding:12px 14px;background:rgba(20,132,83,.06);border-left:3px solid var(--color-brand);border-radius:var(--radius-sm)">
             <div style="font:var(--font-body);font-weight:600;color:var(--color-brand);margin-bottom:4px">🔮 明日风险预判</div>
             <div style="font:var(--font-body);color:var(--color-text-primary);line-height:1.8">
               根据天气预报及排班计划，<b style="color:var(--color-risk-high)">${AC.tomorrow_forecast.base_name||AC.tomorrow_forecast.base_id||'虹桥'}</b> 明日可能面临 <b style="color:var(--color-risk-medium)">${AC.tomorrow_forecast.risk_type||'SOP偏离'}</b> 压力，建议提前部署 <b>${AC.tomorrow_forecast.measure||'现场督导'}</b>。
@@ -17536,7 +17579,7 @@ async function loadBriefingReport(baseId, forceRefresh){
                 <div style="font:var(--font-caption);font-weight:600;color:var(--color-risk-low);margin-bottom:4px">📉 趋势性用语（下降）</div>
                 <div style="font:var(--font-caption);color:var(--color-text-secondary);line-height:1.6">${(LX.trend?.down||[]).join(' / ')||'明显回落 / 持续向好'}</div>
               </div>
-              <div style="padding:8px 10px;background:rgba(46,139,255,.05);border-radius:var(--radius-sm)">
+              <div style="padding:8px 10px;background:rgba(20,132,83,.05);border-radius:var(--radius-sm)">
                 <div style="font:var(--font-caption);font-weight:600;color:var(--color-brand);margin-bottom:4px">➡️ 趋势性用语（平稳）</div>
                 <div style="font:var(--font-caption);color:var(--color-text-secondary);line-height:1.6">${(LX.trend?.flat||[]).join(' / ')||'整体平稳 / 波动正常'}</div>
               </div>
@@ -17558,7 +17601,7 @@ async function loadBriefingReport(baseId, forceRefresh){
 
       // 数据来源与联动标签
       const sourceSources=briefingV2?.drilldown?'（控制清单769条+内部颠簸369条+行业对标1873条 = 3011条真实事件）':'';
-      const linkageHtml = `<div style="text-align:center;padding:10px 12px;margin-top:4px;background:rgba(46,139,255,.06);border-radius:var(--radius-sm);font:var(--font-caption);color:var(--color-text-secondary);border:1px dashed var(--color-border)">
+      const linkageHtml = `<div style="text-align:center;padding:10px 12px;margin-top:4px;background:rgba(20,132,83,.06);border-radius:var(--radius-sm);font:var(--font-caption);color:var(--color-text-secondary);border:1px dashed var(--color-border)">
         🔗 六大模块数据联动：真实历史事件→窗口环比/高发定位→根因标签 ｜ 基地维度分布→四色画像→薄弱环节 ｜ 天气系统×飞行阶段→后果预判→会商建议 ｜ 人员档案→证照到期预警<br>
         📊 数据源 ${sourceSources} ｜ 简报版本 ${briefingV2?.version||'V2'} ｜ 基地范围 ${baseNameLabel}
       </div>`;
@@ -17608,7 +17651,7 @@ async function loadBriefingReport(baseId, forceRefresh){
       const trend=change>0?'↑':change<0?'↓':'→';
       const trendColor=change>0?'var(--color-risk-critical)':change<0?'var(--color-risk-low)':'var(--color-text-secondary)';
       return `<div class="briefing-dim-card" style="background:var(--color-bg-elevated);border-radius:var(--radius-sm);margin-bottom:8px;border-left:3px solid ${d.color};overflow:hidden;cursor:pointer" onclick="toggleBriefingDimCard(this)" data-dim-id="${dimId}">
-        <div class="briefing-dim-header" style="display:flex;align-items:center;gap:8px;padding:10px 14px;background:rgba(46,139,255,.03)" data-dim-id="${dimId}">
+        <div class="briefing-dim-header" style="display:flex;align-items:center;gap:8px;padding:10px 14px;background:rgba(20,132,83,.03)" data-dim-id="${dimId}">
           <span style="font-size:18px;flex-shrink:0">${d.icon}</span>
           <span style="font:var(--font-body);color:var(--color-text-primary);font-weight:600;min-width:90px">${d.name}</span>
           <span style="font:var(--font-h3);color:${cur>0?'var(--color-risk-high)':'var(--color-risk-low)'};font-weight:700;min-width:40px" data-count="${cur}">${cur} 起</span>
@@ -17689,7 +17732,7 @@ async function loadBriefingReport(baseId, forceRefresh){
         const dimCardsHtml = Object.keys(dimCount).map(id => {
           const cnt = dimCount[id] || 0;
           return `<div class="briefing-dim-card" style="background:var(--color-bg-elevated);border-radius:var(--radius-sm);margin-bottom:8px;border-left:3px solid ${dimColors[id]};overflow:hidden;cursor:pointer" onclick="toggleBriefingDimCard(this)" data-dim-id="${id}">
-            <div class="briefing-dim-header" style="display:flex;align-items:center;gap:8px;padding:10px 14px;background:rgba(46,139,255,.03)" data-dim-id="${id}">
+            <div class="briefing-dim-header" style="display:flex;align-items:center;gap:8px;padding:10px 14px;background:rgba(20,132,83,.03)" data-dim-id="${id}">
               <span style="font-size:18px;flex-shrink:0">${dimIcons[id]}</span>
               <span style="font:var(--font-body);color:var(--color-text-primary);font-weight:600;min-width:90px">${dimNames[id]}</span>
               <span style="font:var(--font-h3);color:${cnt>0?'var(--color-risk-high)':'var(--color-risk-low)'};font-weight:700;min-width:40px">${cnt} 起</span>
@@ -17711,7 +17754,7 @@ async function loadBriefingReport(baseId, forceRefresh){
         // 最终兜底 HTML
         contentEl.innerHTML = `<div style="font:var(--font-h2);font-size:17px;color:var(--color-text-primary);margin-bottom:4px">📋 ${baseName} · 今日简报报告（本地兜底版）</div>
           <div style="font:var(--font-caption);color:var(--color-text-secondary);margin-bottom:14px">${today} · 生成时间: ${new Date().toLocaleString('zh-CN')} · V2: ${v2ErrMsg?'失败('+v2ErrMsg.slice(0,18)+')':'无数据'} · V1: 无数据 → 启用本地 ${allEvs.length} 条事件兜底</div>
-          <div style="background:linear-gradient(135deg,rgba(82,196,26,.06),rgba(46,139,255,.06));border-radius:var(--radius-sm);padding:10px 14px;margin-bottom:14px;border-left:3px solid ${sevCritical>0?'var(--color-risk-critical)':(sevGeneral>5?'var(--color-risk-medium)':'var(--color-risk-low)')}">
+          <div style="background:linear-gradient(135deg,rgba(82,196,26,.06),rgba(20,132,83,.06));border-radius:var(--radius-sm);padding:10px 14px;margin-bottom:14px;border-left:3px solid ${sevCritical>0?'var(--color-risk-critical)':(sevGeneral>5?'var(--color-risk-medium)':'var(--color-risk-low)')}">
             <div style="font:var(--font-body);font-weight:600;color:var(--color-text-primary);margin-bottom:4px">${statusIcon} 整体安全态势【${overAllStatus}】 · 共 ${totalEvs} 条历史事件</div>
             <div style="font:var(--font-body);color:var(--color-text-primary);line-height:1.8">
               <div>基地范围 ${baseNameLabel}：本周期共发生【${totalEvs}】起事件，其中严重 ${sevCritical} 起，一般 ${sevGeneral} 起。</div>
@@ -17744,7 +17787,7 @@ async function loadBriefingReport(baseId, forceRefresh){
         contentEl.innerHTML = `<div style="text-align:center;padding:30px;color:var(--color-text-primary)">
           <div style="font:var(--font-h2);margin-bottom:8px">📋 ${baseName} · 今日简报</div>
           <div style="font:var(--font-caption);color:var(--color-text-secondary);margin-bottom:14px">${today} · 所有接口不可用，显示最简版本</div>
-          <div style="padding:12px;background:rgba(46,139,255,.06);border-radius:var(--radius-sm);max-width:600px;margin:0 auto;border:1px solid var(--color-border)">
+          <div style="padding:12px;background:rgba(20,132,83,.06);border-radius:var(--radius-sm);max-width:600px;margin:0 auto;border:1px solid var(--color-border)">
             <div style="font:var(--font-body);line-height:1.8;color:var(--color-text-primary);text-align:left">
               ✅ 建议按 CCAR-121 部及乘务员手册执行：<br>
               &nbsp;&nbsp;1. 航前协同确认机上应急设备、乘务组执勤期；<br>
@@ -17762,7 +17805,7 @@ async function loadBriefingReport(baseId, forceRefresh){
       // ===== 正常 V1 兼容渲染 =====
       contentEl.innerHTML=`<div style="font:var(--font-h2);font-size:17px;color:var(--color-text-primary);margin-bottom:4px">📋 ${baseName} · 今日简报报告（V1兼容版）</div>
         <div style="font:var(--font-caption);color:var(--color-text-secondary);margin-bottom:14px">${today} · ${briefing.generated_at||''}</div>
-        <div style="background:rgba(46,139,255,.06);border-radius:var(--radius-sm);padding:10px 14px;margin-bottom:14px;border-left:3px solid var(--color-brand)">
+        <div style="background:rgba(20,132,83,.06);border-radius:var(--radius-sm);padding:10px 14px;margin-bottom:14px;border-left:3px solid var(--color-brand)">
           <div style="font:var(--font-body);font-weight:600;color:var(--color-brand);margin-bottom:4px">📊 简报摘要</div>
           <div style="font:var(--font-body);color:var(--color-text-primary)">${briefing.summary||'-'}</div>
         </div>
@@ -18713,6 +18756,28 @@ document.addEventListener('DOMContentLoaded',function(){
   }
 });
 
+
+// ============ 壳层单点登录：客舱小助手已登录则自动进入，跳过独立登录页 ============
+document.addEventListener('DOMContentLoaded',function(){
+  try{
+    var _sess=null;
+    try{ _sess=JSON.parse(localStorage.getItem('cabin_session_v1')||'null'); }catch(e){}
+    if(_sess && (_sess['工号']||_sess.account) && !_isLoggedIn){
+      var _ov=document.getElementById('loginOverlay');
+      if(_ov && !_ov.classList.contains('hidden')){
+        _ov.classList.add('hidden');
+        _isLoggedIn=true;
+        STATE.user=STATE.user||{user_name:_sess['姓名']||'乘务员',user_id:_sess['工号']||'cabin-user',base_id:'SHA'};
+        resetInactivityTimer();
+        document.addEventListener('mousemove',resetInactivityTimer);
+        document.addEventListener('keydown',resetInactivityTimer);
+        document.addEventListener('click',resetInactivityTimer);
+        console.info('[sso] 壳层已登录，自动进入风险预警');
+      }
+    }
+  }catch(e){ console.warn('[sso] 单点登录跳过：'+e.message); }
+});
+
 // ============ L7: 跨部门协作面板 ============
 function openCrossDeptPanel(){
   const panel=document.getElementById('crossDeptPanel');
@@ -18912,10 +18977,10 @@ function renderPersonnelMgmt(){
         <div class="crew-list">`;
     members.forEach(p=>{
       const leader=_isLeaderPerson(p.姓名);
-      const leaderBadge=leader?'<span style="margin-left:6px;font-size:10px;padding:1px 6px;border-radius:8px;background:rgba(46,139,255,.15);color:var(--color-brand);font-weight:600">乘务长</span>':'';
+      const leaderBadge=leader?'<span style="margin-left:6px;font-size:10px;padding:1px 6px;border-radius:8px;background:rgba(20,132,83,.15);color:var(--color-brand);font-weight:600">乘务长</span>':'';
       html+=`<div class="crew-card" onclick="openPersonnelEditModal('${String(p.工号)}')" style="cursor:pointer">
         <div class="crew-card-header">
-          <div class="crew-avatar" style="background:${leader?'linear-gradient(135deg,#0A6E47,#1890FF)':'linear-gradient(135deg,var(--color-brand),#1890FF)'}">${p.姓名[0]}</div>
+          <div class="crew-avatar" style="background:${leader?'linear-gradient(135deg,#0A6E47,#1fa56a)':'linear-gradient(135deg,var(--color-brand),#1fa56a)'}">${p.姓名[0]}</div>
           <div class="crew-info">
             <div class="crew-name">${p.姓名}${leaderBadge}</div>
             <div class="crew-id">${p.工号} · ${p.班组||'未分组'}</div>
@@ -19385,7 +19450,7 @@ async function openHistoryDataPanel(){
         <button onclick="historyDeselectAll()" style="padding:4px 10px;border-radius:var(--radius-sm);border:1px solid var(--color-border);background:var(--color-bg-elevated);color:var(--color-text-primary);cursor:pointer;font:var(--font-caption)">☐ 取消全选</button>
         <span style="color:var(--color-border);margin:0 4px">|</span>
         <button onclick="toggleHistoryImport()" id="btnToggleHistImport" style="padding:4px 10px;border-radius:var(--radius-sm);border:1px solid var(--color-info);background:rgba(24,144,255,.1);color:var(--color-info);cursor:pointer;font:var(--font-caption);font-weight:600">📥 导入Excel</button>
-        <button onclick="historyExportDialog()" style="padding:4px 10px;border-radius:var(--radius-sm);border:1px solid var(--color-brand);background:rgba(46,139,255,.1);color:var(--color-brand);cursor:pointer;font:var(--font-caption);font-weight:600">📤 导出数据</button>
+        <button onclick="historyExportDialog()" style="padding:4px 10px;border-radius:var(--radius-sm);border:1px solid var(--color-brand);background:rgba(20,132,83,.1);color:var(--color-brand);cursor:pointer;font:var(--font-caption);font-weight:600">📤 导出数据</button>
         <button onclick="downloadEventTemplate()" style="padding:4px 10px;border-radius:var(--radius-sm);border:1px solid var(--color-success);background:rgba(82,196,26,.1);color:var(--color-success);cursor:pointer;font:var(--font-caption);font-weight:600">📋 下载模板</button>
         <span style="color:var(--color-border);margin:0 4px">|</span>
         <!-- 【功能删除】批量删除/一键清空移至后台：普通业务用户不可见，需管理员授权 -->
@@ -19607,7 +19672,7 @@ function renderHistoryTable(){
     const baseName=BASE_NAMES[e.base]||e.base||'-';
     // 显示分队名：优先 division_name，其次 division_id → BASE_NAMES 翻译
     const divDisplay=e.division_name||(BASE_NAMES[e.division_id]?BASE_NAMES[e.division_id]+'分队':'')||e.division_id||'-';
-    return `<tr style="border-bottom:1px solid var(--color-border);${checked?'background:rgba(46,139,255,.06)':''}">
+    return `<tr style="border-bottom:1px solid var(--color-border);${checked?'background:rgba(20,132,83,.06)':''}">
       <td style="padding:4px 8px;text-align:center"><input type="checkbox" ${checked?'checked':''} onchange="historyToggleOne('${e.event_id}',this.checked)"></td>
       <td style="padding:4px 8px;white-space:nowrap">${e.event_date||'-'}</td>
       <td style="padding:4px 8px;white-space:nowrap"><span style="color:${dimInfo.color}">${dimInfo.icon} ${dimInfo.name}</span></td>
@@ -19617,7 +19682,7 @@ function renderHistoryTable(){
       <td style="padding:4px 8px;white-space:nowrap">${baseName}</td>
       <td style="padding:4px 8px;white-space:nowrap;color:var(--color-text-secondary)">${divDisplay}</td>
       <td style="padding:4px 8px;text-align:center;white-space:nowrap">
-        <button onclick="historyEditEvent('${e.event_id}')" style="padding:2px 8px;border-radius:var(--radius-sm);border:1px solid var(--color-brand);background:rgba(46,139,255,.1);color:var(--color-brand);cursor:pointer;font-size:11px;margin-right:4px">编辑</button>
+        <button onclick="historyEditEvent('${e.event_id}')" style="padding:2px 8px;border-radius:var(--radius-sm);border:1px solid var(--color-brand);background:rgba(20,132,83,.1);color:var(--color-brand);cursor:pointer;font-size:11px;margin-right:4px">编辑</button>
         <button onclick="historyDeleteEvent('${e.event_id}')" style="padding:2px 8px;border-radius:var(--radius-sm);border:1px solid var(--color-risk-critical);background:rgba(245,34,45,.1);color:var(--color-risk-critical);cursor:pointer;font-size:11px">删除</button>
       </td>
     </tr>`;
