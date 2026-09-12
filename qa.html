@@ -277,20 +277,30 @@ window.SeasonEngine = (function () {
     'valentine': ['各位旅客好！又到情人节，巧的是您正在这趟航班上。不管有没有伴儿，爱自己这件事都值得——机上好物，给心爱的人，也给自己一份。', '情人节快乐！香水、口红、护理好物，今天的机上清单格外应景。单身的朋友更该对自己好——爱自己，永远不会亏。'],
     'women': ['各位旅客节日快乐！今天是为她喝彩的日子。机上备了点悦己好物——对自己好，才是头等大事。', '女神节好！机上这几款，都是给自己添点好心情的。辛苦一年，值得。'],
     'xiaonian': ['各位旅客小年好！小年扫尘，迎新纳福。机上好物带一份，年货备齐，好心情也备齐。', '小年一过，家家户户开始忙年了。机上好物备一份，回家也添份喜气。'],
-    'yuanxiao': ['各位旅客元宵好！正月十五闹花灯，天上的航班也沾了喜气。机上备了点好意头的好物——团团圆圆，月圆人更圆。', '元宵节好！过了十五，这个年才算真正过完。机上这几款好物，给年味收个漂亮的尾。']
+    'yuanxiao': ['各位旅客元宵好！正月十五闹花灯，天上的航班也沾了喜气。机上备了点好意头的好物——团团圆圆，月圆人更圆。', '元宵节好！过了十五，这个年才算真正过完。机上这几款好物，给年味收个漂亮的尾。'],
+    'shopping618': ['六月过半，618 这几天买东西的人多。机上这几款跨境好物，包税含邮，落地前下单几天就到家，也算赶上了这一波。', '618 到了，机上的专享价也给您备着。不用蹲点、不用凑单，看中了直接带走，图的就是省心。'],
+    'shuang11': ['各位旅客，双十一这几天，机上的跨境好物也是实打实的专享价——不用熬夜抢、不用凑满减，看中就带走。', '双十一好！与其在网上比来比去，不如趁这趟航班把东西挑明白：跨境正品、包税到家，价格都标在明处。'],
+    'shuang12': ['双十二这几天，年货也可以开始备起来了。机上这几款跨境好物，包税到家，先挑几样，过年就从容。', '各位旅客，双十二好！机上专享价照旧，看中什么落地前下单，几天就能收到。'],
+    'christmas': ['各位旅客圣诞快乐！机上也沾了节日气氛——几款适合送礼的好物，包装体面，带回去就是一份心意。', '圣诞快乐！给自己或重要的人挑一份，机上这几款礼物感足，还省得您再去挤商场。'],
+    'nianhuo': ['年货节到了，年味也近了。机上这几款好物，当年货先备上，回家不用再赶场。', '各位旅客，年货备得早，过年就从容。机上跨境好物包税到家，先挑几样带回去。']
   };
 
   // 公历固定节日
+  // 公历固定节日（含通用购物节点，与 DateMatch 词表口径一致）
   var GREG_FESTS = {
     '01-01': 'newyear', '02-14': 'valentine', '03-08': 'women',
-    '05-01': 'labor', '06-01': 'children', '09-10': 'teachers', '10-01': 'national'
+    '05-01': 'labor', '06-01': 'children', '06-18': 'shopping618',
+    '09-10': 'teachers', '10-01': 'national',
+    '11-11': 'shuang11', '12-12': 'shuang12', '12-25': 'christmas'
   };
   var FEST_NAMES = {
     newyear: '元旦', spring: '春节', yuanxiao: '元宵节', valentine: '情人节',
     women: '妇女节', labor: '劳动节', children: '儿童节', fathers: '父亲节',
     teachers: '教师节', national: '国庆节', duanwu: '端午节', qixi: '七夕节',
     midautumn: '中秋节', chongyang: '重阳节', laba: '腊八节',
-    xiaonian: '小年', chuxi: '除夕', mothers: '母亲节'
+    xiaonian: '小年', chuxi: '除夕', mothers: '母亲节',
+    shopping618: '618年中大促', shuang11: '双十一', shuang12: '双十二',
+    christmas: '圣诞节', nianhuo: '年货节'
   };
   var WEEK = ['星期日', '星期一', '星期二', '星期三', '星期四', '星期五', '星期六'];
 
@@ -353,9 +363,24 @@ window.SeasonEngine = (function () {
     return '';
   }
 
-  // 匹配当日：公历节日 > 农历节日 > 24 节气
+  /* 匹配当日：统一委托 DateMatch.todayMatch（同日口径的唯一来源）
+   * 委托后的差异：认「假期区间」（春节第 3 天也算春节）、覆盖万圣节/感恩节等
+   * 本文件词表没有的节日、输出与文本解析同一结构。
+   * DateMatch 尚未加载时回退本文件原逻辑，保证任何加载顺序都能用。
+   */
   function match(dt) {
     dt = dt || new Date();
+    try {
+      var DM = (typeof window !== 'undefined') ? window.DateMatch : null;
+      if (DM && DM.todayMatch) {
+        var m2 = DM.todayMatch(dt);
+        if (!m2) return null;
+        return {
+          kind: (m2.type === 'term') ? 'solar' : 'festival',
+          key: m2.key, name: m2.name, type: m2.type, date: m2.start, via: 'DateMatch'
+        };
+      }
+    } catch (e) {}
     var f = festOf(dt);
     if (f) return { kind: 'festival', key: f, name: FEST_NAMES[f] || f };
     var t = solarTermOf(dt);
@@ -415,7 +440,10 @@ window.SeasonEngine = (function () {
     { k: 'valentine', l: '💝 情人节' }, { k: 'women', l: '🌷 妇女节' },
     { k: 'mothers', l: '🌸 母亲节' }, { k: 'fathers', l: '👔 父亲节' },
     { k: 'children', l: '🎈 儿童节' }, { k: 'labor', l: '🛠 劳动节' },
-    { k: 'teachers', l: '🍎 教师节' }, { k: 'national', l: '🇨🇳 国庆' }
+    { k: 'teachers', l: '🍎 教师节' }, { k: 'national', l: '🇨🇳 国庆' },
+    { k: 'shopping618', l: '🛒 618' }, { k: 'shuang11', l: '🛍 双十一' },
+    { k: 'shuang12', l: '🎁 双十二' }, { k: 'christmas', l: '🎄 圣诞' },
+    { k: 'nianhuo', l: '🧨 年货节' }
   ];
 
   return {
@@ -430,6 +458,619 @@ window.SeasonEngine = (function () {
 })();
 
 /* ===== SEASON_ENGINE_END ===== */
+/* ===== DATE_MATCH_BEGIN ===== */
+/* =============================================================
+ * 日期匹配引擎（文本 / 日期 → 节假日 / 日期区间）—— 单一来源
+ * 生成/维护：直接改本文件，再跑 python _sync_date_match.py 同步进各页面
+ * 注入目标：index.html / qa.html / beauty.html
+ * 依赖：window.SeasonEngine（农历节日表 LUNAR、24 节气表 TERMS）
+ *
+ * 统一输出结构（所有入口共用，字段齐全，不再各页面各写一套）：
+ *   raw        原始匹配词（含修饰语，如「教师节快到了」）
+ *   type       solar(公历节日) / lunar(农历节日) / weekday(第N个星期几)
+ *              / shopping(通用购物节点) / term(节气) / relative(相对时间)
+ *   key        节日标识（与 SeasonEngine 的 FEST_NAMES / OPEN_FESTS 对齐）
+ *   name       节日中文名
+ *   start      起始日期 YYYY-MM-DD
+ *   end        结束日期 YYYY-MM-DD（多日假期为区间，单日为同一天）
+ *   label      人类可读区间（如「2026-09-25 ~ 2026-09-27（3 天）」）
+ *   confidence 置信度 0~1
+ *   offset     before / same / after / around / soon / none（修饰语类别）
+ *   note       解析说明（含跨年顺延、农历估算等提示）
+ *
+ * 三个对外主入口：
+ *   parse(text)        文本 → 全部命中（数组，已做重叠消解）
+ *   parseBest(text)    文本 → 置信度最高的一个
+ *   todayMatch(dt)     日期 → 当天所处节日/节气（替代各页面自写的当日判断）
+ *   resolveScript(t)   文本 → 直接可用的「开场话术挂载点」（含降级策略）
+ *
+ * ── 跨年处理策略 ───────────────────────────────────────────────
+ * 1) 默认「就近向未来」：先算今年的日期；若整个假期已早于今天且超出宽限期
+ *    （GRACE_DAYS=3 天），顺延到明年，note 标注「自动顺延到 YYYY 年」。
+ *    宽限期的意义：9/12 说「教师节」时，教师节（9/10）才过两天，仍按今年算，
+ *    避免跳到明年，符合「刚过不久」的日常语感。
+ * 2) 「快到了 / 临近 / 节前」这类修饰语表意是「还没到」，因此附加
+ *    preferFuture：只要节日当天已早于今天，一律顺延到明年 —— 否则会出现
+ *    「教师节快到了」却解析出 3 天前区间的自相矛盾结果。
+ * 3) 文本里出现「明年 / 来年 / 下一年」→ 强制 +1 年；「去年 / 上年」→ 强制 -1 年，
+ *    优先级最高，不再走就近顺延。
+ *
+ * ── 农历节日日期不固定的处理策略 ──────────────────────────────
+ * 农历节日（春节、中秋、端午、七夕、重阳、腊八、小年、除夕、元宵）每年对应的
+ * 公历日期都不同，因此不做日期硬编码，分三档处理：
+ *   a. 表内年份（SeasonEngine.LUNAR，2026-2040 天文算法生成）→ 精确日期，
+ *      estimated=false，置信度 0.9；
+ *   b. 表外年份 → 用该节日在公历中的「常见出现区间」(FESTS[].est) 取中点估算，
+ *      estimated=true，置信度降到 0.55，note 明确标注「估算，实际日期以官方日历为准」；
+ *   c. 节气（清明、冬至等）同理：TERMS 表内精确，表外按 TERM_EST 区间估算并降级。
+ * 下游消费方应把 estimated=true 的结果当作「参考区间」，不要用于精确倒计时。
+ * ============================================================= */
+window.DateMatch = (function () {
+  var SE = (typeof window !== 'undefined') ? window.SeasonEngine : null;
+
+  /* ---------------- 日期小工具 ---------------- */
+  function pad(n) { return (n < 10 ? '0' : '') + n; }
+  function ymd(d) { return d.getFullYear() + '-' + pad(d.getMonth() + 1) + '-' + pad(d.getDate()); }
+  function day0(d) { return new Date(d.getFullYear(), d.getMonth(), d.getDate()); }
+  function addDays(d, n) { return new Date(day0(d).getTime() + n * 86400000); }
+  function md2date(s, y) {
+    if (!s) return null;
+    var p = String(s).split('-');
+    if (p.length < 2) return null;
+    var m = parseInt(p[0], 10), d = parseInt(p[1], 10);
+    if (isNaN(m) || isNaN(d)) return null;
+    return new Date(y, m - 1, d);
+  }
+  function daysBetween(a, b) { return Math.round((day0(b) - day0(a)) / 86400000); }
+
+  var CN_NUM = { '零': 0, '一': 1, '二': 2, '两': 2, '三': 3, '四': 4, '五': 5, '六': 6, '七': 7, '八': 8, '九': 9, '十': 10 };
+  function cn2num(s) {
+    if (s == null) return NaN;
+    s = String(s).trim();
+    if (/^\d+$/.test(s)) return parseInt(s, 10);
+    if (s === '十') return 10;
+    if (s.length === 1) return CN_NUM[s] != null ? CN_NUM[s] : NaN;
+    if (/^十[一二三四五六七八九]$/.test(s)) return 10 + CN_NUM[s.charAt(1)];
+    if (/^[二三四五六七八九]十$/.test(s)) return CN_NUM[s.charAt(0)] * 10;
+    if (/^[二三四五六七八九]十[一二三四五六七八九]$/.test(s)) return CN_NUM[s.charAt(0)] * 10 + CN_NUM[s.charAt(2)];
+    return NaN;
+  }
+
+  /* ---------------- 节日词典 ----------------
+   * date：公历固定 MM-DD（solar / shopping）
+   * span：假期天数（含当天），around 修饰时展开为区间
+   * rule：weekday 类型用 [月份, 第几个, 星期几(0=周日)]
+   * lunarKey：农历节日在 SeasonEngine.LUNAR 表中的键
+   * est：该农历节日在公历中的可能区间（表外年份估算 + 跨年判断用）
+   */
+  var FESTS = [
+    // ---------- 公历固定节日 ----------
+    { key: 'newyear', name: '元旦', type: 'solar', date: '01-01', span: 3, alias: ['元旦', '元旦节', '新年', '跨年', '阳历年', '1月1号', '1月1日'] },
+    { key: 'valentine', name: '情人节', type: 'solar', date: '02-14', span: 1, alias: ['情人节', '2月14号', '2月14日'] },
+    { key: 'women', name: '妇女节', type: 'solar', date: '03-08', span: 1, alias: ['妇女节', '三八节', '女神节', '女王节', '女生节', '3月8号', '3月8日'] },
+    { key: 'qingming', name: '清明节', type: 'solar', date: '04-05', span: 3, alias: ['清明', '清明节', '踏青', '扫墓'] },
+    { key: 'labor', name: '劳动节', type: 'solar', date: '05-01', span: 5, alias: ['劳动节', '五一', '五一节', '5月1号', '5月1日', '小长假'] },
+    { key: 'children', name: '儿童节', type: 'solar', date: '06-01', span: 1, alias: ['儿童节', '六一', '六一节', '6月1号', '6月1日'] },
+    { key: 'teachers', name: '教师节', type: 'solar', date: '09-10', span: 1, alias: ['教师节', '老师节', '9月10号', '9月10日'] },
+    { key: 'national', name: '国庆节', type: 'solar', date: '10-01', span: 7, alias: ['国庆', '国庆节', '十一', '10月1号', '10月1日', '黄金周'] },
+    { key: 'halloween', name: '万圣节', type: 'solar', date: '10-31', span: 1, alias: ['万圣节', '万圣夜', '10月31号'] },
+    { key: 'thanksgiving', name: '感恩节', type: 'solar', date: '11-26', span: 1, alias: ['感恩节'] },
+    { key: 'christmas', name: '圣诞节', type: 'solar', date: '12-25', span: 1, alias: ['圣诞', '圣诞节', '平安夜', '12月25号'] },
+    // ---------- 第 N 个星期几 ----------
+    { key: 'mothers', name: '母亲节', type: 'weekday', rule: [5, 2, 0], span: 1, alias: ['母亲节', '妈妈节'] },
+    { key: 'fathers', name: '父亲节', type: 'weekday', rule: [6, 3, 0], span: 1, alias: ['父亲节', '爸爸节'] },
+    // ---------- 通用购物节点 ----------
+    { key: 'shopping618', name: '618年中大促', type: 'shopping', date: '06-18', span: 1, alias: ['618', '6.18', '6月18', '年中大促', '618大促'] },
+    { key: 'shuang11', name: '双十一', type: 'shopping', date: '11-11', span: 1, alias: ['双十一', '双11', '双十一购物节', '光棍节', '11.11', '11月11号'] },
+    { key: 'shuang12', name: '双十二', type: 'shopping', date: '12-12', span: 1, alias: ['双十二', '双12', '12.12', '12月12号'] },
+    { key: 'nianhuo', name: '年货节', type: 'shopping', date: '01-10', span: 10, alias: ['年货节', '年货', '办年货'] },
+    // ---------- 农历节日（每年公历日期不同，查 SeasonEngine.LUNAR 表） ----------
+    { key: 'laba', name: '腊八节', type: 'lunar', lunarKey: 'laba', span: 1, est: ['01-01', '01-31'], alias: ['腊八', '腊八节', '腊月初八'] },
+    { key: 'xiaonian', name: '小年', type: 'lunar', lunarKey: 'xiaonian', span: 1, est: ['01-15', '02-15'], alias: ['小年', '小年夜', '祭灶'] },
+    { key: 'chuxi', name: '除夕', type: 'lunar', lunarKey: 'chuxi', span: 1, est: ['01-20', '02-20'], alias: ['除夕', '大年夜', '年三十', '大年三十'] },
+    { key: 'spring', name: '春节', type: 'lunar', lunarKey: 'spring', span: 7, est: ['01-21', '02-21'], alias: ['春节', '过年', '新春', '农历新年', '大年初一', '初一'] },
+    { key: 'yuanxiao', name: '元宵节', type: 'lunar', lunarKey: 'yuanxiao', span: 1, est: ['02-04', '03-06'], alias: ['元宵', '元宵节', '正月十五', '灯节'] },
+    { key: 'duanwu', name: '端午节', type: 'lunar', lunarKey: 'duanwu', span: 3, est: ['05-27', '06-27'], alias: ['端午', '端午节', '粽子节', '五月初五'] },
+    { key: 'qixi', name: '七夕节', type: 'lunar', lunarKey: 'qixi', span: 1, est: ['07-31', '08-31'], alias: ['七夕', '七夕节', '乞巧节', '七月初七'] },
+    { key: 'midautumn', name: '中秋节', type: 'lunar', lunarKey: 'midautumn', span: 3, est: ['09-07', '10-07'], alias: ['中秋', '中秋节', '八月十五', '月饼节', '团圆节'] },
+    { key: 'chongyang', name: '重阳节', type: 'lunar', lunarKey: 'chongyang', span: 1, est: ['09-30', '10-31'], alias: ['重阳', '重阳节', '敬老节', '九月初九'] }
+  ];
+
+  // 24 节气（type=term，日期查 SeasonEngine.TERMS 表）
+  var TERMS = (SE && SE.TERM_ORDER) ? SE.TERM_ORDER : [
+    '小寒', '大寒', '立春', '雨水', '惊蛰', '春分', '清明', '谷雨', '立夏', '小满',
+    '芒种', '夏至', '小暑', '大暑', '立秋', '处暑', '白露', '秋分', '寒露', '霜降',
+    '立冬', '小雪', '大雪', '冬至'
+  ];
+  // 节气在公历中的常见区间（表外年份估算用）
+  var TERM_EST = {
+    '小寒': ['01-05', '01-07'], '大寒': ['01-19', '01-21'], '立春': ['02-03', '02-05'], '雨水': ['02-18', '02-20'],
+    '惊蛰': ['03-05', '03-07'], '春分': ['03-20', '03-22'], '清明': ['04-04', '04-06'], '谷雨': ['04-19', '04-21'],
+    '立夏': ['05-05', '05-07'], '小满': ['05-20', '05-22'], '芒种': ['06-05', '06-07'], '夏至': ['06-20', '06-22'],
+    '小暑': ['07-06', '07-08'], '大暑': ['07-22', '07-24'], '立秋': ['08-07', '08-09'], '处暑': ['08-22', '08-24'],
+    '白露': ['09-07', '09-09'], '秋分': ['09-22', '09-24'], '寒露': ['10-07', '10-09'], '霜降': ['10-22', '10-24'],
+    '立冬': ['11-06', '11-08'], '小雪': ['11-21', '11-23'], '大雪': ['12-06', '12-08'], '冬至': ['12-21', '12-23']
+  };
+
+  /* ---------------- 修饰语：把节日当天变成区间 ---------------- */
+  var SOON_DAYS = 7;    // 「快到了 / 临近」默认按节前 7 天算
+  var NEAR_DAYS = 3;    // 「节前 / 之前」未带数字时，默认取节前 3 天
+  // 数量词（含中文数字），供 before / after 计算跨度
+  var NUM = '([一二三四五六七八九十两1-9]|十[一二三四五六七八九]|\\d+)';
+  var UNIT = '(个月|月|周|个星期|星期|礼拜|天|日)';
+  var MODS = [
+    // 顺序即优先级：先看「临近」，再看「节前/节后」，最后才是泛化的「前后/期间」
+    { re: /(快到了|就快到了|快要到了|就要到了|马上到了|即将到来|即将来临|临近了?|快到了|快到|接近了?|倒计时|要到了|快过节|要过节)/, off: 'soon', label: '临近（节前 ' + SOON_DAYS + ' 天起）' },
+    { re: /(节前|之前|以前)/, off: 'before', n: NEAR_DAYS, label: '节前（默认节前 ' + NEAR_DAYS + ' 天）' },
+    { re: /(节后|之后|过后|以后)/, off: 'after', n: NEAR_DAYS, label: '节后（默认节后 ' + NEAR_DAYS + ' 天）' },
+    { re: /(前一天|头一天|提前一天|提前1天)/, off: 'before', n: 1, unit: '天', label: '节前 1 天' },
+    { re: /(后一天|次日|第二天|隔天)/, off: 'after', n: 1, unit: '天', label: '节后 1 天' },
+    // 注意：动词用非捕获组，保证 m[1]=数量、m[2]=单位 的索引在所有规则里一致
+    { re: /(?:提前|提早)\s*([一二三四五六七八九十两1-9]|十[一二三四五六七八九]|\d+)\s*(个月|月|周|个星期|星期|天|日)/, off: 'before', label: '提前 N 个单位' },
+    { re: new RegExp('前\\s*' + NUM + '\\s*' + UNIT), off: 'before', label: '节前 N 个单位' },
+    { re: new RegExp('后\\s*' + NUM + '\\s*' + UNIT), off: 'after', label: '节后 N 个单位' },
+    { re: /(当天|正日子|当日|那天|节日当天|这一天)/, off: 'same', label: '节日当天' },
+    { re: /(前后|期间|那几天|这几天|假期里|假期|过节期间|过节|节日里|左右)/, off: 'around', label: '节日前后' }
+  ];
+  // 单位 → 天数（「月」走日历加月，这里只在无法加月时兜底）
+  function unitDays(u) {
+    if (!u) return 1;
+    if (u.indexOf('月') >= 0) return 30;
+    if (u.indexOf('周') >= 0 || u.indexOf('星期') >= 0 || u.indexOf('礼拜') >= 0) return 7;
+    return 1;
+  }
+  // 按单位平移日期（月按日历自然月，避免 30 天累计误差）
+  function shiftByUnit(d, n, u) {
+    if (u && u.indexOf('月') >= 0) return new Date(d.getFullYear(), d.getMonth() + n, d.getDate());
+    return addDays(d, n * unitDays(u));
+  }
+
+  /* ---------------- 相对时间 ---------------- */
+  function weekStart(d) { var x = day0(d), w = x.getDay(); return addDays(x, w === 0 ? -6 : 1 - w); } // 周一为首
+  function monthStart(d) { return new Date(d.getFullYear(), d.getMonth(), 1); }
+  function monthEnd(d) { return new Date(d.getFullYear(), d.getMonth() + 1, 0); }
+  function addMonths(d, n) { return new Date(d.getFullYear(), d.getMonth() + n, 1); }
+
+  /* 相对时间词表
+   * 顺序原则：特异表达在前（「这周末」优先于「这周」），重叠命中由 dedupe 按
+   * raw 长度与置信度消解 —— 例如「下周末」同时命中「下周末」与「下周」时保留前者。
+   */
+  var RELS = [
+    // —— 天级 ——
+    { re: /今天|今日|现在/, name: '今天', calc: function (t) { return { s: t, e: t }; } },
+    { re: /大后天/, name: '大后天', calc: function (t) { return { s: addDays(t, 3), e: addDays(t, 3) }; } },
+    { re: /明天|明日|明儿/, name: '明天', calc: function (t) { return { s: addDays(t, 1), e: addDays(t, 1) }; } },
+    { re: /后天/, name: '后天', calc: function (t) { return { s: addDays(t, 2), e: addDays(t, 2) }; } },
+    { re: /昨天|昨日/, name: '昨天', calc: function (t) { return { s: addDays(t, -1), e: addDays(t, -1) }; } },
+    { re: /前天/, name: '前天', calc: function (t) { return { s: addDays(t, -2), e: addDays(t, -2) }; } },
+    { re: new RegExp(NUM + '\\s*(天|日)后'), name: 'N天后', calc: function (t, m) { var n = cn2num(m[1]) || 1; return { s: addDays(t, n), e: addDays(t, n) }; } },
+    { re: new RegExp('前\\s*' + NUM + '\\s*(天|日)'), name: '前N天', calc: function (t, m) { var n = cn2num(m[1]) || 3; return { s: addDays(t, -n), e: addDays(t, -1) }; } },
+    { re: /这几天|近几天|这两天/, name: '这几天', calc: function (t) { return { s: addDays(t, -2), e: t }; } },
+    { re: /前几天|前些天/, name: '前几天', calc: function (t) { return { s: addDays(t, -3), e: addDays(t, -1) }; } },
+    // —— 周级：周末类必须排在泛化周之前 ——
+    { re: /这(个)?周末|本周末|这(个)?礼拜天?/, name: '这周末', calc: function (t) { var w = weekStart(t); return { s: addDays(w, 5), e: addDays(w, 6) }; } },
+    { re: /下(个)?周末|下(个)?礼拜天?/, name: '下周末', calc: function (t) { var w = weekStart(t); return { s: addDays(w, 12), e: addDays(w, 13) }; } },
+    { re: /上(个)?周末|上(个)?礼拜天?/, name: '上周末', calc: function (t) { var w = weekStart(t); return { s: addDays(w, -2), e: addDays(w, -1) }; } },
+    { re: /周末|礼拜天|周日/, name: '周末', calc: function (t) { var w = weekStart(t); return { s: addDays(w, 5), e: addDays(w, 6) }; } },
+    { re: new RegExp(NUM + '\\s*(周|个星期|星期|礼拜)后'), name: 'N周后', calc: function (t, m) { var n = cn2num(m[1]) || 1; return { s: addDays(t, n * 7), e: addDays(t, n * 7) }; } },
+    { re: /下(个)?(周|星期|礼拜)/, name: '下周', calc: function (t) { var w = weekStart(t); return { s: addDays(w, 7), e: addDays(w, 13) }; } },
+    { re: /这(个)?(周|星期|礼拜)|本(周|星期)/, name: '这周', calc: function (t) { var w = weekStart(t); return { s: w, e: addDays(w, 6) }; } },
+    { re: /上上?(个)?(周|星期|礼拜)/, name: '上周', calc: function (t) { var w = weekStart(t); return { s: addDays(w, -7), e: addDays(w, -1) }; } },
+    // —— 月 / 季 / 年 ——
+    { re: new RegExp(NUM + '\\s*(个月|月)后'), name: 'N个月后', calc: function (t, m) { var n = cn2num(m[1]) || 1, d = addMonths(t, n); return { s: d, e: new Date(d.getFullYear(), d.getMonth() + 1, 0) }; } },
+    { re: /下个月|下月|下个?月/, name: '下个月', calc: function (t) { var m = addMonths(t, 1); return { s: m, e: new Date(m.getFullYear(), m.getMonth() + 1, 0) }; } },
+    { re: /这个月|本月|这月/, name: '这个月', calc: function (t) { return { s: monthStart(t), e: monthEnd(t) }; } },
+    { re: /上个月|上月/, name: '上个月', calc: function (t) { var m = addMonths(t, -1); return { s: m, e: new Date(m.getFullYear(), m.getMonth() + 1, 0) }; } },
+    { re: /年底|年末|年底前/, name: '年底', calc: function (t) { return { s: new Date(t.getFullYear(), 11, 1), e: new Date(t.getFullYear(), 11, 31) }; } },
+    { re: /年初|开年/, name: '年初', calc: function (t) { var y = t.getFullYear() + (t.getMonth() > 0 ? 1 : 0); return { s: new Date(y, 0, 1), e: new Date(y, 0, 31), rolled: t.getMonth() > 0 }; } },
+    { re: /半年内|近半年/, name: '近半年', calc: function (t) { return { s: addDays(t, -180), e: t }; } }
+  ];
+
+  /* ---------------- 节日 → 具体日期 ---------------- */
+  // 取某年该节日的 {s, e, estimated}
+  function datesOf(fest, year) {
+    if (fest.type === 'solar' || fest.type === 'shopping') {
+      var d = md2date(fest.date, year);
+      return { s: d, e: addDays(d, (fest.span || 1) - 1), estimated: false };
+    }
+    if (fest.type === 'weekday') {
+      var r = fest.rule, first = new Date(year, r[0] - 1, 1).getDay();
+      var day = ((r[2] - first + 7) % 7) + 1 + (r[1] - 1) * 7;
+      var wd = new Date(year, r[0] - 1, day);
+      return { s: wd, e: addDays(wd, (fest.span || 1) - 1), estimated: false };
+    }
+    if (fest.type === 'lunar') {
+      var tbl = SE && SE.LUNAR && SE.LUNAR[String(year)];
+      if (tbl && tbl[fest.lunarKey]) {
+        var ld = md2date(tbl[fest.lunarKey], year);
+        return { s: ld, e: addDays(ld, (fest.span || 1) - 1), estimated: false };
+      }
+      // 表外年份：用公历可能区间的中点估算，置信度降级，同时把真实可能区间一并带出
+      var a = md2date(fest.est[0], year), b = md2date(fest.est[1], year);
+      var mid = day0(new Date((a.getTime() + b.getTime()) / 2));
+      return { s: mid, e: addDays(mid, (fest.span || 1) - 1), estimated: true, estRange: [ymd(a), ymd(b)] };
+    }
+    if (fest.type === 'term') {
+      var tt = SE && SE.TERMS && SE.TERMS[String(year)];
+      if (tt && tt[fest.key]) {
+        var td = md2date(tt[fest.key], year);
+        return { s: td, e: addDays(td, 2), estimated: false };
+      }
+      var er = TERM_EST[fest.key] || ['01-01', '12-31'];
+      var ea = md2date(er[0], year), eb = md2date(er[1], year);
+      var tm = day0(new Date((ea.getTime() + eb.getTime()) / 2));
+      return { s: tm, e: addDays(tm, 2), estimated: true, estRange: [ymd(ea), ymd(eb)] };
+    }
+    return null;
+  }
+
+  /* 跨年策略：
+   * 1. 先取「今年」的日期；若整个假期已早于今天，且超出宽限期（默认 3 天），顺延到明年（rolled=true）
+   *    —— 宽限期的意义：刚过去两三天的节（9/12 说「教师节」）仍按今年算，避免跳到明年
+   * 2. 文本里出现「明年 / 明年中秋」→ 强制 +1 年；「去年 / 去年春节」→ 强制 -1 年
+   * 3. 农历节日日期每年不同：表内年份（2026-2040）用天文算法生成的精确表；
+   *    表外年份用「该节日在公历中的可能区间」取中点估算，并置 estimated=true、置信度降至 0.6
+   */
+  var GRACE_DAYS = 3;
+  /* preferFuture：语义上必然指向「还没到的那个节」（临近 / 节前 / 提前准备）时置 true ——
+   * 此时只要节日当天已早于今天，一律顺延到明年，避免「教师节快到了」解析出已过去的区间 */
+  function resolveFest(fest, today, forceYear, grace, preferFuture) {
+    grace = (grace == null) ? GRACE_DAYS : grace;
+    var y = today.getFullYear();
+    if (forceYear === 'next') y += 1;
+    if (forceYear === 'prev') y -= 1;
+    var r = datesOf(fest, y);
+    if (!r) return null;
+    var rolled = false, justPassed = 0;
+    if (!forceYear) {
+      var gap = daysBetween(r.e, day0(today)); // >0 表示假期已结束多少天
+      if (preferFuture && gap > 0) {
+        y += 1;
+        r = datesOf(fest, y);
+        rolled = true;
+      } else if (gap > grace) {
+        y += 1;
+        r = datesOf(fest, y);
+        rolled = true;
+      } else if (gap > 0) {
+        justPassed = gap;
+      }
+    }
+    return { year: y, s: r.s, e: r.e, estimated: r.estimated, estRange: r.estRange, rolled: rolled, justPassed: justPassed };
+  }
+
+  /* ---------------- 扫描：节日词 ---------------- */
+  // 构造（词 → 节日）索引，长词优先
+  var WORDS = [];
+  var FEST_ALIAS = {};
+  FESTS.forEach(function (f) {
+    f.alias.forEach(function (a) {
+      FEST_ALIAS[a] = 1;
+      WORDS.push({ w: a, f: f });
+    });
+  });
+  // 节气词：已被节日别名占用的（如「清明」）不再单独建词，避免同位置重复命中
+  TERMS.forEach(function (t) {
+    if (FEST_ALIAS[t]) return;
+    WORDS.push({ w: t, f: { key: t, name: t, type: 'term', span: 3, alias: [t] } });
+  });
+  WORDS.sort(function (a, b) { return b.w.length - a.w.length; });
+
+  // 上下文保护：排除「三十一号」里的「十一」、「十一月」里的「十一」这类数字片段误命中
+  var NUMCHARS = '0-9一二三四五六七八九十百千万两';
+  function badCtx(text, i, w) {
+    var prev = i > 0 ? text.charAt(i - 1) : '';
+    var next = text.charAt(i + w.length) || '';
+    var isNum = function (ch) { return !!ch && NUMCHARS.indexOf(ch) >= 0; };
+    // 前面紧跟数字/数词 → 是更大数字的一部分（三十一、一百一）
+    if (isNum(prev) && isNum(w.charAt(0))) return true;
+    // 「双十一 / 双十二」里的数字片段由整词命中，这里排除重复扫描
+    if (prev === '双' && w.charAt(0) === '十') return true;
+    // 后接「月」→ 是月份（十一月、五月、六月），不是节日
+    if (next === '月' && (w === '十一' || w === '五一' || w === '六一' || w === '初一' || w === '十一五')) return true;
+    // 后接量词/单位 → 是数量或时间点（十一点、十一号、三十一号、十一万）
+    if ((w === '十一' || w === '五一' || w === '六一') && /[点号日时个万人元岁分秒]/.test(next)) return true;
+    // 五一路、五一路口这类地名
+    if (w === '五一' && next === '路') return true;
+    if (w === '过年' && isNum(prev)) return true;
+    return false;
+  }
+
+  function scanFestivals(text, today) {
+    var out = [];
+    WORDS.forEach(function (item) {
+      var from = 0, i;
+      while ((i = text.indexOf(item.w, from)) >= 0) {
+        var end = i + item.w.length;
+        if (badCtx(text, i, item.w)) { from = end; continue; }
+        // 年份修饰：明年 / 去年 / 后年
+        var pre = text.slice(Math.max(0, i - 4), i);
+        var force = null;
+        if (/明年|来年|下一年/.test(pre)) force = 'next';
+        else if (/去年|上年|上一年|前年/.test(pre)) force = 'prev';
+        // 修饰语：先看词后 8 字，再看词前 3 字（「临近中秋」「节前 3 天」两种语序）
+        var post = text.slice(end, end + 8);
+        var mod = null, modAt = end, modLen = 0;
+        for (var k = 0; k < MODS.length; k++) {
+          var m = post.match(MODS[k].re);
+          if (m) { mod = { def: MODS[k], m: m }; modAt = end + m.index; modLen = m[0].length; break; }
+          var preTxt = text.slice(Math.max(0, i - 3), i);
+          var m2 = preTxt.match(MODS[k].re);
+          if (m2) { mod = { def: MODS[k], m: m2 }; modAt = i - m2[0].length; modLen = m2[0].length; break; }
+        }
+        // 临近 / 节前语义 → 一律指向「还没到的那个节」
+        var _pf = !!(mod && (mod.def.off === 'soon' || mod.def.off === 'before' || mod.def.off === 'pre'));
+        var resolved = resolveFest(item.f, today, force, null, _pf);
+        if (!resolved) { from = end; continue; }
+        var s = resolved.s, e = resolved.e, off = 'none', note = '';
+        var conf = item.f.type === 'lunar' ? 0.9 : (item.f.type === 'term' ? 0.85 : (item.f.type === 'shopping' ? 0.86 : 0.92));
+        if (resolved.estimated) {
+          conf = 0.55;
+          var _rg = resolved.estRange ? ('，实际落在 ' + resolved.estRange[0] + ' ~ ' + resolved.estRange[1] + ' 之间') : '';
+          note = '该年无精确' + (item.f.type === 'term' ? '节气' : '农历') + '表，按公历常见区间取中估算' + _rg + '，以官方日历为准';
+        }
+        if (mod) {
+          off = mod.def.off;
+          var n = (mod.def.n != null) ? mod.def.n : cn2num(mod.m[1]);
+          if (!n || isNaN(n)) n = 1;
+          var uu = mod.def.unit || (mod.m && mod.m[2]) || '天';
+          if (off === 'before' || off === 'pre') {
+            s = shiftByUnit(resolved.s, -n, uu); e = addDays(resolved.s, -1);
+          } else if (off === 'after') {
+            s = addDays(resolved.e, 1); e = shiftByUnit(resolved.e, n, uu);
+          } else if (off === 'soon') {
+            s = addDays(resolved.s, -SOON_DAYS); e = resolved.s;
+          } else if (off === 'same') {
+            s = resolved.s; e = resolved.s;
+          } else if (off === 'around') {
+            s = addDays(resolved.s, -1); e = resolved.e;
+          }
+          conf -= 0.04;
+          note = (note ? note + '；' : '') + mod.def.label;
+        }
+        if (resolved.rolled) { conf -= 0.03; note = (note ? note + '；' : '') + '今年该节日已过，自动顺延到 ' + resolved.year + ' 年'; }
+        else if (resolved.justPassed) { conf -= 0.02; note = (note ? note + '；' : '') + '该节日 ' + resolved.justPassed + ' 天前刚过（' + GRACE_DAYS + ' 天宽限内，仍按今年）'; }
+        conf = Math.max(0.35, Math.min(0.99, conf));
+        // 原文跨度：节日词 + 修饰语（前/后）+ 年份词（明年/去年）
+        var rawFrom = Math.min(i, modAt, force ? i - 2 : i);
+        var rawTo = Math.max(end, modAt + modLen);
+        var _s0 = ymd(s), _e0 = ymd(e), _days = daysBetween(s, e) + 1;
+        out.push({
+          raw: text.slice(Math.max(0, rawFrom), rawTo),
+          type: item.f.type, key: item.f.key, name: item.f.name,
+          start: _s0, end: _e0,
+          label: _s0 + (_s0 === _e0 ? '' : ' ~ ' + _e0) + '（' + _days + ' 天）',
+          confidence: Math.round(conf * 100) / 100,
+          offset: off, index: Math.max(0, rawFrom), note: note || '未带修饰语，按节日当天（含假期 ' + (item.f.span || 1) + ' 天）',
+          year: resolved.year, estimated: resolved.estimated, rolled: resolved.rolled, span: item.f.span || 1
+        });
+        from = end;
+      }
+    });
+    return out;
+  }
+
+  /* ---------------- 扫描：相对时间 ---------------- */
+  function scanRelative(text, today) {
+    var out = [];
+    RELS.forEach(function (r) {
+      var m = text.match(r.re);
+      if (!m) return;
+      var c = r.calc(today, m);
+      if (!c) return;
+      var _rs = ymd(c.s), _re = ymd(c.e), _rd = daysBetween(c.s, c.e) + 1;
+      out.push({
+        raw: m[0], type: 'relative', key: r.name, name: r.name,
+        start: _rs, end: _re,
+        label: _rs + (_rs === _re ? '' : ' ~ ' + _re) + '（' + _rd + ' 天）',
+        confidence: (c.s.getTime() === c.e.getTime() ? 0.9 : 0.8), offset: 'none',
+        index: text.indexOf(m[0]),
+        note: '按当前系统日期 ' + ymd(today) + ' 归一化' + (c.rolled ? '（已过，顺延到下一年）' : ''),
+        year: c.s.getFullYear(), estimated: false, rolled: !!c.rolled, span: _rd
+      });
+    });
+    return out;
+  }
+
+  /* ---------------- 主入口 ---------------- */
+  // 重叠消解：长匹配优先，其次置信度高优先
+  function dedupe(list) {
+    list.sort(function (a, b) {
+      var la = a.raw.length, lb = b.raw.length;
+      if (lb !== la) return lb - la;
+      return b.confidence - a.confidence;
+    });
+    var taken = [], out = [];
+    list.forEach(function (m) {
+      var s = m.index, e = s + m.raw.length;
+      for (var i = 0; i < taken.length; i++) {
+        if (s < taken[i].e && e > taken[i].s) return; // 与已选重叠
+      }
+      taken.push({ s: s, e: e });
+      out.push(m);
+    });
+    out.sort(function (a, b) { return a.index - b.index; });
+    return out;
+  }
+
+  function parse(text, opts) {
+    opts = opts || {};
+    if (text == null) return [];
+    text = String(text);
+    var today = opts.today ? day0(opts.today) : day0(new Date());
+    var all = scanFestivals(text, today).concat(scanRelative(text, today));
+    return dedupe(all);
+  }
+
+  function parseBest(text, opts) {
+    var list = parse(text, opts);
+    if (!list.length) return null;
+    var best = list[0];
+    list.forEach(function (m) { if (m.confidence > best.confidence) best = m; });
+    return best;
+  }
+
+  /* ---------------- 当日匹配：统一「今天是什么节」 ----------------
+   * 与 SeasonEngine.match 的差异（也是各页面此前各写一套的根源）：
+   *   1. 认「假期区间」——春节第 3 天、国庆第 5 天都算在节里（SeasonEngine 只认当天）
+   *   2. 覆盖万圣节 / 感恩节等 SeasonEngine 词表里没有的节日
+   *   3. 输出结构与 parse() 完全一致，消费方不必写两套字段
+   * 优先级：公历节日 > 第 N 个星期几 > 农历节日 > 购物节点 > 节气
+   */
+  var TODAY_ORDER = { solar: 0, weekday: 1, lunar: 2, shopping: 3, term: 4 };
+  function todayMatch(dt) {
+    var today = day0(dt || new Date());
+    var hits = [];
+    FESTS.forEach(function (f) {
+      var r = datesOf(f, today.getFullYear());
+      if (!r || !r.s) return;
+      var rs = day0(r.s), re = day0(r.e);
+      if (today >= rs && today <= re) {
+        var a = ymd(rs), b = ymd(re), sp = daysBetween(rs, re) + 1;
+        hits.push({
+          raw: f.name, type: f.type, key: f.key, name: f.name,
+          start: a, end: b,
+          label: a + (a === b ? '' : ' ~ ' + b) + '（' + sp + ' 天）',
+          confidence: r.estimated ? 0.55 : (f.type === 'lunar' ? 0.9 : 0.92),
+          offset: 'same', index: -1,
+          note: '今天是' + f.name + (daysBetween(rs, today) > 0 ? '（假期第 ' + (daysBetween(rs, today) + 1) + ' 天）' : ''),
+          year: today.getFullYear(), estimated: !!r.estimated, rolled: false, span: sp
+        });
+      }
+    });
+    // 节气：复用 SeasonEngine 的精确表，DateMatch 不再维护第二份节气日期
+    try {
+      var tn = (SE && SE.solarTermOf) ? SE.solarTermOf(today) : '';
+      if (tn) {
+        var row = (SE && SE.TERMS) ? SE.TERMS[String(today.getFullYear())] : null;
+        var td = row ? md2date(row[tn], today.getFullYear()) : null;
+        var ok = !!(td && !isNaN(td.getTime()));
+        var ts = ok ? day0(td) : today, te = addDays(ts, 2);
+        hits.push({
+          raw: tn, type: 'term', key: tn, name: tn,
+          start: ymd(ts), end: ymd(te),
+          label: ymd(ts) + (ymd(ts) === ymd(te) ? '' : ' ~ ' + ymd(te)) + '（' + (daysBetween(ts, te) + 1) + ' 天）',
+          confidence: ok ? 0.85 : 0.6, offset: 'same', index: -1,
+          note: '今天是节气「' + tn + '」' + (ok ? '' : '（按常见区间估算）'),
+          year: today.getFullYear(), estimated: !ok, rolled: false, span: 3
+        });
+      }
+    } catch (e) {}
+    if (!hits.length) return null;
+    hits.sort(function (a, b) {
+      var oa = TODAY_ORDER[a.type] == null ? 9 : TODAY_ORDER[a.type];
+      var ob = TODAY_ORDER[b.type] == null ? 9 : TODAY_ORDER[b.type];
+      if (oa !== ob) return oa - ob;
+      return b.span - a.span;
+    });
+    return hits[0];
+  }
+
+  /* ---------------- 解析结果 → 开场话术挂载点 ----------------
+   * 只有话术库里真有对应话术池的才返回 key（fest→OPEN_FESTS / term→OPEN_TERMS），
+   * 其余返回 null，由调用方走通用开场 —— 关键是「识别」与「有话说」解耦，
+   * 不再因为话术池缺 key 就把识别结果整条丢掉。
+   */
+  var TERM_AS_FEST = { qingming: '清明' };
+  function scriptKeyOf(m) {
+    if (!m) return null;
+    if (m.type === 'term') return { kind: 'term', key: m.key };
+    if (m.type === 'relative') return null;
+    if (TERM_AS_FEST[m.key]) return { kind: 'term', key: TERM_AS_FEST[m.key] };
+    if (SE && SE.OPEN_FESTS && SE.OPEN_FESTS[m.key]) return { kind: 'fest', key: m.key };
+    return null;
+  }
+  function hasOpenPool(k) {
+    if (!k || !SE) return false;
+    var pool = (k.kind === 'term') ? (SE.OPEN_TERMS && SE.OPEN_TERMS[k.key]) : (SE.OPEN_FESTS && SE.OPEN_FESTS[k.key]);
+    return !!(pool && pool.length);
+  }
+
+  /* ---------------- 一站式：文本 → 可直接驱动话术的结果 ----------------
+   * 优先级：话术主题里识别到的节日 > 今日匹配
+   * 返回：source(topic|today|none) / match / script(有现成话术时) / label / confidence / inlineHint
+   */
+  function resolveScript(text, opts) {
+    opts = opts || {};
+    var today = opts.today ? day0(opts.today) : day0(new Date());
+    var t = (text == null) ? '' : String(text).trim();
+    var m = t ? parseBest(t, { today: today }) : null;
+    var source = 'topic';
+    if (!m) { m = todayMatch(today); source = m ? 'today' : 'none'; }
+    var key = scriptKeyOf(m);
+    var usable = hasOpenPool(key);
+    return {
+      source: source,
+      match: m,
+      script: usable ? key : null,
+      kind: (key && usable) ? key.kind : '',
+      key: (key && usable) ? key.key : '',
+      name: m ? m.name : '',
+      start: m ? m.start : '',
+      end: m ? m.end : '',
+      label: m ? m.label : '',
+      confidence: m ? m.confidence : 0,
+      note: m ? m.note : '',
+      estimated: m ? !!m.estimated : false,
+      // 只有「节日 / 节气」才值得补一句应景提示；相对时间（下个月、这周）不植入
+      inlineHint: (m && !usable && m.type !== 'relative') ? ('正好赶上' + m.name + '，算是应景。') : ''
+    };
+  }
+
+  // 一句话说明（UI 展示用）
+  function describe(m) {
+    if (!m) return '';
+    var range = m.label || (m.start === m.end ? m.start : (m.start + ' ~ ' + m.end));
+    return m.name + '（' + range + '，置信度 ' + Math.round(m.confidence * 100) + '%' + (m.note ? '，' + m.note : '') + '）';
+  }
+
+  var TYPE_NAMES = { solar: '公历节日', lunar: '农历节日', weekday: '公历节日', shopping: '通用节点', term: '节气', relative: '相对时间' };
+  function typeName(t) { return TYPE_NAMES[t] || t; }
+
+  /* ---------------- 自检样例 ---------------- */
+  var SAMPLES = [
+    // —— 话术里最常见的节日称呼（务必先识别节日词，再解析日期）——
+    '教师节快到了，想给老师挑份礼物',
+    '中秋想送点礼给爸妈',
+    '国庆出去玩，路上带点什么好',
+    '春节前一天飞',
+    '端午后一天回程',
+    '中秋当天想订一盒',
+    '临近中秋的航班',
+    '国庆节前的班次',
+    '教师节后三天到货',
+    '中秋前一周开始备货',
+    '明年中秋想提前一个月准备',
+    // —— 通用购物节点 ——
+    '双十一准备囤货',
+    '618有什么值得买的',
+    '双十二要不要上点货',
+    // —— 节气 ——
+    '冬至快到了',
+    '立冬那天开始用',
+    // —— 相对时间 ——
+    '前三天刚买了这个',
+    '这周有促销吗',
+    '下周末回来',
+    '下个月要出差',
+    // —— 负例（不应命中的数字片段）——
+    '11月去日本'
+  ];
+  function selfTest(today) {
+    return SAMPLES.map(function (s) { return { text: s, match: parseBest(s, { today: today }) }; });
+  }
+
+  return {
+    FESTS: FESTS, TERMS: TERMS, MODS: MODS, RELS: RELS, SAMPLES: SAMPLES,
+    parse: parse, parseBest: parseBest, describe: describe, typeName: typeName,
+    todayMatch: todayMatch, scriptKeyOf: scriptKeyOf, hasOpenPool: hasOpenPool,
+    resolveScript: resolveScript,
+    resolveFest: resolveFest, datesOf: datesOf, selfTest: selfTest,
+    ymd: ymd, addDays: addDays, shiftByUnit: shiftByUnit, SOON_DAYS: SOON_DAYS
+  };
+})();
+
+/* ===== DATE_MATCH_END ===== */
 
 /* 客舱小助手数据包引擎（_sync_packs.py 自动注入；改 docs/_packs_engine.js 后重跑 python _sync_packs.py） */
 //__PACKS_ENGINE_START__
@@ -763,6 +1404,7 @@ window.SeasonEngine = (function () {
     <button class="src-tab" data-src="ccm" onclick="setQaSource('ccm',this)">📘 乘务员手册<small>01.10</small></button>
     <button class="src-tab" data-src="mgm" onclick="setQaSource('mgm',this)">📗 乘务员管理手册<small>01.14</small></button>
     <button class="src-tab" data-src="svc" onclick="setQaSource('svc',this)">💼 服务手册规范<small>00.07</small></button>
+    <button class="src-tab" data-src="dc" onclick="setQaSource('dc',this)">🚨 大撤专项</button>
   </div>
   <div class="input-box">
     <div class="ti-wrap">
@@ -1141,6 +1783,7 @@ const KB = [
 {cat:'销售财务',icon:'🏦',src:'4月OJT / 管理手册 6.7.9.3.10',t:['转账','附言','现金缴存','缴存扣分'],
  rel:['销售','扣分','业务质量分'],
  q:'销售款怎么缴存？转账附言怎么写？',
+ t:['销售款','缴存','转账附言','机上销售','销售款缴存'],
  a:`<ul>
  <li><strong>现金缴存</strong>：乘务组登录销售系统人员须在降落后 <strong>24 小时内</strong>完成；未按时 / 金额不足 → 操作人扣业务质量分 <strong>2 分</strong>，乘务长、4 号位各扣 <strong>1 分</strong>。</li>
  <li><strong>转账</strong>：乘务长或其指定乘务员操作，收款户名「春秋航空股份有限公司」；同样 <strong>24 小时内</strong>完成。</li>
@@ -1870,13 +2513,13 @@ a:'成人胸外按压：部位为胸部正中<strong>乳头连线水平（胸骨
 {cat:'应急救护-CPR', icon:'📘', src:'CCM 7.11.3.5', t:['儿童按压','胸骨下1/2','15:2','双人施救','婴幼儿A-B-C','胸外按压'],
 q:'儿童胸外按压和人工呼吸比例有什么要求？',
 a:'儿童按压部位为胸骨下1/2处，单掌或双掌按压，频率100-120次/分，按压幅度至少为胸廓前后径的1/3，每次按压后胸廓复位。儿童/婴儿CPR步骤为<strong>A-B-C</strong>；按压与呼吸比：单人施救30:2，<strong>2人及以上施救15:2</strong>。'},
-{cat:'应急救护-CPR', icon:'📘', src:'CCM 7.11.3.5', t:['婴儿按压','乳头连线下方','双指按压','频率100','深度1/3','婴儿胸外按压','胸外按压'],
+{cat:'应急救护-CPR', icon:'📘', src:'CCM 7.11.3.5', t:['婴儿按压','乳头连线下方','双指按压','频率100','深度1/3','婴儿胸外按压','胸外按压','心肺复苏','婴儿胸外心肺复苏','婴儿CPR'],
 q:'婴儿胸外按压怎么做？',
 a:'婴儿心脏按压部位为紧贴胸部正中<strong>乳头连线下方水平</strong>，采用<strong>中指、无名指（两手指）或双手环抱双拇指</strong>按压；按压频率至少100次/分钟；按压幅度至少为胸廓前后径的1/3；每次按压后胸廓复位。婴儿CPR步骤为A-B-C（先开放气道和人工呼吸）。'},
 {cat:'应急救护-CPR', icon:'📘', src:'CCM 7.11.3.7', t:['开放气道','仰头举颏法','压额头','抬下颏'],
 q:'如何开放气道（仰头举颏法）？',
 a:'开放气道采用<strong>仰头举颏法</strong>：一只手放在患者前额，用手掌小鱼际部把额头用力向后推使头部后仰；另一只手指放在下颌骨处使下颏向上抬起。勿用力压迫下颌部软组织，避免可能造成的气道梗阻。'},
-{cat:'应急救护-CPR', icon:'📘', src:'CCM 7.11.3.8', t:['人工呼吸','1秒通气','连续2次','5秒','口对口'],
+{cat:'应急救护-CPR', icon:'📘', src:'CCM 7.11.3.8', t:['人工呼吸','1秒通气','连续2次','5秒','口对口','心肺复苏','CPR'],
 q:'人工呼吸的基本要求是什么？',
 a:'人工呼吸：有条件时应使用人工呼吸面膜避免直接接触口鼻减少感染；每次通气必须使肺脏充分膨胀、可见胸廓上抬，每次通气时间约<strong>1秒钟</strong>，<strong>连续2次通气在5秒内完成</strong>。成人/儿童用口对口（捏住鼻孔防漏气）或口对鼻；婴儿用口对口鼻。'},
 {cat:'应急救护-CPR', icon:'📘', src:'CCM 7.11.3.3', t:['呼救','广播找医生','帮我','抢救呼救'],
@@ -3255,8 +3898,13 @@ const qaTalkEngine = (function(){
 
     const _useTime = (opts.time && TS_OPEN_TIMES[opts.time]) ? opts.time : _autoTime;
 
-    let _useFest = (opts.holiday && TS_OPEN_FESTS[opts.holiday]) ? opts.holiday : '';
-    let _useTerm = (opts.holiday && String(opts.holiday).indexOf('solar:') === 0) ? String(opts.holiday).slice(6) : '';
+    // 挂载点约定（与 beauty.html 一致）：'fest:<key>' 节日 / 'term:<节气>' 或 'solar:<节气>' 节气
+    const _hRaw = String(opts.holiday || '');
+    let _useFest = '', _useTerm = '';
+    if(_hRaw.indexOf('solar:') === 0) _useTerm = _hRaw.slice(6);
+    else if(_hRaw.indexOf('term:') === 0) _useTerm = _hRaw.slice(5);
+    else if(_hRaw.indexOf('fest:') === 0) _useFest = _hRaw.slice(5);
+    else if(opts.holiday && TS_OPEN_FESTS[opts.holiday]) _useFest = opts.holiday;
     if(opts.holiday === 'auto' || (!opts.holiday && opts.autoFest !== false)){
       const _sm = SeasonEngine.match(new Date());
       if(_sm && _sm.kind === 'festival' && TS_OPEN_FESTS[_sm.key]){ _useFest = _sm.key; _useTerm = ''; }
@@ -3379,9 +4027,9 @@ window.qaTalkEngine = qaTalkEngine;
 /* qa 版合规清洗（与 beauty.html 的 beautySceneEngine.complianceClean 同源，双库同步注释：
  * 改任一处的违禁词表/替换规则时，需同步另一处 + 重跑构建） */
 const qaComplianceClean = function(text, mode){
-  const ALWAYS_BANNED = ['治疗','治愈','100%','永久','根治','秒杀','碾压','全网最低','最低价','最便宜','手慢无','错过就没有','比专柜','比代购','比免税','药到病除','无副作用','绝对','唯一','宣称','承诺'];
+  const ALWAYS_BANNED = ['治疗','治愈','100%','永久','根治','秒杀','碾压','全网最低','最低价','最便宜','手慢无','错过就没有','比专柜','比代购','比免税','药到病除','无副作用','绝对','唯一','宣称','承诺','顶级','立竿见影','最具标志性'];
   const STRICT_BANNED = ['医美','水光针','热玛吉','干细胞','排毒','消炎','杀菌','注射','填充','医美术','医疗'];
-  const REPLACE_MAP = { '爆款':'人气款', '明星产品':'人气产品', '最佳':'很好', '最好':'很好', '第一':'头一份', '最有效':'很有效', '独家':'少有的', '神效':'不错', '治愈':'舒适' };
+  const REPLACE_MAP = { '爆款':'人气款', '明星产品':'人气产品', '最佳':'很好', '最好':'很好', '第一':'头一份', '最有效':'很有效', '独家':'少有的', '神效':'不错', '治愈':'舒适', '顶级':'高端', '立竿见影':'见效快', '最具标志性':'很有代表性' };
   const found = [];
   let t = String(text || '');
   // 2026-09-09 审查修复：短语级预替换（两模式都跑，先于单词处理）——与 beauty.html 同步
@@ -3410,6 +4058,8 @@ const qaComplianceClean = function(text, mode){
   t = t.replace(/([，、；,;])(?=[，、；,;。])/g, '')
        .replace(/([，、；,;])\s*。/g, '。')
        .replace(/^[，、；。,;\s]+/, '');
+  // 2026-09-12：违禁词整词删除后可能留下连续空格（如「100% 南高梅」→「  南高梅」），此处收口
+  t = t.replace(/[ \t]{2,}/g, ' ');
   return { text: t, replaced: found };
 };
 
@@ -3424,7 +4074,7 @@ function buildTalkScript(cfg){
     });
   });
   const durMin = parseInt(cfg.dura || '3', 10);
-  const s = qaTalkEngine.build(prods, { mode: 'strict', duration: durMin, time: cfg.time || 'auto', holiday: cfg.fest || 'none' });
+  const s = qaTalkEngine.build(prods, { mode: 'strict', duration: durMin, time: cfg.time || 'auto', holiday: qaFestKeyOf(cfg) });
   if(!s) return '生成失败，请重试';
   return '「' + cats.map(function(c){ return c.label.replace(/^.\s*/, ''); }).join(' / ') + '」广播·脱口秀稿（约 ' + durMin + ' 分钟）\n\n' + s.fullText;
 }
@@ -3494,7 +4144,7 @@ function buildScript(cfg){
 
 /* ===================== 对话状态与渲染 ===================== */
 const chat = { msgs: [] };
-const wizard = { active:false, cats:[], dura:'3', budget:'mid', style:'guide', time:'auto', fest:'auto' };
+const wizard = { active:false, cats:[], dura:'3', budget:'mid', style:'guide', time:'auto', fest:'auto', topic:'' };
 // 快捷提问：{icon,title,desc,q}
 const CHIPS = [
   { ic:'📝', tl:'写销售话术', st:'选品类+时长出稿', q:'帮我写一段销售话术稿子' },
@@ -3577,12 +4227,14 @@ const SRC_CFG = {
   daily:{ label:'日常库',  name:'日常库（考勤·绩效·日常规定）', tips:'可问：UM怎么安排 / 病假怎么请 / 迟到怎么扣分 / 帮我写销售话术' },
   ccm:  { label:'乘务员手册', name:'客舱乘务员手册01.10', tips:'可问：值勤限制 / 撤离口令 / CPR / 出口座位 / 婴儿旅客限制' },
   mgm:  { label:'管理手册', name:'客舱服务部管理手册01.14', tips:'可问：酒测标准 / 复训 / 晋级条件 / 备份驻外 / 仪容仪表' },
-  svc:  { label:'服务手册规范', name:'客舱服务规范00.07', tips:'可问：着装标准 / 迎客话术 / UM服务 / 尊享飞流程 / 延误服务 / 禁忌话术' }
+  svc:  { label:'服务手册规范', name:'客舱服务规范00.07', tips:'可问：着装标准 / 迎客话术 / UM服务 / 尊享飞流程 / 延误服务 / 禁忌话术' },
+  dc:   { label:'大撤专项', name:'🚨 大撤专项（动态舱应急撤离）', tips:'可问：大撤整体流程 / 三人灭火小组 / 释压处置 / 氧气瓶操作 / 滑梯救生筏 / 预防式离机；也可用指令「/大撤 关键词」直达' }
 };
 function currentKbPool(){
   if(qaSource==='ccm') return window.KB_CCM_RAW;
   if(qaSource==='mgm') return window.KB_MGM_RAW;
   if(qaSource==='svc') return window.KB_SVC_RAW;
+  if(qaSource==='dc') return (window.DC_KB && window.DC_KB.length) ? window.DC_KB : KB;
   return KB;
 }
 function currentPoolLabel(){ return SRC_CFG[qaSource] ? SRC_CFG[qaSource].name : '日常库'; }
@@ -3604,10 +4256,15 @@ function nowTs(){ const d=new Date(); const p=n=>String(n).padStart(2,'0'); retu
 function addMsg(role, html, opts){
   opts = opts || {};
   chat.msgs.push({ role:role, html:html, raw:html, ts: nowTs(), answer:!!opts.answer, q:opts.q || '' });
-  renderChat();
+  renderChat(role === 'bot' && opts.answer ? {reveal:true} : {});
 }
-function renderChat(){
+function renderChat(opts){
+  opts = opts || {};
   const wrap = el('chatWrap');
+  const sc = el('chatScroll');
+  // 在重写内容【前】记录用户是否贴近底部：新消息插入会改变 scrollHeight，
+  // 若在插入后才测量会把"新消息撑出的高度"误判为"用户上翻"而拒绝滚动（答案需手动滑的根因）
+  const nearBottom = !sc || (sc.scrollHeight - sc.scrollTop - sc.clientHeight < 140);
   wrap.innerHTML = chat.msgs.map(m => {
     if (m.role === 'bot'){
       // 有本机改良答案时优先展示用户版本（可展开对比系统原文）；一问一答案气泡底部附 👍/👎 反馈条
@@ -3617,7 +4274,23 @@ function renderChat(){
     }
     return `<div class="msg user"><div class="avatar user">我</div><div class="bubble"><div class="bubble-inner">${m.html}</div><span class="ts">${esc(m.ts)}</span></div></div>`;
   }).join('');
-  scrollChat();
+  // 新消息自动露出：新答案到达(reveal)或用户原本就在底部时——
+  // 短气泡滚到底部；长答案把答案开头对齐可视区顶部（看到答案从头开始，而非只看到结尾）
+  if(opts.reveal || nearBottom){
+    const msgs = wrap.querySelectorAll('.msg');
+    const last = msgs[msgs.length - 1];
+    if(last && sc){
+      const lastH = last.getBoundingClientRect().height;
+      if(lastH + 40 < sc.clientHeight){
+        sc.scrollTop = sc.scrollHeight;
+      }else{
+        const topInSc = last.getBoundingClientRect().top - sc.getBoundingClientRect().top + sc.scrollTop;
+        sc.scrollTop = Math.max(0, topInSc - 10);
+      }
+    }else{
+      scrollChat(true);
+    }
+  }
 }
 function scrollChat(force){
   const sc = el('chatScroll');
@@ -3729,6 +4402,347 @@ function updateSendBtn(){
    命中时对原文与"去【的】字"后的文本双向匹配，解决【PBE的操作 → PBE操作】这类问法
    泛标签（如"操作""使用""检查"）不参与计分，避免设备 A 的操作问题串出设备 B（如"氧气瓶的操作"误出滑梯）
    同义换说法支持：换一种问法（口语/书面/同义词/语序）也能命中同一知识点 */
+/* 大撤专项知识库（单一来源 docs/_dache_kb.js，python _sync_dache.py 同步） */
+/* DC_KB_BEGIN（同步标记块，请勿在标记块外修改以下内容） */
+window.DC_KB = [
+/* ---------- 大撤·流程 ---------- */
+{cat:'大撤·流程', icon:'🚨', src:'大撤专项·动态舱应急撤离流程', t:['大撤','动态舱','应急撤离','撤离流程','大撤流程','整体流程'], rel:['撤离','滑梯预位','清舱','防冲击姿势'],
+q:'动态舱应急撤离（大撤）整体流程分哪几个阶段？',
+a:`<strong>动态舱应急撤离（大撤）八个阶段</strong>：<ul>
+<li><strong>① 设备检查</strong>：各号位清点手电筒、SK包、扩音器、ELT、急救箱、应急医疗箱、舱单（I-PAD），检查完 PA 外话报告"X 号位客舱设备检查正常"；</li>
+<li><strong>② 滑梯预位</strong>：顺序<strong>先左后右</strong>，听看响动查说，双人制操作（听到 1 号门预位完成后，3 号位 PA 外话报告"4 号门滑梯预位完成"）；</li>
+<li><strong>③ 安全检查</strong>：前后舱各留一人在服务间（检查设备、锁闭洗手间、固定松散物品），另 2 人进客舱广播"请系好安全带、收起小桌板、打开遮阳板、手机调成飞行模式"，巡舱交接后返回责任号位；</li>
+<li><strong>④ 滑行阶段</strong>：客舱灯光变暗，回位坐好"我已坐好，系好安全带，肩带，静默 30 秒 STS"；</li>
+<li><strong>⑤ 平飞服务</strong>：灯光变亮、安全带灯熄灭一声铃后恢复服务；</li>
+<li><strong>⑥ 特情处置</strong>：颠簸 / 失火 / 释压（见对应专项条目）；</li>
+<li><strong>⑦ 有准备/有时限的撤离</strong>：乘务长进驾驶舱 → 准备会 → 客舱准备广播与演示 → 防冲击姿势 → 个人最后准备 → 500 英尺口令 → 15 秒撤离流程；</li>
+<li><strong>⑧ 清舱</strong>：手电筒照射、蹲下检查，口令"还有人吗，Anyone else, answer me"反复多次，逐个报告"已完成清舱，请求撤离"。</li></ul>`},
+{cat:'大撤·流程', icon:'🔦', src:'大撤专项·动态舱应急撤离流程', t:['设备检查','手电筒','SK包','急救箱','ELT','扩音器','号位携带'], rel:['大撤流程'],
+q:'大撤设备检查时各号位分别携带什么设备？',
+a:`<strong>各号位设备清单（检查完 PA 外话报告）</strong>：<ul>
+<li><strong>1 号位</strong>：手电筒、SK 包、扩音器、舱单（I-PAD）；</li>
+<li><strong>2 号位</strong>：手电筒、SK 包、急救箱在位；</li>
+<li><strong>3 号位</strong>：手电筒、SK 包、扩音器、ELT 在位；</li>
+<li><strong>4 号位</strong>：手电筒、SK 包、急救箱、应急医疗箱在位。</li></ul>
+<strong>撤离携带分工（陆地）</strong>：2 号位（R1 门）携<strong>手电筒、SK 包、急救箱</strong>；3 号位（L4 门）携<strong>手电筒、SK 包、扩音器、ELT</strong>；4 号位（R4 门）携<strong>手电筒、SK 包、急救箱、应急医疗箱</strong>。水上撤离 3 号位另拿检令纸（救生衣）。`},
+{cat:'大撤·流程', icon:'🔒', src:'大撤专项·动态舱应急撤离流程', t:['滑梯预位','交叉检查','先左后右','预位报告'], rel:['大撤流程'],
+q:'滑梯预位的顺序和交叉检查怎么做？',
+a:`<strong>滑梯预位操作检查</strong>：顺序<strong>先左后右</strong>，听看响动查说，双人制操作。<br>
+预位完成后进行交叉核对：听到 <strong>1 号门</strong>滑梯预位完成后，<strong>3 号位</strong>通过 PA 外话报告：<strong>"4 号门滑梯预位完成"</strong>。`},
+{cat:'大撤·流程', icon:'🤫', src:'大撤专项·动态舱应急撤离流程', t:['静默30秒','STS','滑行','坐好口令'], rel:['大撤流程'],
+q:'静默 30 秒（STS）是什么？',
+a:`<strong>静默 30 秒（STS, Silent Thirty Seconds）</strong>：客舱灯光变暗或安全检查完成后（滑行阶段），乘务员回座位坐好并完成个人准备，口令：<br>
+<strong>"我已坐好，系好安全带，肩带，静默 30 秒 STS"</strong>。<br>
+这是起飞关键阶段的最后准备，静默期间停止一切非安全必需的通讯与动作。`},
+{cat:'大撤·流程', icon:'⏱', src:'大撤专项·动态舱应急撤离流程', t:['15秒撤离','500英尺','撤离口令','清舱'], rel:['大撤流程','撤离'],
+q:'15 秒撤离流程和 500 英尺口令是什么？',
+a:`<strong>个人准备完成后</strong>：坐下口令"系好安全带、肩带，静默 30 秒 STS"，等待 <strong>500 英尺</strong>飞行机组口令后，<strong>15 秒撤离流程</strong>开始。<ul>
+<li><strong>如机长发布无需撤离</strong>：口令"镇静，听指挥！""我们安全了，请坐在原位，keep calm, we are safe, please remain seated"，2 人站前后服务间、2 人进客舱安抚；</li>
+<li><strong>实施撤离</strong>：飞机完全停稳后 15 秒内完成撤离；</li>
+<li><strong>清舱</strong>：所有号位口令"我已准备好撤离时需要带的应急设备"，拿出手电筒照射、蹲下仔细检查，口令"还有人吗，Anyone else, answer me"反复多次；</li>
+<li><strong>最后报告</strong>：2/3/4 号位依次报告"已完成清舱，请求撤离"，从就近出口撤离（水上：到门口救生衣充气、上船、割断系留绳）。</li></ul>`},
+/* ---------- 大撤·颠簸 ---------- */
+{cat:'大撤·颠簸', icon:'〰', src:'大撤专项·动态舱应急撤离流程', t:['颠簸','铃数','轻度颠簸','中度颠簸','重度颠簸','一声铃'], rel:['颠簸处置'],
+q:'颠簸铃数怎么区分轻重程度？',
+a:`<strong>颠簸程度按客舱铃数区分</strong>：<ul>
+<li><strong>1 声铃（轻度）</strong>：客舱继续服务，提示旅客抓好行李架下方辅助把手，前后服务间提醒洗手间旅客抓好扶手，就近 PA 乘务员广播；</li>
+<li><strong>2~3 声铃（中度）</strong>：提醒旅客回座位系好安全带、抓辅助把手，固定服务间松散物品，餐车推回就近服务间，停止服务；</li>
+<li><strong>4~5 声铃（重度）</strong>：立刻踩下餐车刹车、抓住餐车固定自己，提示站着的旅客立即坐下系好安全带，洗手间旅客抓住扶手固定自己。</li></ul>
+<strong>颠簸结束后</strong>：2 号位从第 1 排检查到 12 排、3 号位从最后检查到 13 排，给手势说各自检查过的区域，回前后舱交接。<strong>报告口令</strong>："报告乘务长，我是 X 号位乘务员，我检查了 XX 排（前/后服务间、卫生间），无旅客受伤，无设备损坏，报告完毕"。*轻度颠簸可以不报告。`},
+{cat:'大撤·颠簸', icon:'📢', src:'大撤专项·动态舱应急撤离流程', t:['颠簸广播','广播词','turbulence'], rel:['颠簸'],
+q:'颠簸的客舱广播词是什么？',
+a:`<strong>轻度颠簸【Turbulence】</strong>：女士们、先生们：飞机受航路气流影响正在颠簸。请您回原座位坐好，系好安全带。如您不能及时返回座位，请抓住就近的辅助把手。正在使用洗手间的旅客，也请抓好扶手。颠簸期间，请勿打开行李架，并保管好随身的松散物品。洗手间暂停使用。晕机的旅客，请使用您座位前口袋里的清洁袋。感谢您的合作。<br><br>
+<strong>中度及严重颠簸</strong>：在轻度词基础上增加"同时我们将暂停客舱服务"，英文版另含 "Refrain from using the lavatory or moving through the cabin at this time... The lavatory and cabin service will be suspended during this period."`},
+/* ---------- 大撤·失火 ---------- */
+{cat:'大撤·失火', icon:'🔥', src:'大撤专项·动态舱应急撤离流程 / CRM演练', t:['灭火小组','三人灭火','消防员','通讯员','辅助消防员','灭火分工'], rel:['失火','灭火瓶'],
+q:'三人灭火小组怎么分工？',
+a:`<strong>灭火程序最好由 3 名客舱乘务员组成灭火小组</strong>，同时履行各自分工：<ul>
+<li><strong>① 消防员</strong>（第一个发现者）：迅速通知其他乘务员 → 取下最近灭火瓶 → 立即确定火源 → 实施灭火。话术<strong>"我来灭火，你去报告"</strong>；</li>
+<li><strong>② 通讯员</strong>（第二个到达）：通知飞行机组（火灾位置、火源、严重程度/烟的浓度颜色气味、灭火进展、使用灭火瓶数量、灭火开始时间）→ 通知其他乘务员支援 → 保持客舱与驾驶舱通讯 → 客舱火警广播 → 观察客舱。话术："机长，你好！X排X坐X地方，现已查明是X座旅客X东西着火，现场有明火、黑烟，我们已经转移X排到X排的旅客前往安全区域，现在X号位正在灭火！"</li>
+<li><strong>③ 辅助消防员</strong>（第三个到达）：提供额外灭火设备、戴上 PBE 接替未防护的消防员、清除易燃物品、持续灭火，替换消防员。话术<strong>"我来接替你灭火"</strong>，并宣布火势的状态；</li>
+<li><strong>支援人员</strong>：传送灭火设备、重排旅客座位、提供急救、安抚旅客。话术："大家不要惊慌、请系好安全带！弯下腰，用衣袖捂住口鼻！"</li></ul>`},
+{cat:'大撤·失火', icon:'🚻', src:'大撤专项·动态舱应急撤离流程', t:['洗手间火灾','LD火灾','门是凉的','烤箱火灾','行李架火灾','锂电池失火'], rel:['失火','灭火小组'],
+q:'客舱常见失火点（洗手间/烤箱/行李架/舱壁）分别怎么处置？',
+a:`<strong>各失火点处置要点（3 人灭火小组启动）</strong>：<ul>
+<li><strong>洗手间火灾</strong>：敲门问"洗手间有人吗"2 遍 → 用<strong>手背</strong>感觉门的温度（上、中、下），说"门是凉的" → 开小缝 → 就近拿灭火瓶灭火 → 成功后锁闭洗手间。如洗手间损坏报告（XX 洗手间损坏），未损坏则报告具体损坏程度；</li>
+<li><strong>烤箱火灾</strong>：关闭电源、拔出跳开关 → 湿毛巾堵住通风孔 → 就近灭火瓶灭火。报告（XX 烤箱损坏）；</li>
+<li><strong>行李架火灾（锂电池）</strong>：开一条小缝 → 灭火瓶灭火，<strong>打开一下、灭一下，循环</strong> → 支援者移走氧气瓶、SK 包。报告（XX 行李架损坏或具体损坏程度）；</li>
+<li><strong>舱壁着火</strong>：手背探温找着火点 → 第一人拿灭火瓶、另一人拿<strong>应急斧</strong> → 灭火后监控者用湿毛巾堵住小洞。报告（舱壁损坏的具体程度）。</li></ul>`},
+{cat:'大撤·失火', icon:'🧯', src:'大撤专项·动态舱应急撤离流程 / CRM演练', t:['灭火后处置','防止复燃','火警解除广播','灭火报告','湿阻燃物'], rel:['失火'],
+q:'火灾扑灭后要做哪些工作、怎么报告？',
+a:`<strong>处置火灾或烟雾后</strong>：<ul>
+<li>用<strong>湿阻燃物</strong>（毛毯、门帘等）覆盖着火点<strong>防止复燃</strong>；指派一名乘务员监督受影响区域并定期向通讯员（包含组员）报告当前的状态；</li>
+<li><strong>辅助消防员</strong>传达处置阶段火情："明火已扑灭，还有少许烟雾，未发现机体破损！"；</li>
+<li><strong>监控人员（含支援人员）</strong>持续用水（消防水）对设备淋洒降温，冷却后将设备放入<strong>航空安全防护箱</strong>转移至后舱固定监控（大型行李箱、书包等用防火阻燃袋）；</li>
+<li><strong>通讯员</strong>向机长报告处置阶段情况："报告机长！X排X火已被扑灭，后续情况由乘务长向您报告！"；</li>
+<li>乘务长统计（各号位报告使用灭火瓶/PBE 数量、有无人员受伤、设备受损）后汇总报告机长，填写<strong>《客舱记录本》CLB、《机上事件报告单》</strong>；</li>
+<li>进行<strong>火警解除广播</strong>："现在客舱失火已被扑灭，飞机处于良好状态，对于给您带来的不便我们深表歉意…各位旅客，请不要担心，我们已经安全了！"；</li>
+<li>如火势无法控制，继续执行灭火程序并报告机长，由机长决定下一步。</li></ul>`},
+/* ---------- 大撤·释压 ---------- */
+{cat:'大撤·释压', icon:'💨', src:'大撤专项·动态舱应急撤离流程 / CRM演练 / CCM 释压程序', t:['释压','氧气面罩','紧急下降','释压处置'], rel:['释压','氧气瓶'],
+q:'客舱释压时乘务员的直接处置是什么？',
+a:`<strong>客舱释压程序启动后</strong>：<ul>
+<li>迅速戴上最近的<strong>氧气面罩</strong>，固定身体；</li>
+<li>立即在最近的座位坐下、系好安全带（<strong>坐在乘务员座椅必须系肩带</strong>）；没有空座位时直接坐到旅客身上，让旅客抱紧腰部，或蹲地握住行李档杆固定自己；</li>
+<li>戴上面罩后用手势和简短口令指示旅客："像我一样戴上氧气面罩，<strong>先大人后小孩</strong>。Pull your Oxygen mask, cover your nose and mouth, you first, then your children"，边说边用力拍打旁边的座位；</li>
+<li>指示旅客摘下眼镜；已戴面罩的成年人协助旁边的儿童；带儿童的旅客先戴好自己的面罩再协助儿童；</li>
+<li>到达安全高度前或释压警告解除前，<strong>停止客舱内一切活动</strong>。</li></ul>
+<strong>时间节点</strong>：氧气面罩脱落后 1 分钟内听到机长外话发布紧急下降（Emergency descent）→ 按程序执行；<strong>1 分钟后无驾驶舱任何信息</strong> → 乘务长内话联系驾驶舱告知面罩脱落情况；联系未果 → 前舱乘务员背便携式氧气瓶进驾驶舱查看，必要时（机组失能）实施救助。若听到紧急下降广播后 <strong>10 分钟</strong>未收到到达安全高度指令，乘务长立即内话联系；无回应更换便携式氧气瓶进驾驶舱急救。`},
+{cat:'大撤·释压', icon:'✅', src:'大撤专项·动态舱应急撤离流程 / CRM演练', t:['安全高度','释压后检查','氧气面罩打结','翼上出口检查','释压报告'], rel:['释压'],
+q:'到达安全高度后客舱检查怎么做、报告什么？',
+a:`<strong>飞行机组宣布到达安全高度后</strong>：<ul>
+<li>前后服务间乘务员起身将氧气面罩<strong>打结系高</strong>，检查两边舱门（四周摸一遍）、检查洗手间、检查其他设备；</li>
+<li>客舱乘务员起身打结系高，拿<strong>氧气瓶斜背竖抱</strong>进入客舱；口令："我们已经安全了，请不要惊慌；请将氧气面罩打结系高或放在前排座椅口袋内（第一排乘客及应急出口旅客只能打结系高）"；小声询问"有受伤的旅客吗？"</li>
+<li><strong>检查翼上出口（四扇都要检查，回字型检查）</strong>；交接口令："我检查了 1~12 排，左侧 2 个翼上出口"/"我检查了 13~最后 1 排，右侧 2 个翼上出口"；</li>
+<li><strong>报告口令</strong>："报告乘务长，我是 X 号位乘务员，我检查了 XX 排（服务间、卫生间），无旅客受伤，无设备损坏，我使用了 1 个氧气瓶，氧气瓶剩余压力 1300PSI，无火情，报告完毕"。*<strong>没有使用氧气瓶也要报告</strong>；</li>
+<li>乘务长汇总后向机长报告：设备损坏程度、人员伤亡、有无火情、氧气瓶使用数量，并填入 CLB。</li></ul>`},
+/* ---------- 大撤·撤离准备 ---------- */
+{cat:'大撤·撤离准备', icon:'📋', src:'大撤专项·动态舱应急撤离流程', t:['准备会','迫降准备','乘务长进驾驶舱','责任分区','对表'], rel:['撤离','防冲击姿势'],
+q:'有准备的迫降：准备会怎么开、区域怎么划分？',
+a:`<strong>① 机长决定实施迫降</strong>：广播"乘务长进驾驶舱，乘务长进驾驶舱，Purser to cockpit"，乘务长带好纸、笔、手表进驾驶舱；2 号位拿纸笔手表，口令"我已拿好纸、笔手表在前舱集合"；3、4 号位一起走向前舱。<br>
+<strong>② 准备会</strong>：乘务长通报迫降原因/时间/地点/天气，机长将以外话形式发出防冲撞指令和撤离指令。各号位报告分工：<ul>
+<li><strong>2 号位</strong>：负责 1~10 排（水上 1~15 排）旅客，从 <strong>R1 门</strong>撤离，携带手电筒、SK 包、急救箱；</li>
+<li><strong>3 号位</strong>：负责 21~最后 1 排（水上 16~最后 1 排），从 <strong>L4 门</strong>撤离，携带手电筒、SK 包、扩音器、ELT；</li>
+<li><strong>4 号位</strong>：负责 21~最后 1 排（水上 16~最后 1 排），从 <strong>R4 门</strong>撤离，携带手电筒、SK 包、急救箱、应急医疗箱。</li></ul>
+（3 号位与安全员传达信息：防冲击指令和撤离指令由谁发出、飞机预计降落的时间、迫降点：水上/陆地；将安全员调至 13D，如有旅客占座转移该旅客），拿好检令纸/救生衣去站位。水上撤离时救生衣放到座椅下："这是我的救生衣，请不要动"（2 号位 1 排、3 号位 10 排、4 号位 20 排）。`},
+{cat:'大撤·撤离准备', icon:'🎬', src:'大撤专项·动态舱应急撤离流程', t:['客舱准备广播','防冲击姿势','Heads down brace','演示','脱高跟鞋'], rel:['撤离准备'],
+q:'迫降前的客舱准备广播和防冲击姿势演示怎么做？',
+a:`<strong>客舱准备（乘务长广播后）</strong>：<ul>
+<li><strong>固定松散物品</strong>："固定小桌板，系好安全带。Stow your tray table, fasten your seat belt."（2 遍，过去中文回来英文）；</li>
+<li><strong>收取尖锐物品、穿好衣服</strong>：<strong>"请取下随身的尖锐物品（钢笔、手表、首饰等放入行李，取下领带、围巾），请勿放在座椅前方口袋内"</strong>（1 遍，黑体字 2 遍）；<strong>"取出衣服穿好，行李放到行李架上"</strong>（2 遍）；</li>
+<li><strong>脱高跟鞋</strong>（水上连鞋一起脱）：各号位拿毛毯或垃圾袋收鞋（前舱由前往后、后舱由后往前），收好的高跟鞋放到<strong>不朝机头方向的洗手间</strong>并锁闭；</li>
+<li><strong>水上撤离</strong>另有救生衣演示："请穿上救生衣，但在客舱内不要充气。Please put on your life vest, but do not inflate it while you are in the cabin."（2 遍）；</li>
+<li><strong>演示防冲击姿势</strong>：2 号位坐 1C 椅背向乘客演示，3 号位 10D，4 号位 20C。口令："低下头，紧迫用力。Heads down brace"（2 遍，去）；"解开安全带。Open your seat belt"（2 遍，回）；"请大家系好安全带！Please fasten your seat belt tight and low"（2 遍，去）；检查旅客安全带；</li>
+<li>做完回原位站好给手势。*有时限的陆地迫降，防冲击姿势结束后 3 号位往后舱找翼上援助者。</li></ul>`},
+{cat:'大撤·撤离准备', icon:'🧍', src:'大撤专项·动态舱应急撤离流程', t:['援助者','C型门援助者','翼上援助者','出口座位指示'], rel:['撤离准备','援助者'],
+q:'有准备迫降时如何选择和指导援助者？',
+a:`<strong>C 型门援助者口令（陆地）</strong>："你、你、你请跟我来！"带到机门旁：飞机停稳后挡住旅客，直到滑梯完全充气；充气后两位援助者先跳下滑梯，在滑梯两侧帮助旅客撤离并指挥远离飞机；一人站机门口抓门上把手指挥"到这边来，跳，滑"；<strong>"如果我不能开门，请帮我开门"</strong>（开门前注意机外情况，有烟、火、障碍物不要开门，指挥去其他出口）；"如果我受伤，请将我带下飞机，我的安全带是这样解开的"。让援助者复述任务；座位没变防冲击姿势不变，回原位坐好。<br>
+<strong>翼上出口旅客（水上）</strong>：站 11 排选 6 位援助者——2 位（靠窗）接指令后开翼上出口、舱门往机头方向抛出，组织旅客在翼上等待救援；2 位（当中）从行李架取出<strong>救生绳</strong>连接机翼环扣，协助旅客在翼上等待；2 位（靠过道）站座位上协助撤离。开门前注意机外情况（烟、火、障碍物、水位过高不开门）。<br>
+<strong>出口座位旅客指示</strong>：2 号位（1~10 排，水上 1~15 排）从前门撤离、前门不能用从后面门；3 号位（11~20 排）从中间门；4 号位（21~最后 1 排）从后面门。每号位询问 3 人（2 遍中文 1 遍英文）："请问您从哪个门撤离？如果这边的门不能使用，应从哪边的门撤离？"`},
+{cat:'大撤·撤离准备', icon:'🎒', src:'大撤专项·动态舱应急撤离流程', t:['个人准备','最后准备','应急灯光','关闭客舱灯光'], rel:['撤离准备'],
+q:'乘务员个人最后准备包括哪些内容？',
+a:`<strong>乘务长关闭客舱灯光、打开应急灯光</strong>，广播"全体乘务员做好最后准备。All attendant, prepare yourself"。所有乘务员回责任位，边走边提醒旅客系好安全带：<ul>
+<li><strong>2 号位</strong>：检查手电筒、SK 包、急救箱在位；固定前舱松散物品；</li>
+<li><strong>3 号位</strong>：检查手电筒、SK 包、扩音器、ELT 在位；打开后舱遮光板；固定后舱松散物品；</li>
+<li><strong>4 号位</strong>：检查手电筒、SK 包、急救箱、应急医疗箱在位；</li>
+<li>前后服务间固定松散物品；检查洗手间有无人、放下马桶盖、锁闭；关闭烤箱、烧水壶、烧水器等电器电源；</li>
+<li><strong>水上撤离</strong>：挂 SK 包；取下尖锐物品（肩章、胸章、领带）存入不朝机头方向的洗手间；检查撤离通道无障碍、手势清晰；</li>
+<li>个人准备完成后坐下口令"系好安全带、肩带，静默 30 秒 STS"。</li></ul>`},
+/* ---------- 大撤·特情 ---------- */
+{cat:'大撤·特情', icon:'🧑‍✈️', src:'大撤专项·CRM演练 / CCM 3.14', t:['机组失能','飞行机组失能','进驾驶舱','寻找医生','指挥权接替'], rel:['特情','失能'],
+q:'飞行机组失能怎么处置？',
+a:`<strong>判断</strong>：多次以正常及应急方式均无法与驾驶舱取得联系，可判定飞行机组失能；或机组内话/PA 外话呼叫乘务长进驾驶舱。<ul>
+<li><strong>第一人（乘务长）</strong>：立即进驾驶舱，轻拍高喊失能机组（<strong>至少两次</strong>）、查看呼吸脉搏；将失能者固定于座椅（双臂交叉放于安全带下扣紧、座椅后拉到最大限度、双腿后拉）；协助戴上氧气面罩并调整至 <strong>100% 纯氧</strong>；</li>
+<li><strong>第二人</strong>：广播找医生（<strong>避免透露机组失能</strong>，可用"机组""旅客"等代称呼，防旅客恐慌）；再铺毛毯、拿氧气瓶。安排安全员进前舱监控、2 号位进驾驶舱协助（2 号位先进驾驶舱，乘务长再替换，避免驾驶舱失控）、3 号位拿<strong>医疗物品补充箱</strong>从前向后逐排找医生、4 号位坚守后舱；</li>
+<li><strong>第三人</strong>：接 PA 通知后带医疗物品补充箱询问有无医生（有则查证件，<strong>护工、保姆等不可以</strong>），协助把失能机组抬到前舱服务间，<strong>在出驾驶舱前取下肩章、领带</strong>等机组标识；第二人进驾驶舱观察位坐下；</li>
+<li><strong>恢复后</strong>：就近安排靠窗座位（2A、2F），志愿者照顾；如发生应急撤离记得将失能机组带下飞机；</li>
+<li><strong>指挥权接替次序</strong>：机长 → 巡航机长 → C、B、A 类副驾驶 → 乘务长 → 客舱乘务员 → 航空安全员（相同职务按等级，高者优先）；</li>
+<li><strong>乘务长失能</strong>：优先有乘务长资质者接替；无则按乘务员等级排（同等级飞行小时多者优先），接替者第一时间报告机长并重新分工。</li></ul>`},
+{cat:'大撤·特情', icon:'🏃', src:'大撤专项·动态舱应急撤离流程 / CRM演练', t:['无准备撤离','15秒','第一次撞击','机外失火'], rel:['撤离','特情'],
+q:'无准备撤离的注意事项是什么？',
+a:`<strong>无准备撤离</strong>（起飞关键阶段着火、无准备迫降等）：<ul>
+<li>起飞关键阶段着火：拍打、大声告知机组失火，<strong>不能解开安全带</strong>；</li>
+<li>发生第一次撞击（有刹车感觉）时，乘务员口令<strong>"低下头，紧迫用力，Heads down brace"</strong>（3 遍）；</li>
+<li>等飞机<strong>完全停稳</strong>后，<strong>15 秒</strong>紧急撤离；*机外失火时可自行撤离，注意着火侧的门可能不能用，千万要观察！</li>
+<li>开门后口令："第 1 人，站在我对面，像我一样指挥旅客跳、滑；第 2、3 人跳下滑梯，站在滑梯 2 侧指挥旅客远离飞机！"</li></ul>`},
+{cat:'大撤·特情', icon:'🛬', src:'大撤专项·CRM演练 / CCM 6.29', t:['预防式离机','地面阶段','解除预位','离机广播'], rel:['特情','预防式离机'],
+q:'预防式离机（地面阶段）程序是什么？',
+a:`<strong>预防式离机（CCM 6.29）地面阶段</strong>：<ul>
+<li><strong>乘务长</strong>接机长内话后进驾驶舱了解：执行预防式离机、原因、通道及方式、升级应急撤离的发布方式及口令、其他协调内容，并传达给全体乘务员（含安全员）；</li>
+<li><strong>滑梯状态</strong>：如已预位——安全带灯关闭后指示<strong>解除所有舱门滑梯预位</strong>；如已解除——无需指示和报告；</li>
+<li><strong>全体乘务员</strong>：执行解除预位程序；安抚旅客："解开安全带，先不要动，不要拿行李。Open your seat belt. Don't move. Don't take your baggage."；清理通道保持出口通畅，回责任舱门附近等待指令；</li>
+<li><strong>离机广播</strong>："我是本次航班的乘务长，由于…原因，现在请大家快速有序地从前舱/后舱离开飞机，下机时请不要携带随身行李、不要使用电子设备进行拍摄、网聊等。"</li>
+<li><strong>离机出口乘务员</strong>：对接设备到位且听到敲门声后直接开启舱门（无需请示程序）；引导"到这边来，一个接一个，不要带行李，快速离开飞机。Come this way. One by one. No baggage! Be quick"；</li>
+<li><strong>非离机出口乘务员</strong>：值守责任舱门监控；如听到"乘务组各就各位。Cabin crew at stations"，立即将滑梯<strong>重新预位</strong>，按应急撤离程序实施；</li>
+<li><strong>清客</strong>："还有人吗？听到请回答。Anyone else? Answer me."机长与乘务长最后检查后离开飞机，可不携带应急设备。</li></ul>`},
+{cat:'大撤·特情', icon:'⚖️', src:'大撤专项·CRM演练', t:['撤离决定','自主撤离','乘务组各就各位','不需要撤离','EVA CMD'], rel:['撤离','特情'],
+q:'撤离决定怎么做出？什么情况可以自主撤离？',
+a:`<strong>撤离决定</strong>：<ul>
+<li>驾驶舱发布<strong>"乘务组各就各位！Cabin crew at stations"</strong> → 乘务员解开安全带站起来，口令"镇静、听指挥！Keep calm, follow my direction"，等待"撤离！Evacuate"指令；</li>
+<li><strong>飞机停稳后未接到任何指令</strong>：立即呼叫驾驶舱，<strong>呼叫 30 秒内无应答视为飞行机组失能</strong>，乘务组自主评估是否撤离；</li>
+<li><strong>可自主执行撤离</strong>：水上迫降、航空器严重损坏等非常紧急情况；威胁性失火、烟雾无法控制、燃油严重泄漏等——联系驾驶舱汇报，无应答即自主判断撤离；</li>
+<li><strong>自主发出撤离指令的方式</strong>：首先按压 <strong>FAP 上的 EVA CMD</strong>，其次 PA、扩音器、口头指令；</li>
+<li><strong>撤离指令一旦下达不可取消</strong>；</li>
+<li><strong>不需要撤离</strong>：驾驶舱发布"旅客留在原位。Passengers remain seated"→ 乘务员发布"镇静、听指挥！""我们安全了，请坐在原位。We are safe, remain seated."并进客舱安抚。</li></ul>`},
+/* ---------- 大撤·设备 ---------- */
+{cat:'大撤·设备', icon:'🫁', src:'大撤专项·机型设备 / CCM 第四章', t:['氧气瓶','I型氧气瓶','II型氧气瓶','III型氧气瓶','310升','1500PSI'], rel:['设备','释压'],
+q:'机上氧气瓶（I/II/III 型）的性能与操作有什么区别？',
+a:`<strong>共同点</strong>：氧气容量均 <strong>310 升</strong>；4 升/分钟可用 <strong>78 分钟</strong>，2 升/分钟可用 <strong>155 分钟</strong>（II/III 型）。<ul>
+<li><strong>I 型</strong>：仅一个接头可连接机上氧气面罩（4 升/分钟高流量），另一接头为<strong>非计量全流量出口</strong>供烟雾面罩（PBE）使用；逆时针（左转）开/关活门；</li>
+<li><strong>II 型</strong>：旋转开/关活门调节流量，数字<strong>"2"低流量、"4"高流量</strong>，只有数字位于流量观察窗中间氧气才流出；</li>
+<li><strong>III 型</strong>：通过<strong>流量调节旋钮</strong>调高低流量（"2"/"4"），其余同 II 型。</li></ul>
+<strong>检查</strong>：固定在支架上；压力指示 <strong>1500 PSI 以上</strong>；独立包装面罩连接在输出口上；多输出口需检查防尘帽在位。<br>
+<strong>特殊考虑</strong>：切勿放空——<strong>压力 200PSI 时停止使用</strong>以备急用；使用时前后四排（3 米）内禁烟；操作时手上切勿沾油脂；使用氧气瓶时客舱乘务员必须进行监控。<br>
+<strong>位置</strong>：A320 共 4 个（1 排 ABC、1 排 DEF 行李架内各 1 个，30/31 排 ABC 行李架内 2 个）；A321 共 5 个（1 排 ABC、1 排 DEF 各 1 个，3 号门乘务员上方行李架 1 个，39/40 排 ABC 行李架内 2 个）。`},
+{cat:'大撤·设备', icon:'🧯', src:'大撤专项·机型设备 / CCM 4.4', t:['灭火瓶','I型灭火瓶','II型灭火瓶','HALON','9-12秒','1.5-2米'], rel:['设备','失火'],
+q:'灭火瓶（I/II 型）怎么操作、使用时注意什么？',
+a:`<strong>检查（两型相同）</strong>：固定在支架上；压力表指示在<strong>绿色区域</strong>；安全锁扣和铅封/安全栓完好。<br>
+<strong>操作</strong>：取下 → 竖直握住、抓提把提起 → <strong>I 型</strong>：安全锁扣向下打开、压断铅封丝；<strong>II 型</strong>：取下安全栓 → 站在远离火源处对准<strong>火源底部</strong> → 压下/按压操作把手来回扫射 → 松开把手停止。<br>
+<strong>特殊考虑（II 型）</strong>：<ul>
+<li>灭火剂需<strong>完全雾化</strong>才有效；</li>
+<li>持续喷射约 <strong>9~12 秒</strong>，可反复按压直至用完；<strong>最优工作距离 1.5~2 米</strong>；</li>
+<li>HALON 灭火剂有微毒，开放空间可直接喷洒人体着火（<strong>禁止对头部喷洒</strong>，防窒息）；</li>
+<li>建议灭火时戴 PBE（燃烧烟尘与灭火剂气体会刺激眼睛、损伤呼吸器官）。</li></ul>
+<strong>位置</strong>：A320（180/186）4 个——前舱乘务员座位下方 1 个、1 排 DEF 行李架内 1 个、后舱左侧乘务员座位下方 1 个、后舱右侧乘务员座位上方/右侧 1 个；A321 共 6 个（增 3 号门乘务员座椅下方 1 个、后舱洗手间门乘务员座位下方 1 个等）。`},
+{cat:'大撤·设备', icon:'😷', src:'大撤专项·机型设备 / CCM 4.4', t:['PBE','烟雾面罩','15分钟','触发绳','I型PBE','II型PBE'], rel:['设备','失火'],
+q:'PBE（烟雾面罩）I/II 型怎么戴、有什么特殊考虑？',
+a:`<strong>PBE I 型（胸前型）佩戴</strong>：打开储存盒 → 撕开真空袋 → 展开 PBE → 双手扩大颈部密封圈、低头套在头上（罩住口鼻、头发在 PBE 内）→ <strong>用力拉动触发绳</strong>开始工作（听到"咝咝"气流声）→ 身体固定绳系腰间。取下：先解固定绳，双手由颈下插入面部松开调节带，向上拉起取下。<br>
+<strong>PBE II 型佩戴</strong>：取出真空袋撕开 → 取出 PBE → <strong>先拉动触发拉环</strong>（听到气流声）→ 扩大密封圈 → 套头 → 确保头发在内。取下：双手由颈下插入面部向上拉起。<br>
+<strong>特殊考虑</strong>：<ul>
+<li>拉触发绳/拉环后无氧气流出，再用力重复一次，否则取下面罩；</li>
+<li>头部有热感或面罩瘪下 = 供氧结束，<strong>离开火源</strong>后在安全处取下；</li>
+<li>取下后头发内残留氧气，不要靠近明火，充分抖散头发；</li>
+<li>供氧时间约 <strong>15 分钟</strong>（呼吸快时更短）；观察窗有水气雾气时迅速取下；</li>
+<li>I 型可通过面罩前部<strong>发话器</strong>与外界联系。</li></ul>
+<strong>数量位置</strong>：A320（180）6 个 /（186）5 个、A321 6 个，分布于 1 排 DEF 行李架、30/31（或 39/40）排行李架及后舱乘务员座位附近。`},
+{cat:'大撤·设备', icon:'📡', src:'大撤专项·机型设备', t:['ELT','应急定位发射器','121.5','406MHz','ARM','XMT'], rel:['设备','水上撤离'],
+q:'ELT（应急定位发射器）I 型和 III 型有什么区别、怎么用？',
+a:`<strong>I 型（加强型）频率</strong>：121.5MHz 民用遇险、243MHz 军用遇险、406MHz 全球卫星搜救（COSPAS-SARSAT）。<strong>III 型</strong>：121.5MHz + 406MHz。<br>
+<strong>I 型旋转电门</strong>：ARM（待命，自动启用）、XMT（发射，人工启用）、TEST（自测，维修用）、OFF（关闭，维修用）。<br>
+<strong>水上</strong>：电门旋到 <strong>ARM</strong> 位 → 系留绳固定绑在救生筏系留点 → 放到筏附近水中自动激活（I 型天线 5 分钟后发射；III 型<strong>接触水后 10 秒内自动激活</strong>）→ 与救生筏保持最大距离；中止发射时取出平放筏上。<br>
+<strong>陆地</strong>：I 型旋到 <strong>XMT</strong> 位（III 型调到 <strong>ON</strong> 位）→ 无障碍最高点 → 竖直天线 → 保持距离（I 型约 9.144 米/30 英尺；III 型至少 10 英尺/约 3 米内无障碍）。<br>
+<strong>III 型激活指示灯</strong>：琥珀色每 2 秒闪烁；GPS 被解码约 3 分钟后变<strong>绿色</strong>；发射最长持续 4 小时，之后变回琥珀色（表示无 GPS 位置发射）。<br>
+<strong>检查</strong>：固定在支架上。`},
+{cat:'大撤·设备', icon:'🔦', src:'大撤专项·机型设备', t:['扩音器','手电筒','应急手电筒','电量指示灯'], rel:['设备'],
+q:'扩音器和应急手电筒怎么检查使用？',
+a:`<strong>扩音器</strong>：检查——固定在支架上、按动开关有声音；操作——取下、喇叭面向旅客、按下送话键。注意：调节音量防啸叫；<strong>不要对着人耳使用</strong>，强声会损伤耳内。<br>
+<strong>应急手电筒（防水，落水会浮起）</strong>：<ul>
+<li><strong>电量指示灯手电筒</strong>：检查——铅封完好、指示灯间隙闪烁（间隔 10 秒内）且明亮；操作——取下即亮（续航 4 小时以上），用后把断路开关嵌回支架复位（否则电池耗光）；指示灯间隔超 10 秒或变暗 = 电量不足需换电池；</li>
+<li><strong>干电池手电筒</strong>：检查——可正常开启；操作——打开开关即亮，灯暗 = 电量不足，用后关电源放回支架。</li></ul>`},
+{cat:'大撤·设备', icon:'🛝', src:'大撤专项·机型设备 / CCM 第四章', t:['滑梯','翼上出口滑梯','滑梯救生筏','软梯','双通道','单通道'], rel:['设备','撤离'],
+q:'滑梯、翼上出口滑梯、滑梯救生筏三者的区别？',
+a:`<ul>
+<li><strong>滑梯</strong>：<strong>单通道、单用途</strong>（水上仅作漂浮装置）；配备在<strong>不具备延伸跨水运行能力</strong>的 A320 客舱 C 型机门上（4 个）及 A321 的 3 号门上（2 个）；检查——压力表指针在绿色区域（大温差下可能短暂红区，约 30 分钟内回绿；1、4 号门底部橘红色指示与地板箭头对齐 = 预位状态正常）；充气不足/不充气时用底部两侧手柄展开作<strong>软梯</strong>；</li>
+<li><strong>翼上出口滑梯</strong>：<strong>双通道、单用途</strong>，充气约 <strong>4 秒</strong>；位于 III 型门外机翼上、面向飞机后部，共 2 个；受损/漏气时仍可作<strong>脱离道</strong>使用——挂钩固定在机翼连接点，必须由 4 人拉住（每侧 2 名）；</li>
+<li><strong>滑梯救生筏</strong>：<strong>双通道、双用途</strong>（陆上滑梯、水上救生筏），作为救生筏可承载 <strong>44 人、最大 55 人</strong>；配备在具备延伸跨水运行能力的 A320 C 型机门上（4 个）及 A321 的 1、4 号门（4 个）；特殊——钩形小刀装在系留绳旁，用来割断系留绳使筏脱离飞机（钩形设计防划破筏体）。</li></ul>
+<strong>共同要求</strong>：飞行前必须检查滑梯压力。`},
+{cat:'大撤·设备', icon:'🩺', src:'大撤专项·机型设备 / CCM 应急医疗设备', t:['应急医疗箱','急救箱','医疗物品补充箱','卫生防疫包','配备数量'], rel:['设备','医疗'],
+q:'机上应急医疗设备（医疗箱/急救箱/防疫包）配备数量和位置？',
+a:`<strong>A320</strong>：应急医疗箱 <strong>1 个</strong>（180：28/29 排 DEF 行李架内；186：30/31 排 DEF 行李架内）、急救箱 <strong>2 个</strong>（2 排 DEF 1 个 + 28/29 或 30/31 排 DEF 1 个）、卫生防疫包 <strong>3 个</strong>（2 排 DEF 1 个 + 28/29 或 30/31 排 DEF 2 个）、医疗物品补充箱 1 个（2 排 DEF 行李架上、急救箱旁）。<br>
+<strong>A321</strong>：应急医疗箱 1 个（39/40 排 DEF）、急救箱 <strong>3 个</strong>（2 排 DEF 1 个 + 39/40 排 DEF 2 个）、卫生防疫包 <strong>4 个</strong>（2 排 DEF 2 个 + 39/40 排 DEF 2 个）、医疗物品补充箱 1 个。<br>
+<strong>检查</strong>：封条或签封完好、在有效期内。<br>
+<strong>特殊考虑</strong>：签封被打开 → 对照清单检查有无缺损，缺损通知值班航医补充；无缺损且在有效期内可铅封条临时签封继续运行、航后报告；缺损或过期 → 先用医疗物品补充箱补充，补不齐立即报 AOC（联系航卫处评估），补齐后方可运行；一次运行中使用过 → 立即报值班航医并报备客舱部值班经理，低于 CCAR-121 部要求必须补充后才能继续运行。<br>
+<strong>使用顺序</strong>：急救需要时先考虑使用<strong>医疗物品补充箱</strong>，补充箱没有的物品才用其余应急医疗设备（补充箱打开使用不影响航班运行，航后报告补充）。`},
+{cat:'大撤·设备', icon:'🧪', src:'大撤专项·机型设备', t:['卫生防疫包','消毒凝固剂','生物有害垃圾','操作步骤'], rel:['设备','医疗'],
+q:'卫生防疫包的操作步骤是什么？',
+a:`<strong>用途</strong>：清除客舱内血液、尿液、呕吐物和排泄物等潜在传染性物质，护理可疑传染病病人。<br>
+<strong>操作</strong>：<ol>
+<li>穿戴个人防护用品：依次<strong>医用口罩、眼罩、医用橡胶手套、防渗透围裙</strong>；</li>
+<li>配制消毒液：1 片表面清理消毒片放入 250~500 毫升清水，配成 1:500~1000 浓度；</li>
+<li>将<strong>消毒凝固剂</strong>均匀覆盖污物 <strong>3~5 分钟</strong>使其凝胶固化；</li>
+<li>用便携拾物铲将凝胶固化污物铲入<strong>生物有害物专用垃圾袋</strong>；</li>
+<li>用消毒液对污染物品消毒（滞留 3~5 分钟后清水擦拭、吸干），<strong>重复一遍</strong>，用过的毛巾和消毒用品入专用垃圾袋；</li>
+<li>依次脱手套、围裙，皮肤消毒擦拭纸巾擦手；再脱眼罩、口罩，擦手及可能接触部位；</li>
+<li>垃圾袋封闭，填写"生物有害垃圾标签"贴在封口处；</li>
+<li>暂存适当位置（防丢失破损、防污染餐食）；通知目的地地面部门接收；</li>
+<li>生物有害垃圾按医疗垃圾管理原则无害化处理。</li></ol>`},
+{cat:'大撤·设备', icon:'🫧', src:'大撤专项·机型设备 / CCM 第四章', t:['化学氧气','氧气面罩脱落','14000英尺','15分钟','22分钟'], rel:['设备','释压'],
+q:'客舱固定化学氧气系统是怎么工作的？',
+a:`<strong>描述</strong>：客舱紧急释压时为乘客供氧；氧气由<strong>化学发生器</strong>产生，每个发生器给 2、3 或 4 个一组的氧气面罩供氧；发生器和面罩在储存箱内（旅客座位上方、洗手间、厨房、客舱机组位置上方）。<br>
+<strong>操作</strong>：<ul>
+<li>座舱压力减小到相当于 <strong>14000(+250/-750) 英尺</strong>时，应急氧气系统盖板自动打开、面罩脱落（飞行机组也可手动放下）；</li>
+<li><strong>用力拉下</strong>任何一个面罩，氧气发生器开始工作产生氧气流；</li>
+<li>盖板不能打开时，将<strong>旅客氧气释放工具</strong>插入盖板小孔松开锁机构；</li>
+<li>面罩罩住口鼻正常呼吸；</li>
+<li>按飞机构型约可持续 <strong>15 分钟或 22 分钟</strong>；<strong>氧气不可被关断</strong>，用完气流即中止，直到发生器内化学物质耗尽。</li></ul>`},
+{cat:'大撤·设备', icon:'🌊', src:'大撤专项·机型设备', t:['信号弹','海水染色剂','信号反射镜','水净化药片','修补钳','海水淡化泵','求救设备'], rel:['设备','水上撤离'],
+q:'水上求生设备（信号弹/反射镜/染色剂等）怎么使用？',
+a:`<ul>
+<li><strong>信号弹</strong>（68273-101/63762-101）：红色伞状信号，昼夜可用，最高视程 30 英里、射程 300 米、烟雾持续 40 秒；手握螺纹把手垂直放于<strong>头上方</strong>，旋开红盖引燃，<strong>严禁对准人或物体</strong>；只在飞机/船确实可见或接近时发射；水上在船的<strong>风下侧</strong>伸出船外（防烧坏救生船、防烟雾吹向人员），陆地在高开阔地使用；</li>
+<li><strong>信号反射镜</strong>：反射太阳光，视程超 <strong>23 公里</strong>；先反射到近旁表面，再渐渐上移至眼睛水平，经观察孔看到光亮点后转动身体让光点落在目标上；镜角绳套在手上防丢失；可反复使用、船上人员可传用；</li>
+<li><strong>海水染色剂</strong>：把救生船周围 <strong>300 米</strong>水染成荧光绿色，持续约 <strong>45 分钟</strong>；绳索系在筏逆风一方，拉下盖片释放扔入水中；只在看到搜救人员且海面较平静时使用；</li>
+<li><strong>水净化药片</strong>：一片净化一升淡水，净化 10 分钟；水质差可加片延时；<strong>不是去盐药片</strong>，海水不能饮用；</li>
+<li><strong>修补钳</strong>：修补救生船破损面——垫片穿入磨损口、面向内层放平、盖片压下封严、翼形螺帽拧紧；长绳系在手上防掉出船外；</li>
+<li><strong>充气泵</strong>：给救生筏充气；<strong>海水淡化泵</strong>：撕开包装排出管内抑菌剂后使用。</li></ul>`},
+{cat:'大撤·特情', icon:'📱', src:'大撤专项·CRM演练', t:['手机发热','锂电池','电子设备发热','降温'], rel:['失火','锂电池'],
+q:'旅客手机/电子设备发热怎么处置？',
+a:`<strong>电子设备发热/起火处置（CRM 演练）</strong>：<ul>
+<li>确认设备电源关闭；</li>
+<li>在采取适当防护的前提下，<strong>置于装有冰块的不渗漏袋子</strong>上等降温方式冷却；</li>
+<li>冷却后由专人在适当区域监控（可由设备所属人进行，但客舱机组确保随时可采取进一步处置，并提前将可能措施告知设备所属人）；</li>
+<li>维持客舱秩序、安抚旅客，必要时人员疏散转移；</li>
+<li>报告机长、维持联络，必要时持续报告；</li>
+<li>行李架内锂电池起火的完整灭火程序（戴 PBE、防火手套、略微打开行李架伸入喷嘴、打开一下灭一下循环）见"大撤·失火"专项条目。</li></ul>`},
+/* ---------- 大撤·撤离程序（第 8 大场景：五张可点击流程卡） ---------- */
+{cat:'大撤·撤离程序', icon:'🛫', acc:true, src:'大撤专项·动态舱应急撤离流程', t:['有准备撤离','有准备的撤离程序','完整撤离程序','迫降撤离','撤离程序','有准备陆地','有准备水上'], rel:['撤离','撤离准备'],
+q:'有准备撤离的完整程序是什么？（陆地 / 水上 · 含手册口令）',
+a:`<strong>有准备撤离（时间充裕的迫降）完整流程</strong>：<ol>
+<li><strong>乘务长进驾驶舱</strong>：机长广播<strong>"乘务长进驾驶舱，乘务长进驾驶舱，Purser to cockpit"</strong>，乘务长带纸、笔、手表进驾驶舱；2 号位拿纸笔手表，口令<strong>"我已拿好纸、笔手表在前舱集合"</strong>；3、4 号位一起走向前舱；</li>
+<li><strong>准备会</strong>：乘务长通报迫降原因/时间/地点/天气；<strong>机长将以外话形式发出防冲撞指令和撤离指令</strong>。各号位报告分工：2 号位 1~10 排（水上 1~15 排）R1 门 / 3 号位 21~最后 1 排（水上 16~最后 1 排）L4 门 / 4 号位 21~最后 1 排（水上 16~最后 1 排）R4 门；3 号位与安全员传达信息（防冲击指令和撤离指令由谁发出、飞机预计降落的时间、迫降点：水上/陆地；将安全员调至 13D，如有旅客占座转移该旅客）；</li>
+<li><strong>客舱准备广播与演示</strong>：固定松散物品口令<strong>"固定小桌板，系好安全带。Stow your tray table, fasten your seat belt."</strong>（2 遍，过去中文回来英文）→ 收取尖锐物品<strong>"请取下随身的尖锐物品（钢笔、手表、首饰等放入行李，取下领带、围巾），请勿放在座椅前方口袋内"</strong>（1 遍，黑体字 2 遍）→ <strong>"取出衣服穿好，行李放到行李架上"</strong>（2 遍）→ 脱高跟鞋（各号位拿毛毯或垃圾袋收鞋，前舱由前往后、后舱由后往前，收好的高跟鞋放到<strong>不朝机头方向的洗手间</strong>并锁闭）；</li>
+<li><strong>防冲击姿势演示</strong>：2 号位坐 1C、3 号位 10D、4 号位 20C，口令<strong>"低下头！紧迫用力！Heads down brace！"</strong>（中英文交替发布，声音统一、响亮）→<strong>"解开安全带。Open your seat belt"</strong>（2 遍，回）→<strong>"请大家系好安全带！Please fasten your seat belt tight and low"</strong>（2 遍，去）→ 检查旅客安全带；</li>
+<li><strong>选择并指导援助者</strong>：口令<strong>"你、你、你请跟我来！"</strong>带到机门旁交代任务——飞机停稳后挡住旅客直到滑梯完全充气、"到这边来，跳，滑"、<strong>"如果我不能开门，请帮我开门"</strong>、"如果我受伤，请将我带下飞机，我的安全带是这样解开的"；让援助者复述任务，座位没变防冲击姿势不变，回原位坐好；</li>
+<li><strong>个人最后准备</strong>：乘务长<strong>关闭客舱灯光、打开应急灯光</strong>，广播<strong>"全体乘务员做好最后准备。All attendant, prepare yourself"</strong>；检查本号位设备在位、固定松散物品、锁闭洗手间、关闭电器电源；坐下口令<strong>"系好安全带、肩带，静默 30 秒 STS"</strong>；</li>
+<li><strong>驾驶舱口令（手册 6.2.5.13，中英文交替、声音统一响亮）</strong>：下降至 <strong>2000 英尺</strong>，驾驶舱发出<strong>"完成准备！完成准备！Finish preparation！Finish preparation！"</strong>——听到后停止所有准备工作、尽快就位，未完成的工作由乘务长通过 PA 广播告知旅客；下降至 <strong>500 英尺</strong>，驾驶舱发出<strong>"防冲击姿势！防冲击姿势！Brace for impact！Brace for impact！"</strong>，乘务员立即向旅客发布防冲击指令<strong>"低下头！紧迫用力！Heads down brace！"</strong>（中英文交替）；</li>
+<li><strong>撤离实施（手册 6.1 / 6.4.4.5）</strong>：飞机完全停稳后，飞行机组发出<strong>"乘务组各就各位！乘务组各就各位！Cabin crew at stations！Cabin crew at stations！"</strong>，乘务员解开安全带站起来，口令<strong>"镇静！听指挥！Keep calm, follow my direction."</strong>，等待撤离指令；接到<strong>"撤离！撤离！Evacuate！Evacuate！"</strong>后实施 <strong>15 秒撤离流程</strong>；滑梯充气过程中两手抓住门两侧辅助把手挡住出口，口令<strong>"解开安全带！不要带行李！脱下高跟鞋！"</strong>；滑梯充气完毕后引导口令<strong>"到这边来，跳、滑。Come this way, jump slide."</strong>（烟雾环境加"弯下腰，捂住口鼻。Bend over, cover your nose and mouth."；应急电源失效的黑暗环境加"朝灯光方向走。Come to the light."）；清舱口令<strong>"还有人吗，Anyone else, answer me"</strong>反复多次，逐个报告"已完成清舱，请求撤离"。</li></ol>
+<strong>水上撤离额外要求</strong>：<ul>
+<li><strong>救生衣演示</strong>："请穿上救生衣，但在客舱内不要充气。Please put on your life vest, but do not inflate it while you are in the cabin."（2 遍）；</li>
+<li><strong>脱高跟鞋</strong>：水上<strong>连鞋一起脱</strong>；</li>
+<li><strong>乘务员自身准备</strong>：挂 SK 包；取下尖锐物品（肩章、胸章、领带）存入不朝机头方向的洗手间；救生衣放到座椅下口令<strong>"这是我的救生衣，请不要动"</strong>（2 号位 1 排、3 号位 10 排、4 号位 20 排）；</li>
+<li><strong>撤离后</strong>：到门口救生衣再充气 → 上滑梯救生筏 → 钩形小刀割断系留绳脱离飞机 → ELT 旋到 ARM 位放入水中自动激活 → 与飞机保持最大距离等待救援。</li></ul>`},
+{cat:'大撤·撤离程序', icon:'⏳', acc:true, src:'大撤专项·动态舱应急撤离流程', t:['有时限撤离','有时限的撤离','时间有限迫降','陆地迫降','有时限陆地','有时限水上'], rel:['撤离','撤离准备'],
+q:'有时限撤离（时间有限的迫降）程序是什么？（陆地 / 水上 · 含手册口令）',
+a:`<strong>有时限撤离（迫降时间有限，准备程序压缩执行）</strong>：<ol>
+<li><strong>乘务长快速进驾驶舱</strong>接受机长通报，快速传达迫降原因、预计降落时间与各号位分工；</li>
+<li><strong>快速客舱准备</strong>：简短广播固定松散物品、系好安全带；快速收取尖锐物品、穿好衣服、脱高跟鞋；</li>
+<li><strong>防冲击姿势</strong>：口令<strong>"低下头！紧迫用力！Heads down brace！"</strong>（中英文交替发布，声音统一、响亮）；*<strong>有时限的陆地迫降，防冲击姿势结束后 3 号位往后舱找翼上援助者</strong>；</li>
+<li><strong>个人最后准备</strong>：快速检查设备与撤离通道，坐下口令"系好安全带、肩带，静默 30 秒 STS"静默待命；</li>
+<li><strong>驾驶舱口令（手册 6.2.5.13）</strong>：下降至 <strong>2000 英尺</strong>——<strong>"完成准备！完成准备！Finish preparation！Finish preparation！"</strong>；下降至 <strong>500 英尺</strong>——<strong>"防冲击姿势！防冲击姿势！Brace for impact！Brace for impact！"</strong>；</li>
+<li><strong>撤离实施（手册 6.1 / 6.4.4.5）</strong>：飞机完全停稳后，飞行机组发出<strong>"乘务组各就各位！乘务组各就各位！Cabin crew at stations！Cabin crew at stations！"</strong>，乘务员口令<strong>"镇静！听指挥！Keep calm, follow my direction."</strong>；接到<strong>"撤离！撤离！Evacuate！Evacuate！"</strong>后实施 <strong>15 秒撤离流程</strong>；滑梯充气中挡住出口口令<strong>"解开安全带！不要带行李！脱下高跟鞋！"</strong>，充气完毕后引导<strong>"到这边来，跳、滑。Come this way, jump slide."</strong>；清舱<strong>"还有人吗，Anyone else, answer me"</strong>反复多次。</li></ol>
+<strong>水上撤离额外要求</strong>：<ul>
+<li><strong>救生衣演示</strong>照常执行："请穿上救生衣，但在客舱内不要充气。Please put on your life vest, but do not inflate it while you are in the cabin."（2 遍）；</li>
+<li><strong>脱高跟鞋</strong>：水上<strong>连鞋一起脱</strong>；责任分区按水上划分（2 号位 1~15 排 / 3、4 号位 16~最后 1 排）；</li>
+<li><strong>乘务员自身准备</strong>：救生衣放到座椅下"这是我的救生衣，请不要动"（2 号位 1 排、3 号位 10 排、4 号位 20 排）；挂 SK 包、取下尖锐物品；</li>
+<li><strong>撤离后</strong>：到门口救生衣再充气、上筏、割断系留绳，ELT 旋到 ARM 位激活。</li></ul>`},
+{cat:'大撤·撤离程序', icon:'🏃', acc:true, src:'大撤专项·动态舱应急撤离流程 / CRM演练', t:['无准备撤离','无准备','突然迫降','第一次撞击'], rel:['撤离','特情'],
+q:'无准备撤离程序是什么？',
+a:`<strong>无准备撤离（起飞关键阶段着火、无准备迫降等）</strong>：<ol>
+<li><strong>起飞关键阶段着火</strong>：拍打、大声告知机组失火，<strong>不能解开安全带</strong>；</li>
+<li><strong>发生第一次撞击</strong>（有刹车感觉）时，乘务员口令<strong>"低下头！紧迫用力！Heads down brace！"</strong>（中英文交替发布，3 遍，声音统一、响亮）；</li>
+<li>等飞机<strong>完全停稳</strong>后，飞行机组发出<strong>"乘务组各就各位！乘务组各就各位！Cabin crew at stations！Cabin crew at stations！"</strong>；未接到任何指令且呼叫驾驶舱 <strong>30 秒</strong>无应答视为飞行机组失能，乘务组自主评估撤离；接到<strong>"撤离！撤离！Evacuate！Evacuate！"</strong>后实施 <strong>15 秒</strong>紧急撤离；*机外失火时可自行撤离，注意着火侧的门可能不能用，千万要观察；</li>
+<li><strong>开门后口令</strong>："第 1 人，站在我对面，像我一样指挥旅客跳、滑；第 2、3 人跳下滑梯，站在滑梯 2 侧指挥旅客远离飞机！"；引导口令<strong>"解开安全带！不要带行李！脱下高跟鞋！"</strong>、<strong>"到这边来，跳、滑。Come this way, jump slide."</strong>（烟雾环境加"弯下腰，捂住口鼻。Bend over, cover your nose and mouth."）；</li>
+<li><strong>清舱</strong>：手电筒照射、蹲下检查，"还有人吗，Anyone else, answer me"反复多次，依次报告后从就近出口撤离。</li></ol>`},
+{cat:'大撤·撤离程序', icon:'🌊', acc:true, src:'大撤专项·动态舱应急撤离流程', t:['水上撤离','水上迫降','救生筏','水面程序'], rel:['撤离','水上撤离'],
+q:'水上撤离（水上迫降）程序有什么特殊要求？',
+a:`<strong>水上撤离特殊要求</strong>：<ol>
+<li><strong>救生衣</strong>：客舱内<strong>不要充气</strong>，到门口/水面后再充气；水上撤离时乘务员救生衣放到座椅下"这是我的救生衣，请不要动"；</li>
+<li><strong>水上撤离引导口令（手册 6.1）</strong>：应穿好救生衣后撤离，口令<strong>"到这边来！充上救生衣！上筏！Come this way. Inflate your life vest. On board."</strong>；</li>
+<li><strong>撤离用筏</strong>：滑梯救生筏（<strong>44 人、最大 55 人</strong>）；系留绳固定，筏漂离飞机后猛拉充气手柄充气；</li>
+<li><strong>当（考）180 型飞机</strong>：开启舱门后需补充操作——<strong>掀开黑色盖布，拉开白色断开手柄，推筏</strong>；引导口令改为<strong>"到这边来！救生衣充气！跳！Come this way. Inflate your life vest. Jump."</strong>（中英文各两遍）；最后使用<strong>钩型小刀</strong>断开系留绳；</li>
+<li><strong>人员满载脱离</strong>：用钩形小刀割断系留绳使筏脱离飞机（钩形设计防划破筏体）；</li>
+<li><strong>ELT</strong>：电门旋到 ARM 位，系留绳固定绑在救生筏系留点，放到筏附近水中自动激活；</li>
+<li><strong>上筏后</strong>：与飞机保持最大距离，等待救援（信号弹、海水染色剂按需使用）。</li></ol>`},
+{cat:'大撤·撤离程序', icon:'⚖️', acc:true, src:'大撤专项·CRM演练', t:['撤离指令','撤离决定','EVA CMD','自主撤离','各就各位'], rel:['撤离','特情'],
+q:'撤离指令由谁发出、撤离决定怎么做出？',
+a:`<strong>撤离指令与撤离决定</strong>：<ol>
+<li>驾驶舱发布<strong>"乘务组各就各位！乘务组各就各位！Cabin crew at stations！Cabin crew at stations！"</strong> → 乘务员解开安全带站起来，口令<strong>"镇静！听指挥！Keep calm, follow my direction."</strong>，等待撤离指令；</li>
+<li><strong>飞机停稳后未接到任何指令</strong>：立即呼叫驾驶舱，<strong>呼叫 30 秒内无应答视为飞行机组失能</strong>，乘务组自主评估是否撤离；</li>
+<li><strong>自主发出撤离指令的方式</strong>：首先按压 <strong>FAP 上的 EVA CMD</strong>，其次 PA、扩音器、口头指令；</li>
+<li><strong>撤离指令（手册 6.1.7）</strong>：<strong>"撤离！撤离！Evacuate！Evacuate！"</strong>——<strong>撤离指令一旦下达不可取消</strong>；</li>
+<li><strong>不需要撤离（手册 6.1.7.4）</strong>：驾驶舱广播<strong>"旅客留在原位！旅客留在原位！Passengers remain seated！Passengers remain seated！"</strong> → 乘务员发布"镇静、听指挥！""我们安全了，请坐在原位。We are safe, remain seated."并进客舱安抚。</li></ol>`},
+{cat:'大撤·撤离程序', icon:'🔄', acc:true, src:'大撤专项·动态舱应急撤离流程', t:['完成准备','程序转换','有准备转有时限','迫降应急程序','个人准备下降'], rel:['撤离','撤离准备'],
+q:'听到"完成准备"口令时怎么执行？（有准备 → 有时限 转换）',
+a:`<strong>迫降应急程序的转换（有准备 → 有时限）</strong>：<ol>
+<li>在迫降的应急程序中，<strong>无论当前进行到哪一步程序</strong>（客舱准备广播、演示、选择援助者等任一环节），只要听到驾驶舱在<strong>下降至 2000 英尺</strong>时发出的口令<strong>"完成准备！完成准备！Finish preparation！Finish preparation！"</strong>（手册 6.2.5.11），<strong>立即停止当前程序</strong>；</li>
+<li><strong>直接做个人准备、准备下降</strong>：检查本号位设备在位、在洗手间内取下随身的尖锐物品，确认过道通畅，回责任位坐下口令<strong>"系好安全带、肩带，静默 30 秒 STS"</strong>——即从【有准备】程序切换到【有时限】程序；</li>
+<li><strong>开启舱门后，寻找援助者</strong>：C 型门口令<strong>"你、你、你请跟我来！"</strong>；有时限陆地迫降防冲击姿势结束后 3 号位往后舱找翼上援助者。</li></ol>`}
+];
+
+/* 大撤专项练习题（并入「你问我答」在线练习，章节：大撤专项） */
+window.DC_QUIZ = [
+{q:'动态舱应急撤离（大撤）的滑梯预位顺序是（）。',t:'单选',o:['A. 先右后左','B. 先左后右','C. 先前舱后后舱','D. 同时预位'],a:'B',c:'大撤专项',e:'滑梯预位操作检查顺序先左后右，听看响动查说，双人制操作；听到 1 号门滑梯预位完成后，3 号位 PA 外话报告"4 号门滑梯预位完成"。'},
+{q:'静默 30 秒（STS）的完整口令是（）。',t:'单选',o:['A. 我已坐好，系好安全带，肩带，静默 30 秒 STS','B. 全体注意，静默 30 秒','C. 系好安全带，静默准备','D. 静默 30 秒，听从指挥'],a:'A',c:'大撤专项',e:'客舱灯光变暗或安全检查完成后，乘务员回位坐好并报口令"我已坐好，系好安全带，肩带，静默 30 秒 STS"。'},
+{q:'三人灭火小组中，第二个到达现场的乘务员承担的角色是（）。',t:'单选',o:['A. 消防员','B. 辅助消防员','C. 通讯员','D. 支援人员'],a:'C',c:'大撤专项',e:'第一个发现者任消防员（"我来灭火，你去报告"），第二个到达任通讯员（报告机长并广播），第三个到达任辅助消防员（戴 PBE 接替灭火，"我来接替你灭火"）。'},
+{q:'II 型灭火瓶持续喷射时间约为（），最优工作距离（）。',t:'单选',o:['A. 5~8 秒；1~1.5 米','B. 9~12 秒；1.5~2 米','C. 15~20 秒；2~3 米','D. 30 秒以上；任意距离'],a:'B',c:'大撤专项',e:'灭火瓶持续喷射时间大约 9~12 秒，可反复按压多次直至用完；最优工作距离 1.5~2 米，对准火源底部来回扫射。'},
+{q:'氧气瓶使用时的特殊考虑，正确的是（）。',t:'单选',o:['A. 氧气应放空保存','B. 压力在 200PSI 时停止使用以备急用','C. 使用时两排内禁烟','D. 手上可沾少量油脂'],a:'B',c:'大撤专项',e:'切勿将氧气放空，压力 200PSI 时停止使用以备急用；使用时前后四排（3 米）内禁烟；操作时手上切勿沾油脂；使用氧气瓶时客舱乘务员必须进行监控。'},
+{q:'PBE（烟雾面罩）的供氧时间约为（）。',t:'单选',o:['A. 5 分钟','B. 10 分钟','C. 15 分钟','D. 30 分钟'],a:'C',c:'大撤专项',e:'PBE 供氧时间平均约 15 分钟（呼吸快时更短）；观察窗有水气雾气时迅速取下；取下后头发内残留氧气，不要靠近明火。'},
+{q:'客舱释压、氧气面罩脱落后，指示旅客戴面罩的口令要点是（）。',t:'单选',o:['A. 先小孩后大人','B. 先大人后小孩','C. 同时佩戴','D. 只给儿童佩戴'],a:'B',c:'大撤专项',e:'口令"像我一样戴上氧气面罩，先大人后小孩。Pull your oxygen mask, cover your nose and mouth, you first, then your children"，并指示旅客摘下眼镜、成年人协助儿童。'},
+{q:'飞机停稳后未接到驾驶舱任何指令，乘务员呼叫驾驶舱多少秒无应答可视为飞行机组失能？（）',t:'单选',o:['A. 10 秒','B. 15 秒','C. 30 秒','D. 60 秒'],a:'C',c:'大撤专项',e:'飞机停稳后未接到驾驶舱任何指令，客舱乘务员应立即呼叫驾驶舱，呼叫 30 秒内无应答视为驾驶舱飞行机组失能，乘务组自主评估是否撤离。'},
+{q:'滑梯救生筏作为救生筏使用时可承载（）。',t:'单选',o:['A. 25 人，最大 38 人','B. 44 人，最大 55 人','C. 30 人，最大 40 人','D. 50 人，最大 60 人'],a:'B',c:'大撤专项',e:'滑梯救生筏为双通道双用途（陆上滑梯/水上救生筏），作为救生筏可承载 44 人、最大 55 人。'},
+{q:'乘务员个人最后准备的内容不包括（）。',t:'单选',o:['A. 检查撤离携带设备在位','B. 固定松散物品、锁闭洗手间','C. 关闭烤箱、烧水壶等电器电源','D. 向旅客分发餐食'],a:'D',c:'大撤专项',e:'个人最后准备：检查本号位设备（手电筒/SK包/急救箱/ELT 等）、固定松散物品、检查洗手间并锁闭、关闭电器电源、水上撤离取下尖锐物品；不进行任何服务动作。'}
+];
+/* DC_KB_END（同步标记块结束） */
+
 const GENERIC_TAGS = new Set(['操作','使用','检查','方法','步骤','流程','标准','要求','怎么','如何','什么','哪个','哪些','多久','多少','几点','注意','处理','做法','规定','程序','支持','提供','时候','地方','时间','服务','服务流程','基本要求','注意事项']);
 /* 常见口语/换说法 → 知识库标签用词：提问命中左边说法时，用右边词参与标签匹配（只保留语义强对应，避免"值班→值勤"这类宽松映射把无关条目带偏） */
 const SYN_QUERY = {
@@ -3843,13 +4857,37 @@ function kbSearch(text, n, pool){
   const scored = pool.map(k => {
     let score = 0;
     let sem = false;   // 是否为语义命中（标签/同义/标题前缀）——同分时优先于正文兜底
+    let simVal = 0;    // 标题 bigram 相似度（平分时的次级排序信号）
+    let evVal = 0;     // 强证据计数（精确/同义标签 + 标题级命中；模糊/正文兜底不计）
     (k.t || []).forEach(kw => {
       if (!kw || GENERIC_TAGS.has(kw)) return;
       const kwl = String(kw).toLowerCase();
       const kwn = kwl.replace(/的/g,'');   // 标签与提问中的『的』应互相等价
       const direct = low.indexOf(kwl) >= 0 || norm.indexOf(kwl) >= 0 || norm2.indexOf(kwl) >= 0 || norm2.indexOf(kwn) >= 0;
-      if (direct){ score += kw.length; sem = true; }
-      else if (synEx.indexOf(kwl) >= 0 || synNorm.indexOf(kwn) >= 0){ score += Math.round(kw.length * 1.5); sem = true; }  // 同义换说法命中权重略高：语义更贴切
+      if (direct){ score += kw.length; sem = true; evVal++; }
+      else if (synEx.indexOf(kwl) >= 0 || synNorm.indexOf(kwn) >= 0){ score += Math.round(kw.length * 1.5); sem = true; evVal++; }  // 同义换说法命中权重略高：语义更贴切
+      else if (kwn.length >= 3 && kwn.length <= 6 && norm2.length >= kwn.length){
+        // 错别字容错的模糊标签命中（2026-09-12 RAG 核查新增）
+        // 根因：提问带 1 处错字时（急救→极救、乘务员→乘务圆），精确/同义匹配全部失手，
+        // 而标签往往正是区分同章节相似条目（乘务员 vs 飞行机组、急救 vs 报告记录）的判别词，
+        // 于是同结构的错误条目靠其他公共标签反超（实测 4 例全部如此）。
+        // 做法：提问切成与标签等长的窗口，任一窗口与标签逐字比对恰好 1 处不同 → 模糊命中，
+        // 得分 = 标签长 × 0.8（仍低于精确命中），保持"越精确分越高"的排序不变量。
+        const L = kwn.length;
+        let inCnt = 0;
+        for (let ci = 0; ci < L; ci++){ if (norm2.indexOf(kwn.charAt(ci)) >= 0) inCnt++; }
+        if (inCnt >= L - 1){
+          let okF = false;
+          for (let wi = 0; wi + L <= norm2.length && !okF; wi++){
+            const w = norm2.slice(wi, wi + L);
+            if (w === kwn) continue;                    // 完全相等属于 direct，已在上方命中
+            let diff = 0;
+            for (let ci = 0; ci < L; ci++){ if (w.charAt(ci) !== kwn.charAt(ci) && ++diff > 1) break; }
+            if (diff === 1) okF = true;
+          }
+          if (okF){ score += Math.max(2, Math.round(kw.length * 0.8)); sem = true; }
+        }
+      }
     });
     // 命中条目标题也算：提问完整包含条目标题前 6 字（含去"的"变体）是很强的信号，
     // 给 +4 语义分，使其在同分（如与正文反向匹配的 4 分条目）时优先胜出，避免整段无关答案抢占。
@@ -3859,7 +4897,42 @@ function kbSearch(text, n, pool){
     if (ql && low.length >= 2) {
       const q6 = ql.slice(0, Math.min(6, ql.length));
       const q6n = q6.replace(/的/g,'');
-      if (low.indexOf(q6) >= 0 || norm.indexOf(q6) >= 0 || norm2.indexOf(q6) >= 0 || norm2.indexOf(q6n) >= 0){ score += 4; sem = true; }
+      if (low.indexOf(q6) >= 0 || norm.indexOf(q6) >= 0 || norm2.indexOf(q6) >= 0 || norm2.indexOf(q6n) >= 0){ score += 4; sem = true; evVal++; }
+    }
+    // 精确问句命中（2026-09-12 核查修复）：提问与条目标题完全一致时给决定性分值。
+    // 根因：同章节条目共享大量标签，正确答案会因标签总分略低被挤到第二，表现为「答非所问」。
+    // 实测：使用氧气瓶有哪些特殊注意事项？→ 被「旅客能携带医用氧气装置吗」顶掉；
+    //       气道异物梗阻有什么症状？→ 被「气道完全梗阻如何进行急救」顶掉。
+    // 判定用去标点/去「的」后的归一化串：完全相等（≥4 字）或提问完整包含标题（≥6 字）。
+    if (ql) {
+      const qNormTitle = ql.replace(/的/g, '').replace(/[^a-z0-9\u4e00-\u9fa5]/g, '');
+      if (qNormTitle.length >= 4 && norm2 === qNormTitle) { score += 60; sem = true; evVal += 2; }
+      else if (qNormTitle.length >= 6 && norm2.indexOf(qNormTitle) >= 0) { score += 50; sem = true; evVal += 2; }
+    }
+    // 标题字面相似度主加权（2026-09-12 核查修复）
+    // 根因：提问与条目标题的字面相似度此前只在「零分兜底」分支里使用，于是同章节、同结构的
+    // 条目靠标签累计分就能压过真正对应的条目。实测：
+    //   「应急逃生滑梯如何操作？多长时间充气完成？」正确答案 sim=82% 却排第 2；
+    //   「客舱乘务员航前喝酒的标准…」正确答案 sim=83% 排第 3；
+    //   「氧气瓶的设倍检查要点是什么？」（错别字）正确答案 sim=82% 排第 6；
+    //   「上机后客仓设备检查怎么做？」（错别字）正确答案 sim=82% 排第 5。
+    // 现在把 sim 提升为主排序信号（最高 20 分仍低于精确问句的 60 分），并乘上
+    // 「核心实词是否落在标题里」的因子，防止灭火瓶/氧气瓶这类同结构条目互抢。
+    if (ql && norm2.length >= 4) {
+      const qn = norm2.replace(/[^a-z0-9\u4e00-\u9fa5]/g, '');
+      const tn = ql.replace(/的/g, '').replace(/[^a-z0-9\u4e00-\u9fa5]/g, '');
+      if (qn.length >= 4 && tn.length >= 4) {
+        const sim = _bigramSim(qn, tn);
+        simVal = sim;
+        if (sim >= 0.45) {
+          const core = tokens.filter(t => t.length >= 3);
+          const coreHit = core.length === 0 || core.some(t => tn.indexOf(t) >= 0);
+          const base = sim >= 0.75 ? 20 : (sim >= 0.6 ? 12 : 6);
+          score += Math.round(base * (coreHit ? 1 : 0.35));
+          sem = true;
+          if (sim >= 0.6) evVal++;
+        }
+      }
     }
     // 换种说法兜底①：标签没直接命中时，用提问实词去【标题+答案+标签】反向匹配（同一知识点换个角度问也能答）
     // 贡献封顶 4 分：防止公共词（如"机供品""值班"）把无关长文条目串到前面，确保语义命中（标签/同义）始终优先
@@ -3883,10 +4956,10 @@ function kbSearch(text, n, pool){
         }
       }
       // 纯两字词命中需 ≥6（至少三个实词）才认：防止"机长+权利""报告+职责"等公共双字词
-      // 拼出无关条目（如"机长的权利"错出 3.5.2 机闹）；含 ≥3 字词片段时维持 ≥4（两个实词）门槛
-      // 2026-09-09 审查修复：兜底贡献封顶从 4 降到 3——兜底（正文反向匹配）永远低于任何语义命中
-      // 加权后的分数（语义命中 min 2+2=4），否则"备份任务"会被酒测长文兜底顶到 top1（实测）
-      if (strong ? hit >= 4 : hit >= 6) score += 3;
+      // 拼出无关条目（如"机长的权利"错出 3.5.2 机闹）；含 ≥3 字词片段时 ≥3 即认（2026-09-12 下调）：
+      // 原阈值 4 导致"单个 3 字关键词"查询（迫降 / 在机上 / 销售款）差 1 分被完全丢弃（实测 3 例零召回），
+      // 而 3 字实词特异性足够，且兜底分(+3)仍低于任何语义命中(保底4)，不会破坏排序不变量
+      if (strong ? hit >= 3 : hit >= 6) score += 3;
     }
     // 换种说法兜底②：标题字串 2-gram 相似度（语序/省略/打字容错）。封顶 4：
     // 纯兜底不应压过语义命中（条目标题前 6 字/标签 +4），否则"遇到空中颠簸…如何处置"会因与
@@ -3915,10 +4988,27 @@ function kbSearch(text, n, pool){
     // 压到后面（实测"备份/颠簸/延误"正确条目被挤掉）。语义命中（标签/同义/标题前缀）保底 4 分，
     // 保证任何语义命中永远排在兜底命中之前。
     if (sem && score < 4) score = 4;
-    return { k, s: score, sem };
-  }).filter(x => x.s > 0).sort((a,b) => (b.s - a.s) || ((b.sem?1:0) - (a.sem?1:0)));
+    // 2026-09-12 RAG 核查：同分条目用标题相似度裁决。
+    // 根因：同章节"镜像条目"（客舱乘务员 vs 飞行机组 对释压如何直接处置）在提问带错别字时
+    // 得分完全相同，原排序依赖数组顺序，谁排前面谁赢（实测正确答案被顶到第 2）。
+    // ev = 强证据计数（精确/同义标签 + 标题级命中；错字模糊命中不计）——
+    // 供跨库切换等调用方区分"真主题命中"与"子串弱命中"（如"不开心"含标签"开心"、"压力好大"命中灭火瓶"压力"）。
+    return { k, s: score, sem, sim: simVal, ev: evVal };
+  }).filter(x => x.s > 0).sort((a,b) => (b.s - a.s) || (b.sim - a.sim) || ((b.sem?1:0) - (a.sem?1:0)));
   return scored.slice(0, n || 3);
 }
+/* 情绪倾诉/心情表达识别（2026-09-12 核查修复）：
+ * "我心情很难受""压力好大"这类主观情绪表达不是知识查询，不得进入知识库检索/跨库切换，
+ * 应直接走 AI 共情对话。带规章/操作/业务词（怎么办/手册/航班/绩效…）的问句不算倾诉，
+ * 仍走正常知识链路，避免"心情不好会影响绩效吗"被误判。 */
+function qaIsEmotionalTalk(text){
+  const t = String(text || '').trim();
+  if (!t || t.length > 50) return false;
+  if (/(手册|规章|规定|流程|标准|多少|如何|怎么|怎么办|扣分|申诉|程序|申请|办理|证明|材料|要求|限制|处罚|奖励|资格|条件|培训|复训|体检|航班|航前|航后|客舱|旅客|机长|乘务长|乘务员|安全|应急|撤离|灭火|急救|医疗|绩效|数据|排名|销售|工资|补贴|考勤|请假|病假|备份|排班)/.test(t)) return false;
+  if (/(难受|难过|不开心|心情不好|心情很差|心情|委屈|想哭|伤心|emo|破防|崩溃|郁闷|压抑|焦虑|心累|好累|很累|太累|累了|疲惫|压力大|压力好大|失落|孤独|低落|沮丧|好烦|烦死|很烦|心烦|想哭|情绪|不开心|不开心|丧)/.test(t)) return true;
+  return false;
+}
+
 async function process(text){
   // AI 回复风格快捷切换命令：/风格 班组 · /风格 正式 · /风格 精简 · /风格 热情（不检索知识库）
   const styleHit = text.trim().match(/^\/风格\s*(\S+)/);
@@ -3931,10 +5021,50 @@ async function process(text){
   }
   // 【增强】待补要素承接（绩效/练习追问）优先处理
   if(qaPending && qaFillPending(text)) return;
+  // 【大撤专项指令（2026-09-12 新增）】「/大撤 关键词」或提问包含"大撤/动态舱"时，
+  // 优先在大撤专项知识库（DC_KB）中检索回答，不受当前选中库影响；未命中给出专项引导。
+  if (/^\/?(大撤|dc)\b/i.test(text.trim()) || /大撤|动态舱/.test(text)){
+    const DCB = (window.DC_KB && window.DC_KB.length) ? window.DC_KB : null;
+    if (DCB){
+      const kw = text.trim().replace(/^\/?(大撤|dc)\s*/i, '');
+      const probe = kw || text;
+      const hits = kbSearch(probe, 3, DCB);
+      if (hits.length && (hits[0].sem || hits[0].s >= 4)){
+        await typing(''); clearTyping();
+        addMsg('bot', '<div class="kbox">🚨 <b>大撤专项</b> · 动态舱应急撤离知识</div>');
+        kbReply(hits, probe);
+        return;
+      }
+      if (!hits.length && kw){
+        await typing(''); clearTyping();
+        const cats = [...new Set(DCB.map(k => k.cat))].map(c => '「' + c + '」').join(' ');
+        addMsg('bot', `<div class="kbox">🚨 大撤专项暂未收录"${esc(kw)}"相关内容。<br>当前覆盖：${esc(cats)}<br>试试：<button class="w-chip" onclick="ask('大撤整体流程')">大撤整体流程</button> <button class="w-chip" onclick="ask('三人灭火小组怎么分工')">三人灭火小组</button> <button class="w-chip" onclick="ask('氧气瓶操作')">氧气瓶操作</button> <button class="w-chip" onclick="ask('滑梯救生筏')">滑梯救生筏</button></div>`);
+        return;
+      }
+    }
+  }
   // 【增强】培训练习意图（章节+数量 在线测试）
   if(qaIsTrainIntent(text)){ qaTrainFlow(text); return; }
   // 【增强】绩效查询意图（谁/时间/类型 三要素 + 结构化卡片）
   if(qaIsPerfIntent(text)){ qaPerfFlow(text); return; }
+  // 2026-09-12 核查修复：情绪倾诉/心情表达类提问（"我心情很难受""压力好大"）不是知识查询，
+  // 不做知识库命中展示，更不做跨库静默切换（实测"不开心"含标签"开心"子串、"压力好大"命中灭火瓶
+  // "压力"标签，弱相关凑够 4 分被切到乘务员手册，出现"已在 01.10 中为你找到"的突兀回答）。
+  // 直接走 AI 共情对话；AI 未接入时给关怀兜底，不假装修复情绪也不编造规章。
+  if (qaIsEmotionalTalk(text)){
+    if (SpringAI.isEnabled()){
+      await typing(''); clearTyping();
+      try{
+        const sys = AI_STYLES[currentAiStyle()] + '\n\n【当前语境】对方是客舱乘务员，正在向你倾诉情绪或心情（不是在查询规章知识）。请先共情安抚，再视情况给一点轻松可行的建议；不要输出规章条款、数值和章节号。';
+        const resp = await SpringAI.chatLLM([{ role:'system', content: sys }, { role:'user', content: text }], { temperature:0.8, maxTokens:600 });
+        aiLastResp = resp;
+        addMsg('bot', mdToHtml(resp), { answer:true, q:text });
+        return;
+      }catch(e){ /* AI 失败 → 落到下方关怀兜底 */ }
+    }
+    addMsg('bot', `<div class="kbox">🌿 辛苦了，先给你倒杯温水。听到你状态不好——情绪这件事没有"标准答案"，不用勉强自己马上好起来。<br>想找人聊聊的话，在 ⚙️AI设置 里接好 AI，这里随时都在；想自己缓缓的话，深呼吸几次、落地好好休息。<br>如果是想查什么，换个说法我再帮你找。</div>`, { answer:true, q:text });
+    return;
+  }
   const intent = detectIntent(text);
   if (intent === 'jump'){ const j = detectJumpIntent(text); if(j && j.mod){ const names = { quiz:'📚 培训考核', performance:'📊 绩效管理', beauty:'💄 美妆话术', medical:'🚑 医疗急救', manual:'📕 手册奖惩', daily:'❓ 日常问题', risk:'⚠️ 风险预警', report:'🗂 事件报告', kbadmin:'📇 库管理' }; addMsg('bot', '⏭ 为你切换到 <b>' + (names[j.mod]||j.mod) + '</b> 模块…'); setTimeout(()=>jumpTo(j.mod), 600); return; } }
   if (intent === 'script'){ startWizard(); return; }
@@ -3949,13 +5079,18 @@ async function process(text){
   // 2026-09-09 审查修复：当前库零命中时自动跨四库检索——只接受语义命中（s≥4，标签/同义/标题级证据），
   // 防止把别的库的兜底长文串进来。四个库都搜一遍取最高分（实测"酒测数值"的正确条目在管理手册库，
   // 按库顺序会先命中乘务员手册的次要条目），命中则切换到该库并展示。
+  // 2026-09-12 核查收紧：s≥4 只是单条短标签的保底分，"不开心"（含标签"开心"子串）、"压力好大"
+  // （命中灭火瓶"压力"标签）这类子串弱命中也会凑够——现要求**强证据**才切库：
+  // 总分 ≥8，或标题相似度 ≥0.25，或 ≥2 条精确/同义标签命中（ev 字段，错字模糊命中不计入）。
   {
-    const KB_POOLS = { daily: KB, ccm: window.KB_CCM_RAW, mgm: window.KB_MGM_RAW, svc: window.KB_SVC_RAW };
-    const otherPools = ['daily','ccm','mgm','svc'].filter(p => p !== qaSource && KB_POOLS[p] && KB_POOLS[p].length);
+    const KB_POOLS = { daily: KB, ccm: window.KB_CCM_RAW, mgm: window.KB_MGM_RAW, svc: window.KB_SVC_RAW, dc: (window.DC_KB && window.DC_KB.length) ? window.DC_KB : null };
+    const otherPools = ['daily','ccm','mgm','svc','dc'].filter(p => p !== qaSource && KB_POOLS[p] && KB_POOLS[p].length);
     let best = null;
     for (const p of otherPools){
       const h = kbSearch(text, 1, KB_POOLS[p]);
-      if (h.length && h[0].sem && h[0].s >= 4 && (!best || h[0].s > best.s)) best = { pool: p, s: h[0].s };
+      const strongEnough = h.length && h[0].sem && h[0].s >= 4 &&
+        (h[0].s >= 8 || (h[0].sim || 0) >= 0.25 || (h[0].ev || 0) >= 2);
+      if (strongEnough && (!best || h[0].s > best.s)) best = { pool: p, s: h[0].s };
     }
     if (best){
       // 静默切库（不弹提示气泡），在该库内取完整命中后按正常格式回答
@@ -4014,8 +5149,7 @@ async function process(text){
 function kbReply(hits, rawText){
   rawText = rawText || '';
   const pool = currentKbPool();
-  const isManualPool = qaSource !== 'daily';
-  if (hits && hits.length){
+  const isManualPool = qaSource !== 'daily';  if (hits && hits.length){
     // 收集命中条目的关联标签（滤掉泛词，避免把全库拉下水）
     const relSet = new Set();
     hits.forEach(x => (x.k.rel || []).forEach(t => { if (t && !GENERIC_TAGS.has(t)) relSet.add(String(t).toLowerCase()); }));
@@ -4080,6 +5214,7 @@ function kbReply(hits, rawText){
     <button class="jump-btn" onclick="setQaSource('ccm',null)">📘 乘务员手册01.10</button>
     <button class="jump-btn" onclick="setQaSource('mgm',null)">📗 管理手册01.14</button>
     <button class="jump-btn" onclick="setQaSource('svc',null)">💼 服务手册规范00.07</button>
+    <button class="jump-btn" onclick="setQaSource('dc',null)">🚨 大撤专项</button>
   </div>
   <div class="srcline"><span class="src-badge">直达板块</span><button class="jump-btn" onclick="jumpTo('manual')">📕 手册奖惩</button> <button class="jump-btn" onclick="jumpTo('daily')">❓ 日常问题</button> <button class="jump-btn" onclick="jumpTo('beauty')">💄 美妆话术</button></div>`, { answer:true, q: rawText || '' });
 }
@@ -4101,7 +5236,7 @@ function mdToHtml(s){
 
 /* ===================== 话术向导 ===================== */
 function startWizard(){
-  wizard.active = true; wizard.cats = []; wizard.dura = '3'; wizard.budget = 'mid';
+  wizard.active = true; wizard.cats = []; wizard.dura = '3'; wizard.budget = 'mid'; wizard.topic = '';
   addMsg('bot', `<div class="wizard">
     <div class="wz-bar"><span class="wz-no">1</span> 选择产品品类（可多选）</div>
     <div class="wz-opts" id="wz-cats">${SCRIPT_CATS.map(c => `<button class="wz-opt" data-k="${c.key}" onclick="toggleCat('${c.key}',this)">${c.label}</button>`).join('')}</div>
@@ -4111,6 +5246,9 @@ function startWizard(){
     <div class="wz-opts" id="wz-budget">${BUDGET_OPTS.map(d => `<button class="wz-opt ${d.k==='mid'?'sel':''}" onclick="pickBudget('${d.k}',this)">${d.l}</button>`).join('')}</div>
     <div class="wz-bar"><span class="wz-no">4</span> 话术风格</div>
     <div class="wz-opts" id="wz-style">${STYLE_OPTS.map(d => `<button class="wz-opt ${d.k==='guide'?'sel':''}" onclick="pickWzStyle('${d.k}',this)">${d.l}</button>`).join('')}</div>
+    <div class="wz-bar"><span class="wz-no">5</span> 话术主题（可选 · 写了自动识别节日/日期）</div>
+    <div><input id="wz-topic" type="text" placeholder="如：教师节快到了 / 中秋想送点礼 / 下个月出差" value="" oninput="pickWzTopic(this.value)" style="width:100%;padding:8px 10px;border:1px solid #DDE5E1;border-radius:8px;font-size:13px" /></div>
+    <div id="wz-topic-tip" class="wz-opts" style="display:block"></div>
     <div class="wz-bar" id="wz-bar-time" style="display:none"><span class="wz-no">☆</span> 航段时段（广播稿）</div>
     <div class="wz-opts" id="wz-time" style="display:none">${TIME_OPTS.map(d => `<button class="wz-opt ${d.k==='auto'?'sel':''}" onclick="pickWzTime('${d.k}',this)">${d.l}</button>`).join('')}</div>
     <div class="wz-bar" id="wz-bar-fest" style="display:none"><span class="wz-no">☆</span> 机上场合（广播稿 · 可选手动）</div>
@@ -4129,6 +5267,46 @@ function pickDura(k, btn){
   wizard.dura = k;
   document.querySelectorAll('#wz-dura .wz-opt').forEach(b => b.classList.remove('sel'));
   btn.classList.add('sel');
+}
+/* 话术主题 → 日期/节日识别提示（DateMatch，与 beauty 同源） */
+function pickWzTopic(v){
+  wizard.topic = v || '';
+  const box = document.getElementById('wz-topic-tip');
+  if (!box) return;
+  const t = String(wizard.topic || '').trim();
+  if (!t || typeof DateMatch === 'undefined'){ box.innerHTML = ''; return; }
+  const list = DateMatch.parse(t);
+  if (!list.length){ box.innerHTML = '<div style="font-size:12px;color:#8A9A92;padding:4px 2px">未识别到节日或日期表达</div>'; return; }
+  const rows = list.map(function(m){
+    const ok = m.confidence >= 0.8;
+    const range = m.label || ((m.start === m.end) ? m.start : (m.start + ' ~ ' + m.end));
+    const style = 'font-size:12px;padding:5px 8px;border-radius:8px;margin-top:4px;'
+      + (ok ? 'background:#E8F6F0;color:#0F6E56' : 'background:#FDF3E3;color:#8A5A0B');
+    return '<div style="' + style + '">🎯 ' + DateMatch.typeName(m.type) + '：' + m.name
+      + '（' + range + '，置信度 ' + Math.round(m.confidence * 100) + '%' + (m.note ? '，' + m.note : '') + '）</div>';
+  }).join('');
+  // 挂载点提示：识别结果是否真的接到话术上，让用户一眼看见
+  const r = DateMatch.resolveScript(t);
+  let use = '';
+  if (r && r.script){
+    use = '<div style="font-size:12px;padding:5px 8px;border-radius:8px;margin-top:4px;background:#E8F6F0;color:#0F6E56">✅ 已挂载'
+      + (r.script.kind === 'term' ? '节气开场' : '节日开场') + '：' + r.name + '</div>';
+  } else if (r && r.match){
+    use = '<div style="font-size:12px;padding:5px 8px;border-radius:8px;margin-top:4px;background:#F3F4F6;color:#4B5563">ℹ '
+      + r.match.name + ' 暂无专属开场白，将在开场补一句应景提示</div>';
+  }
+  box.innerHTML = rows + use;
+}
+/* 统一节日取值：手动选择 > 话术主题识别（DateMatch 统一解析）> 今日自动匹配
+ * 返回约定与 beauty.html 一致：'fest:<key>' 节日话术 / 'solar:<节气>' 节气话术 / 'auto' / 'none' */
+function qaFestKeyOf(cfg){
+  const manual = (cfg && cfg.fest) ? cfg.fest : 'auto';
+  if (manual && manual !== 'auto') return manual;      // 手动指定优先（'none' = 常规航班）
+  if (typeof DateMatch !== 'undefined'){
+    const r = DateMatch.resolveScript(String((cfg && cfg.topic) || ''));
+    if (r && r.script) return r.script.kind + ':' + r.script.key;
+  }
+  return 'auto';
 }
 function pickBudget(k, btn){
   wizard.budget = k;
@@ -4257,13 +5435,16 @@ function qaSeededRand(seed){
   return function(){ s = (s * 9301 + 49297) % 233280; return s / 233280; };
 }
 function qaEnsureTeamLeaders(){
+  // 班组长可能未收录进名册：仅按姓名补一条便于解析，**不编造工号**（2026-09-12 修复）
   const extra = [
-    { 工号:'000001', 姓名:'张露', 班组:'广州张露班组' },
-    { 工号:'000002', 姓名:'黄子健', 班组:'广州黄子健班组' },
-    { 工号:'000003', 姓名:'李凯', 班组:'广州李凯班组' }
+    { 工号:'', 姓名:'张露', 班组:'广州张露班组' }
   ];
   extra.forEach(e => { if(!QA_CREW.some(c => c.姓名 === e.姓名)) QA_CREW.push(e); });
 }
+/* ⚠️ 演示数据生成器（2026-09-12 起默认不再调用）
+ * 历史问题：qaLoadPerfData() 在无真实数据时自动调用本函数，用伪随机数造出每人每月绩效，
+ * 用户问到的分数/排名全是编的。现在只有显式设置 localStorage.qa_perf_demo = '1'
+ * （或在控制台手动调用）才会生成，正常问答路径一律走真实数据，读不到就如实回答"暂无数据"。 */
 function qaSeedPerfData(){
   qaEnsureTeamLeaders();
   const rows = [];
@@ -4297,15 +5478,152 @@ function qaSeedPerfData(){
   }catch(e){ console.warn('[绩效] 模拟数据写入失败', e); }
   return rows;
 }
-function qaLoadPerfData(){
+/* ══════════════════════════════════════════════════════════════
+ * 真实绩效数据桥（2026-09-12 核查修复）
+ * 问题：此前 qaLoadPerfData() 在无数据时直接调用 qaSeedPerfData()，
+ *       用伪随机数"造"出每人每月绩效分——用户问到的数字全是编的。
+ * 修复：改为读取绩效后台（performance.html）真实落库数据，读不到就如实说"暂无数据"。
+ * 真实数据源与 performance.html 完全一致：IndexedDB
+ *   db「keyval-store」/ store「keyval」（idbKeyval 默认库）
+ *   键 crew_gz_month_index（月份索引）、crew_gz_<YYYY-MM>（月份数据）
+ *   结构 { summary:[{name,team,position,safeScore,operationScore,businessScore,
+ *                    comprehensiveScore,workScore,salesScore,flightHours,performance,details}],
+ *          sales:{detailRows:[{name,team,personalSale,personalTarget,completionRate}]},
+ *          events:{...} }
+ * ══════════════════════════════════════════════════════════════ */
+const QA_IDB_DB = 'keyval-store';
+const QA_IDB_STORE = 'keyval';
+const QA_IDB_PREFIX = 'crew_gz_';
+let qaPerfRealRows = null;      // 真实数据缓存（null = 尚未加载）
+let qaPerfLoadState = 'idle';   // idle | loading | ready | empty | unavailable
+
+function qaIdbGet(key){
+  return new Promise(function(resolve){
+    try{
+      if(typeof indexedDB === 'undefined') return resolve(null);
+      const req = indexedDB.open(QA_IDB_DB);
+      req.onupgradeneeded = function(){ try{ req.result.createObjectStore(QA_IDB_STORE); }catch(e){} };
+      req.onerror = function(){ resolve(null); };
+      req.onsuccess = function(){
+        const db = req.result;
+        try{
+          const tx = db.transaction(QA_IDB_STORE, 'readonly');
+          const g = tx.objectStore(QA_IDB_STORE).get(key);
+          g.onsuccess = function(){ const v = g.result; resolve(v == null ? null : v); };
+          g.onerror = function(){ resolve(null); };
+          tx.oncomplete = function(){ try{ db.close(); }catch(e){} };
+          tx.onabort = function(){ try{ db.close(); }catch(e){} };
+        }catch(e){ try{ db.close(); }catch(e2){} resolve(null); }
+      };
+    }catch(e){ resolve(null); }
+  });
+}
+function qaNum(v){ const n = Number(v); return isFinite(n) ? n : 0; }
+function qaCrewByName(name){
+  if(!name) return null;
+  return QA_CREW.find(function(c){ return c.姓名 === name; }) || null;
+}
+/* 把绩效后台的一个月数据映射成问答层字段（纯函数，便于回归测试） */
+function qaMapRealMonth(monthKey, monthData){
+  const out = [];
+  const sum = (monthData && Array.isArray(monthData.summary)) ? monthData.summary : [];
+  const sales = (monthData && monthData.sales && Array.isArray(monthData.sales.detailRows)) ? monthData.sales.detailRows : [];
+  sum.forEach(function(r){
+    if(!r || !r.name) return;
+    const s = sales.find(function(x){ return x && x.name === r.name; }) || {};
+    const crew = qaCrewByName(r.name);
+    out.push({
+      工号: crew ? (crew.工号 || '') : '',
+      姓名: r.name,
+      班组: r.team || (crew ? crew.班组 : '') || '',
+      岗位: r.position || '',
+      月份: monthKey,
+      安全质量: qaNum(r.safeScore),
+      运行品质: qaNum(r.operationScore),
+      业务得分: qaNum(r.businessScore),
+      综合能力: qaNum(r.comprehensiveScore),
+      工作评定: qaNum(r.workScore),
+      辅助收益: qaNum(r.salesScore),
+      飞行小时: qaNum(r.flightHours),
+      绩效总分: qaNum(r.performance),
+      个人销售额: qaNum(s.personalSale),
+      个人总指标: qaNum(s.personalTarget),
+      完成率: qaNum(s.completionRate),
+      排名: 0,
+      _来源: '绩效后台'
+    });
+  });
+  // 排名：按当月绩效总分降序（与绩效后台口径一致）
+  out.slice().sort(function(a, b){ return (b.绩效总分 || 0) - (a.绩效总分 || 0); })
+    .forEach(function(r, i){ r.排名 = i + 1; });
+  return out;
+}
+async function qaLoadRealPerf(){
+  const idx = await qaIdbGet(QA_IDB_PREFIX + 'month_index');
+  let months = (Array.isArray(idx) ? idx : []).filter(function(m){ return /^\d{4}-\d{2}$/.test(String(m)); });
+  if(!months.length){
+    // 索引缺失时退回探测当前月
+    const d = new Date();
+    months = [qaMonthStr(d.getFullYear(), d.getMonth() + 1)];
+  }
+  const rows = [];
+  for(const mo of months){
+    const md = await qaIdbGet(QA_IDB_PREFIX + mo);
+    if(md) rows.push.apply(rows, qaMapRealMonth(mo, md));
+  }
+  return rows;
+}
+/* 显式导入的绩效数据（用户在 qa 板块点"导入数据"后写入，属于用户提供，非编造） */
+function qaReadUploadedPerf(){
   try{
     const raw = localStorage.getItem(QA_PERF_KEY);
     if(raw){
       const d = JSON.parse(raw);
-      if(d && d.magic === QA_PERF_MAGIC && Array.isArray(d.rows) && d.rows.length) return d.rows;
+      if(d && d.magic === QA_PERF_MAGIC && Array.isArray(d.rows) && d.rows.length){
+        return d.rows.map(function(r){ r._来源 = '已导入数据'; return r; });
+      }
     }
   }catch(e){}
-  return qaSeedPerfData();
+  return null;
+}
+/* qa_perf_dirty：绩效后台（performance.html）保存/删除数据时写入的时间戳。
+ * qa 的缓存只在启动时加载一次，不检查该标记的话，后台更新数据后 qa 会拿旧数据回答（变相编造）。 */
+function qaPerfDirtyFlag(){
+  try{ return parseInt(localStorage.getItem('qa_perf_dirty') || '0', 10) || 0; }catch(e){ return 0; }
+}
+let qaPerfLoadedAt = 0;
+/* 预加载：页面启动后调用一次，把真实数据灌进缓存；绩效后台有更新（dirty）时自动重新加载 */
+async function qaPreloadPerf(force){
+  if(!force && qaPerfDirtyFlag() <= qaPerfLoadedAt && (qaPerfLoadState === 'loading' || qaPerfLoadState === 'ready')) return qaPerfRealRows;
+  qaPerfLoadState = 'loading';
+  qaEnsureTeamLeaders();      // 名册归一（班组长按姓名补位，不编造工号）
+  try{
+    const real = await qaLoadRealPerf();
+    if(real && real.length){ qaPerfRealRows = real; qaPerfLoadState = 'ready'; qaPerfLoadedAt = Date.now(); return real; }
+  }catch(e){}
+  const up = qaReadUploadedPerf();
+  qaPerfRealRows = up && up.length ? up : [];
+  qaPerfLoadState = qaPerfRealRows.length ? 'ready' : 'empty';
+  qaPerfLoadedAt = Date.now();
+  return qaPerfRealRows;
+}
+/* 同步读：只返回已加载到的真实数据或用户导入数据；没有就返回空数组（绝不编造） */
+function qaLoadPerfData(){
+  if(qaPerfRealRows && qaPerfRealRows.length) return qaPerfRealRows;
+  const up = qaReadUploadedPerf();
+  if(up && up.length) return up;
+  return qaPerfRealRows || [];
+}
+/* 数据来源说明（用于回答里标注数据出处，让用户知道数字是哪来的） */
+function qaPerfSourceNote(){
+  const rows = qaLoadPerfData();
+  if(!rows.length) return '';
+  const src = rows[0]._来源 || '';
+  const months = {};
+  rows.forEach(function(r){ months[r.月份] = 1; });
+  const ms = Object.keys(months).sort();
+  const range = ms.length ? (ms[0] + (ms.length > 1 ? ' ~ ' + ms[ms.length - 1] : '')) : '';
+  return (src ? '数据来源：' + src : '') + (range ? ' · 覆盖 ' + range + '（共 ' + rows.length + ' 条记录）' : '');
 }
 function qaQueryPerfRow(rows, name, month){
   if(!rows || !name || !month) return null;
@@ -4373,10 +5691,20 @@ function qaMatchCrew(text){
     if(text.indexOf(c.姓名) >= 0 && (!best || c.姓名.length > best.姓名.length)) best = c;
   });
   if(best) return best;
+  // 名册可能有滞后：真实绩效数据里出现过的姓名同样可识别（新人/临时借调）
+  let best2 = null;
+  (qaPerfRealRows || []).forEach(function(r){
+    if(r && r.姓名 && text.indexOf(r.姓名) >= 0 && (!best2 || r.姓名.length > best2.姓名.length)){
+      best2 = { 工号: r.工号 || '', 姓名: r.姓名, 班组: r.班组 || '' };
+    }
+  });
+  if(best2) return best2;
   const m = String(text).match(/(\d{5,6})/);
   if(m){
     const c = QA_CREW.find(x => String(x.工号).indexOf(m[1]) >= 0);
     if(c) return c;
+    const r2 = (qaPerfRealRows || []).find(x => String(x.工号).indexOf(m[1]) >= 0);
+    if(r2) return { 工号: r2.工号, 姓名: r2.姓名, 班组: r2.班组 || '' };
   }
   // 自我查询仅当句子里确实带绩效/数据/飞行/销售等关键词，避免"我怎么请病假"这类普通提问被误判成查绩效
   if((/^(我|我的|本人|自己).{0,12}?(绩效|数据|排名|销售|业绩|飞行|小时|时长|考核|成绩|得分|总分|分数|看板)/.test(String(text)) || /我的绩效|我的数据|我的销售|我的排名/.test(String(text)))){
@@ -4465,7 +5793,7 @@ function qaIsTrainIntent(text){
   return false;
 }
 function qaPickTrainQuestions(chapter, count, rndSeed){
-  let pool = QA_QUIZ_POOL;
+  let pool = QA_QUIZ_POOL.concat((window.DC_QUIZ && window.DC_QUIZ.length) ? window.DC_QUIZ : []);
   if(chapter && chapter !== '全部') pool = pool.filter(q => q.c === chapter);
   if(!pool.length) return [];
   const n = Math.min(count || pool.length, pool.length);
@@ -4487,35 +5815,80 @@ const QA_CHAPTERS = (function(){ const set = []; QA_QUIZ_POOL.forEach(q => { if(
  * ============================================================ */
 let qaPending = null;   // {kind:'perf'|'train', ...}
 
-function qaPerfFlow(text){
+/* 自动认人：个人资料里的姓名若命中系统真实名册（或真实绩效数据），就不再追问姓名。
+ * 对应需求「升级个人资料 → 姓名改为系统中已存在的真实姓名后，再问绩效无需再报姓名」。 */
+function qaAutoWho(){
+  const me = qaCurrentUser();
+  if(!me || !me.姓名) return null;
+  const c = qaCrewByName(me.姓名);
+  if(c) return { 工号: c.工号 || '', 姓名: c.姓名, 班组: c.班组 || '', _auto: true };
+  if((qaPerfRealRows || []).some(function(r){ return r.姓名 === me.姓名; })){
+    let team = '';
+    (qaPerfRealRows || []).forEach(function(r){ if(r.姓名 === me.姓名 && r.班组) team = r.班组; });
+    return { 工号: '', 姓名: me.姓名, 班组: team, _auto: true };
+  }
+  return null;
+}
+/* 判断是否允许用资料身份自动认人（2026-09-12 修复）：
+ * 「张三2026年8月的绩效」这类点名了名册外人员的提问，绝不能套用资料用户身份（qaAutoWho），
+ * 否则会把他人的绩效查询串成资料用户自己的数据。仅当「我/我的」句式或句中未点名具体人时允许。 */
+function qaAutoWhoAllowed(text){
+  const t = String(text || '');
+  if (/^(我|我的|本人|自己)|帮我查(看)?我|查我/.test(t)) return true;
+  const nm = t.match(/([\u4e00-\u9fa5]{2,4})(?:的)?(?:绩效|业绩|数据|排名|得分|分数|总分|飞行小时|飞行时长|销售额|销售数据|销售情况)/);
+  if (!nm) return true;                                 // 未点名任何人（如「怎么样」类问法）
+  if (/^(这个月|上个月|本月|当月|最近|今年|上月|那个月|上半年|全年)/.test(nm[1])) return true;  // 主语是时间词不是人名
+  return false;                                         // 点名了具体某人 → 需追问，不许自动认人
+}
+async function qaPerfFlow(text){
+  // 先确保真实数据已加载（避免拿到空缓存后误报"无记录"）
+  await qaPreloadPerf();
   const p = qaParsePerf(text);
-  if(!p.who){
+  let who = p.who;
+  if(!who && qaAutoWhoAllowed(text)) who = qaAutoWho();          // 姓名联动：仅限「我的」类问法
+  if(!who){
     qaPending = { kind:'perf', who:null, time:p.time, type:p.type };
-    addMsg('bot', `<div class="qeh-guide">👤 请问要查询<b>哪位乘务员</b>的绩效？（可输入姓名或工号，例如：张露 / 黄子健 / 028981）</div>`);
+    const hasData = (qaLoadPerfData() || []).length > 0;
+    addMsg('bot', `<div class="qeh-guide">👤 请问要查询<b>哪位乘务员</b>的绩效？（可输入姓名或工号，例如：张露 / 黄子健 / 028981）${hasData ? '' : '<br><span style="color:#C0392B">⚠️ 当前未检测到绩效数据，请先在「绩效管理」导入当月数据；也可在右上角完善个人资料（填真实姓名）后直接问「我的绩效」。</span>'}</div>`);
     return;
   }
   if(!p.time){
-    qaPending = { kind:'perf', who:p.who, time:null, type:p.type };
+    qaPending = { kind:'perf', who:who, time:null, type:p.type };
     addMsg('bot', `<div class="qeh-guide">📅 请问要查<b>哪个时间段</b>的绩效？（例如：2026年7月 / 上个月 / 最近3个月）</div>`);
     return;
   }
   qaPending = null;
-  qaPerfQueryUI(p.who, p.time, p.type);
+  qaPerfQueryUI(who, p.time, p.type);
+}
+/* 数据出处标注：让用户知道这些数字来自哪里（绩效后台 / 已导入数据），而不是凭空生成 */
+function qaPerfFooterNote(){
+  const note = qaPerfSourceNote();
+  return note ? '<div class="qeh-guide" style="margin-top:6px">📌 ' + esc(note) + '</div>' : '';
 }
 async function qaPerfQueryUI(who, time, type){
+  // 回答前先确保数据新鲜（绩效后台更新过 → 自动重载），未加载到任何真实数据时如实说明，不编造
+  await qaPreloadPerf();
+  const all = qaLoadPerfData();
+  if(!all.length){
+    addMsg('bot', `<div class="qeh-empty">🔍 <b>暂无绩效数据</b>，因此无法回答。<br>请先在「绩效管理」板块导入当月绩效文件（导入后本板块自动读取，无需重复录入）；也可点下方按钮导入 JSON 数据后重试。</div>`);
+    return;
+  }
   if(time.type === 'month'){
     await typing('');
     clearTyping();
     const resp = await qaMockApi('/api/performance', { name: who.姓名, month: time.month, type: type });
     if(resp.code === 200 && resp.data){
-      addMsg('bot', qaPerfCardHtml(resp.data, type));
+      addMsg('bot', qaPerfCardHtml(resp.data, type) + qaPerfFooterNote());
     }else{
-      addMsg('bot', `<div class="qeh-empty">🔍 未找到 <b>${esc(who.姓名)}</b> 在 <b>${esc(time.month)}</b> 的记录。该时段记录不存在或尚未录入，请确认后重试。</div>`);
+      const months = [...new Set(all.map(function(r){ return r.月份; }))].sort();
+      addMsg('bot', `<div class="qeh-empty">🔍 未找到 <b>${esc(who.姓名)}</b> 在 <b>${esc(time.month)}</b> 的记录。`
+        + (months.length ? '<br>当前已录入的月份：' + esc(months.join('、')) : '')
+        + '<br>该时段可能尚未录入，请确认后在「绩效管理」补充。</div>');
     }
     return;
   }
   // 范围 / 上半年 / 全年：取多月平均卡片
-  const rows = qaLoadPerfData();
+  const rows = all;
   const months = qaRangeMonths(time);
   const recs = months.map(mo => qaQueryPerfRow(rows, who.姓名, mo)).filter(Boolean);
   if(!recs.length){
@@ -4525,7 +5898,7 @@ async function qaPerfQueryUI(who, time, type){
   await typing('');
   clearTyping();
   const avg = qaAvgRecord(recs);
-  addMsg('bot', qaPerfRangeCardHtml(who, time, recs.length, avg, type));
+  addMsg('bot', qaPerfRangeCardHtml(who, time, recs.length, avg, type) + qaPerfFooterNote());
 }
 function qaRangeMonths(time){
   const now = new Date();
@@ -4650,9 +6023,13 @@ function qaTrainQuizHtml(questions, chapter, count){
   const qid = 'q' + (Date.now() % 1000000) + '_' + (qaQuizSeq++);
   const items = questions.map(function(q, i){
     const opts = (q.o || []).map(function(op, oi){
-      const letter = op.replace(/^([A-Z])\.\s*/, '$1');
-      const label = op.replace(/^[A-Z]\.\s*/, '');
-      return `<label class="tq-op"><input type="radio" name="${qid}_${i}" value="${letter}"><span>${esc(label)}</span></label>`;
+      // 2026-09-12 修复：原 replace(/^([A-Z])\.\s*/,'$1') 只替换匹配段、选项正文会保留
+      // （'A. CQH-COM' → 'ACQH-COM'），radio value 永远不等于标准答案字母 → 选对也判错。
+      // 改为真正提取选项字母（兼容全角点 '．'），无字母前缀时退回整串。
+      const _m = String(op).match(/^([A-Z])[.．]\s*/);
+      const letter = _m ? _m[1] : String(op).trim();
+      const label = String(op).replace(/^[A-Z][.．]\s*/, '');
+      return `<label class="tq-op"><input type="radio" name="${qid}_${i}" value="${esc(letter)}"><span>${esc(label)}</span></label>`;
     }).join('');
     return `<div class="tq-item" data-qid="${qid}" data-i="${i}" data-ans="${esc(q.a || '')}" data-explain="${esc(q.e || '')}">
       <div class="tq-q">${i + 1}. ${esc(q.q)}</div>
@@ -4790,30 +6167,38 @@ function qaRunSelfTest(){
 
   (async function(){
     log('========== 回归测试开始（' + new Date().toLocaleString() + '） ==========');
+    await qaPreloadPerf();
     const rows = qaLoadPerfData();
     qaEnsureTeamLeaders();
+    const hasPerf = rows.length > 0;
+    const monthsWithData = hasPerf ? [...new Set(rows.map(r => r.月份))].sort() : [];
 
     /* --- 1. 绩效查询：固定用例 --- */
     rec('绩效·三要素解析（张露/2026年7月/综合）',
       (function(){ const p = qaParsePerf('查一下张露2026年7月的绩效'); return p.who && p.who.姓名 === '张露' && p.time && p.time.month === '2026-07'; })(),
       '解析结果应命中 张露 + 2026-07');
 
-    const r1 = qaQueryPerfRow(rows, '张露', '2026-07');
-    rec('绩效·数据精确匹配（张露 2026-07）', !!r1 && r1.姓名 === '张露' && r1.月份 === '2026-07',
-      r1 ? JSON.stringify({ 绩效总分: r1.绩效总分, 飞行小时: r1.飞行小时 }) : '无记录');
+    if(hasPerf){
+      const sample = rows[0];
+      const r1 = qaQueryPerfRow(rows, sample.姓名, sample.月份);
+      rec('绩效·数据精确匹配（' + sample.姓名 + ' ' + sample.月份 + '）',
+        !!r1 && r1.姓名 === sample.姓名 && r1.月份 === sample.月份,
+        r1 ? JSON.stringify({ 绩效总分: r1.绩效总分, 飞行小时: r1.飞行小时 }) : '无记录');
+      rec('绩效·每条记录标注数据来源（可追溯，非编造）', !!sample._来源, '_来源=' + (sample._来源 || '缺失'));
+      rec('绩效·记录字段完整（姓名/月份/绩效总分/飞行小时）',
+        ['姓名','月份','绩效总分','飞行小时'].every(k => sample[k] !== undefined),
+        JSON.stringify(Object.keys(sample).slice(0, 12)));
+      const prevM = qaParseTime('上个月的飞行时长');
+      rec('绩效·相对时间解析（上月）', !!prevM && prevM.type === 'month', '上月 = ' + (prevM && prevM.month));
+    }else{
+      // 无真实数据时必须如实为空，不得回落到伪随机生成（2026-09-12 修复点）
+      rec('绩效·无数据时返回空（不编造数据）', rows.length === 0 && qaLoadPerfData().length === 0,
+        '无真实绩效数据 → qaLoadPerfData() = []，问答将提示"暂无数据"');
+    }
 
     rec('绩效·未命中时段提示（张露 2027-03）',
       (function(){ const r = qaQueryPerfRow(rows, '张露', '2027-03'); return r === null; })(),
-      '2027-03 不在预置范围，应返回 null');
-
-    const prev = qaParseTime('黄子健上个月的飞行时长');
-    const r2 = prev && prev.month ? qaQueryPerfRow(rows, '黄子健', prev.month) : null;
-    rec('绩效·相对时间解析（上月）', prev && prev.type === 'month' && !!r2,
-      '上月 = ' + (prev && prev.month) + ' 黄子健 飞行小时=' + (r2 && r2.飞行小时));
-
-    const r3 = qaQueryPerfRow(rows, '李凯', '2026-07');
-    rec('绩效·销售类型数据', !!r3 && typeof r3.个人销售额 === 'number' && r3.个人销售额 > 0,
-      r3 ? '销售额=' + r3.个人销售额 + ' 完成率=' + r3.完成率 + '%' : '无记录');
+      '2027-03 应无记录，返回 null');
 
     /* --- 2. 培训练习 --- */
     const t1 = qaParseTrain('来10道第三章的题');
@@ -4831,23 +6216,26 @@ function qaRunSelfTest(){
 
     /* --- 3. 随机组合（≥5 组） --- */
     const rndNames = ['张露', '黄子健', '李凯', '雷炜豪', '曹晨', '陈雨晴'];
-    const rndMonths = qaPerfMonths();
+    const rndMonths = hasPerf ? monthsWithData : qaPerfMonths();
     const rndTypes = ['综合', '飞行时长', '销售额', '排名'];
     const rndChapters = QA_CHAPTERS.length ? QA_CHAPTERS : ['全部'];
     let rndPass = 0, rndTotal = 0;
     const srand = qaSeededRand(20260908);
     const ri = (a, b) => Math.floor(srand() * (b - a + 1)) + a;
     for(let i = 0; i < 6; i++){
-      const rndName = rndNames[ri(0, rndNames.length - 1)];
-      const rndMo = rndMonths[ri(0, rndMonths.length - 1)];
+      const base = hasPerf ? rows[ri(0, rows.length - 1)] : null;
+      const rndName = base ? base.姓名 : rndNames[ri(0, rndNames.length - 1)];
+      const rndMo = base ? base.月份 : rndMonths[ri(0, rndMonths.length - 1)];
       const rndType = rndTypes[ri(0, rndTypes.length - 1)];
       const query = '查一下' + rndName + rndMo + '的' + (rndType === '综合' ? '绩效' : rndType);
       const p = qaParsePerf(query);
       const row = p.who && p.time ? qaQueryPerfRow(rows, p.who.姓名, p.time.month) : null;
-      const ok = !!(p.who && p.time && row);
+      // 无真实数据时只校验解析链路（不要求有记录），有数据时要求真实命中
+      const ok = !!(p.who && p.time && (!hasPerf || row));
       rndTotal++; if(ok) rndPass++;
       rec('随机' + (i + 1) + '·绩效 ' + rndName + ' ' + rndMo + ' ' + rndType, ok,
-        ok ? ('绩效总分=' + row.绩效总分) : '解析=' + JSON.stringify({ who: p.who && p.who.姓名, time: p.time && p.time.month }));
+        ok ? (row ? '绩效总分=' + row.绩效总分 : '解析通过（暂无该月数据）')
+           : '解析=' + JSON.stringify({ who: p.who && p.who.姓名, time: p.time && p.time.month }));
 
       if(i < 3){
         const ch = rndChapters[ri(0, rndChapters.length - 1)];
@@ -4862,16 +6250,16 @@ function qaRunSelfTest(){
     rec('随机组合整体（' + rndTotal + ' 组）', rndPass === rndTotal, rndPass + '/' + rndTotal + ' 通过');
 
     /* --- 4. API 真实性验证 --- */
-    const apiPerf = await qaMockApi('/api/performance', { name: '张露', month: '2026-07', type: '综合' });
-    rec('API·/api/performance 返回', apiPerf.code === 200 && apiPerf.data && apiPerf.cost >= 0,
-      'code=' + apiPerf.code + ' data=' + (apiPerf.data ? apiPerf.data.姓名 : 'null'));
+    const apiPerf = await qaMockApi('/api/performance', { name: hasPerf ? rows[0].姓名 : '张露', month: hasPerf ? rows[0].月份 : '2026-07', type: '综合' });
+    rec('API·/api/performance 返回', hasPerf ? (apiPerf.code === 200 && !!apiPerf.data && apiPerf.cost >= 0) : (apiPerf.code === 404),
+      'code=' + apiPerf.code + (hasPerf ? ' data=' + (apiPerf.data ? apiPerf.data.姓名 : 'null') : '（当前无数据 → 应返回 404 而非编造）'));
 
     const apiTrain = await qaMockApi('/api/training', { chapter: '全部', count: 8 });
     rec('API·/api/training 返回', apiTrain.code === 200 && Array.isArray(apiTrain.data) && apiTrain.data.length === 8,
       'code=' + apiTrain.code + ' 题目数=' + (apiTrain.data && apiTrain.data.length));
 
     const api404 = await qaMockApi('/api/performance', { name: '张露', month: '2027-03' });
-    rec('API·未命中返回 404', api404.code === 404, 'msg=' + api404.msg);
+    rec('API·未命中返回 404（不编造）', api404.code === 404, 'msg=' + api404.msg);
 
     /* --- 报告 --- */
     log('========== 测试结果：' + pass + ' 项通过 / ' + fail + ' 项失败 ==========');
@@ -4885,6 +6273,8 @@ function qaRunSelfTest(){
     }catch(e){}
   })();
 }
+/* 页面加载后预载真实绩效数据（供"我的绩效"等问答直接使用，避免首次提问拿到空缓存） */
+setTimeout(function(){ qaPreloadPerf(); }, 300);
 /* 页面加载后延迟运行自测（不影响首屏体验） */
 setTimeout(qaRunSelfTest, 1600);
 

@@ -21,6 +21,10 @@ HERE = os.path.dirname(os.path.abspath(__file__))
 
 BUILD_STEPS = [
     (u'同步数据包引擎(4源)', u'python _sync_packs.py --check'),
+    (u'同步日期匹配引擎(3源)', u'python _sync_date_match.py --check'),
+    (u'同步时节引擎(单一来源)', u'python _sync_season.py --check'),
+    (u'同步日期匹配引擎(单一来源)', u'python _sync_date_match.py --check'),
+    (u'同步大撤专项(2源)', u'python _sync_dache.py --check'),
     (u'构建 kb-admin(库管理)', u'python _build_kbadmin.py'),
     (u'构建 spring(9模块单文件)', u'python _gzip_build.py'),
     (u'构建 4合1(10模块离线版)', u'python _build_4in1.py'),
@@ -34,6 +38,9 @@ VERIFY_SCRIPTS = [
     u'node _verify_packs_m14.js',  # 备份内容层隔离 14
     u'node _verify_packs_m15.js',  # 产物内嵌特征 40
     u'node _verify_packs_m2.js',   # 在线更新 27
+    u'node _verify_date_match.js',  # 日期匹配引擎回归（节日/农历/通用节点/相对时间/跨年/表外估算）
+    u'node _verify_date_match.js',         # 日期匹配引擎（节日词/修饰语/相对时间/跨年/农历策略）
+    u'node _verify_fest_hookup.js',        # 节日识别 → 话术挂载 端到端
     u'node _verify_script_gen.js 20260829',  # 话术生成引擎回归（6类x12套组合 × 品类匹配审计）
     u'node _verify_full_script.js 20260829', # 全话术链路回归（随机24套×3次：开场→落地前下单 结构/语义/违禁词/品牌重复/句级重复）
     u'node _verify_ai_price.js',   # 竞品分析 AI 更新价格（JSON 解析/覆盖层/预设与自定义应用）

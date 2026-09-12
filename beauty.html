@@ -782,20 +782,30 @@ window.SeasonEngine = (function () {
     'valentine': ['各位旅客好！又到情人节，巧的是您正在这趟航班上。不管有没有伴儿，爱自己这件事都值得——机上好物，给心爱的人，也给自己一份。', '情人节快乐！香水、口红、护理好物，今天的机上清单格外应景。单身的朋友更该对自己好——爱自己，永远不会亏。'],
     'women': ['各位旅客节日快乐！今天是为她喝彩的日子。机上备了点悦己好物——对自己好，才是头等大事。', '女神节好！机上这几款，都是给自己添点好心情的。辛苦一年，值得。'],
     'xiaonian': ['各位旅客小年好！小年扫尘，迎新纳福。机上好物带一份，年货备齐，好心情也备齐。', '小年一过，家家户户开始忙年了。机上好物备一份，回家也添份喜气。'],
-    'yuanxiao': ['各位旅客元宵好！正月十五闹花灯，天上的航班也沾了喜气。机上备了点好意头的好物——团团圆圆，月圆人更圆。', '元宵节好！过了十五，这个年才算真正过完。机上这几款好物，给年味收个漂亮的尾。']
+    'yuanxiao': ['各位旅客元宵好！正月十五闹花灯，天上的航班也沾了喜气。机上备了点好意头的好物——团团圆圆，月圆人更圆。', '元宵节好！过了十五，这个年才算真正过完。机上这几款好物，给年味收个漂亮的尾。'],
+    'shopping618': ['六月过半，618 这几天买东西的人多。机上这几款跨境好物，包税含邮，落地前下单几天就到家，也算赶上了这一波。', '618 到了，机上的专享价也给您备着。不用蹲点、不用凑单，看中了直接带走，图的就是省心。'],
+    'shuang11': ['各位旅客，双十一这几天，机上的跨境好物也是实打实的专享价——不用熬夜抢、不用凑满减，看中就带走。', '双十一好！与其在网上比来比去，不如趁这趟航班把东西挑明白：跨境正品、包税到家，价格都标在明处。'],
+    'shuang12': ['双十二这几天，年货也可以开始备起来了。机上这几款跨境好物，包税到家，先挑几样，过年就从容。', '各位旅客，双十二好！机上专享价照旧，看中什么落地前下单，几天就能收到。'],
+    'christmas': ['各位旅客圣诞快乐！机上也沾了节日气氛——几款适合送礼的好物，包装体面，带回去就是一份心意。', '圣诞快乐！给自己或重要的人挑一份，机上这几款礼物感足，还省得您再去挤商场。'],
+    'nianhuo': ['年货节到了，年味也近了。机上这几款好物，当年货先备上，回家不用再赶场。', '各位旅客，年货备得早，过年就从容。机上跨境好物包税到家，先挑几样带回去。']
   };
 
   // 公历固定节日
+  // 公历固定节日（含通用购物节点，与 DateMatch 词表口径一致）
   var GREG_FESTS = {
     '01-01': 'newyear', '02-14': 'valentine', '03-08': 'women',
-    '05-01': 'labor', '06-01': 'children', '09-10': 'teachers', '10-01': 'national'
+    '05-01': 'labor', '06-01': 'children', '06-18': 'shopping618',
+    '09-10': 'teachers', '10-01': 'national',
+    '11-11': 'shuang11', '12-12': 'shuang12', '12-25': 'christmas'
   };
   var FEST_NAMES = {
     newyear: '元旦', spring: '春节', yuanxiao: '元宵节', valentine: '情人节',
     women: '妇女节', labor: '劳动节', children: '儿童节', fathers: '父亲节',
     teachers: '教师节', national: '国庆节', duanwu: '端午节', qixi: '七夕节',
     midautumn: '中秋节', chongyang: '重阳节', laba: '腊八节',
-    xiaonian: '小年', chuxi: '除夕', mothers: '母亲节'
+    xiaonian: '小年', chuxi: '除夕', mothers: '母亲节',
+    shopping618: '618年中大促', shuang11: '双十一', shuang12: '双十二',
+    christmas: '圣诞节', nianhuo: '年货节'
   };
   var WEEK = ['星期日', '星期一', '星期二', '星期三', '星期四', '星期五', '星期六'];
 
@@ -858,9 +868,24 @@ window.SeasonEngine = (function () {
     return '';
   }
 
-  // 匹配当日：公历节日 > 农历节日 > 24 节气
+  /* 匹配当日：统一委托 DateMatch.todayMatch（同日口径的唯一来源）
+   * 委托后的差异：认「假期区间」（春节第 3 天也算春节）、覆盖万圣节/感恩节等
+   * 本文件词表没有的节日、输出与文本解析同一结构。
+   * DateMatch 尚未加载时回退本文件原逻辑，保证任何加载顺序都能用。
+   */
   function match(dt) {
     dt = dt || new Date();
+    try {
+      var DM = (typeof window !== 'undefined') ? window.DateMatch : null;
+      if (DM && DM.todayMatch) {
+        var m2 = DM.todayMatch(dt);
+        if (!m2) return null;
+        return {
+          kind: (m2.type === 'term') ? 'solar' : 'festival',
+          key: m2.key, name: m2.name, type: m2.type, date: m2.start, via: 'DateMatch'
+        };
+      }
+    } catch (e) {}
     var f = festOf(dt);
     if (f) return { kind: 'festival', key: f, name: FEST_NAMES[f] || f };
     var t = solarTermOf(dt);
@@ -920,7 +945,10 @@ window.SeasonEngine = (function () {
     { k: 'valentine', l: '💝 情人节' }, { k: 'women', l: '🌷 妇女节' },
     { k: 'mothers', l: '🌸 母亲节' }, { k: 'fathers', l: '👔 父亲节' },
     { k: 'children', l: '🎈 儿童节' }, { k: 'labor', l: '🛠 劳动节' },
-    { k: 'teachers', l: '🍎 教师节' }, { k: 'national', l: '🇨🇳 国庆' }
+    { k: 'teachers', l: '🍎 教师节' }, { k: 'national', l: '🇨🇳 国庆' },
+    { k: 'shopping618', l: '🛒 618' }, { k: 'shuang11', l: '🛍 双十一' },
+    { k: 'shuang12', l: '🎁 双十二' }, { k: 'christmas', l: '🎄 圣诞' },
+    { k: 'nianhuo', l: '🧨 年货节' }
   ];
 
   return {
@@ -935,6 +963,619 @@ window.SeasonEngine = (function () {
 })();
 
 /* ===== SEASON_ENGINE_END ===== */
+/* ===== DATE_MATCH_BEGIN ===== */
+/* =============================================================
+ * 日期匹配引擎（文本 / 日期 → 节假日 / 日期区间）—— 单一来源
+ * 生成/维护：直接改本文件，再跑 python _sync_date_match.py 同步进各页面
+ * 注入目标：index.html / qa.html / beauty.html
+ * 依赖：window.SeasonEngine（农历节日表 LUNAR、24 节气表 TERMS）
+ *
+ * 统一输出结构（所有入口共用，字段齐全，不再各页面各写一套）：
+ *   raw        原始匹配词（含修饰语，如「教师节快到了」）
+ *   type       solar(公历节日) / lunar(农历节日) / weekday(第N个星期几)
+ *              / shopping(通用购物节点) / term(节气) / relative(相对时间)
+ *   key        节日标识（与 SeasonEngine 的 FEST_NAMES / OPEN_FESTS 对齐）
+ *   name       节日中文名
+ *   start      起始日期 YYYY-MM-DD
+ *   end        结束日期 YYYY-MM-DD（多日假期为区间，单日为同一天）
+ *   label      人类可读区间（如「2026-09-25 ~ 2026-09-27（3 天）」）
+ *   confidence 置信度 0~1
+ *   offset     before / same / after / around / soon / none（修饰语类别）
+ *   note       解析说明（含跨年顺延、农历估算等提示）
+ *
+ * 三个对外主入口：
+ *   parse(text)        文本 → 全部命中（数组，已做重叠消解）
+ *   parseBest(text)    文本 → 置信度最高的一个
+ *   todayMatch(dt)     日期 → 当天所处节日/节气（替代各页面自写的当日判断）
+ *   resolveScript(t)   文本 → 直接可用的「开场话术挂载点」（含降级策略）
+ *
+ * ── 跨年处理策略 ───────────────────────────────────────────────
+ * 1) 默认「就近向未来」：先算今年的日期；若整个假期已早于今天且超出宽限期
+ *    （GRACE_DAYS=3 天），顺延到明年，note 标注「自动顺延到 YYYY 年」。
+ *    宽限期的意义：9/12 说「教师节」时，教师节（9/10）才过两天，仍按今年算，
+ *    避免跳到明年，符合「刚过不久」的日常语感。
+ * 2) 「快到了 / 临近 / 节前」这类修饰语表意是「还没到」，因此附加
+ *    preferFuture：只要节日当天已早于今天，一律顺延到明年 —— 否则会出现
+ *    「教师节快到了」却解析出 3 天前区间的自相矛盾结果。
+ * 3) 文本里出现「明年 / 来年 / 下一年」→ 强制 +1 年；「去年 / 上年」→ 强制 -1 年，
+ *    优先级最高，不再走就近顺延。
+ *
+ * ── 农历节日日期不固定的处理策略 ──────────────────────────────
+ * 农历节日（春节、中秋、端午、七夕、重阳、腊八、小年、除夕、元宵）每年对应的
+ * 公历日期都不同，因此不做日期硬编码，分三档处理：
+ *   a. 表内年份（SeasonEngine.LUNAR，2026-2040 天文算法生成）→ 精确日期，
+ *      estimated=false，置信度 0.9；
+ *   b. 表外年份 → 用该节日在公历中的「常见出现区间」(FESTS[].est) 取中点估算，
+ *      estimated=true，置信度降到 0.55，note 明确标注「估算，实际日期以官方日历为准」；
+ *   c. 节气（清明、冬至等）同理：TERMS 表内精确，表外按 TERM_EST 区间估算并降级。
+ * 下游消费方应把 estimated=true 的结果当作「参考区间」，不要用于精确倒计时。
+ * ============================================================= */
+window.DateMatch = (function () {
+  var SE = (typeof window !== 'undefined') ? window.SeasonEngine : null;
+
+  /* ---------------- 日期小工具 ---------------- */
+  function pad(n) { return (n < 10 ? '0' : '') + n; }
+  function ymd(d) { return d.getFullYear() + '-' + pad(d.getMonth() + 1) + '-' + pad(d.getDate()); }
+  function day0(d) { return new Date(d.getFullYear(), d.getMonth(), d.getDate()); }
+  function addDays(d, n) { return new Date(day0(d).getTime() + n * 86400000); }
+  function md2date(s, y) {
+    if (!s) return null;
+    var p = String(s).split('-');
+    if (p.length < 2) return null;
+    var m = parseInt(p[0], 10), d = parseInt(p[1], 10);
+    if (isNaN(m) || isNaN(d)) return null;
+    return new Date(y, m - 1, d);
+  }
+  function daysBetween(a, b) { return Math.round((day0(b) - day0(a)) / 86400000); }
+
+  var CN_NUM = { '零': 0, '一': 1, '二': 2, '两': 2, '三': 3, '四': 4, '五': 5, '六': 6, '七': 7, '八': 8, '九': 9, '十': 10 };
+  function cn2num(s) {
+    if (s == null) return NaN;
+    s = String(s).trim();
+    if (/^\d+$/.test(s)) return parseInt(s, 10);
+    if (s === '十') return 10;
+    if (s.length === 1) return CN_NUM[s] != null ? CN_NUM[s] : NaN;
+    if (/^十[一二三四五六七八九]$/.test(s)) return 10 + CN_NUM[s.charAt(1)];
+    if (/^[二三四五六七八九]十$/.test(s)) return CN_NUM[s.charAt(0)] * 10;
+    if (/^[二三四五六七八九]十[一二三四五六七八九]$/.test(s)) return CN_NUM[s.charAt(0)] * 10 + CN_NUM[s.charAt(2)];
+    return NaN;
+  }
+
+  /* ---------------- 节日词典 ----------------
+   * date：公历固定 MM-DD（solar / shopping）
+   * span：假期天数（含当天），around 修饰时展开为区间
+   * rule：weekday 类型用 [月份, 第几个, 星期几(0=周日)]
+   * lunarKey：农历节日在 SeasonEngine.LUNAR 表中的键
+   * est：该农历节日在公历中的可能区间（表外年份估算 + 跨年判断用）
+   */
+  var FESTS = [
+    // ---------- 公历固定节日 ----------
+    { key: 'newyear', name: '元旦', type: 'solar', date: '01-01', span: 3, alias: ['元旦', '元旦节', '新年', '跨年', '阳历年', '1月1号', '1月1日'] },
+    { key: 'valentine', name: '情人节', type: 'solar', date: '02-14', span: 1, alias: ['情人节', '2月14号', '2月14日'] },
+    { key: 'women', name: '妇女节', type: 'solar', date: '03-08', span: 1, alias: ['妇女节', '三八节', '女神节', '女王节', '女生节', '3月8号', '3月8日'] },
+    { key: 'qingming', name: '清明节', type: 'solar', date: '04-05', span: 3, alias: ['清明', '清明节', '踏青', '扫墓'] },
+    { key: 'labor', name: '劳动节', type: 'solar', date: '05-01', span: 5, alias: ['劳动节', '五一', '五一节', '5月1号', '5月1日', '小长假'] },
+    { key: 'children', name: '儿童节', type: 'solar', date: '06-01', span: 1, alias: ['儿童节', '六一', '六一节', '6月1号', '6月1日'] },
+    { key: 'teachers', name: '教师节', type: 'solar', date: '09-10', span: 1, alias: ['教师节', '老师节', '9月10号', '9月10日'] },
+    { key: 'national', name: '国庆节', type: 'solar', date: '10-01', span: 7, alias: ['国庆', '国庆节', '十一', '10月1号', '10月1日', '黄金周'] },
+    { key: 'halloween', name: '万圣节', type: 'solar', date: '10-31', span: 1, alias: ['万圣节', '万圣夜', '10月31号'] },
+    { key: 'thanksgiving', name: '感恩节', type: 'solar', date: '11-26', span: 1, alias: ['感恩节'] },
+    { key: 'christmas', name: '圣诞节', type: 'solar', date: '12-25', span: 1, alias: ['圣诞', '圣诞节', '平安夜', '12月25号'] },
+    // ---------- 第 N 个星期几 ----------
+    { key: 'mothers', name: '母亲节', type: 'weekday', rule: [5, 2, 0], span: 1, alias: ['母亲节', '妈妈节'] },
+    { key: 'fathers', name: '父亲节', type: 'weekday', rule: [6, 3, 0], span: 1, alias: ['父亲节', '爸爸节'] },
+    // ---------- 通用购物节点 ----------
+    { key: 'shopping618', name: '618年中大促', type: 'shopping', date: '06-18', span: 1, alias: ['618', '6.18', '6月18', '年中大促', '618大促'] },
+    { key: 'shuang11', name: '双十一', type: 'shopping', date: '11-11', span: 1, alias: ['双十一', '双11', '双十一购物节', '光棍节', '11.11', '11月11号'] },
+    { key: 'shuang12', name: '双十二', type: 'shopping', date: '12-12', span: 1, alias: ['双十二', '双12', '12.12', '12月12号'] },
+    { key: 'nianhuo', name: '年货节', type: 'shopping', date: '01-10', span: 10, alias: ['年货节', '年货', '办年货'] },
+    // ---------- 农历节日（每年公历日期不同，查 SeasonEngine.LUNAR 表） ----------
+    { key: 'laba', name: '腊八节', type: 'lunar', lunarKey: 'laba', span: 1, est: ['01-01', '01-31'], alias: ['腊八', '腊八节', '腊月初八'] },
+    { key: 'xiaonian', name: '小年', type: 'lunar', lunarKey: 'xiaonian', span: 1, est: ['01-15', '02-15'], alias: ['小年', '小年夜', '祭灶'] },
+    { key: 'chuxi', name: '除夕', type: 'lunar', lunarKey: 'chuxi', span: 1, est: ['01-20', '02-20'], alias: ['除夕', '大年夜', '年三十', '大年三十'] },
+    { key: 'spring', name: '春节', type: 'lunar', lunarKey: 'spring', span: 7, est: ['01-21', '02-21'], alias: ['春节', '过年', '新春', '农历新年', '大年初一', '初一'] },
+    { key: 'yuanxiao', name: '元宵节', type: 'lunar', lunarKey: 'yuanxiao', span: 1, est: ['02-04', '03-06'], alias: ['元宵', '元宵节', '正月十五', '灯节'] },
+    { key: 'duanwu', name: '端午节', type: 'lunar', lunarKey: 'duanwu', span: 3, est: ['05-27', '06-27'], alias: ['端午', '端午节', '粽子节', '五月初五'] },
+    { key: 'qixi', name: '七夕节', type: 'lunar', lunarKey: 'qixi', span: 1, est: ['07-31', '08-31'], alias: ['七夕', '七夕节', '乞巧节', '七月初七'] },
+    { key: 'midautumn', name: '中秋节', type: 'lunar', lunarKey: 'midautumn', span: 3, est: ['09-07', '10-07'], alias: ['中秋', '中秋节', '八月十五', '月饼节', '团圆节'] },
+    { key: 'chongyang', name: '重阳节', type: 'lunar', lunarKey: 'chongyang', span: 1, est: ['09-30', '10-31'], alias: ['重阳', '重阳节', '敬老节', '九月初九'] }
+  ];
+
+  // 24 节气（type=term，日期查 SeasonEngine.TERMS 表）
+  var TERMS = (SE && SE.TERM_ORDER) ? SE.TERM_ORDER : [
+    '小寒', '大寒', '立春', '雨水', '惊蛰', '春分', '清明', '谷雨', '立夏', '小满',
+    '芒种', '夏至', '小暑', '大暑', '立秋', '处暑', '白露', '秋分', '寒露', '霜降',
+    '立冬', '小雪', '大雪', '冬至'
+  ];
+  // 节气在公历中的常见区间（表外年份估算用）
+  var TERM_EST = {
+    '小寒': ['01-05', '01-07'], '大寒': ['01-19', '01-21'], '立春': ['02-03', '02-05'], '雨水': ['02-18', '02-20'],
+    '惊蛰': ['03-05', '03-07'], '春分': ['03-20', '03-22'], '清明': ['04-04', '04-06'], '谷雨': ['04-19', '04-21'],
+    '立夏': ['05-05', '05-07'], '小满': ['05-20', '05-22'], '芒种': ['06-05', '06-07'], '夏至': ['06-20', '06-22'],
+    '小暑': ['07-06', '07-08'], '大暑': ['07-22', '07-24'], '立秋': ['08-07', '08-09'], '处暑': ['08-22', '08-24'],
+    '白露': ['09-07', '09-09'], '秋分': ['09-22', '09-24'], '寒露': ['10-07', '10-09'], '霜降': ['10-22', '10-24'],
+    '立冬': ['11-06', '11-08'], '小雪': ['11-21', '11-23'], '大雪': ['12-06', '12-08'], '冬至': ['12-21', '12-23']
+  };
+
+  /* ---------------- 修饰语：把节日当天变成区间 ---------------- */
+  var SOON_DAYS = 7;    // 「快到了 / 临近」默认按节前 7 天算
+  var NEAR_DAYS = 3;    // 「节前 / 之前」未带数字时，默认取节前 3 天
+  // 数量词（含中文数字），供 before / after 计算跨度
+  var NUM = '([一二三四五六七八九十两1-9]|十[一二三四五六七八九]|\\d+)';
+  var UNIT = '(个月|月|周|个星期|星期|礼拜|天|日)';
+  var MODS = [
+    // 顺序即优先级：先看「临近」，再看「节前/节后」，最后才是泛化的「前后/期间」
+    { re: /(快到了|就快到了|快要到了|就要到了|马上到了|即将到来|即将来临|临近了?|快到了|快到|接近了?|倒计时|要到了|快过节|要过节)/, off: 'soon', label: '临近（节前 ' + SOON_DAYS + ' 天起）' },
+    { re: /(节前|之前|以前)/, off: 'before', n: NEAR_DAYS, label: '节前（默认节前 ' + NEAR_DAYS + ' 天）' },
+    { re: /(节后|之后|过后|以后)/, off: 'after', n: NEAR_DAYS, label: '节后（默认节后 ' + NEAR_DAYS + ' 天）' },
+    { re: /(前一天|头一天|提前一天|提前1天)/, off: 'before', n: 1, unit: '天', label: '节前 1 天' },
+    { re: /(后一天|次日|第二天|隔天)/, off: 'after', n: 1, unit: '天', label: '节后 1 天' },
+    // 注意：动词用非捕获组，保证 m[1]=数量、m[2]=单位 的索引在所有规则里一致
+    { re: /(?:提前|提早)\s*([一二三四五六七八九十两1-9]|十[一二三四五六七八九]|\d+)\s*(个月|月|周|个星期|星期|天|日)/, off: 'before', label: '提前 N 个单位' },
+    { re: new RegExp('前\\s*' + NUM + '\\s*' + UNIT), off: 'before', label: '节前 N 个单位' },
+    { re: new RegExp('后\\s*' + NUM + '\\s*' + UNIT), off: 'after', label: '节后 N 个单位' },
+    { re: /(当天|正日子|当日|那天|节日当天|这一天)/, off: 'same', label: '节日当天' },
+    { re: /(前后|期间|那几天|这几天|假期里|假期|过节期间|过节|节日里|左右)/, off: 'around', label: '节日前后' }
+  ];
+  // 单位 → 天数（「月」走日历加月，这里只在无法加月时兜底）
+  function unitDays(u) {
+    if (!u) return 1;
+    if (u.indexOf('月') >= 0) return 30;
+    if (u.indexOf('周') >= 0 || u.indexOf('星期') >= 0 || u.indexOf('礼拜') >= 0) return 7;
+    return 1;
+  }
+  // 按单位平移日期（月按日历自然月，避免 30 天累计误差）
+  function shiftByUnit(d, n, u) {
+    if (u && u.indexOf('月') >= 0) return new Date(d.getFullYear(), d.getMonth() + n, d.getDate());
+    return addDays(d, n * unitDays(u));
+  }
+
+  /* ---------------- 相对时间 ---------------- */
+  function weekStart(d) { var x = day0(d), w = x.getDay(); return addDays(x, w === 0 ? -6 : 1 - w); } // 周一为首
+  function monthStart(d) { return new Date(d.getFullYear(), d.getMonth(), 1); }
+  function monthEnd(d) { return new Date(d.getFullYear(), d.getMonth() + 1, 0); }
+  function addMonths(d, n) { return new Date(d.getFullYear(), d.getMonth() + n, 1); }
+
+  /* 相对时间词表
+   * 顺序原则：特异表达在前（「这周末」优先于「这周」），重叠命中由 dedupe 按
+   * raw 长度与置信度消解 —— 例如「下周末」同时命中「下周末」与「下周」时保留前者。
+   */
+  var RELS = [
+    // —— 天级 ——
+    { re: /今天|今日|现在/, name: '今天', calc: function (t) { return { s: t, e: t }; } },
+    { re: /大后天/, name: '大后天', calc: function (t) { return { s: addDays(t, 3), e: addDays(t, 3) }; } },
+    { re: /明天|明日|明儿/, name: '明天', calc: function (t) { return { s: addDays(t, 1), e: addDays(t, 1) }; } },
+    { re: /后天/, name: '后天', calc: function (t) { return { s: addDays(t, 2), e: addDays(t, 2) }; } },
+    { re: /昨天|昨日/, name: '昨天', calc: function (t) { return { s: addDays(t, -1), e: addDays(t, -1) }; } },
+    { re: /前天/, name: '前天', calc: function (t) { return { s: addDays(t, -2), e: addDays(t, -2) }; } },
+    { re: new RegExp(NUM + '\\s*(天|日)后'), name: 'N天后', calc: function (t, m) { var n = cn2num(m[1]) || 1; return { s: addDays(t, n), e: addDays(t, n) }; } },
+    { re: new RegExp('前\\s*' + NUM + '\\s*(天|日)'), name: '前N天', calc: function (t, m) { var n = cn2num(m[1]) || 3; return { s: addDays(t, -n), e: addDays(t, -1) }; } },
+    { re: /这几天|近几天|这两天/, name: '这几天', calc: function (t) { return { s: addDays(t, -2), e: t }; } },
+    { re: /前几天|前些天/, name: '前几天', calc: function (t) { return { s: addDays(t, -3), e: addDays(t, -1) }; } },
+    // —— 周级：周末类必须排在泛化周之前 ——
+    { re: /这(个)?周末|本周末|这(个)?礼拜天?/, name: '这周末', calc: function (t) { var w = weekStart(t); return { s: addDays(w, 5), e: addDays(w, 6) }; } },
+    { re: /下(个)?周末|下(个)?礼拜天?/, name: '下周末', calc: function (t) { var w = weekStart(t); return { s: addDays(w, 12), e: addDays(w, 13) }; } },
+    { re: /上(个)?周末|上(个)?礼拜天?/, name: '上周末', calc: function (t) { var w = weekStart(t); return { s: addDays(w, -2), e: addDays(w, -1) }; } },
+    { re: /周末|礼拜天|周日/, name: '周末', calc: function (t) { var w = weekStart(t); return { s: addDays(w, 5), e: addDays(w, 6) }; } },
+    { re: new RegExp(NUM + '\\s*(周|个星期|星期|礼拜)后'), name: 'N周后', calc: function (t, m) { var n = cn2num(m[1]) || 1; return { s: addDays(t, n * 7), e: addDays(t, n * 7) }; } },
+    { re: /下(个)?(周|星期|礼拜)/, name: '下周', calc: function (t) { var w = weekStart(t); return { s: addDays(w, 7), e: addDays(w, 13) }; } },
+    { re: /这(个)?(周|星期|礼拜)|本(周|星期)/, name: '这周', calc: function (t) { var w = weekStart(t); return { s: w, e: addDays(w, 6) }; } },
+    { re: /上上?(个)?(周|星期|礼拜)/, name: '上周', calc: function (t) { var w = weekStart(t); return { s: addDays(w, -7), e: addDays(w, -1) }; } },
+    // —— 月 / 季 / 年 ——
+    { re: new RegExp(NUM + '\\s*(个月|月)后'), name: 'N个月后', calc: function (t, m) { var n = cn2num(m[1]) || 1, d = addMonths(t, n); return { s: d, e: new Date(d.getFullYear(), d.getMonth() + 1, 0) }; } },
+    { re: /下个月|下月|下个?月/, name: '下个月', calc: function (t) { var m = addMonths(t, 1); return { s: m, e: new Date(m.getFullYear(), m.getMonth() + 1, 0) }; } },
+    { re: /这个月|本月|这月/, name: '这个月', calc: function (t) { return { s: monthStart(t), e: monthEnd(t) }; } },
+    { re: /上个月|上月/, name: '上个月', calc: function (t) { var m = addMonths(t, -1); return { s: m, e: new Date(m.getFullYear(), m.getMonth() + 1, 0) }; } },
+    { re: /年底|年末|年底前/, name: '年底', calc: function (t) { return { s: new Date(t.getFullYear(), 11, 1), e: new Date(t.getFullYear(), 11, 31) }; } },
+    { re: /年初|开年/, name: '年初', calc: function (t) { var y = t.getFullYear() + (t.getMonth() > 0 ? 1 : 0); return { s: new Date(y, 0, 1), e: new Date(y, 0, 31), rolled: t.getMonth() > 0 }; } },
+    { re: /半年内|近半年/, name: '近半年', calc: function (t) { return { s: addDays(t, -180), e: t }; } }
+  ];
+
+  /* ---------------- 节日 → 具体日期 ---------------- */
+  // 取某年该节日的 {s, e, estimated}
+  function datesOf(fest, year) {
+    if (fest.type === 'solar' || fest.type === 'shopping') {
+      var d = md2date(fest.date, year);
+      return { s: d, e: addDays(d, (fest.span || 1) - 1), estimated: false };
+    }
+    if (fest.type === 'weekday') {
+      var r = fest.rule, first = new Date(year, r[0] - 1, 1).getDay();
+      var day = ((r[2] - first + 7) % 7) + 1 + (r[1] - 1) * 7;
+      var wd = new Date(year, r[0] - 1, day);
+      return { s: wd, e: addDays(wd, (fest.span || 1) - 1), estimated: false };
+    }
+    if (fest.type === 'lunar') {
+      var tbl = SE && SE.LUNAR && SE.LUNAR[String(year)];
+      if (tbl && tbl[fest.lunarKey]) {
+        var ld = md2date(tbl[fest.lunarKey], year);
+        return { s: ld, e: addDays(ld, (fest.span || 1) - 1), estimated: false };
+      }
+      // 表外年份：用公历可能区间的中点估算，置信度降级，同时把真实可能区间一并带出
+      var a = md2date(fest.est[0], year), b = md2date(fest.est[1], year);
+      var mid = day0(new Date((a.getTime() + b.getTime()) / 2));
+      return { s: mid, e: addDays(mid, (fest.span || 1) - 1), estimated: true, estRange: [ymd(a), ymd(b)] };
+    }
+    if (fest.type === 'term') {
+      var tt = SE && SE.TERMS && SE.TERMS[String(year)];
+      if (tt && tt[fest.key]) {
+        var td = md2date(tt[fest.key], year);
+        return { s: td, e: addDays(td, 2), estimated: false };
+      }
+      var er = TERM_EST[fest.key] || ['01-01', '12-31'];
+      var ea = md2date(er[0], year), eb = md2date(er[1], year);
+      var tm = day0(new Date((ea.getTime() + eb.getTime()) / 2));
+      return { s: tm, e: addDays(tm, 2), estimated: true, estRange: [ymd(ea), ymd(eb)] };
+    }
+    return null;
+  }
+
+  /* 跨年策略：
+   * 1. 先取「今年」的日期；若整个假期已早于今天，且超出宽限期（默认 3 天），顺延到明年（rolled=true）
+   *    —— 宽限期的意义：刚过去两三天的节（9/12 说「教师节」）仍按今年算，避免跳到明年
+   * 2. 文本里出现「明年 / 明年中秋」→ 强制 +1 年；「去年 / 去年春节」→ 强制 -1 年
+   * 3. 农历节日日期每年不同：表内年份（2026-2040）用天文算法生成的精确表；
+   *    表外年份用「该节日在公历中的可能区间」取中点估算，并置 estimated=true、置信度降至 0.6
+   */
+  var GRACE_DAYS = 3;
+  /* preferFuture：语义上必然指向「还没到的那个节」（临近 / 节前 / 提前准备）时置 true ——
+   * 此时只要节日当天已早于今天，一律顺延到明年，避免「教师节快到了」解析出已过去的区间 */
+  function resolveFest(fest, today, forceYear, grace, preferFuture) {
+    grace = (grace == null) ? GRACE_DAYS : grace;
+    var y = today.getFullYear();
+    if (forceYear === 'next') y += 1;
+    if (forceYear === 'prev') y -= 1;
+    var r = datesOf(fest, y);
+    if (!r) return null;
+    var rolled = false, justPassed = 0;
+    if (!forceYear) {
+      var gap = daysBetween(r.e, day0(today)); // >0 表示假期已结束多少天
+      if (preferFuture && gap > 0) {
+        y += 1;
+        r = datesOf(fest, y);
+        rolled = true;
+      } else if (gap > grace) {
+        y += 1;
+        r = datesOf(fest, y);
+        rolled = true;
+      } else if (gap > 0) {
+        justPassed = gap;
+      }
+    }
+    return { year: y, s: r.s, e: r.e, estimated: r.estimated, estRange: r.estRange, rolled: rolled, justPassed: justPassed };
+  }
+
+  /* ---------------- 扫描：节日词 ---------------- */
+  // 构造（词 → 节日）索引，长词优先
+  var WORDS = [];
+  var FEST_ALIAS = {};
+  FESTS.forEach(function (f) {
+    f.alias.forEach(function (a) {
+      FEST_ALIAS[a] = 1;
+      WORDS.push({ w: a, f: f });
+    });
+  });
+  // 节气词：已被节日别名占用的（如「清明」）不再单独建词，避免同位置重复命中
+  TERMS.forEach(function (t) {
+    if (FEST_ALIAS[t]) return;
+    WORDS.push({ w: t, f: { key: t, name: t, type: 'term', span: 3, alias: [t] } });
+  });
+  WORDS.sort(function (a, b) { return b.w.length - a.w.length; });
+
+  // 上下文保护：排除「三十一号」里的「十一」、「十一月」里的「十一」这类数字片段误命中
+  var NUMCHARS = '0-9一二三四五六七八九十百千万两';
+  function badCtx(text, i, w) {
+    var prev = i > 0 ? text.charAt(i - 1) : '';
+    var next = text.charAt(i + w.length) || '';
+    var isNum = function (ch) { return !!ch && NUMCHARS.indexOf(ch) >= 0; };
+    // 前面紧跟数字/数词 → 是更大数字的一部分（三十一、一百一）
+    if (isNum(prev) && isNum(w.charAt(0))) return true;
+    // 「双十一 / 双十二」里的数字片段由整词命中，这里排除重复扫描
+    if (prev === '双' && w.charAt(0) === '十') return true;
+    // 后接「月」→ 是月份（十一月、五月、六月），不是节日
+    if (next === '月' && (w === '十一' || w === '五一' || w === '六一' || w === '初一' || w === '十一五')) return true;
+    // 后接量词/单位 → 是数量或时间点（十一点、十一号、三十一号、十一万）
+    if ((w === '十一' || w === '五一' || w === '六一') && /[点号日时个万人元岁分秒]/.test(next)) return true;
+    // 五一路、五一路口这类地名
+    if (w === '五一' && next === '路') return true;
+    if (w === '过年' && isNum(prev)) return true;
+    return false;
+  }
+
+  function scanFestivals(text, today) {
+    var out = [];
+    WORDS.forEach(function (item) {
+      var from = 0, i;
+      while ((i = text.indexOf(item.w, from)) >= 0) {
+        var end = i + item.w.length;
+        if (badCtx(text, i, item.w)) { from = end; continue; }
+        // 年份修饰：明年 / 去年 / 后年
+        var pre = text.slice(Math.max(0, i - 4), i);
+        var force = null;
+        if (/明年|来年|下一年/.test(pre)) force = 'next';
+        else if (/去年|上年|上一年|前年/.test(pre)) force = 'prev';
+        // 修饰语：先看词后 8 字，再看词前 3 字（「临近中秋」「节前 3 天」两种语序）
+        var post = text.slice(end, end + 8);
+        var mod = null, modAt = end, modLen = 0;
+        for (var k = 0; k < MODS.length; k++) {
+          var m = post.match(MODS[k].re);
+          if (m) { mod = { def: MODS[k], m: m }; modAt = end + m.index; modLen = m[0].length; break; }
+          var preTxt = text.slice(Math.max(0, i - 3), i);
+          var m2 = preTxt.match(MODS[k].re);
+          if (m2) { mod = { def: MODS[k], m: m2 }; modAt = i - m2[0].length; modLen = m2[0].length; break; }
+        }
+        // 临近 / 节前语义 → 一律指向「还没到的那个节」
+        var _pf = !!(mod && (mod.def.off === 'soon' || mod.def.off === 'before' || mod.def.off === 'pre'));
+        var resolved = resolveFest(item.f, today, force, null, _pf);
+        if (!resolved) { from = end; continue; }
+        var s = resolved.s, e = resolved.e, off = 'none', note = '';
+        var conf = item.f.type === 'lunar' ? 0.9 : (item.f.type === 'term' ? 0.85 : (item.f.type === 'shopping' ? 0.86 : 0.92));
+        if (resolved.estimated) {
+          conf = 0.55;
+          var _rg = resolved.estRange ? ('，实际落在 ' + resolved.estRange[0] + ' ~ ' + resolved.estRange[1] + ' 之间') : '';
+          note = '该年无精确' + (item.f.type === 'term' ? '节气' : '农历') + '表，按公历常见区间取中估算' + _rg + '，以官方日历为准';
+        }
+        if (mod) {
+          off = mod.def.off;
+          var n = (mod.def.n != null) ? mod.def.n : cn2num(mod.m[1]);
+          if (!n || isNaN(n)) n = 1;
+          var uu = mod.def.unit || (mod.m && mod.m[2]) || '天';
+          if (off === 'before' || off === 'pre') {
+            s = shiftByUnit(resolved.s, -n, uu); e = addDays(resolved.s, -1);
+          } else if (off === 'after') {
+            s = addDays(resolved.e, 1); e = shiftByUnit(resolved.e, n, uu);
+          } else if (off === 'soon') {
+            s = addDays(resolved.s, -SOON_DAYS); e = resolved.s;
+          } else if (off === 'same') {
+            s = resolved.s; e = resolved.s;
+          } else if (off === 'around') {
+            s = addDays(resolved.s, -1); e = resolved.e;
+          }
+          conf -= 0.04;
+          note = (note ? note + '；' : '') + mod.def.label;
+        }
+        if (resolved.rolled) { conf -= 0.03; note = (note ? note + '；' : '') + '今年该节日已过，自动顺延到 ' + resolved.year + ' 年'; }
+        else if (resolved.justPassed) { conf -= 0.02; note = (note ? note + '；' : '') + '该节日 ' + resolved.justPassed + ' 天前刚过（' + GRACE_DAYS + ' 天宽限内，仍按今年）'; }
+        conf = Math.max(0.35, Math.min(0.99, conf));
+        // 原文跨度：节日词 + 修饰语（前/后）+ 年份词（明年/去年）
+        var rawFrom = Math.min(i, modAt, force ? i - 2 : i);
+        var rawTo = Math.max(end, modAt + modLen);
+        var _s0 = ymd(s), _e0 = ymd(e), _days = daysBetween(s, e) + 1;
+        out.push({
+          raw: text.slice(Math.max(0, rawFrom), rawTo),
+          type: item.f.type, key: item.f.key, name: item.f.name,
+          start: _s0, end: _e0,
+          label: _s0 + (_s0 === _e0 ? '' : ' ~ ' + _e0) + '（' + _days + ' 天）',
+          confidence: Math.round(conf * 100) / 100,
+          offset: off, index: Math.max(0, rawFrom), note: note || '未带修饰语，按节日当天（含假期 ' + (item.f.span || 1) + ' 天）',
+          year: resolved.year, estimated: resolved.estimated, rolled: resolved.rolled, span: item.f.span || 1
+        });
+        from = end;
+      }
+    });
+    return out;
+  }
+
+  /* ---------------- 扫描：相对时间 ---------------- */
+  function scanRelative(text, today) {
+    var out = [];
+    RELS.forEach(function (r) {
+      var m = text.match(r.re);
+      if (!m) return;
+      var c = r.calc(today, m);
+      if (!c) return;
+      var _rs = ymd(c.s), _re = ymd(c.e), _rd = daysBetween(c.s, c.e) + 1;
+      out.push({
+        raw: m[0], type: 'relative', key: r.name, name: r.name,
+        start: _rs, end: _re,
+        label: _rs + (_rs === _re ? '' : ' ~ ' + _re) + '（' + _rd + ' 天）',
+        confidence: (c.s.getTime() === c.e.getTime() ? 0.9 : 0.8), offset: 'none',
+        index: text.indexOf(m[0]),
+        note: '按当前系统日期 ' + ymd(today) + ' 归一化' + (c.rolled ? '（已过，顺延到下一年）' : ''),
+        year: c.s.getFullYear(), estimated: false, rolled: !!c.rolled, span: _rd
+      });
+    });
+    return out;
+  }
+
+  /* ---------------- 主入口 ---------------- */
+  // 重叠消解：长匹配优先，其次置信度高优先
+  function dedupe(list) {
+    list.sort(function (a, b) {
+      var la = a.raw.length, lb = b.raw.length;
+      if (lb !== la) return lb - la;
+      return b.confidence - a.confidence;
+    });
+    var taken = [], out = [];
+    list.forEach(function (m) {
+      var s = m.index, e = s + m.raw.length;
+      for (var i = 0; i < taken.length; i++) {
+        if (s < taken[i].e && e > taken[i].s) return; // 与已选重叠
+      }
+      taken.push({ s: s, e: e });
+      out.push(m);
+    });
+    out.sort(function (a, b) { return a.index - b.index; });
+    return out;
+  }
+
+  function parse(text, opts) {
+    opts = opts || {};
+    if (text == null) return [];
+    text = String(text);
+    var today = opts.today ? day0(opts.today) : day0(new Date());
+    var all = scanFestivals(text, today).concat(scanRelative(text, today));
+    return dedupe(all);
+  }
+
+  function parseBest(text, opts) {
+    var list = parse(text, opts);
+    if (!list.length) return null;
+    var best = list[0];
+    list.forEach(function (m) { if (m.confidence > best.confidence) best = m; });
+    return best;
+  }
+
+  /* ---------------- 当日匹配：统一「今天是什么节」 ----------------
+   * 与 SeasonEngine.match 的差异（也是各页面此前各写一套的根源）：
+   *   1. 认「假期区间」——春节第 3 天、国庆第 5 天都算在节里（SeasonEngine 只认当天）
+   *   2. 覆盖万圣节 / 感恩节等 SeasonEngine 词表里没有的节日
+   *   3. 输出结构与 parse() 完全一致，消费方不必写两套字段
+   * 优先级：公历节日 > 第 N 个星期几 > 农历节日 > 购物节点 > 节气
+   */
+  var TODAY_ORDER = { solar: 0, weekday: 1, lunar: 2, shopping: 3, term: 4 };
+  function todayMatch(dt) {
+    var today = day0(dt || new Date());
+    var hits = [];
+    FESTS.forEach(function (f) {
+      var r = datesOf(f, today.getFullYear());
+      if (!r || !r.s) return;
+      var rs = day0(r.s), re = day0(r.e);
+      if (today >= rs && today <= re) {
+        var a = ymd(rs), b = ymd(re), sp = daysBetween(rs, re) + 1;
+        hits.push({
+          raw: f.name, type: f.type, key: f.key, name: f.name,
+          start: a, end: b,
+          label: a + (a === b ? '' : ' ~ ' + b) + '（' + sp + ' 天）',
+          confidence: r.estimated ? 0.55 : (f.type === 'lunar' ? 0.9 : 0.92),
+          offset: 'same', index: -1,
+          note: '今天是' + f.name + (daysBetween(rs, today) > 0 ? '（假期第 ' + (daysBetween(rs, today) + 1) + ' 天）' : ''),
+          year: today.getFullYear(), estimated: !!r.estimated, rolled: false, span: sp
+        });
+      }
+    });
+    // 节气：复用 SeasonEngine 的精确表，DateMatch 不再维护第二份节气日期
+    try {
+      var tn = (SE && SE.solarTermOf) ? SE.solarTermOf(today) : '';
+      if (tn) {
+        var row = (SE && SE.TERMS) ? SE.TERMS[String(today.getFullYear())] : null;
+        var td = row ? md2date(row[tn], today.getFullYear()) : null;
+        var ok = !!(td && !isNaN(td.getTime()));
+        var ts = ok ? day0(td) : today, te = addDays(ts, 2);
+        hits.push({
+          raw: tn, type: 'term', key: tn, name: tn,
+          start: ymd(ts), end: ymd(te),
+          label: ymd(ts) + (ymd(ts) === ymd(te) ? '' : ' ~ ' + ymd(te)) + '（' + (daysBetween(ts, te) + 1) + ' 天）',
+          confidence: ok ? 0.85 : 0.6, offset: 'same', index: -1,
+          note: '今天是节气「' + tn + '」' + (ok ? '' : '（按常见区间估算）'),
+          year: today.getFullYear(), estimated: !ok, rolled: false, span: 3
+        });
+      }
+    } catch (e) {}
+    if (!hits.length) return null;
+    hits.sort(function (a, b) {
+      var oa = TODAY_ORDER[a.type] == null ? 9 : TODAY_ORDER[a.type];
+      var ob = TODAY_ORDER[b.type] == null ? 9 : TODAY_ORDER[b.type];
+      if (oa !== ob) return oa - ob;
+      return b.span - a.span;
+    });
+    return hits[0];
+  }
+
+  /* ---------------- 解析结果 → 开场话术挂载点 ----------------
+   * 只有话术库里真有对应话术池的才返回 key（fest→OPEN_FESTS / term→OPEN_TERMS），
+   * 其余返回 null，由调用方走通用开场 —— 关键是「识别」与「有话说」解耦，
+   * 不再因为话术池缺 key 就把识别结果整条丢掉。
+   */
+  var TERM_AS_FEST = { qingming: '清明' };
+  function scriptKeyOf(m) {
+    if (!m) return null;
+    if (m.type === 'term') return { kind: 'term', key: m.key };
+    if (m.type === 'relative') return null;
+    if (TERM_AS_FEST[m.key]) return { kind: 'term', key: TERM_AS_FEST[m.key] };
+    if (SE && SE.OPEN_FESTS && SE.OPEN_FESTS[m.key]) return { kind: 'fest', key: m.key };
+    return null;
+  }
+  function hasOpenPool(k) {
+    if (!k || !SE) return false;
+    var pool = (k.kind === 'term') ? (SE.OPEN_TERMS && SE.OPEN_TERMS[k.key]) : (SE.OPEN_FESTS && SE.OPEN_FESTS[k.key]);
+    return !!(pool && pool.length);
+  }
+
+  /* ---------------- 一站式：文本 → 可直接驱动话术的结果 ----------------
+   * 优先级：话术主题里识别到的节日 > 今日匹配
+   * 返回：source(topic|today|none) / match / script(有现成话术时) / label / confidence / inlineHint
+   */
+  function resolveScript(text, opts) {
+    opts = opts || {};
+    var today = opts.today ? day0(opts.today) : day0(new Date());
+    var t = (text == null) ? '' : String(text).trim();
+    var m = t ? parseBest(t, { today: today }) : null;
+    var source = 'topic';
+    if (!m) { m = todayMatch(today); source = m ? 'today' : 'none'; }
+    var key = scriptKeyOf(m);
+    var usable = hasOpenPool(key);
+    return {
+      source: source,
+      match: m,
+      script: usable ? key : null,
+      kind: (key && usable) ? key.kind : '',
+      key: (key && usable) ? key.key : '',
+      name: m ? m.name : '',
+      start: m ? m.start : '',
+      end: m ? m.end : '',
+      label: m ? m.label : '',
+      confidence: m ? m.confidence : 0,
+      note: m ? m.note : '',
+      estimated: m ? !!m.estimated : false,
+      // 只有「节日 / 节气」才值得补一句应景提示；相对时间（下个月、这周）不植入
+      inlineHint: (m && !usable && m.type !== 'relative') ? ('正好赶上' + m.name + '，算是应景。') : ''
+    };
+  }
+
+  // 一句话说明（UI 展示用）
+  function describe(m) {
+    if (!m) return '';
+    var range = m.label || (m.start === m.end ? m.start : (m.start + ' ~ ' + m.end));
+    return m.name + '（' + range + '，置信度 ' + Math.round(m.confidence * 100) + '%' + (m.note ? '，' + m.note : '') + '）';
+  }
+
+  var TYPE_NAMES = { solar: '公历节日', lunar: '农历节日', weekday: '公历节日', shopping: '通用节点', term: '节气', relative: '相对时间' };
+  function typeName(t) { return TYPE_NAMES[t] || t; }
+
+  /* ---------------- 自检样例 ---------------- */
+  var SAMPLES = [
+    // —— 话术里最常见的节日称呼（务必先识别节日词，再解析日期）——
+    '教师节快到了，想给老师挑份礼物',
+    '中秋想送点礼给爸妈',
+    '国庆出去玩，路上带点什么好',
+    '春节前一天飞',
+    '端午后一天回程',
+    '中秋当天想订一盒',
+    '临近中秋的航班',
+    '国庆节前的班次',
+    '教师节后三天到货',
+    '中秋前一周开始备货',
+    '明年中秋想提前一个月准备',
+    // —— 通用购物节点 ——
+    '双十一准备囤货',
+    '618有什么值得买的',
+    '双十二要不要上点货',
+    // —— 节气 ——
+    '冬至快到了',
+    '立冬那天开始用',
+    // —— 相对时间 ——
+    '前三天刚买了这个',
+    '这周有促销吗',
+    '下周末回来',
+    '下个月要出差',
+    // —— 负例（不应命中的数字片段）——
+    '11月去日本'
+  ];
+  function selfTest(today) {
+    return SAMPLES.map(function (s) { return { text: s, match: parseBest(s, { today: today }) }; });
+  }
+
+  return {
+    FESTS: FESTS, TERMS: TERMS, MODS: MODS, RELS: RELS, SAMPLES: SAMPLES,
+    parse: parse, parseBest: parseBest, describe: describe, typeName: typeName,
+    todayMatch: todayMatch, scriptKeyOf: scriptKeyOf, hasOpenPool: hasOpenPool,
+    resolveScript: resolveScript,
+    resolveFest: resolveFest, datesOf: datesOf, selfTest: selfTest,
+    ymd: ymd, addDays: addDays, shiftByUnit: shiftByUnit, SOON_DAYS: SOON_DAYS
+  };
+})();
+
+/* ===== DATE_MATCH_END ===== */
         const products = [
             // ==================== 雅诗兰黛 ====================
             { id: 'estee-001', name: '雅诗兰黛小棕瓶精华第七代', brand: '雅诗兰黛', category: '精华', tale: '它的夜修护成分，据说是从千万种肽里筛出来的优等生——你熬着夜，它替你把修护的活儿干了。', volume: '30ml/50ml/75ml', origin: '美国', stock: 'in_stock', description: '雅诗兰黛灵魂产品，升级至第七代，核心升级为时钟肌因信源科技（Chronolux Power Signal Technology），含高浓度二裂酵母发酵产物溶胞物与三肽-32（律波肽），修护肌底的同时帮助同步肌肤昼夜节律，改善细纹、暗沉、干燥等多种肌肤问题，是雅诗兰黛广受欢迎的精华产品。', coreBenefits: ['修护肌底', '同步昼夜节律', '淡化细纹', '提亮肤色', '深层补水', '增强肌肤韧性'], targetSkinTypes: ['所有肤质', '初老肌肤', '熬夜肌', '肌肤状态不稳定者', '暗沉肌肤'], keyIngredients: [{ commonName: '时钟肌因信源科技（律波肽／三肽-32）', mechanism: '同步肌肤昼夜节律，增强肌肤自我修护力' }, { commonName: '三肽-32', mechanism: '激活肌肤节律基因，改善熬夜导致的肌肤问题' }, { commonName: '二裂酵母发酵产物溶胞物', mechanism: '修护DNA，增强肌肤屏障功能' }, { commonName: '猴面包树籽提取物', mechanism: '抗光老化，预防肌肤提前衰老' }], unsuitable: [{ type: '对成分过敏者', reason: '使用前建议先做皮肤测试' }], tags: ['精华', '雅诗兰黛', '小棕瓶', '肌底修护', '抗初老', '第七代'], reviewCount: 32560 },
@@ -1400,17 +2041,17 @@ productIntrosByCategory: {
                     "这款精华水是喷头设计的，可以直接喷脸上，当保湿喷雾用也很方便。",
                 ],
                 '面霜': [
-                    "这款面霜是啫喱质地的，夏天用特别清爽，冬天可以叠加精华油用。",
+                    "这款面霜上脸清爽不闷，夏天用特别舒服，冬天可以叠加精华油用。",
                     "说真的，这款面霜在我们春秋航班上卖得特别好，很多旅客坐一次春秋就买一次，回购率特别高。",
                     "这款面霜的质地特别轻盈，上脸秒吸收，油皮用着也不觉得闷，我自己就是油皮亲测好用。",
                     "这款面霜的口碑是实打实用出来的，成分和功效都很能打，机上购买还能直接送到家。",
                     "这款面霜的锁水能力特别强，在飞机上这种干燥环境用，一整天皮肤都不紧绷。",
                     "这款面霜是那种润而不油的感觉，涂完脸上有一层保护膜，但完全看不出涂了东西。",
-                    "这款面霜有日夜两款，白天用日霜防护，晚上用晚霜修护，搭配着用效果加倍。",
+                    "这款面霜白天用防护、晚上用修护，早晚都不耽误。",
                     "这款面霜是修护型的，皮肤不稳定的时候用它，第二天就能恢复。",
-                    "这款面霜是罐装的，用量很省，每次黄豆大小就够涂全脸了。",
-                    "这款面霜的盖子是旋转式的，密封性好，放包里不怕不小心打开。",
-                    "这款面霜有淡淡的草本味道，闻着特别安心，不是那种刺鼻的香精味。",
+                    "这款面霜用量很省，每次黄豆大小就够涂全脸了。",
+                    "这款面霜的包装密封性很好，放包里带着很安心。",
+                    "这款面霜的气味很清淡，闻着特别安心，不是刺鼻的香精味。",
                 ],
                 '精华': [
                     "这款精华液我自己用了大半年，皮肤状态真的肉眼可见地变好了，所以今天才敢在航班上跟各位旅客推荐。",
@@ -12966,8 +13607,8 @@ productIntrosByCategory: {
     },
     {
         'id': 'comp065',
-        'name': '加贺缠纯米大吟酿',
-        'brand': '加贺缠',
+        'name': '加贺鸢纯米大吟酿',
+        'brand': '加贺鸢',
         'category': '清酒',
         'prices':         [
             {
@@ -17666,7 +18307,11 @@ productIntrosByCategory: {
             'health|alcohol': ['日常营养补上了，偶尔小酌也更安心，下面这款酒正好配得上好心情。', '底子打好了，偶尔放松也从容，下面这款酒适合慢慢品。'],
             'health|souvenir': ['自己内调养身，给别人带份心意，下面这款纪念品正好。', '健康留给自己，回忆带给亲友，两样都安排上。'],
             'souvenir|health': ['伴手礼备好了，自己的健康也别落下，下面这款营养品也值得一看。', '心意先给亲友，健康留给自己，下面这款营养品正好收个尾。'],
-            'other|other': ['下面的也一样贴心实用。', '再看看下面这一款。', '看完了再往下翻，还有一件同样出色的。', '别急，下面这一款同样值得一看。']
+            'other|other': ['下面的也一样贴心实用。', '再看看下面这一款。', '看完了再往下翻，还有一件同样出色的。', '别急，下面这一款同样值得一看。'],
+            // 2026-09-12 核查补全：原先缺这 3 种顺序，跨品类时会退化成通用过渡句
+            'makeup|health': ['妆面好看是一时的，身体状态是长久的——下面这款，往身体上补一补。', '外在靠妆，内在靠养，下面这款正好接上这层照顾。'],
+            'souvenir|fragrance': ['纪念品留住了旅程的样子，接下来这支香，留住旅程的味道。', '东西收进包里了，味道也可以带上——下面这款香气很搭。'],
+            'souvenir|alcohol': ['伴手礼挑好了，饭桌上还缺一瓶——下面这款正好凑成一桌。', '纪念品是留给以后的，这瓶酒是留给今晚的。']
         };
         // 通用兜底过渡（跨品类无专属句时使用）
         const GENERIC_TRANSITIONS = ['接下来跟您说说下一款好物。', '下面这一款也同样值得一看。', '别着急，精彩的在后面，再看下一款。', '这款讲完了，下面这一款也同样值得期待。', '前面那款讲清楚了，再看下面这一款。'];
@@ -17776,11 +18421,95 @@ const getRandomUnique = (arr, usedSet) => {
  * 双版本：strict 严格版（无医美类比/无成分罗列）/ relaxed 宽松版（允许医美类比）
  * 叠加层：不改动既有模板引擎，仅在「场景化风格」开启时接管生成
  * ============================================================ */
+/* ===== 品牌故事 / 设计理念 / 饮用建议（2026-09 联网核查，来源见 _research_brands_a/b.json）
+ * 单一来源：scene（场景化生活语）/ classic（经典规范语）/ talk（广播脱口秀）三种话术风格共用，
+ * 用于给「每一款产品」补上品牌背书与工艺细节，避免同品类产品话术雷同。
+ * ========================================================================== */
+// 品牌故事 / 设计理念 / 饮用建议（2026-09 联网核查，来源见 _research_brands_a/b.json）
+const BRAND_STORY = {
+  'ASAHI朝日': { story:'「ネナイト／NENAITO」2016 年诞生于朝日集团食品，面对的是「睡眠不足大国·日本」这个社会课题。名字来自夜空月亮插画＋「寝ないとね（不睡不行呢）」。当时的日本，用保健品对付睡眠还是负面印象，朝日想扭转它。', concept:'不卖「催眠」，卖「第二天早上的清醒」——理念是「睡眠可以战略性获取，美好的明天由自己创造」。核心成分 L-茶氨酸 200mg/日，属功能性标示食品（届出番号 B306）。', tip:'一日 4 粒，睡前以水或温水送服；服用高血压药或兴奋剂者应避免，未成年/孕产妇/哺乳期不宜。' },
+  'CHOYA俏雅': { story:'蝶矢梅酒 1914 年在大阪创业，初代种葡萄，1924 年开始酿酒，1959 年起做梅酒。坚持只用日本青梅、无人工添加／色素／香料，熟成梅酒避光恒温熟成约 1 年。', concept:'2017 年起分两条线：CHOYA 与 THE CHOYA（后者全部选用南高梅）。思路很朴素——好梅酒不需要香精，靠青梅本身和一年时间。', tip:'加冰块或苏打水稀释，餐前开胃、餐后解腻都合适。' },
+  'CPB肌肤之钥': { story:'CPB 1982 年诞生，名字 Clé de Peau Beauté 是法语，意思是“开启肌肤之美的钥匙”。它从诞生起就定位为集团技术实力的集中展示，走高端百货和专业顾问路线。', concept:'以皮肤科学研究为基础，强调唤醒肌肤自身的“智慧”与光泽感，从底妆到护肤都围绕“钥匙”寓意——帮肌肤回到理想状态。' },
+  'DHC': { story:'1972 年吉田嘉明在日本创业，最早做的其实是委托翻译业务，后来才转向化妆品和健康食品，靠通信贩卖（邮购/电话订购）做起来。它家最出名的就是从西班牙有机橄榄园取材的橄榄卸妆油，2005 年进入中国，也是国内第一批做通信销售的外资化妆品企业。', concept:'护肤理念是“天然、温和、高品质”，公司一直挂着一句话：“品质相同，价格最低；价格相同，品质最高。”' },
+  'GNC健安喜': { story:'GNC 1935 年创立于美国匹兹堡，最初只是一家小型健康食品店，如今是全球最大的营养补充剂连锁之一。', concept:'以「科学配方 + 透明标示」为原则，强调成分剂量写在标签上、可追溯。', tip:'按标签推荐量随餐服用；孕期、哺乳期或正在服药请先咨询医生。' },
+  'IPSA茵芙莎': { story:'IPSA 1987 年诞生，名字来自拉丁语 ipse，意思是“自我”。它从一开始就不按年龄和肤质一刀切，而是主张每个人的肌肤都不一样，柜台会给客人做肌肤测试再配产品。', concept:'核心是“肌肤自律循环”——不靠猛药，而是帮肌肤恢复自我更新和保水的能力，自律循环液也因此做成按肤质分号的体系。' },
+  'OLAY': { story:'1952 年南非化学家 Graham Wulff 想给妻子做一款不厚重的保湿品，调出了当年很特别的粉色液体 Beauty Fluid，名字 Oil of Olay 是拿关键成分羊毛脂（lanolin）的词做了个谐音。1985 年宝洁收购后把它做成了全球品牌。', concept:'以皮肤科学研究为基础的大众高效护肤，烟酰胺（维生素 B3）是它最核心的成分，主打一个成分配方打透美白、抗老多个诉求，价格亲民。' },
+  'SK-II': { story:'1970 年代日本科学家在清酒酿酒厂注意到，常年把手泡在酒醪里的老师傅双手却很细嫩，由此研究酵母；1980 年从 350 多种酵母里筛出专属酵母株，SK-II 这个品牌就在日本诞生了。神仙水的核心是 PITERA™，一瓶里九成以上都是它。', concept:'一滴 PITERA™ 里含有 50 多种微量营养素（维生素、氨基酸、矿物质、有机酸），理念是维持肌肤“晶莹剔透”的状态，不是靠剥脱去换白。' },
+  'SPA': { story:'SPA 指的是日本品牌 Spa treatment，2002 年创立于大阪，属于 Wave Corporation 株式会社的自有品牌，公司有多年 Spa 美容服务经验。它 2011 年推出蛇毒眼膜，一下填补了眼膜的空白，在日本 cosme 大赏上口碑爆棚，红白两款都成了爆款。', concept:'品牌概念是“消除皮肤的压力”，把院线 Spa 级护理做成居家可用；眼膜靠类蛇毒肽 + 胶原肽的组合做抗皱紧致，膜布弹力好可以贴眼周、法令纹多个部位。' },
+  '伊丽莎白雅顿': { story:'雅顿夫人本名 Florence Nightingale Graham，加拿大出生，1910 年在纽约第五大道开了第一家沙龙，那扇标志性的红门就是品牌符号。“Elizabeth Arden”这个艺名是她后来改的，取自当时一本小说和丁尼生的诗《伊诺克·雅顿》。她说过的名言是“美丽是每个女人与生俱来的权利”。', concept:'坚持“美是自然和科学的结晶”，最有代表性的设计是胶囊包装——一粒一次用量、密封锁鲜，让视黄醇、神经酰胺这类活性成分不易氧化。' },
+  '伊菲丹': { story:'伊菲丹 2007 年由法国人 Charles-Edouard Barthes 创立，起因很浪漫：他在东京出差时认识了后来的妻子、富士电视台主持人中村江里子，发现她定居巴黎后一直为敏感肌找不到合适的产品发愁，于是专门找日本生物学家研发，把品牌当成送给妻子的礼物。', concept:'日式尖端科技 × 法式高定优雅：核心是 Triple Collagen® 三重胶原肽（北海道大学等研究团队研发）与 QAI® 复合精华，配方用南法 La Foux 泉水，专为敏感肌做抗老。' },
+  '兰蔻': { story:'1935 年 Armand Petitjean 在法国创立兰蔻，品牌名字取自卢瓦尔河谷一座叫 Lancosme 的城堡，玫瑰也因此成了品牌的标志。小黑瓶 2009 年推出第一代，是“肌底液”这个品类的开创者，2024 年升级到第三代。', concept:'主打“肌底修护 + 微生态平衡”：第三代超修小黑瓶用 98% 高纯度 β-葡聚糖精粹，灵感来自诺贝尔奖 TRPV1 相关研究，配方去掉酒精和传统防腐剂，走温和高效路线。' },
+  '加贺鸢': { story:'出自金泽的福光屋（Kagatobi·加贺鸢）——1625 年创业，2001 年发表「纯米蔵宣言」，酿造水取自灵峰白山的百年伏流水。酒标图案源自江户加贺藩消防团「加贺鸢」的雷云披风。', concept:'纯米大吟酿精选兵库县山田锦＋长野县木岛平金纹锦＋富山县福光五百万石三酒米混酿。关键词是「粋（风流潇洒）」与「余味净爽」——浓缩的米味之后收得干净利落。', tip:'冷饮最能体现「余味净爽」，配加贺料理与白身鱼。' },
+  '古驰': { story:'Gucci Bloom 花悦 2017 年上市，是 Alessandro Michele 任创意总监后第一支完整主导的香水，调香 Alberto Morillas。三种核心花材里最特别的是使君子（Rangoon Creeper）——南非藤本，花开时由白转粉再转红，这是它第一次被用在香水里。', concept:'不是「一支花香」，而是「走进一座想象中的繁花花园」。瓷质粉瓶配 Herbarium 植物标本印花，主张让使用者绽放真实本我。' },
+  '和汉刚SUGI': { story:'「剛SUGI（つよすぎまん）」出自和漢 SINCA 研究所，日本制造的男性专用配方。思路是汉方智慧 × 现代营养学：以北海道鹿骨胶与冬虫夏草为底，叠加玛卡、高丽/西洋人参、精氨酸与瓜氨酸、含锌酵母、薏苡仁与金银花。', concept:'把八到十种活力源浓缩成易吞服的小颗粒——一日 4 粒、300mg×120 粒袋装。日本制造，官方明确不建议女性服用。', tip:'一日 4 粒温水送服；男性专用配方，不建议女性服用。' },
+  '圣罗兰': { story:'Mon Paris 反转巴黎 2016 年上市，是 YSL 以「巴黎」为情感坐标做的一支果香西普，调香师 Olivier Cresp、Harry Fremont、Dora Baghriche 三人合作。它的主意是用甜美的果香包住广藿香的暗面，讲一段炽热又带点危险的爱情。', concept:'以「巴黎」为情感坐标：前调用草莓、覆盆子、梨与卡拉布里亚佛手柑铺出甜，中调牡丹、茉莉、橙花之外点入曼陀罗（Datura）制造迷幻感，后调落到印尼广藿香、白麝香与雪松。' },
+  '奔富': { story:'Penfolds 1844 年创立于南澳。Grange 的创造者 Max Schubert 1948-1975 年任首席酿酒师，奠定了多产区、多园混酿＋美国橡木桶的 Penfolds 风格——当年他被命令停产，仍秘密把 Grange 做了下去。Bin 389 用陈酿过 Grange 的桶熟化，因此被称为「小葛兰许」。', concept:'多产区、多园混酿＋美国橡木桶，是 Penfolds 不变的底色。Max\'s 系列（2016 年推出）是向 Schubert 本人致敬，官方定位原文是「A more approachable Penfolds style at release – ideally shelf to glass, save the cellar」——上市即饮，不必窖藏。', tip:'开瓶即饮，不必窖藏；红肉、烤肉与硬质奶酪都很合拍。' },
+  '娇韵诗': { story:'1954 年 Jacques Courtin-Clarins 在巴黎开出第一家美容护理院，从身体护理和按摩手法起家，本身就是个很讲究“手法”的品牌。它很早就坚持用植物成分做配方，创始人的理念是“美离不开健康”。双萃精华是它家的招牌，2024 年已经迭代到第九代。', concept:'以植物精萃为核心，主张内外双源抗老：外源抵御（法国巨型芦竹精萃）＋内源焕活（65% 高纯度姜黄酮、植物 A 醇、胜肽），包装上的旋钮锁和取量阀也是为了让水油双相现调现用。' },
+  '安耐晒': { story:'安热沙 1992 年诞生（港台译作“安耐晒”），名字来自日语“熱砂”——被太阳晒得发烫的沙子，寓意肌肤就算在烈日下也能保持美丽光泽。它 1996 年成为全球第一个在包装上标注 PA 防晒系数的品牌。', concept:'背靠百年的紫外线研究积累，以超强防水防汗为招牌，后来又做出“遇汗遇水后防晒膜更强”的 Aqua Booster 技术，专为长时间户外设计。' },
+  '蜜丝婷': { story:'蜜丝婷（泰国国民美妆品牌，官方中文即“蜜丝婷”）是 1988 年在泰国创立的美妆品牌，隶属百特威（泰国）有限公司。创始人当年看准了热带气候下大家最需要防水防汗、持久不脱妆的产品，靠直销做起，后来成了泰国的国民美妆品牌，2016 年进入中国。', concept:'围绕热带气候做研发，主打防水防汗防晕染和高倍防晒，主力单品“小黄帽”用多重防晒剂物化结合，诉求高倍防护 + 平价好上手。' },
+  '幸姬酒造': { story:'幸姬酒造在佐贺县鹿岛市，1934 年创业，长期为日本三大稻荷之一佑德稻荷神社酿造御神酒。特别纯米酒用佐贺县产山田锦，稍偏辛口。', concept:'为神社酿御神酒的酒造，讲究的是「干净」——用本地米、本地水，做出佐贺人餐桌上配得上的那一口。酒精度 15%、720ml，配鲔鱼、鲑鱼、牡蛎。', tip:'稍偏辛口，冰镇或常温皆宜，配海鲜尤其对味。' },
+  '敷尔佳': { story:'敷尔佳是哈尔滨的品牌，前身是 1996 年成立、做药品销售的华信药业。2014 年团队研发出“医用透明质酸钠修复贴”，2015 年正式创立敷尔佳品牌，从医美术后修复这个场景切入，2023 年在深交所创业板上市。', concept:'带着医药基因做专业皮肤护理，从原料筛选到生产全程按药企标准管控，主打 II 类医疗器械类敷料与功能性护肤品并行的“妆械同源”路线。' },
+  '斯维诗': { story:'Swisse 1969 年创立于墨尔本，创始人 Kevin Ring 在 1960 年代环游世界寻找天然原料后创立品牌，2015/16 年被一家国际健康营养集团全资收购。使命是让全世界人们生活得更健康、更快乐。', concept:'护肝片以奶蓟草＋洋蓟＋姜黄的西草经典组合为核心：每片洋蓟鲜叶 1g 当量、奶蓟草提取物 35.71mg（当量干果 2.5g）、姜黄提取物 75mg（当量干根茎 1.5g）。官方定位是支持自然的肝脏清洁与解毒过程。', tip:'成人每日 2 片，随餐或餐后立即服用；孕妇或可能怀孕者禁用，含亚硫酸盐。' },
+  '日本酒精选': { story:'这不是酒造品牌，是选品组合装，没有品牌故事可讲。', concept:'清酒权威风格框架是 SSI 的「薰·爽·醇·熟」四分类（香气高低 × 口感浓淡）；甘口/辛口是甜度维度，与淡丽/浓醇是口感浓淡维度，两者正交。小瓶组合的意义在于横向对比品鉴。', tip:'三支小瓶建议按「薰→爽→醇」顺序品鉴，从低温喝到常温。' },
+  '明色': { story:'明色（MEISHOKU）是桃谷顺天馆旗下的品牌，1932 年推出第一款明色卸妆霜后正式问世，名字寓意“光彩的明天”。当年它打出过一句很红的广告语——“美人是于夜间所制造的”，一度是日本皇室御用护肤品。', concept:'延续桃谷顺天馆“安全性第一”的信条，主打祛痘、保湿和美白抗皱三条线，配方以胎盘素、胶原蛋白、水杨酸为核心，走高性价比药妆路子。' },
+  '春秋航空': { story:'春秋航空 2004 年成立，是中国首批民营航空公司之一，总部上海，以「低成本、高性价比、让更多人坐得起飞机」为出发点。机上纪念品（云端好梦颈枕、飞行员墨镜、机模等）都是官方出品，只在机上与官方渠道有。', concept:'纪念品的思路是「把这段飞行带回家」——飞机造型、航线元素、机长同款，讲的是一个普通人也能拥有的飞行梦。' },
+  '普拉达': { story:'Prada Monochrome 唇膏的设计理念是把品牌的两块招牌面料做成妆效：金色壳的 Hyper Matte 取 Saffiano 皮革，银色壳的 Soft Matte 取 Re-Nylon。技术上用 Micro-Fit™ 让膏体接触双唇即融合，配双歧杆菌发酵溶胞物与荷荷巴油修护唇部屏障。', concept:'把面料做成妆效——Saffiano 皮革＝深色浓度与高附着（12 小时），Re-Nylon＝柔光漫射（6 小时、可叠加可作腮红）。三角形膏体一笔勾出唇峰，可替换芯比整支重购减少 76% 包装重量。' },
+  '桃谷明色': { story:'桃谷顺天馆 1885 年由药剂师桃谷政次郎在日本和歌山创立。当时他妻子一直被粉刺困扰，他就为她调配了一瓶“祛痘美颜水”，这瓶水后来成了日本第一瓶化妆水，也是品牌一百多年来的金字招牌。1932 年又推出了“明色”系列。', concept:'以药品级研发标准要求自己（历代掌门人多有药剂师资格），核心成分走胎盘素、胶原蛋白、水杨酸这类“药妆”路线，强调安全与平价。' },
+  '梅森马吉拉': { story:'Replica 香氛 2012 年推出，延续品牌 1994 年 Replica 成衣线的「复刻」概念——复刻的是一段记忆，不是一件衣服。药剂师瓶身配棉布标签，标签上写着地点与年份，比如慵懒周末写的是 Florence 2003。', concept:'每支香水复刻一个具体时空：慵懒周末＝佛罗伦萨清晨的床单与肌肤（铃兰、甜梨、鸢尾、白麝香）；航行日＝Paros 2001 的爱琴海（海水、杜松、鸢尾、龙涎香）；雨后初晴＝Dublin 1967（佛手柑、粉红胡椒、松针、广藿香、苔藓）。' },
+  '欧舒丹': { story:'1976 年，23 岁的 Olivier Baussan 在法国普罗旺斯买下一台旧蒸馏机，蒸馏迷迭香精油拿到集市上卖，欧舒丹就这么开始了。后来他去非洲布基纳法索旅行发现乳木果油，从那以后就一直跟当地妇女合作社公平采购原料。', concept:'把普罗旺斯的植物原料做成护理品（乳木果、樱花、甜扁桃、蜡菊等），同时坚持可追溯原料、尊重生物多样性和扶持女性经济独立这六项承诺。' },
+  '法尔曼': { story:'法尔曼的根在瑞士蒙特勒，1905 年那里就设立了疗养院，1985 年才正式推出 Valmont 护肤品牌。它把疗养院的医学护理传统搬进了护肤品，最出名的就是从野生三文鱼中提取的 DNA-RNA 活性因子。', concept:'以瑞士细胞疗养医学为底色，主打细胞更新与“肌肤健康状态”，配方强调高浓度活性成分和院线级护理体验。' },
+  '海蓝之谜': { story:'创始人是美国航空航天领域的物理学家 Max Huber，他在一次实验室事故中被灼伤，之后花了 12 年、做了 6000 多次实验，从深海巨藻里发酵出神奇活性精萃 Miracle Broth™。这个品牌后来归入国际化妆品集团，面霜一直是它的灵魂单品。', concept:'以深海巨藻为主料，配合酸橙茶等成分，经过 3-4 个月生物发酵得到 Miracle Broth™ 神奇活性精萃，走“修护优先”的路子。' },
+  '澳佳宝': { story:'Blackmores 澳佳宝 1932 年创立于澳大利亚，由自然疗法先驱 Maurice Blackmore 创办，是澳洲最具历史的天然健康品牌之一。', concept:'「自然疗法为本、证据为证」——坚持用天然来源原料，并把有效成分含量明确标示在包装上。', tip:'按标签推荐量随餐服用；孕期、哺乳期或正在服药请先咨询医生。' },
+  '爱马仕': { story:'爱马仕 1837 年由 Thierry Hermès 在巴黎开马具工坊起家。美妆是这个家族品牌的第 16 个 métier，2020 年才诞生，物件由鞋履与珠宝创意总监 Pierre Hardy 设计，香氛由专属调香师 Christine Nagel 创作；香水线的极简风格则由 2004-2016 年的专属调香师 Jean-Claude Ellena 奠定，大地（2006）、尼罗河花园（2005）都出自他手。', concept:'把彩妆当作可保留、可传承的物件而非消耗品——可替换芯、可续用。Pierre-Alexis Dumas 给它的定义是「benevolent artifice」：化妆不是为了伪装，而是把本来就有的美显现出来。' },
+  '獭祭': { story:'獭祭出自山口县岩国的旭酒造（1947 创业，品牌 1990 诞生），第三代社长樱井博志接手后立了三条不打折扣的原则：只用山田锦、不设杜氏（把温度时间湿度全部数据化）、引入远心分离取酒。', concept:'把清酒从「口传心授的手艺」变成「可记录、可复制的科学」。三割九分＝精米步合 39%，二割三分＝23%（研磨需 7 天）——磨掉多少，决定了酒能有多干净。', tip:'纯米大吟酿宜冷饮（10-15℃），配生鱼片、白身鱼与清淡料理，不要加热。' },
+  '珂润': { story:'珂润是日本花王 1999 年推出的品牌，专门为干燥性敏感肌做的。花王从 1976 年就开始研究皮肤，1987 年自己研发出了“润浸保湿神经酰胺功能成分”，从研究到产品化前后花了十多年。名字 Curel 来自 Cure（缓解）＋Well（良好状态）。', concept:'整套产品围绕“神经酰胺护理（Ceramide Care）”两大路径：洗净时守护神经酰胺、保湿时补足神经酰胺，全线无香料、无色素、无酒精。' },
+  '皇后的秘密': { story:'“皇后的秘密”是日本 Quality First（クオリティファースト）旗下的面膜系列，品牌 2012 年诞生于东京，靠大容量、无添加、平价的袋装面膜在日本走红，拿过 COSME 大赏面膜品类第一。正如名字 Quality First，它主打的就是“品质第一”。', concept:'有制药公司背景，追求“安全 + 有效”：用 BG、DPG 复配实现不加防腐剂也能抗菌，做到无香料、无色素、无酒精、无矿物油，定位可以每天敷的日常面膜。' },
+  '科颜氏': { story:'科颜氏的前身是 1851 年在纽约曼哈顿东村开的一家药房，最早由 Kiehl 家族经营，后来做成了以皮肤科学为基础的专业护肤品牌，2000 年被欧莱雅集团收购。店里保留着药剂师传统，骨头上刻着“since 1851”，还以慷慨送小样出名。', concept:'药房出身带来的配方哲学：天然高效成分 + 皮肤科学验证，代表成分是角鲨烷、金盏花和冰川保护蛋白，配方尽量精简、温和。' },
+  '芭比波朗': { story:'Bobbi Brown 是纽约的职业化妆师，1991 年推出自己的第一组自然色系彩妆，想法特别朴素——让妆看起来“像皮肤本身、只是更好看一点”。这个思路后来延伸到护肤线：不追夸张效果，只求上脸舒服、状态稳定。', concept:'裸妆哲学：化妆是为了让你更像你自己，而不是变成另一个人（品牌原话是“美的秘诀很简单：做你自己”），底妆追求像没化妆一样自然。' },
+  '莱珀妮': { story:'莱珀妮的起点是 1931 年瑞士蒙特勒的 Clinique La Prairie 疗养院，以活细胞疗法闻名；1978 年才推出 La Prairie 护肤品牌。后来它把鱼子精华做成了招牌，鱼子系列一直是顶奢抗老的代表。', concept:'以“活细胞抗老”为核心，独家的 Exclusive Cellular Complex 配合鱼子精华（Caviar Premier™），诉求紧致提拉和改善松弛。' },
+  '萨州赤兔马': { story:'出自鹿儿岛县いちき串木野市的濱田酒造，明治元年（1868）创业，有伝兵衛蔵（传统）、傳藏院蔵（革新）、金山蔵（继承）三藏，赤兔马出自伝兵衛蔵。酒名取自《三国志》「人中吕布、马中赤兔」的千里名马。', concept:'鹿儿岛产黄金千贯＋国产米米曲，白麹、常压蒸馏，用シラス台地天然过滤的地下水与冠岳涌水仕込，反复熟成与过滤。华丽果香与轻盈口感之下藏着醇厚——淡丽且芳醇。', tip:'常规款 25 度，加冰或兑温水皆可；佐鹿儿岛黑豚与烤物。' },
+  '蔻依': { story:'Chloé 1960 年代由 Gaby Aghion 创立，以柔软、不矫饰的女性气质著称，丝带是贯穿成衣与香氛的标志符号。经典 Chloé EDP 出自 2008 年，调香 Amandine Clerc-Marie 与 Michel Almairac；Nomade 恋旅则是 2018 年 2 月上市、由 Quentin Bisch 调香。', concept:'经典 EDP 用手绑丝带瓶承载牡丹/荔枝/小苍兰与玫瑰/铃兰/木兰，落点弗吉尼亚雪松与琥珀；Nomade 以 Drew「小猪包」的圆润 O 型弧线做瓶身，配金属颈圈与粉色垂带，讲「向世界出发的女性」。' },
+  '资生堂': { story:'1872 年，前海军药剂师福原有信在东京银座开了日本第一家西式药房，名字“资生堂”取自《易经》里的“至哉坤元，万物资生”。后来从药房转型做化妆品，成了日本历史最久的化妆品企业之一，红腰子就是它家最长红的精华。', concept:'核心理念是提升肌肤自身的防御力（肌肤免疫力），红腰子用 ImuGeneration 科技，以灵芝提取物和鸢尾根提取物为主，配合发酵植物精华。' },
+  '赫莲娜': { story:'创始人赫莲娜·鲁宾斯坦 1872 年生于波兰，因为不肯接受家里安排的婚事只身去了澳洲，随身只带了一把阳伞和妈妈做的乳霜。当地女性羡慕她白皙的皮肤，她就把乳霜拿来卖，1902 年在墨尔本开了世界上第一家美容沙龙。她那句“世上没有丑女人，只有懒女人”流传至今。', concept:'品牌精神是“至美力量，科技为先”、科学为美服务，长期与生物学、皮肤学、医学美容领域合作，并与瑞士医美中心 Laclinic-Montreux 联合研发，玻色因（Pro-Xylane）是核心抗老成分。' },
+  '金凯撒': { story:'金凯撒是面向中国市场的膳食营养补充剂品牌，主打鱼油、磷虾油等 Omega-3 类产品。', concept:'强调原料来源可追溯、有效成分含量明确标示（EPA/DHA 含量标在标签上）。', tip:'随餐服用吸收更好；正在服用抗凝药物者请先咨询医生。' },
+  '雅诗兰黛': { story:'创始人雅诗·兰黛夫人本名 Josephine Esther，家里人叫她 Estée，她跟丈夫 Joseph Lauder 1946 年在纽约创业，最早只有清洁油、润肤露、面霜等 4 款产品。她当年最出名的一句话是“每个女人都可以美丽”，还喜欢亲自站柜台给客人试妆。小棕瓶是 1982 年推出的，一直在迭代。', concept:'以皮肤科学为本做抗老修护，核心技术是“时钟肌因信源科技”（Chronolux Power Signal Technology），配合律波肽（三肽-32）和二裂酵母发酵产物溶胞物，主打夜间修护肌肤节律。' },
+  '香奈儿': { story:'嘉柏丽尔·香奈儿出身贫寒，在修道院学会缝纫，晚上在咖啡馆驻唱时常唱《谁见过 Coco》，就被大家叫成了“Coco”。1910 年她在巴黎康朋街 21 号开了第一家帽子店 Chanel Modes，1914 年正式创立品牌。1921 年她让调香师 Ernest Beaux 调香，挑了第 5 号样品，N°5 由此诞生。', concept:'设计哲学是“流行稍纵即逝，风格永存”，主张简约、自由、解放女性身体；护肤线以山茶花为核心成分，强调保湿与屏障防护。' },
+  '高丝': { story:'1946 年小林孝三郎在东京北区王子创办了高丝的前身“小林合名会社”，最早是做化妆品经销，后来自己做品牌。他讲究“制、贩、需共存共荣”，高丝也以品质出名，是日本化妆品行业第一个拿到戴明奖的企业。它家的高端线也很有名。', concept:'企业理念是“美之创造企业”，主张英知与感性融合、创造独特的美的价值；KOSE 这个名字取自希腊语 kosmetikos，寓意宇宙、秩序与美。' },
+  '黛珂': { story:'黛珂是 1970 年诞生的高端品牌，创始人小林孝三郎给品牌起名时把法语的 cosmétique（化妆品）和 décoration（装饰）拼在一起，意思是不只要护肤，还要“妆点”肌肤。它家最有名的是 1992 年上市的多重层微脂囊体精华。', concept:'两大招牌理念：一是“乳液先行”（先乳后水）的护肤顺序，二是 LIPOSOME 多重层微脂囊体技术，让有效成分一层层缓慢释放、渗透更久。' }
+};
+
+/* ===== 共用小工具（scene / classic / talk 三风格共用） =====
+ * clipSentenceText：按句截断，宁可少说一句也不把句子拦腰砍断
+ * brandHeadline：品牌来头句——首款讲来历（78 字内），其余讲理念（56 字内），无故事则返回空
+ */
+function clipSentenceText(text, max){
+  const t = String(text || '').trim();
+  if(!t) return '';
+  if(t.length <= max) return t;
+  let out = '', buf = '';
+  for(let i = 0; i < t.length; i++){
+    buf += t.charAt(i);
+    if('。！？'.indexOf(t.charAt(i)) >= 0){ out += buf; buf = ''; if(out.length >= max) return out; }
+  }
+  const all = out + buf;
+  return all.length > max ? (all.slice(0, max) + '。') : all;
+}
+function brandHeadline(brand, isFirst){
+  const bs = (typeof BRAND_STORY !== 'undefined') ? BRAND_STORY[brand] : null;
+  if(!bs) return '';
+  const src = (isFirst && bs.story) ? bs.story : (bs.concept || bs.story);
+  if(!src) return '';
+  const txt = clipSentenceText(src, isFirst ? 78 : 56);
+  if(!txt) return '';
+  return (isFirst ? '品牌来历：' + brand + '——' : '品牌理念：' + brand + '做东西讲究的是——') + txt;
+}
+
 const beautySceneEngine = (function(){
   // ================= 合规词表 =================
-  const ALWAYS_BANNED = ['治疗','治愈','100%','永久','根治','秒杀','碾压','全网最低','最低价','最便宜','手慢无','错过就没有','比专柜','比代购','比免税','药到病除','无副作用','绝对','唯一','宣称','承诺'];
+  const ALWAYS_BANNED = ['治疗','治愈','100%','永久','根治','秒杀','碾压','全网最低','最低价','最便宜','手慢无','错过就没有','比专柜','比代购','比免税','药到病除','无副作用','绝对','唯一','宣称','承诺','顶级','立竿见影','最具标志性'];
+  // 2026-09-12 核查新增：顶级/立竿见影/最具标志性（实测香奈儿N°5、兰蔻持妆、清酒品类导语中出现）
   const STRICT_BANNED = ['医美','水光针','热玛吉','干细胞','排毒','消炎','杀菌','注射','填充','医美术','医疗'];
-  const REPLACE_MAP = { '爆款':'人气款', '明星产品':'人气产品', '最佳':'很好', '最好':'很好', '第一':'头一份', '最有效':'很有效', '独家':'少有的', '神效':'不错', '治愈':'舒适' };
+  const REPLACE_MAP = { '爆款':'人气款', '明星产品':'人气产品', '最佳':'很好', '最好':'很好', '第一':'头一份', '最有效':'很有效', '独家':'少有的', '神效':'不错', '治愈':'舒适', '顶级':'高端', '立竿见影':'见效快', '最具标志性':'很有代表性' };
 
   function complianceClean(text, mode){
     const found = [];
@@ -17816,6 +18545,8 @@ const beautySceneEngine = (function(){
     t = t.replace(/([，、；,;])(?=[，、；,;。])/g, '')
          .replace(/([，、；,;])\s*。/g, '。')
          .replace(/^[，、；。,;\s]+/, '');
+    // 2026-09-12：违禁词整词删除后可能留下连续空格（如「100% 南高梅」→「  南高梅」），此处收口
+    t = t.replace(/[ \t]{2,}/g, ' ');
     return { text: t, replaced: found };
   }
 
@@ -18067,27 +18798,81 @@ const beautySceneEngine = (function(){
 
   // ================= 逐款介绍（品类感知标签/比喻/结构轮换） =================
   const INTRO_LEADS_POOL = ['我先给您说句实在话。','我给您说几个实在的感受。','您听我慢慢说。','我给您拆开讲讲。','咱就不绕弯子了。'];
-  // 每款记忆锚点（按品类给一个让人记住的点，避免"款款都像"）
+  // 每款记忆锚点（按品类给一个让人记住的点，避免"款款都像"）——2026-09 扩充至每类 5 条
   const MEMORY_HOOK = {
-    skincare: ['是机上旅客常回购的补水款','出差路上给皮肤兜底','主打一个省心养肤'],
-    makeup: ['是旅行包里常年占位的一款','上手快、不费事的几秒妆','送姐妹也拿得出手'],
-    fragrance: ['气味不挑人，是送人有辨识度的一款','是容易被记住的味道'],
-    health: ['是飞完航班的回头客款','连续飞的人会常备的那一款'],
-    alcohol: ['配礼盒很体面','懂行的人会回购的那瓶'],
-    souvenir: ['是这趟旅程最有纪念意义的一件','送礼特别有面子的一件']
+    skincare: ['是机上旅客常回购的补水款','出差路上给皮肤兜底','主打一个省心养肤','早晚两步里最不该省的那一瓶','换季时最稳得住的那一支'],
+    makeup: ['是旅行包里常年占位的一款','上手快、不费事的几秒妆','送姐妹也拿得出手','包里放一支就够安心的那种','赶时间也能用好的那一步'],
+    fragrance: ['气味不挑人，是送人有辨识度的一款','是容易被记住的味道','不挑场合、日常也用得上的一瓶','留香不张扬，但一直都在','送人有面子、自用也顺手'],
+    health: ['是飞完航班的回头客款','连续飞的人会常备的那一款','给日常加底气的那一份','出差箱子里常年塞着的','带回家给爸妈也合适'],
+    alcohol: ['配礼盒很体面','懂行的人会回购的那瓶','聚会开一瓶就不冷场的那种','自饮配餐都合适的那一支','送人不费力、还显得用心'],
+    souvenir: ['是这趟旅程最有纪念意义的一件','送礼特别有面子的一件','孩子看见就喜欢的那种','摆在桌上天天能看到的','把这段飞行带回家的那一件']
   };
+  // 场景画面（2026-09 新增，生活语风格）：把产品放进一个旅客能代入的具体瞬间
+  const SCENE_PICTURE = {
+    skincare: ['洗完脸那一刻，脸上不再绷着，摸上去是软的。','第二天早上照镜子，脸色比前一天匀净一些。','空调吹了一整天，晚上这一层补上去，脸算是缓过来了。','出差住酒店，洗漱包里就它一瓶，反倒省事。','换季那几天，脸不闹脾气，人也就踏实了。'],
+    makeup: ['早上五分钟出门，气色就位，一整天都自在。','下飞机直接去见人，补两下就敢抬头说话。','照片拍出来，不用修也敢发朋友圈。','晚上赴约，灯光下看着比白天还精神。','包里放着它，什么时候拿出来都不慌。'],
+    fragrance: ['走过之后留在空气里的一点味道，比说话更先被人记住。','早上出门前两下，一整天的心情就有了底。','外套上沾着一点，脱下来还闻得到。','久别重逢的时候，味道比名片先到。','一个人住酒店，熟悉的味道让房间不那么陌生。'],
+    health: ['连着飞的那几天，早上起来先吃它，心里有底。','应酬多的那阵子，回家不忘这一口。','抽屉里放一盒，忙起来也不会断。','给爸妈带一份，比什么都实在。','出差箱子里塞一盒，路上就成习惯了。'],
+    alcohol: ['周末在家做顿饭，开一瓶，日子就有了仪式感。','逢年过节拎着它进门，话就自然多了。','朋友来了摆上桌，气氛一下就热起来。','下班回家倒一小杯，这一天就算过去了。','配着对味的菜，最容易喝出它的好。'],
+    souvenir: ['摆在书桌上，加班抬头看一眼，想起这趟说走就走的旅行。','孩子拿在手里玩得开心，大人看着也高兴。','挂在包上，每次出门都能看见。','同事问起来，您有一段故事可以讲。','下次再坐我们的航班，孩子一眼就认出来。']
+  };
+  // 品牌来头引导词（BRAND_STORY 为三风格共用，见文件全局）
+  const BRAND_LEADS_STORY = ['说起{brand}这个牌子——','{brand}的来历，值得说两句——','先说说{brand}这个牌子——'];
+  const BRAND_LEADS_CONCEPT = ['这个牌子做东西讲究的是——','{brand}一直坚持的是——','说回{brand}做产品的思路——'];
+  // 按句截断：宁可少说一句，也不把句子拦腰砍断
+  function clipSentence(text, max){
+    const t = String(text || '').trim();
+    if(!t) return '';
+    if(t.length <= max) return t;
+    let out = '', buf = '';
+    for(let i = 0; i < t.length; i++){
+      buf += t.charAt(i);
+      if('。！？'.indexOf(t.charAt(i)) >= 0){ out += buf; buf = ''; if(out.length >= max) return out; }
+    }
+    const all = out + buf;
+    return all.length > max ? (all.slice(0, max) + '。') : all;
+  }
+  // 每款一句"来头"：首款讲故事，其余讲理念（杜绝只有第一款有品牌背书）
+  function brandLineFor(p, i, used){
+    const bs = BRAND_STORY[p.brand];
+    if(!bs) return null;
+    const first = (i === 0);
+    const src = (first && bs.story) ? bs.story : (bs.concept || bs.story);
+    if(!src) return null;
+    const txt = clipSentence(src, first ? 78 : 56);
+    if(!txt) return null;
+    const lead = first
+      ? pickUnused(BRAND_LEADS_STORY, used, '说起这个牌子——').split('{brand}').join(p.brand)
+      : pickUnused(BRAND_LEADS_CONCEPT, used, '这个牌子做东西讲究的是——').split('{brand}').join(p.brand);
+    return '【来头】' + lead + txt;
+  }
+  // 成分/香调/酿造行（一句话讲清"起作用的是什么"）
+  function ingLineFor(p, used, label){
+    const ings = (p.keyIngredients || []).filter(function(x){ return x && x.commonName; });
+    if(!ings.length) return null;
+    const k = ings[0];
+    const mech = String(k.mechanism || '').replace(/[。；;\s]+$/, '');
+    const line = '【' + label + '】' + k.commonName + (mech ? '——' + mech : '') + '。';
+    if(used.has('成分:' + line)) return null;
+    used.add('成分:' + line);
+    return clipSentence(line, 92);
+  }
   // 非 brief 档每款末尾的轻量价值+行动推进句（合规：仅业务卖点「包税/含邮/机上价」，无比价绝对化）
   // 价值行品类感知（2026-09-09）：跨境好物“包税含邮、落地前下单配送到家”；
   // 纪念品是机上现货、旅客想要可直接买走，不能再套“下飞机前点一下就送到”
   const VALUE_LINES_CROSS = [
     '机上包税含邮，落地前下单几天就送到家。',
     '这一档机上价，含税含邮，下飞机前点一下就送到。',
-    '机上买就图省心：包税含邮，自己不用搬着走。'
+    '机上买就图省心：包税含邮，自己不用搬着走。',
+    '价格里关税运费都含着，下单之后就等收货，别的不用操心。',
+    '跨境包税一价全包，落地前点一下，剩下的我们替您跑。'
   ];
   const VALUE_LINES_SOUVENIR = [
     '这款机上就备着现货，看中了随时叫我一声。',
     '纪念品是机上现货，喜欢的话落地前就能带走。',
-    '这件直接在机上就有，不用等配送，看中就拿走。'
+    '这件直接在机上就有，不用等配送，看中就拿走。',
+    '机上现货不用等，喜欢就直接带走，省一趟快递。',
+    '这份纪念品飞机上就放着，看中当场就能拿。'
   ];
   function valueLineFor(p, used, fallback){
     const pool = bigType(p) === 'souvenir' ? VALUE_LINES_SOUVENIR : VALUE_LINES_CROSS;
@@ -18142,7 +18927,10 @@ const beautySceneEngine = (function(){
     const catLabel = bt === 'skincare' ? '肤质' : '适合人群';
     const ingLabel = bt === 'alcohol' ? '酿造' : (bt === 'fragrance' ? '香调' : (bt === 'health' ? '营养' : (bt === 'souvenir' ? '亮点' : '成分')));
     if(depth === 'brief'){
-      return ['这款' + p.category + '，核心就一句：' + benefit + '。' + feel + '。'];
+      // 2026-09：极简档也保留"什么时候用"，避免每款只剩一句卖点
+      const briefLines = ['这款' + p.category + '，核心就一句：' + benefit + '。' + feel + '。'];
+      if(scene.moment) briefLines.push(scene.moment + '，' + mf + '。');
+      return briefLines;
     }
     const lead = pickUnused(INTRO_LEADS_POOL, used, INTRO_LEADS_POOL[0]);
     const lines = ['这款' + p.category + '，' + lead];
@@ -18153,6 +18941,9 @@ const beautySceneEngine = (function(){
     const swapMoment = depth !== 'normal' && Math.random() < 0.35;
     const bl = pickUnused(BENEFIT_LEADS, used, '说白了就是——');
     lines.push('【卖点】「' + benefit + '」' + bl + feel + '。');
+    // 2026-09：每款都给一句品牌来头（首款讲来历、其余讲理念），让同品类两款不再像同一款
+    const bline = brandLineFor(p, i || 0, used);
+    if(bline) lines.push(bline);
     // 使用时刻：同品类多款时换措辞，避免整句复读
     let moment = scene.moment;
     if(used.has('时刻:' + scene.moment)){
@@ -18164,6 +18955,8 @@ const beautySceneEngine = (function(){
     if(moment) used.add('时刻:' + moment);
     if(depth === 'normal'){
       lines.push('【使用时刻】' + moment + '，' + mf + '。');
+      const nIng = ingLineFor(p, used, ingLabel);
+      if(nIng) lines.push(nIng);
       if(valueLine) lines.push(valueLine());
       return lines;
     }
@@ -18174,6 +18967,11 @@ const beautySceneEngine = (function(){
       lines.push('【体会】' + metaphorForUnused(p, mode, used));
       lines.push('【使用时刻】' + moment + '，' + mf + '。');
     }
+    // 标准/深度档：补一句"起作用的是什么"和一个具体的生活画面
+    const fIng = ingLineFor(p, used, ingLabel);
+    if(fIng) lines.push(fIng);
+    const pic = pickUnused(SCENE_PICTURE[bt] || SCENE_PICTURE.skincare, used, '');
+    if(pic) lines.push('【画面】' + pic);
     if(depth === 'deep'){
       // 数据行去重：同款产品【成分】【注意】内容一致时顺延下一条，避免复读
       const deepLine = (prefix, items, fmt) => {
@@ -18183,10 +18981,15 @@ const beautySceneEngine = (function(){
         }
         return null;
       };
-      const ings = p.keyIngredients || [];
-      if(ings.length){
-        const line = deepLine('【' + ingLabel + '】', ings, ing => ing.commonName + '：' + ing.mechanism + '。');
-        if(line) lines.push(line);
+      // 深度档再多讲两个成分（第 1 个已在上面【成分】行说过，这里从第 2 个起，避免复读）
+      const ings = (p.keyIngredients || []).slice(1, 3);
+      let ingAdded = 0;
+      for(let k = 0; k < ings.length && ingAdded < 2; k++){
+        const line = deepLine('【' + ingLabel + '】', [ings[k]], ing => ing.commonName + '：' + ing.mechanism + '。');
+        if(line){ lines.push(line); ingAdded++; }
+      }
+      if(p.volume && p.origin){
+        lines.push('【规格】' + p.volume + '，' + p.origin + '原产，机上专享。');
       }
       if(p.targetSkinTypes && p.targetSkinTypes.length){
         const skinLine = '【' + catLabel + '】更适合' + p.targetSkinTypes.slice(0, 3).join('、') + '。';
@@ -18450,7 +19253,11 @@ const beautySceneEngine = (function(){
     'health|alcohol': ['日常营养补上了，偶尔小酌也更安心，下面这款酒正好配得上好心情。', '底子打好了，偶尔放松也从容，下面这款酒适合慢慢品。'],
     'health|souvenir': ['自己内调养身，给别人带份心意，下面这款纪念品正好。', '健康留给自己，回忆带给亲友，两样都安排上。'],
     'souvenir|health': ['伴手礼备好了，自己的健康也别落下，下面这款营养品也值得一看。', '心意先给亲友，健康留给自己，下面这款营养品正好收个尾。'],
-    'other|other': ['下面的也一样贴心实用。', '再看看下面这一款。', '看完了再往下翻，还有一件同样出色的。', '别急，下面这一款同样值得一看。']
+    'other|other': ['下面的也一样贴心实用。', '再看看下面这一款。', '看完了再往下翻，还有一件同样出色的。', '别急，下面这一款同样值得一看。'],
+    // 2026-09-12 核查补全：原先缺这 3 种顺序，跨品类时会退化成通用过渡句
+    'makeup|health': ['彩妆照顾外在形象，营养补充照顾身体状态，下面这款正好做内调。', '妆面之外，身体状态也值得投入，下面这款营养品正好接上。'],
+    'souvenir|fragrance': ['纪念品留住旅程的记忆，香氛延续旅程的味道，下面这款香气也很适合。', '把回忆带回家，也把味道带上，下面这款香氛正好相配。'],
+    'souvenir|alcohol': ['纪念品留作念想，好酒留作欢聚，下面这款正好凑成一份心意。', '带走的回忆备好了，再添一瓶适合聚饮的酒，这趟就齐了。']
   };
   const GENERIC_TRANS = ['接下来跟您说说下一款好物。', '下面这一款也同样值得一看。', '别着急，精彩的在后面，再看下一款。', '这款讲完了，下面这一款也同样值得期待。', '前面那款讲清楚了，再看下面这一款。'];
   const SECTION_TRANS = {
@@ -18501,6 +19308,28 @@ const beautySceneEngine = (function(){
 
     // 1. 开场：春秋机上广播式（痛点去重 + 互动钩子 + 画像轻介入）
     paras.push(openingFor(prods, scenes, cfg.depth, cp));
+
+    // 1.5 节日应景（2026-09-12）：由调用方传入已识别的节日 key（DateMatch 解析结果）
+    //     顺序：用户话术主题命中的节日 > 今日自动匹配，避免开场白与话术主题跑偏
+    // 与 talk 引擎同一约定：'fest:<key>' → 节日话术；'solar:<节气>' → 节气话术
+    const _fRaw = String(opts.fest || '');
+    let _sceneFest = '', _sceneTerm = '';
+    if(_fRaw.indexOf('solar:') === 0) _sceneTerm = _fRaw.slice(6);
+    else if(_fRaw.indexOf('term:') === 0) _sceneTerm = _fRaw.slice(5);
+    else if(_fRaw.indexOf('fest:') === 0) _sceneFest = _fRaw.slice(5);
+    else if(opts.fest && SeasonEngine.OPEN_FESTS[opts.fest]) _sceneFest = opts.fest;
+    if(!_sceneFest && !_sceneTerm && opts.fest !== 'none'){
+      const _mToday = SeasonEngine.match(new Date());
+      if(_mToday && _mToday.kind === 'festival' && SeasonEngine.OPEN_FESTS[_mToday.key]) _sceneFest = _mToday.key;
+      else if(_mToday && _mToday.kind === 'solar' && SeasonEngine.OPEN_TERMS[_mToday.key]) _sceneTerm = _mToday.key;
+    }
+    if(_sceneTerm && SeasonEngine.OPEN_TERMS[_sceneTerm]){
+      const _pool = SeasonEngine.OPEN_TERMS[_sceneTerm];
+      paras.push('『节气应景』\n' + _pool[Math.floor(Math.random() * _pool.length)]);
+    } else if(_sceneFest && SeasonEngine.OPEN_FESTS[_sceneFest]){
+      const _pool = SeasonEngine.OPEN_FESTS[_sceneFest];
+      paras.push('『节日应景』\n' + _pool[Math.floor(Math.random() * _pool.length)]);
+    }
 
     // 2. 逐款介绍：品类感知标签/比喻/结构轮换（段落间用过渡句自然衔接，消除割裂感）
     const usedP = new Set();
@@ -18586,7 +19415,10 @@ const beautySceneEngine = (function(){
     // 按档位装配模块
     const modules = [];
     modules.push({ id:'opening', type:'opening', title:'💬 开场·共鸣', duration:0, content:paras[0] });
-    modules.push({ id:'coreBenefits', type:'coreBenefits', title: (cfg.depth === 'brief' ? '🌟 核心卖点速递' : '🌟 逐款感受分享'), duration:0, content: paras.slice(1, 1 + prods.length).join('\n\n') });
+    const _hasFest = !!(_sceneFest || _sceneTerm);
+    const _off = 1 + (_hasFest ? 1 : 0);
+    if(_hasFest) modules.push({ id:'festival', type:'opening', title: _sceneTerm ? '🍃 节气应景' : '🎉 节日应景', duration:0, content: paras[1] });
+    modules.push({ id:'coreBenefits', type:'coreBenefits', title: (cfg.depth === 'brief' ? '🌟 核心卖点速递' : '🌟 逐款感受分享'), duration:0, content: paras.slice(_off, _off + prods.length).join('\n\n') });
     if(!single && (cfg.depth === 'full' || cfg.depth === 'deep')){
       const combo = (paras.filter(function(x){ return x.indexOf('『组合优势』') === 0; })[0] || '').replace('『组合优势』\n', '');
       if(combo) modules.push({ id:'combo', type:'usage', title:'🔗 组合使用建议', duration:0, content:combo });
@@ -18601,6 +19433,10 @@ const beautySceneEngine = (function(){
     }
     if(warns.length && cfg.depth !== 'brief'){ modules.push({ id:'warning', type:'quality', title:'⚠️ 使用提醒', duration:0, content:warns.join('\n') }); }
     modules.push({ id:'closing', type:'closing', title:'🛒 收尾', duration:0, content: paras[paras.length - 1] });
+
+    // 2026-09-12 核查修复：fullText 已清洗，但 modules 拆自清洗前的 paras，
+    // 违禁词（顶级/绝对/100% 等）会残留在模块内容里直接渲染。此处对模块内容再清洗一遍（幂等）。
+    modules.forEach(function(m){ m.content = complianceClean(m.content, mode).text; });
 
     // 时长分配：按内容量（约4.2字/秒的机上播报语速）加权分配，最后一段收尾吸收余量
     const totalSec = cfg.seconds;
@@ -18717,47 +19553,223 @@ const talkShowEngine = (function(){
   function solar2lunar(){ return null; }
   function festName(key){ return SeasonEngine.FEST_NAMES[key] || key; }
 
+  // ============ 逐款素材库（2026-09 扩充）：钩子 / 段子 / 场景画面 / 互动反问 ============
+  // 说明：每个品类各 6~8 条，配合跨产品去重（used 集合），避免同品类多款话术雷同
   const TS_HOOKS = {
     skincare: [
-      '接下来这款，请各位熬夜冠军、刷剧达人、凌晨还在朋友圈里emo的朋友们，把耳朵竖起来——',
-      '接下来这款，把"皮肤状态在线"看得比天都大的朋友，请留步——',
-      '这款是我私藏了好久的好物，今天头一回在机上好好讲讲，护肤的朋友留步——',
-      '接下来这款，说给各位"把脸当门面"的朋友听——'
+      '接下来这款，请各位熬夜冠军、刷剧达人、凌晨还在朋友圈里 emo 的朋友，把耳朵竖起来——',
+      '把“皮肤状态在线”看得比天大的朋友，这一段您别走神——',
+      '这款是我私藏了好久的，今天头一回在机上好好讲讲，护肤的朋友留步——',
+      '接下来这款，说给各位“把脸当门面”的朋友听——',
+      '接下来这款，是给“出差三天、脸就开始闹情绪”的朋友准备的——',
+      '爱美的朋友，这一款您记住了——',
+      '接下来这款，属于那种“用完会回购、回购还带朋友一起买”的——'
     ],
     makeup: [
-      '接下来给各位"精致每一天"的朋友来一款好物——',
+      '接下来给各位“精致每一天”的朋友来一款——',
       '这款可是化妆包里的常客，拿出来补个妆都自带光环——',
-      '接下来这款，属于那种"涂上就提气、拍出来就显精神"的狠角色——'
+      '接下来这款，属于“涂上就提气、拍照就显精神”的狠角色——',
+      '化妆这件事，讲究的是事半功倍。下面这位，就是帮您省事的那一位——',
+      '接下来这款，是那种“包里放一支、心里就踏实”的存在——',
+      '想让自己看起来精神一点的朋友，注意听这一段——',
+      '接下来这款，属于“素颜也能救个场”的那一挂——'
     ],
     fragrance: [
-      '接下来这款香，属于"电梯里让人多闻两下、办公室里有人追问"的存在——',
-      '香水这东西，用的是味道，穿的是气场。下面这款，气场这块拿捏得明明白白——',
-      '接下来这款，是那种闻一下，就想多待一会的味道——'
+      '接下来这款香，属于“电梯里让人多闻两下、办公室里有人追问”的存在——',
+      '香水这东西，用的是味道，穿的是气场。下面这位，气场拿捏得明明白白——',
+      '接下来这款，是那种闻一下，就想多待一会儿的味道——',
+      '想让别人记住您的朋友，这一段别错过——',
+      '接下来这款，属于“人还没到、味道先到”的那种——',
+      '味道是最难被忘掉的记忆。下面这款，就是奔着让您被记住来的——',
+      '接下来这支香，不挑场合、不挑年纪，属于很难出错的那一类——'
     ],
     health: [
-      '接下来这款，专门说给"熬着大夜、还想养好身体"的各位朋友听——',
-      '保养这事，讲究细水长流。下面这款，就是给日常加点底气——',
-      '接下来这款，适合工作忙、节奏快、想对自己好一点的朋友——'
+      '接下来这款，专门说给“熬着大夜、还想把自己养好”的各位听——',
+      '保养这事讲究细水长流。下面这款，就是给日常加点底气的——',
+      '接下来这款，适合工作忙、节奏快、想对自己好一点的朋友——',
+      '给自己补一补这件事，越早开始越划算。下面这款，是很多人的第一站——',
+      '接下来这款，说给家里上有老下有小、唯独把自己排在最后的朋友——',
+      '接下来这款，是常飞、常出差的人会常备在包里的那一款——',
+      '想让状态稳一点的朋友，这段您听听——'
     ],
     alcohol: [
-      '接下来这款，说给"回家想小酌一杯、或者饭局想喝点好的"的朋友——',
-      '好酒看缘分。下面这款，属于"桌上摆出来，就有人多看一眼"的那种——',
-      '接下来这款，适合带回去配顿饭，或者送个懂行的朋友——'
+      '接下来这款，说给“回家想小酌一杯、饭局想喝点好的”的朋友——',
+      '好酒看缘分。下面这款，属于“桌上摆出来就有人多看一眼”的那种——',
+      '接下来这款，适合带回去配顿饭，或者送个懂行的朋友——',
+      '酒逢知己千杯少，下面这瓶，就是为知己准备的——',
+      '接下来这款，适合那种“不常喝，但一喝就懂”的人——',
+      '想给饭桌添点意思的朋友，留意这一瓶——',
+      '接下来这款，属于“开瓶要挑日子”的好酒——'
     ],
     souvenir: [
       '终于到压轴的纪念环节了——接下来这几位，是咱春秋航空的专属系列——',
-      '前面聊的都是用的、涂的、喝的，接下来给各位看看"带得走的飞行记忆"——',
-      '接下来这款，属于"放在桌上天天见、见了就想起这趟旅程"的存在——'
+      '前面聊的都是用的、涂的、喝的，接下来给各位看看“带得走的飞行记忆”——',
+      '接下来这款，属于“放在桌上天天见、见了就想起这趟旅程”的存在——',
+      '想给这趟飞行留个念想的朋友，看这里——',
+      '接下来这款，是很多旅客专门为了它再坐一次咱们航班的——',
+      '送礼最怕没新意，接下来这几件，新意管够——',
+      '接下来这款，属于“孩子看见就走不动路”的那种——'
     ]
   };
 
+  // 段子包袱：脱口秀的“笑点”，让每款产品在严肃介绍之外有记忆点
+  const TS_JOKES = {
+    skincare: [
+      '说句不怕您笑话的——我飞早班机的时候，脸比闹钟还难叫醒。',
+      '别问我为什么懂这么多，问就是踩过坑。',
+      '有人问我：你们乘务员皮肤怎么都挺好？我说：一是喝水，二是别熬夜。第三条，就在这辆小车上了。',
+      '这东西的好处是，别人看不出您花了心思，但您自己知道。',
+      '护肤最怕三天打鱼两天晒网——不过这款，倒是适合我这种记性不好的。',
+      '我妈到现在还用一块香皂洗全脸，我劝了十年没劝动，只能先把好东西摆到您面前。'
+    ],
+    makeup: [
+      '我一向认为，化妆的最高境界是“看着像没化”——这话不是我说的，是专业的化妆师说的。',
+      '别笑，我第一次给自己涂口红，涂到牙上了。',
+      '有回航班延误，隔壁那位小姐姐补了个妆，气场立刻就回来了——妆容这东西，是真提气。',
+      '包里放一支，什么时候拿出来都不慌。',
+      '送女朋友这件事上，我见过太多翻车案例了——所以今天只推荐不容易翻车的。',
+      '有人问我男人懂什么彩妆，我说：我懂的是你们收到时的那个表情。'
+    ],
+    fragrance: [
+      '香水这东西挑人，比挑衣服还挑。所以今天我不说什么最好，只说什么最难出错。',
+      '我有个同事，喷了这味儿之后，全办公室都问他是不是谈恋爱了。',
+      '味道这东西，说不清道不明，但就是记得住。',
+      '香水是少有的一样东西——别人看不见，却实打实感觉得到。',
+      '有人用香水是为了盖味道，有人是为了留印象。今天这支，属于后者。',
+      '我妈那代人管这叫“讲究”，我管这叫“对自己有要求”。'
+    ],
+    health: [
+      '养生这事，我年轻时也嗤之以鼻，现在保温杯里泡枸杞——谁也别笑谁。',
+      '身体是自己的，账也是自己的——今天补一点，明天少亏一点。',
+      '别等身体提意见了才想起照顾它，那时候它说话可就不客气了。',
+      '我爸的原则是“不舒服就扛”，我的原则是“能补就先补上”。',
+      '飞了这么多年，我最大的体会是：状态这东西，真是省出来的。',
+      '保健品不是药，这点我先说清楚——它是给日常加把劲的。'
+    ],
+    alcohol: [
+      '我这人不劝酒，但遇到好酒，我忍不住多说两句。',
+      '送酒是门学问：送贵的不如送对的。',
+      '有人说酒是粮食精，我觉得吧，酒更像是一顿饭的句号。',
+      '我第一次喝清酒是被朋友坑的，说是“甜的”，结果第二天头疼——所以今天我把喝法也一并交代清楚。',
+      '开一瓶好酒的时机，其实不需要理由。',
+      '我这人喝酒不行，但挑酒还有些心得——毕竟看得多了。'
+    ],
+    souvenir: [
+      '买纪念品这事，小时候觉得是浪费钱，长大了才知道，那是给以后的自己留个由头。',
+      '我家里摆着第一年飞的时候买的机模，我妈每次擦灰都要念叨两句，但一次都没给我扔。',
+      '这东西不贵，但几十年后回头看，那就是一段日子的证据。',
+      '送孩子、送朋友、送自己，纪念品是少数怎么送都不容易出错的选择。',
+      '别小看这一件小东西，它替您记着：那年那月，您飞过这一程。',
+      '有位老旅客跟我说，他每飞一次就带一件，现在家里已经摆满一柜子了。'
+    ]
+  };
+
+  // 场景画面：把产品放进一个具体的、旅客能代入的生活瞬间
+  const TS_SCENES = {
+    skincare: [
+      '出差在外，晚上回到酒店洗完脸，抹上它那一刻，人算是真正落地了。',
+      '早班机落地直奔会议室，脸还是那张脸，但看着精神，底气就不一样。',
+      '长途飞行下机，最怕别人来一句“你是不是没睡好”——这一款，就是用来堵这句话的。',
+      '空调房里待一整天，脸干得能听见响，晚上这一道程序，是给它补回来的。',
+      '熬夜赶方案的第二天早上，照镜子那三秒钟，心态全靠它撑着。',
+      '换季的时候脸最容易闹脾气，这时候手里有一款稳得住的，比什么都强。'
+    ],
+    makeup: [
+      '早上赶时间，五分钟出门，这支就是那五分钟里最关键的一步。',
+      '下飞机直接去见客户，包里摸出它补两下，气色马上回来。',
+      '晚上有饭局，白天飞了一整天，靠它把疲惫藏起来。',
+      '拍照的时候，谁都想气色好一点——它干的就是这个活。',
+      '聚会前在洗手间补个妆，走出来那一瞬间，自信是看得见的。',
+      '日常通勤不想太隆重，薄薄一层提个气色就够了。'
+    ],
+    fragrance: [
+      '早上出门前喷两下，这一天的心情就有了底。',
+      '重要场合见人，身上带一点干净的味道，比穿什么都管用。',
+      '下了飞机直奔约会，来不及换衣服，但味道可以先把气氛带起来。',
+      '秋冬的外套容易闷，一点清透的香气，整个人都跟着清爽。',
+      '久别重逢的饭局上，味道往往比名片先被记住。',
+      '一个人出差住酒店，熟悉的味道能让房间像家一点。'
+    ],
+    health: [
+      '连着飞四段的那几天，包里揣着它，心里踏实。',
+      '应酬多、睡得晚的那阵子，早上起来第一件事就是它。',
+      '换季、熬夜、连轴转——状态最容易掉链子的时候，它顶上。',
+      '给爸妈带一份，比带什么都实在——他们嘴上说不要，身体很诚实。',
+      '办公室抽屉里放一盒，忙起来忘了吃饭也不会忘。',
+      '出差的行李箱里塞一盒，路上就是稳定的日常。'
+    ],
+    alcohol: [
+      '周末在家做顿简单的饭，开一瓶，日子立刻有了仪式感。',
+      '逢年过节走亲戚，拎着它进门，话题就自然打开了。',
+      '朋友聚会，一人带一瓶，摆一桌子，比什么开场白都好使。',
+      '下班回家，先换身衣服，再倒上一小杯，这一天就算交代了。',
+      '家里来了客人，拿出一瓶好酒，主人的心意就在里面了。',
+      '冬天温一壶、夏天冰一瓶，四季都有它的位置。'
+    ],
+    souvenir: [
+      '摆在家里的书桌上，加班到深夜抬头看一眼，想起那趟说走就走的旅行。',
+      '孩子拿在手里玩，大人看着高兴，这钱花得就值。',
+      '送给还没坐过飞机的长辈，他们稀罕的从来不是东西本身。',
+      '挂在包上、摆在车里，每次看到，心情都会好一点。',
+      '同事问起来，您有故事可讲——这就是它最值钱的地方。',
+      '下次再坐咱们的航班，孩子一眼就认出来：“这个我也有！”'
+    ]
+  };
+
+  // 互动反问：脱口秀的“抛梗”，把单向播报变成对话
+  const TS_ASK = {
+    skincare: ['您有多久没好好看过自己的脸了？','有没有哪一款，是您用完一定会回购的？','出差的时候，您会特意带上护肤品吗？','如果只能带一样出门，您会带什么？'],
+    makeup: ['您化妆，是为了好看，还是为了提气？','包里常备的那一支，是哪一支？','赶时间的时候，您会省掉哪一步？','有没有哪一支，是您用完还会回购的？'],
+    fragrance: ['您还记得，上一次被人夸“味道好闻”是什么时候吗？','您挑香水，是挑自己喜欢的，还是挑别人喜欢的？','有没有一种味道，一闻就想起一个人？','如果只留一瓶，您会留哪一瓶？'],
+    health: ['您有多久没认真照顾过自己的身体了？','上一次按时吃早饭，是哪天的事？','家里常备的东西里，有几样是给自己的？','今年为自己的身体，花过心思吗？'],
+    alcohol: ['家里有没有一瓶，是专门为某个日子留着的？','您喝酒，是图个气氛，还是图个味道？','上一次和重要的人喝一杯，是哪天？','送酒这件事，您最看重的是什么？'],
+    souvenir: ['这趟旅程，您想带走点什么？','家里有没有一件东西，每次看到都会想起一段日子？','上一次给家人带纪念品，是什么时候？','如果只能带一件回家，您会选哪件？']
+  };
+
+  // 使用时刻：每品类 5 条，讲清“什么时候用、怎么用”，避免六类共用一句
   const TS_MOMENTS = {
-    skincare: '早晚护肤的时候用上它，出差旅行往洗漱包里一塞就能带走。',
-    makeup: '早上出门前用上，一整天都提气。',
-    fragrance: '出门前喷两下，举手投足都是好心情。',
-    health: '按说明每天来一点，细水长流地养着。',
-    alcohol: '到家开一瓶，配餐自饮、送人都拿得出手。',
-    souvenir: '买回去就摆上、就用上，天天都能想起这趟旅程。'
+    skincare: [
+      '用法也简单：早晚护肤的时候用上它，出差旅行往洗漱包里一塞就能带走。',
+      '每天早晚洁面后用上，出差住酒店也照样能坚持。',
+      '洁面后第一步就用它，后面该抹什么抹什么，顺序不乱。',
+      '早上出门前一次、晚上回到酒店一次，一天两回，一次一两分钟的事。',
+      '飞机上干燥，落地当晚就用上，第二天的状态会温和很多。'
+    ],
+    makeup: [
+      '用法也简单：早上出门前用上，一整天都提气。',
+      '出门前五分钟，薄薄一层就够了，不用讲究手法。',
+      '通勤前、见客户前补一下就行，包里放着也不占地方。',
+      '白天补妆、晚上赴约，一支就能走天下。',
+      '妆前打底用上它，后面的妆也更服帖。'
+    ],
+    fragrance: [
+      '用法也简单：出门前喷两下，举手投足都是好心情。',
+      '出门前在手腕、耳后各来一下，一整天都在。',
+      '上午出门前喷一次，下午重要场合前再补一次，刚刚好。',
+      '喷在衣角和围巾上，留香更久，也不冲人。',
+      '赴约前、开会前，随手两下，比换一身衣服快多了。'
+    ],
+    health: [
+      '用法也简单：按说明每天来一点，细水长流地养着。',
+      '每天随餐服用，出差带着也不占地方。',
+      '一天两次，早饭或晚饭后，跟着饭点走不容易忘。',
+      '按标签上的推荐量来，坚持一两个月，身体会慢慢给您反馈。',
+      '办公室放一盒、家里放一盒，省得来回带。'
+    ],
+    alcohol: [
+      '喝法也简单：到家开一瓶，配餐自饮、送人都拿得出手。',
+      '冰镇或者常温都行，配餐、独酌都合适。',
+      '开瓶先倒一小杯闻一闻，再慢慢喝，层次就出来了。',
+      '配白肉、海鲜、清淡的菜，最容易喝出它的好。',
+      '聚会分着喝、在家慢慢品，怎么喝都不浪费。'
+    ],
+    souvenir: [
+      '用处也实在：买回去就摆上、就用上，天天都能想起这趟旅程。',
+      '摆桌上、挂包上、放车里，怎么用都是一份念想。',
+      '自留一份、送人一份，这趟旅程就有了两份记忆。',
+      '机上就有现货，看中了直接带走，不用等。',
+      '包装都是现成的，送人不用另外费心。'
+    ]
   };
 
   const TS_TRANS = [
@@ -18768,31 +19780,127 @@ const talkShowEngine = (function(){
     '好物得一款一款看，就像旅程得一站一站打卡——下一站到了！'
   ];
 
+  /* 上下款承接话术（2026-09-12 核查补全）：6 大类两两组合共 30 种顺序全部覆盖，
+   * 键格式「上一款大类|下一款大类」。此前只有 9 种，其余 21 种落回通用过渡句，
+   * 会出现"护肤品刚讲完就说下一款更精彩"这类与前文不搭的衔接。
+   * 写法要求：先接住上一类的语意，再自然引出下一类，不夸大、不承诺功效。 */
   const TS_TRANS_PAIR = {
-    'skincare|makeup': ['护肤把底子打好，接下来咱说说"锦上添花"的。'],
-    'makeup|fragrance': ['妆容精致了，味道也得跟上——接下来这款，是香味担当。'],
-    'fragrance|health': ['外面漂漂亮亮，里面也得舒舒服服——接下来这款，顾的是里子。'],
-    'health|alcohol': ['里子顾好了，饭桌的快乐也得安排上——接下来这款，助兴。'],
-    'alcohol|souvenir': ['吃的喝的都有了，再添点"带得走的回忆"。'],
-    'health|souvenir': ['对自己的好到位了，这份好，也可以分给家人朋友。'],
-    'skincare|souvenir': ['面子工程顾到了，春秋专属的纪念款也不能少——接下来，专属时间。'],
-    'fragrance|souvenir': ['身上有香了，心里还得有惦记——接下来这位，是替您记着旅程的。'],
-    'makeup|souvenir': ['好看有了，好记性也得有——接下来这位春秋专属，拿去收藏。']
+    // —— 护肤开头 ——
+    'skincare|makeup': ['护肤把底子打好，接下来咱说说“锦上添花”的。', '底子顾住了，往外那一层也不能含糊——接下来这位，管气色。'],
+    'skincare|fragrance': ['护肤是给自己的照顾，接下来该给气质加点料——下面这款，是味道上的事。', '脸面稳住了，身上也该有点记忆点——接下来这支香。'],
+    'skincare|health': ['脸上的功夫说完了，接着照顾里头——这款，是给身体打底的。', '外面顾到了，里子也得跟上——接下来这款，是日常养着的那一份。'],
+    'skincare|alcohol': ['脸上顾好了，日子也得有点滋味——接下来这款，是给饭桌和闲时准备的。', '护肤的事先放一放，咱说点让人放松的——接下来这瓶。'],
+    'skincare|souvenir': ['面子工程顾到了，春秋专属的纪念款也不能少——接下来，专属时间。', '日常用的说完了，接下来给这趟旅程留个念想。'],
+    // —— 彩妆开头 ——
+    'makeup|skincare': ['妆容是加分项，底子才是根本——接下来这款，往根上使劲。', '好看是临时的，好状态是长期的——接下来这款，管的是底子。'],
+    'makeup|fragrance': ['妆容精致了，味道也得跟上——接下来这款，是香味担当。', '脸上的事说完了，接着说说不那么容易被看见、但一定被记住的味道。'],
+    'makeup|health': ['外面打扮得漂亮，里面也别落下——接下来这款，顾的是身体。', '气色是画出来的，状态是养出来的——接下来这份，是往里补的。'],
+    'makeup|alcohol': ['气色说完了，气氛也得安排上——接下来这瓶，留到饭桌上开。', '出门的样子有了，回到家的松弛也不能少——接下来这款。'],
+    'makeup|souvenir': ['好看有了，好记性也得有——接下来这位春秋专属，拿去收藏。', '打扮的事告一段落，接着看点能留下的。'],
+    // —— 香水开头 ——
+    'fragrance|skincare': ['味道是别人闻得到的，皮肤是自己摸得着的——接下来这款，把底子养好。', '香气到位了，回到最基础的那一步——接下来这位，管的是皮肤本身。'],
+    'fragrance|makeup': ['香气到位了，往外看的那一层也别含糊——接下来这位，管的是气色。', '味道是底子，妆是门面——接下来这款，把门面也顾上。'],
+    'fragrance|health': ['外面漂漂亮亮，里面也得舒舒服服——接下来这款，顾的是里子。', '气质的事说完了，接着说状态——接下来这份，是给身体的。'],
+    'fragrance|alcohol': ['身上的味道定了，杯子里的味道也来一口——接下来这款，配得上一顿饭。', '香是气氛的一半，酒是另一半——接下来这瓶。'],
+    'fragrance|souvenir': ['身上有香了，心里还得有惦记——接下来这位，是替您记着旅程的。', '味道是流动的记忆，接下来这款，是把记忆摆在那儿。'],
+    // —— 保健品开头 ——
+    'health|skincare': ['里头补上了，外头也别落下——接下来这款，照顾的是脸面。', '身体是底子，皮肤是脸面——接下来这位，把脸面也顾上。'],
+    'health|makeup': ['身体顾好了，气色也得跟着亮起来——接下来这款，一上脸就见精神。', '底子打牢了，接下来这一步是提气。'],
+    'health|fragrance': ['状态稳了，气质也可以再提一档——接下来这支香，是给自己加分的。', '里子稳住了，接下来顾的是给人的第一印象。'],
+    'health|alcohol': ['里子顾好了，饭桌的快乐也得安排上——接下来这款，助兴。', '身体的事讲完了，说点让人放松的——接下来这瓶。'],
+    'health|souvenir': ['对自己的好到位了，这份好，也可以分给家人朋友。', '给自己备齐了，接下来这几件，是带回去送人的。'],
+    // —— 酒类开头 ——
+    'alcohol|skincare': ['酒留着慢慢喝，接下来这款，先把自己照顾好——脸面的事，也别拖。', '喝的挑完了，日常那几步也别省——接下来这位。'],
+    'alcohol|makeup': ['喝的挑完了，用的也来一样——接下来这款，出门前用得上。', '饭桌上的事说完了，接着说说出门时的样子。'],
+    'alcohol|fragrance': ['杯子里的余味还没散，身上的味道也该定下来——接下来这支香。', '酒是留给自己人的，香是给所有人的——接下来这一瓶。'],
+    'alcohol|health': ['小酌是放松，日常还得靠养——接下来这款，给身体垫个底。', '高兴归高兴，底子也得顾——接下来这份，是往里补的。'],
+    'alcohol|souvenir': ['喝的挑好了，再添点“带得走的回忆”。', '酒配好了，接下来这位，是给这趟旅程留个纪念的。'],
+    // —— 纪念品开头 ——
+    'souvenir|skincare': ['纪念品是带走的，接下来这款，是留给自己的——日常用得上。', '念想收好了，回到自己的日常——接下来这位。'],
+    'souvenir|makeup': ['带得走的回忆有了，出门见人的样子也得顾上——接下来这位。', '纪念是留给自己的，接下来这款，是给别人看的体面。'],
+    'souvenir|fragrance': ['把旅程装进了口袋，再把味道也带上——接下来这一瓶。', '东西留下了，味道也可以带走——接下来这支香。'],
+    'souvenir|health': ['纪念是心意，身体是本钱——接下来这款，是给自己和家人的。', '纪念品是给孩子和朋友的，接下来这份，给身体。'],
+    'souvenir|alcohol': ['念想备好了，饭桌上还缺一瓶——接下来这款，正好凑一桌。', '纪念收进行李，接着开一瓶庆祝的——接下来这款。'],
+    // —— 同品类两款（补全同类型承接，避免退化成"下一款更精彩"）——
+    'skincare|skincare': ['这两款都在护肤线上，一个打底、一个加固，配着用更完整。', '同属护肤流程，刚才那款管前半段，这款正好接后半段。'],
+    'makeup|makeup': ['彩妆也讲搭配，刚才那款定基调，这款正好点睛。', '这两款彩妆各管一处，凑在一起妆面才完整。'],
+    'fragrance|fragrance': ['两款香各有性格，想换种心情的时候正好有得选。', '香氛也看场合，这两款一日常一隆重，正好互补。'],
+    'health|health': ['两款补给各管一摊，日常搭配着来更全面。', '保健品讲究搭配不重复，这两款正好互补。'],
+    'alcohol|alcohol': ['两款酒风格不同，一款助兴、一款细品，各有各的场合。', '好酒不嫌多，这两款风味互补，换着喝不腻。'],
+    'souvenir|souvenir': ['这两件凑成一套更有分量，送人自留都合适。', '纪念品讲究成套，这款正好和刚才那件配齐。']
   };
 
   const TS_CLOSERS = {
-    skincare: ['护肤不是跟风，是踏踏实实跟自己处好关系——这款，值得一试。', '对自己好这件事，每天做一点点，久了就见真章。'],
-    makeup: ['好不好看是审美，愿不愿意取悦自己，是态度——这款帮您提气。'],
-    fragrance: ['有人记得你的样子，有人记得你的味道——想让别人记住你，先从这瓶开始。'],
-    health: ['身体是一切的本钱——能给日常打底的，都是聪明的选择。'],
-    alcohol: ['好酒配好菜，更要配好心情——这款，助兴也走心。'],
-    souvenir: ['纪念品值钱的不在价，在于"记得"——这款，替您记得这趟旅程。'],
-    _generic: ['心动就是理由——用得上，就值得。']
+    skincare: [
+      '护肤不是跟风，是踏踏实实跟自己处好关系——这款，值得一试。',
+      '对自己好这件事，每天做一点点，久了就见真章。',
+      '脸是自己的，对它上心一点，它不会亏待您。',
+      '好状态不是一天养出来的，但今天可以是第一天。',
+      '用得舒服、坚持得住，比什么都重要——这款就是。'
+    ],
+    makeup: [
+      '好不好看是审美，愿不愿意取悦自己，是态度——这款帮您提气。',
+      '化妆这件事，从来都不是为了别人。',
+      '一支好用的，胜过抽屉里十支不用的。',
+      '今天这一支，是买给自己的好心情。',
+      '您值得每天出门前，多花这三分钟。'
+    ],
+    fragrance: [
+      '有人记得您的样子，有人记得您的味道——想让别人记住您，先从这瓶开始。',
+      '味道是写给别人的一封信，这封信，值得认真挑。',
+      '选一支合心意的香，是给自己的一点小仪式感。',
+      '闻着舒服，比什么都重要——这款就是。',
+      '今天这一瓶，替您把没说出口的话说了。'
+    ],
+    health: [
+      '身体是一切的本钱——能给日常打底的，都是聪明的选择。',
+      '对自己上心，什么时候都不晚。',
+      '今天对自己好一点，明天才有底气接着忙。',
+      '健康这事，靠的是日积月累，不是临时抱佛脚。',
+      '照顾好自己，才有力气照顾别人。'
+    ],
+    alcohol: [
+      '好酒配好菜，更要配好心情——这款，助兴也走心。',
+      '酒是拿来分享的，好酒更是。',
+      '开一瓶好酒，就是给平凡的一天加个注脚。',
+      '这瓶带回去，是自饮的享受，也是待客的体面。',
+      '喝的是味道，记的是人情——这款，两样都不缺。'
+    ],
+    souvenir: [
+      '纪念品值钱的不在价，在于“记得”——这款，替您记得这趟旅程。',
+      '东西会旧，记忆不会。',
+      '带走的不是一件商品，是这趟旅程的一部分。',
+      '多年以后再看到它，您会想起今天这趟航班。',
+      '这份念想，是这趟飞行额外给您的礼物。'
+    ],
+    _generic: ['心动就是理由——用得上，就值得。','喜欢就带走，犹豫就先记着，都不亏。','买不买是您的自由，说清楚是我的本分。']
   };
+
+  // ============ 引导词库：同一件事换六种说法，杜绝“款款一个腔调” ============
+  const TS_LEAD_BENEFIT = ['它的看家本事就这几样：','您记住这几个词就行：','它的本事，说起来也简单：','这几句是它的招牌：','它到底好在哪？我给您数落数落：','它的卖点，一句话能说完：'];
+  const TS_LEAD_STORY = ['说起{brand}这个牌子，还有段故事——','您可能不知道，{brand}的来头是这样的——','给您讲个{brand}的小典故——','这个牌子的来历，挺有意思——','先说{brand}这个牌子——','很多人用{brand}，但不一定知道它的来历——'];
+  const TS_LEAD_CONCEPT = ['这个牌子做东西有个讲究——','他们家一直坚持的是——','说回{brand}做产品的思路——','这个品牌的坚持，就一句话——','{brand}做东西的原则是——','这牌子的底气在哪？就在——'];
+  const TS_LEAD_TALE = ['里头还有个典故——','这东西背后有个说法——','还有个细节值得说——','它的来历也值得一提——'];
+  const TS_LEAD_ING = ['成分上它主打「{ing}」——','核心成分叫「{ing}」——','它的底气来自「{ing}」——','配方的重点在「{ing}」——','起作用的是「{ing}」——'];
+  const TS_LEAD_WHO = ['尤其适合{who}。','{who}用着最对味。','要说最合适的，还是{who}。','{who}，可以重点看看。','{who}用起来更合适。','这一款，{who}的反馈最好。'];
+  const TS_LEAD_INGMORE = ['配方里还有{list}，各管一摊。','另外还有{list}打配合，不是为了凑数。','再看配方：{list}也在里面，分工明确。'];
+  const TS_LEAD_SPEC = ['规格是{vol}，{origin}原产，机上专享。','{origin}原产，{vol}装，带着也不占地方。','这一份是{vol}，{origin}来的，机上备着货。'];
 
   const TS_SET = [
     '今天这一套，从里到外、从早到晚都给各位配齐了：护肤打底、彩妆提气、香味收尾，外加春秋专属的纪念小物——送人自用，都有里子有面子。',
     '这一套放在一起，不是硬凑——每一款都有自己的位置，组合起来，才是把日子过细致的全套装备。'
+  ];
+  // 深度档（10分钟）组合优势：讲清搭配顺序与成套理由，不只一句口号
+  const TS_SET_DEEP = [
+    '这几样不是我随手凑的，是能排得上顺序的：先清洁打底，再补水修护，最后该防护的防护、该提气的提气。用对了顺序，一样是一样的事半功倍。再加上都是机上专享、跨境包税，一次下单几天就到家，省的是来回折腾的功夫。',
+    '给您算笔明白账：这几样一件件单买，您得跑好几个地方；今天在机上一气配齐，跨境包税一价全包，保税仓直发，落地前下单几天就能到家。东西是一样的东西，省下来的是时间和脚力。',
+    '这几样摆在了一起，是因为它们互相搭得上：白天防护提气、晚上修护补水，各管一段，谁也不抢谁的活。您要是第一次接触这个牌子，成套入手最容易看出变化；要是老客户，那就更不用我多说了。'
+  ];
+  // 开场预告（标准/深度档）：告诉旅客今天讲几款、怎么讲
+  const TS_PREVIEW = [
+    '今天一共{n}款，我不赶时间，一款一款跟您说清楚。',
+    '这一趟我给您备了{n}款，您慢慢听，不着急，听到哪款心动就记哪款。',
+    '一共{n}款，每款我都说透：什么来头、好在哪、怎么用、适合谁——您听完心里就有数了。'
   ];
 
   const TS_CLOSINGS = [
@@ -18811,83 +19919,117 @@ const talkShowEngine = (function(){
     if (n.toLowerCase().indexOf(b.toLowerCase()) === 0) return n;
     return b + n;
   }
-  // 品牌故事 / 设计理念 / 饮用建议（2026-09 联网核查，来源见 _research_brands_a/b.json）
-  const BRAND_STORY = {
-    'ASAHI朝日': { story:'「ネナイト／NENAITO」2016 年诞生于朝日集团食品，面对的是「睡眠不足大国·日本」这个社会课题。名字来自夜空月亮插画＋「寝ないとね（不睡不行呢）」。当时的日本，用保健品对付睡眠还是负面印象，朝日想扭转它。', concept:'不卖「催眠」，卖「第二天早上的清醒」——理念是「睡眠可以战略性获取，美好的明天由自己创造」。核心成分 L-茶氨酸 200mg/日，属功能性标示食品（届出番号 B306）。', tip:'一日 4 粒，睡前以水或温水送服；服用高血压药或兴奋剂者应避免，未成年/孕产妇/哺乳期不宜。' },
-    'CHOYA俏雅': { story:'蝶矢梅酒 1914 年在大阪创业，初代种葡萄，1924 年开始酿酒，1959 年起做梅酒。坚持 100% 日本青梅、无人工添加／色素／香料，熟成梅酒避光恒温熟成约 1 年。', concept:'2017 年起分两条线：CHOYA 与 THE CHOYA（后者用 100% 南高梅）。思路很朴素——好梅酒不需要香精，靠青梅本身和一年时间。', tip:'加冰块或苏打水稀释，餐前开胃、餐后解腻都合适。' },
-    'CPB肌肤之钥': { story:'CPB 是资生堂在 1982 年推出的高端线，名字 Clé de Peau Beauté 是法语，意思是“开启肌肤之美的钥匙”。它从诞生起就定位为资生堂技术实力集中展示的品牌，走高端百货和专业顾问路线。', concept:'以皮肤科学研究为基础，强调唤醒肌肤自身的“智慧”与光泽感，从底妆到护肤都围绕“钥匙”寓意——帮肌肤回到理想状态。' },
-    'DHC': { story:'1972 年吉田嘉明在日本创业，最早做的其实是委托翻译业务，后来才转向化妆品和健康食品，靠通信贩卖（邮购/电话订购）做起来。它家最出名的就是从西班牙有机橄榄园取材的橄榄卸妆油，2005 年进入中国，也是国内第一批做通信销售的外资化妆品企业。', concept:'护肤理念是“天然、温和、高品质”，公司一直挂着一句话：“品质相同，价格最低；价格相同，品质最高。”' },
-    'GNC健安喜': { story:'GNC 1935 年创立于美国匹兹堡，最初只是一家小型健康食品店，如今是全球最大的营养补充剂连锁之一。', concept:'以「科学配方 + 透明标示」为原则，强调成分剂量写在标签上、可追溯。', tip:'按标签推荐量随餐服用；孕期、哺乳期或正在服药请先咨询医生。' },
-    'IPSA茵芙莎': { story:'IPSA 是资生堂 1987 年推出的品牌，名字来自拉丁语 ipse，意思是“自我”。它从一开始就不按年龄和肤质一刀切，而是主张每个人的肌肤都不一样，柜台会给客人做肌肤测试再配产品。', concept:'核心是“肌肤自律循环”——不靠猛药，而是帮肌肤恢复自我更新和保水的能力，自律循环液也因此做成按肤质分号的体系。' },
-    'OLAY': { story:'1952 年南非化学家 Graham Wulff 想给妻子做一款不厚重的保湿品，调出了当年很特别的粉色液体 Beauty Fluid，名字 Oil of Olay 是拿关键成分羊毛脂（lanolin）的词做了个谐音。1985 年宝洁收购后把它做成了全球品牌。', concept:'以皮肤科学研究为基础的大众高效护肤，烟酰胺（维生素 B3）是它最核心的成分，主打一个成分配方打透美白、抗老多个诉求，价格亲民。' },
-    'SK-II': { story:'1970 年代日本科学家在清酒酿酒厂注意到，常年把手泡在酒醪里的老师傅双手却很细嫩，由此研究酵母；1980 年从 350 多种酵母里筛出专属酵母株，SK-II 这个品牌就在日本诞生了。神仙水的核心是 PITERA™，一瓶里九成以上都是它。', concept:'一滴 PITERA™ 里含有 50 多种微量营养素（维生素、氨基酸、矿物质、有机酸），理念是维持肌肤“晶莹剔透”的状态，不是靠剥脱去换白。' },
-    'SPA': { story:'SPA 指的是日本品牌 Spa treatment，2002 年创立于大阪，属于 Wave Corporation 株式会社的自有品牌，公司有多年 Spa 美容服务经验。它 2011 年推出蛇毒眼膜，一下填补了眼膜的空白，在日本 cosme 大赏上口碑爆棚，红白两款都成了爆款。', concept:'品牌概念是“消除皮肤的压力”，把院线 Spa 级护理做成居家可用；眼膜靠类蛇毒肽 + 胶原肽的组合做抗皱紧致，膜布弹力好可以贴眼周、法令纹多个部位。' },
-    '伊丽莎白雅顿': { story:'雅顿夫人本名 Florence Nightingale Graham，加拿大出生，1910 年在纽约第五大道开了第一家沙龙，那扇标志性的红门就是品牌符号。“Elizabeth Arden”这个艺名是她后来改的，取自当时一本小说和丁尼生的诗《伊诺克·雅顿》。她说过的名言是“美丽是每个女人与生俱来的权利”。', concept:'坚持“美是自然和科学的结晶”，最有代表性的设计是胶囊包装——一粒一次用量、密封锁鲜，让视黄醇、神经酰胺这类活性成分不易氧化。' },
-    '伊菲丹': { story:'伊菲丹 2007 年由法国人 Charles-Edouard Barthes 创立，起因很浪漫：他在东京出差时认识了后来的妻子、富士电视台主持人中村江里子，发现她定居巴黎后一直为敏感肌找不到合适的产品发愁，于是专门找日本生物学家研发，把品牌当成送给妻子的礼物。', concept:'日式尖端科技 × 法式高定优雅：核心是 Triple Collagen® 三重胶原肽（北海道大学等研究团队研发）与 QAI® 复合精华，配方用南法 La Foux 泉水，专为敏感肌做抗老。' },
-    '兰蔻': { story:'1935 年 Armand Petitjean 在法国创立兰蔻，品牌名字取自卢瓦尔河谷一座叫 Lancosme 的城堡，玫瑰也因此成了品牌的标志。小黑瓶 2009 年推出第一代，是“肌底液”这个品类的开创者，2024 年升级到第三代。', concept:'主打“肌底修护 + 微生态平衡”：第三代超修小黑瓶用 98% 高纯度 β-葡聚糖精粹，灵感来自诺贝尔奖 TRPV1 相关研究，配方去掉酒精和传统防腐剂，走温和高效路线。' },
-    '加贺缠': { story:'「加贺缠」实为「加贺鸢（Kagatobi）」，出自金泽的福光屋——1625 年创业，2001 年发表「纯米蔵宣言」，酿造水取自灵峰白山的百年伏流水。酒标图案源自江户加贺藩消防团「加贺鸢」的雷云披风。', concept:'纯米大吟酿精选兵库县山田锦＋长野县木岛平金纹锦＋富山县福光五百万石三酒米混酿。关键词是「粋（风流潇洒）」与「余味净爽」——浓缩的米味之后收得干净利落。', tip:'冷饮最能体现「余味净爽」，配加贺料理与白身鱼。' },
-    '古驰': { story:'Gucci Bloom 花悦 2017 年上市，是 Alessandro Michele 任创意总监后第一支完整主导的香水，调香 Alberto Morillas。三种核心花材里最特别的是使君子（Rangoon Creeper）——南非藤本，花开时由白转粉再转红，这是它第一次被用在香水里。', concept:'不是「一支花香」，而是「走进一座想象中的繁花花园」。瓷质粉瓶配 Herbarium 植物标本印花，主张让使用者绽放真实本我。' },
-    '和汉刚SUGI': { story:'「剛SUGI（つよすぎまん）」出自和漢 SINCA 研究所，日本制造的男性专用配方。思路是汉方智慧 × 现代营养学：以北海道鹿骨胶与冬虫夏草为底，叠加玛卡、高丽/西洋人参、精氨酸与瓜氨酸、含锌酵母、薏苡仁与金银花。', concept:'把八到十种活力源浓缩成易吞服的小颗粒——一日 4 粒、300mg×120 粒袋装。日本制造，官方明确不建议女性服用。', tip:'一日 4 粒温水送服；男性专用配方，不建议女性服用。' },
-    '圣罗兰': { story:'Mon Paris 反转巴黎 2016 年上市，是 YSL 以「巴黎」为情感坐标做的一支果香西普，调香师 Olivier Cresp、Harry Fremont、Dora Baghriche 三人合作。它的主意是用甜美的果香包住广藿香的暗面，讲一段炽热又带点危险的爱情。', concept:'以「巴黎」为情感坐标：前调用草莓、覆盆子、梨与卡拉布里亚佛手柑铺出甜，中调牡丹、茉莉、橙花之外点入曼陀罗（Datura）制造迷幻感，后调落到印尼广藿香、白麝香与雪松。' },
-    '奔富': { story:'Penfolds 1844 年创立于南澳。Grange 的创造者 Max Schubert 1948-1975 年任首席酿酒师，奠定了多产区、多园混酿＋美国橡木桶的 Penfolds 风格——当年他被命令停产，仍秘密把 Grange 做了下去。Bin 389 用陈酿过 Grange 的桶熟化，因此被称为「小葛兰许」。', concept:'多产区、多园混酿＋美国橡木桶，是 Penfolds 不变的底色。Max\'s 系列（2016 年推出）是向 Schubert 本人致敬，官方定位原文是「A more approachable Penfolds style at release – ideally shelf to glass, save the cellar」——上市即饮，不必窖藏。', tip:'开瓶即饮，不必窖藏；红肉、烤肉与硬质奶酪都很合拍。' },
-    '娇韵诗': { story:'1954 年 Jacques Courtin-Clarins 在巴黎开出第一家美容护理院，从身体护理和按摩手法起家，本身就是个很讲究“手法”的品牌。它很早就坚持用植物成分做配方，创始人的理念是“美离不开健康”。双萃精华是它家的招牌，2024 年已经迭代到第九代。', concept:'以植物精萃为核心，主张内外双源抗老：外源抵御（法国巨型芦竹精萃）＋内源焕活（65% 高纯度姜黄酮、植物 A 醇、胜肽），包装上的旋钮锁和取量阀也是为了让水油双相现调现用。' },
-    '安耐晒': { story:'安热沙是资生堂 1992 年推出的防晒品牌（港台译作“安耐晒”），名字来自日语“熱砂”——被太阳晒得发烫的沙子，寓意肌肤就算在烈日下也能保持美丽光泽。它 1996 年成为全球第一个在包装上标注 PA 防晒系数的品牌。', concept:'背靠资生堂一百年的紫外线研究，以超强防水防汗为招牌，后来又做出“遇汗遇水后防晒膜更强”的 Aqua Booster 技术，专为长时间户外设计。' },
-    '蜜丝婷': { story:'蜜丝婷（泰国国民美妆品牌，官方中文即“蜜丝婷”）是 1988 年在泰国创立的美妆品牌，隶属百特威（泰国）有限公司。创始人当年看准了热带气候下大家最需要防水防汗、持久不脱妆的产品，靠直销做起，后来成了泰国的国民美妆品牌，2016 年进入中国。', concept:'围绕热带气候做研发，主打防水防汗防晕染和高倍防晒，主力单品“小黄帽”用多重防晒剂物化结合，诉求高倍防护 + 平价好上手。' },
-    '幸姬酒造': { story:'幸姬酒造在佐贺县鹿岛市，1934 年创业，长期为日本三大稻荷之一佑德稻荷神社酿造御神酒。特别纯米酒用佐贺县产山田锦，稍偏辛口。', concept:'为神社酿御神酒的酒造，讲究的是「干净」——用本地米、本地水，做出佐贺人餐桌上配得上的那一口。酒精度 15%、720ml，配鲔鱼、鲑鱼、牡蛎。', tip:'稍偏辛口，冰镇或常温皆宜，配海鲜尤其对味。' },
-    '敷尔佳': { story:'敷尔佳是哈尔滨的品牌，前身是 1996 年成立、做药品销售的华信药业。2014 年团队研发出“医用透明质酸钠修复贴”，2015 年正式创立敷尔佳品牌，从医美术后修复这个场景切入，2023 年在深交所创业板上市。', concept:'带着医药基因做专业皮肤护理，从原料筛选到生产全程按药企标准管控，主打 II 类医疗器械类敷料与功能性护肤品并行的“妆械同源”路线。' },
-    '斯维诗': { story:'Swisse 1969 年创立于墨尔本，创始人 Kevin Ring 在 1960 年代环游世界寻找天然原料后创立品牌，2015/16 年被中国健合集团（H&H，原合生元）全资收购。使命是让全世界人们生活得更健康、更快乐，内部一切决策都要通过「H&H test」。', concept:'护肝片以奶蓟草＋洋蓟＋姜黄的西草经典组合为核心：每片洋蓟鲜叶 1g 当量、奶蓟草提取物 35.71mg（当量干果 2.5g）、姜黄提取物 75mg（当量干根茎 1.5g）。官方定位是支持自然的肝脏清洁与解毒过程。', tip:'成人每日 2 片，随餐或餐后立即服用；孕妇或可能怀孕者禁用，含亚硫酸盐。' },
-    '日本酒精选': { story:'这不是酒造品牌，是选品组合装，没有品牌故事可讲。', concept:'清酒权威风格框架是 SSI 的「薰·爽·醇·熟」四分类（香气高低 × 口感浓淡）；甘口/辛口是甜度维度，与淡丽/浓醇是口感浓淡维度，两者正交。小瓶组合的意义在于横向对比品鉴。', tip:'三支小瓶建议按「薰→爽→醇」顺序品鉴，从低温喝到常温。' },
-    '明色': { story:'明色（MEISHOKU）是桃谷顺天馆旗下的品牌，1932 年推出第一款明色卸妆霜后正式问世，名字寓意“光彩的明天”。当年它打出过一句很红的广告语——“美人是于夜间所制造的”，一度是日本皇室御用护肤品。', concept:'延续桃谷顺天馆“安全性第一”的信条，主打祛痘、保湿和美白抗皱三条线，配方以胎盘素、胶原蛋白、水杨酸为核心，走高性价比药妆路子。' },
-    '春秋航空': { story:'春秋航空 2004 年成立，是中国首批民营航空公司之一，总部上海，以「低成本、高性价比、让更多人坐得起飞机」为出发点。机上纪念品（云端好梦颈枕、飞行员墨镜、机模等）都是官方出品，只在机上与官方渠道有。', concept:'纪念品的思路是「把这段飞行带回家」——飞机造型、航线元素、机长同款，讲的是一个普通人也能拥有的飞行梦。' },
-    '普拉达': { story:'Prada Monochrome 唇膏的设计理念是把品牌的两块招牌面料做成妆效：金色壳的 Hyper Matte 取 Saffiano 皮革，银色壳的 Soft Matte 取 Re-Nylon。技术上用 Micro-Fit™ 让膏体接触双唇即融合，配双歧杆菌发酵溶胞物与荷荷巴油修护唇部屏障。', concept:'把面料做成妆效——Saffiano 皮革＝深色浓度与高附着（12 小时），Re-Nylon＝柔光漫射（6 小时、可叠加可作腮红）。三角形膏体一笔勾出唇峰，可替换芯比整支重购减少 76% 包装重量。' },
-    '桃谷明色': { story:'桃谷顺天馆 1885 年由药剂师桃谷政次郎在日本和歌山创立。当时他妻子一直被粉刺困扰，他就为她调配了一瓶“祛痘美颜水”，这瓶水后来成了日本第一瓶化妆水，也是品牌一百多年来的金字招牌。1932 年又推出了“明色”系列。', concept:'以药品级研发标准要求自己（历代掌门人多有药剂师资格），核心成分走胎盘素、胶原蛋白、水杨酸这类“药妆”路线，强调安全与平价。' },
-    '梅森马吉拉': { story:'Replica 香氛 2012 年推出，延续品牌 1994 年 Replica 成衣线的「复刻」概念——复刻的是一段记忆，不是一件衣服。药剂师瓶身配棉布标签，标签上写着地点与年份，比如慵懒周末写的是 Florence 2003。', concept:'每支香水复刻一个具体时空：慵懒周末＝佛罗伦萨清晨的床单与肌肤（铃兰、甜梨、鸢尾、白麝香）；航行日＝Paros 2001 的爱琴海（海水、杜松、鸢尾、龙涎香）；雨后初晴＝Dublin 1967（佛手柑、粉红胡椒、松针、广藿香、苔藓）。' },
-    '欧舒丹': { story:'1976 年，23 岁的 Olivier Baussan 在法国普罗旺斯买下一台旧蒸馏机，蒸馏迷迭香精油拿到集市上卖，欧舒丹就这么开始了。后来他去非洲布基纳法索旅行发现乳木果油，从那以后就一直跟当地妇女合作社公平采购原料。', concept:'把普罗旺斯的植物原料做成护理品（乳木果、樱花、甜扁桃、蜡菊等），同时坚持可追溯原料、尊重生物多样性和扶持女性经济独立这六项承诺。' },
-    '法尔曼': { story:'法尔曼的根在瑞士蒙特勒，1905 年那里就设立了疗养院，1985 年才正式推出 Valmont 护肤品牌。它把疗养院的医学护理传统搬进了护肤品，最出名的就是从野生三文鱼中提取的 DNA-RNA 活性因子。', concept:'以瑞士细胞疗养医学为底色，主打细胞更新与“肌肤健康状态”，配方强调高浓度活性成分和院线级护理体验。' },
-    '海蓝之谜': { story:'创始人是美国航空航天领域的物理学家 Max Huber，他在一次实验室事故中被灼伤，之后花了 12 年、做了 6000 多次实验，从深海巨藻里发酵出神奇活性精萃 Miracle Broth™。这个品牌后来归入雅诗兰黛集团，面霜一直是它的灵魂单品。', concept:'以深海巨藻为主料，配合酸橙茶等成分，经过 3-4 个月生物发酵得到 Miracle Broth™ 神奇活性精萃，走“修护优先”的路子。' },
-    '澳佳宝': { story:'Blackmores 澳佳宝 1932 年创立于澳大利亚，由自然疗法先驱 Maurice Blackmore 创办，是澳洲最具历史的天然健康品牌之一。', concept:'「自然疗法为本、证据为证」——坚持用天然来源原料，并把有效成分含量明确标示在包装上。', tip:'按标签推荐量随餐服用；孕期、哺乳期或正在服药请先咨询医生。' },
-    '爱马仕': { story:'爱马仕 1837 年由 Thierry Hermès 在巴黎开马具工坊起家。美妆是这个家族品牌的第 16 个 métier，2020 年才诞生，物件由鞋履与珠宝创意总监 Pierre Hardy 设计，香氛由专属调香师 Christine Nagel 创作；香水线的极简风格则由 2004-2016 年的专属调香师 Jean-Claude Ellena 奠定，大地（2006）、尼罗河花园（2005）都出自他手。', concept:'把彩妆当作可保留、可传承的物件而非消耗品——可替换芯、可续用。Pierre-Alexis Dumas 给它的定义是「benevolent artifice」：化妆不是为了伪装，而是把本来就有的美显现出来。' },
-    '獭祭': { story:'獭祭出自山口县岩国的旭酒造（1947 创业，品牌 1990 诞生），第三代社长樱井博志接手后立了三条不打折扣的原则：只用山田锦、不设杜氏（把温度时间湿度全部数据化）、引入远心分离取酒。', concept:'把清酒从「口传心授的手艺」变成「可记录、可复制的科学」。三割九分＝精米步合 39%，二割三分＝23%（研磨需 7 天）——磨掉多少，决定了酒能有多干净。', tip:'纯米大吟酿宜冷饮（10-15℃），配生鱼片、白身鱼与清淡料理，不要加热。' },
-    '珂润': { story:'珂润是日本花王 1999 年推出的品牌，专门为干燥性敏感肌做的。花王从 1976 年就开始研究皮肤，1987 年自己研发出了“润浸保湿神经酰胺功能成分”，从研究到产品化前后花了十多年。名字 Curel 来自 Cure（缓解）＋Well（良好状态）。', concept:'整套产品围绕“神经酰胺护理（Ceramide Care）”两大路径：洗净时守护神经酰胺、保湿时补足神经酰胺，全线无香料、无色素、无酒精。' },
-    '皇后的秘密': { story:'“皇后的秘密”是日本 Quality First（クオリティファースト）旗下的面膜系列，品牌 2012 年诞生于东京，靠大容量、无添加、平价的袋装面膜在日本走红，拿过 COSME 大赏面膜品类第一。正如名字 Quality First，它主打的就是“品质第一”。', concept:'有制药公司背景，追求“安全 + 有效”：用 BG、DPG 复配实现不加防腐剂也能抗菌，做到无香料、无色素、无酒精、无矿物油，定位可以每天敷的日常面膜。' },
-    '科颜氏': { story:'科颜氏的前身是 1851 年在纽约曼哈顿东村开的一家药房，最早由 Kiehl 家族经营，后来做成了以皮肤科学为基础的专业护肤品牌，2000 年被欧莱雅集团收购。店里保留着药剂师传统，骨头上刻着“since 1851”，还以慷慨送小样出名。', concept:'药房出身带来的配方哲学：天然高效成分 + 皮肤科学验证，代表成分是角鲨烷、金盏花和冰川保护蛋白，配方尽量精简、温和。' },
-    '芭比波朗': { story:'Bobbi Brown 是纽约的职业化妆师，1991 年她在 Bergdorf Goodman 百货推出 10 支自然色系的唇膏，想法特别朴素——做一支“看起来像嘴唇、只是更好看一点”的唇膏。原本准备一个月卖 100 支，结果第一天就卖光了，1995 年被雅诗兰黛集团收购。', concept:'裸妆哲学：化妆是为了让你更像你自己，而不是变成另一个人（品牌原话是“美的秘诀很简单：做你自己”），底妆追求像没化妆一样自然。' },
-    '莱珀妮': { story:'莱珀妮的起点是 1931 年瑞士蒙特勒的 Clinique La Prairie 疗养院，以活细胞疗法闻名；1978 年才推出 La Prairie 护肤品牌。后来它把鱼子精华做成了招牌，鱼子系列一直是顶奢抗老的代表。', concept:'以“活细胞抗老”为核心，独家的 Exclusive Cellular Complex 配合鱼子精华（Caviar Premier™），诉求紧致提拉和改善松弛。' },
-    '萨州赤兔马': { story:'出自鹿儿岛县いちき串木野市的濱田酒造，明治元年（1868）创业，有伝兵衛蔵（传统）、傳藏院蔵（革新）、金山蔵（继承）三藏，赤兔马出自伝兵衛蔵。酒名取自《三国志》「人中吕布、马中赤兔」的千里名马。', concept:'鹿儿岛产黄金千贯＋国产米米曲，白麹、常压蒸馏，用シラス台地天然过滤的地下水与冠岳涌水仕込，反复熟成与过滤。华丽果香与轻盈口感之下藏着醇厚——淡丽且芳醇。', tip:'常规款 25 度，加冰或兑温水皆可；佐鹿儿岛黑豚与烤物。' },
-    '蔻依': { story:'Chloé 1960 年代由 Gaby Aghion 创立，以柔软、不矫饰的女性气质著称，丝带是贯穿成衣与香氛的标志符号。经典 Chloé EDP 出自 2008 年，调香 Amandine Clerc-Marie 与 Michel Almairac；Nomade 恋旅则是 2018 年 2 月上市、由 Quentin Bisch 调香。', concept:'经典 EDP 用手绑丝带瓶承载牡丹/荔枝/小苍兰与玫瑰/铃兰/木兰，落点弗吉尼亚雪松与琥珀；Nomade 以 Drew「小猪包」的圆润 O 型弧线做瓶身，配金属颈圈与粉色垂带，讲「向世界出发的女性」。' },
-    '资生堂': { story:'1872 年，前海军药剂师福原有信在东京银座开了日本第一家西式药房，名字“资生堂”取自《易经》里的“至哉坤元，万物资生”。后来从药房转型做化妆品，成了日本历史最久的化妆品企业之一，红腰子就是它家最长红的精华。', concept:'核心理念是提升肌肤自身的防御力（肌肤免疫力），红腰子用 ImuGeneration 科技，以灵芝提取物和鸢尾根提取物为主，配合发酵植物精华。' },
-    '赫莲娜': { story:'创始人赫莲娜·鲁宾斯坦 1872 年生于波兰，因为不肯接受家里安排的婚事只身去了澳洲，随身只带了一把阳伞和妈妈做的乳霜。当地女性羡慕她白皙的皮肤，她就把乳霜拿来卖，1902 年在墨尔本开了世界上第一家美容沙龙。她那句“世上没有丑女人，只有懒女人”流传至今。', concept:'品牌精神是“至美力量，科技为先”、科学为美服务，长期与生物学、皮肤学、医学美容领域合作，并与瑞士医美中心 Laclinic-Montreux 联合研发，玻色因（Pro-Xylane）是核心抗老成分。' },
-    '金凯撒': { story:'金凯撒是面向中国市场的膳食营养补充剂品牌，主打鱼油、磷虾油等 Omega-3 类产品。', concept:'强调原料来源可追溯、有效成分含量明确标示（EPA/DHA 含量标在标签上）。', tip:'随餐服用吸收更好；正在服用抗凝药物者请先咨询医生。' },
-    '雅诗兰黛': { story:'创始人雅诗·兰黛夫人本名 Josephine Esther，家里人叫她 Estée，她跟丈夫 Joseph Lauder 1946 年在纽约创业，最早只有清洁油、润肤露、面霜等 4 款产品。她当年最出名的一句话是“每个女人都可以美丽”，还喜欢亲自站柜台给客人试妆。小棕瓶是 1982 年推出的，一直在迭代。', concept:'以皮肤科学为本做抗老修护，核心技术是“时钟肌因信源科技”（Chronolux Power Signal Technology），配合律波肽（三肽-32）和二裂酵母发酵产物溶胞物，主打夜间修护肌肤节律。' },
-    '香奈儿': { story:'嘉柏丽尔·香奈儿出身贫寒，在修道院学会缝纫，晚上在咖啡馆驻唱时常唱《谁见过 Coco》，就被大家叫成了“Coco”。1910 年她在巴黎康朋街 21 号开了第一家帽子店 Chanel Modes，1914 年正式创立品牌。1921 年她让调香师 Ernest Beaux 调香，挑了第 5 号样品，N°5 由此诞生。', concept:'设计哲学是“流行稍纵即逝，风格永存”，主张简约、自由、解放女性身体；护肤线以山茶花为核心成分，强调保湿与屏障防护。' },
-    '高丝': { story:'1946 年小林孝三郎在东京北区王子创办了高丝的前身“小林合名会社”，最早是做化妆品经销，后来自己做品牌。他讲究“制、贩、需共存共荣”，高丝也以品质出名，是日本化妆品行业第一个拿到戴明奖的企业。黛珂、雪肌精都是它家的。', concept:'企业理念是“美之创造企业”，主张英知与感性融合、创造独特的美的价值；KOSE 这个名字取自希腊语 kosmetikos，寓意宇宙、秩序与美。' },
-    '黛珂': { story:'黛珂是 1970 年由高丝推出的高端品牌，创始人小林孝三郎给品牌起名时把法语的 cosmétique（化妆品）和 décoration（装饰）拼在一起，意思是不只要护肤，还要“妆点”肌肤。它家最有名的是 1992 年上市的多重层微脂囊体精华。', concept:'两大招牌理念：一是“乳液先行”（先乳后水）的护肤顺序，二是 LIPOSOME 多重层微脂囊体技术，让有效成分一层层缓慢释放、渗透更久。' }
-  };
+  // ============ 工具：跨产品去重 / 按句截断 / 时长分档 ============
+  function pickUnused(pool, used, fallback){
+    if(!pool || !pool.length) return fallback || '';
+    let list = pool;
+    if(used){
+      const fresh = pool.filter(function(x){ return !used.has(x); });
+      if(fresh.length) list = fresh;
+    }
+    const s = list[Math.floor(Math.random() * list.length)];
+    if(used) used.add(s);
+    return s;
+  }
+  // 按句截断：宁可少说一句，也不把句子拦腰砍断
+  function clipSentence(text, max){
+    const t = String(text || '').trim();
+    if(!t) return '';
+    if(t.length <= max) return t;
+    let out = '', buf = '';
+    for(let i = 0; i < t.length; i++){
+      buf += t.charAt(i);
+      if('。！？'.indexOf(t.charAt(i)) >= 0){ out += buf; buf = ''; if(out.length >= max) return out; }
+    }
+    const all = out + buf;
+    return all.length > max ? (all.slice(0, max) + '。') : all;
+  }
+  // 时长 → 话术档位：3分钟极简 / 5分钟精简 / 8分钟标准 / 10分钟深度
+  const TALK_DEPTH = { 3:'brief', 5:'normal', 8:'full', 10:'deep' };
+  function talkDepthOf(dur){
+    const d = Number(dur) || 8;
+    return TALK_DEPTH[d] || (d <= 3 ? 'brief' : (d <= 5 ? 'normal' : (d <= 8 ? 'full' : 'deep')));
+  }
 
-  function productTalk(p, i, prevType){
+  /* 逐款话术合成器（2026-09 重写）
+   * 结构：过场衔接 → 钩子+点名+卖点 → 品牌来历/理念+典故或成分 → 段子+场景画面 → 使用时刻+人群+喝法+规格+互动+金句
+   * 档位：brief 2段 / normal 3段 / full 4段 / deep 4段+成分与规格扩展
+   * 去重：同一套餐内每款产品的钩子/段子/画面/时刻/金句互不重复（used 集合跨产品共享）
+   */
+  function productTalk(p, i, prevType, ctx){
+    ctx = ctx || {};
+    const used = ctx.used || new Set();
+    const depth = ctx.depth || 'full';
     const type = bigType(p);
-    const lead = (i > 0 ? pick(TS_TRANS_PAIR[prevType + '|' + type] || TS_TRANS) + '\n' : '');
-    const hook = pick(TS_HOOKS[type] || TS_HOOKS.skincare);
-    const bens = (p.coreBenefits || []).slice(0, 3);
-    const benefit = bens.length ? '主打' + bens.join('、') : '口碑很好';
-    let story = '';
-    if (i === 0 && BRAND_STORY[p.brand]) {
-      const _bs = BRAND_STORY[p.brand];
-      story = '说起' + p.brand + '这个牌子——' + _bs.story + (_bs.concept ? '他们做东西讲究的是：' + _bs.concept : '') + '\n';
+    const name = pName(p);
+    const bs = BRAND_STORY[p.brand];
+    const paras = [];
+
+    // ① 过场衔接（非首款）
+    if(i > 0) paras.push(pickUnused(TS_TRANS_PAIR[prevType + '|' + type] || TS_TRANS, used, ''));
+
+    // ② 钩子 + 点名 + 卖点
+    const hook = pickUnused(TS_HOOKS[type] || TS_HOOKS.skincare, used, '');
+    const bensAll = (p.coreBenefits || []).filter(function(x){ return x && String(x).indexOf('无副作用') < 0 && String(x).indexOf('100%') < 0; });
+    const bens = bensAll.slice(0, depth === 'brief' ? 2 : 3);
+    const benLead = pickUnused(TS_LEAD_BENEFIT, used, '它的看家本事是——');
+    let p1 = hook + '这一位，「' + name + '」。';
+    if(bens.length) p1 += benLead + bens.join('、') + '。';
+    if(i === 0 && ctx.cp){
+      const c = String((ctx.cp && ctx.cp.concerns) || '').trim();
+      if(c) p1 += '正好您关心' + c + '，这一款能说上话。';
     }
-    if (p.tale) {
-      story += '这里头还有个典故——' + p.tale + '。';
-    } else if (p.keyIngredients && p.keyIngredients.length) {
-      const k = p.keyIngredients[0];
-      const mech = String(k.mechanism || '').replace(/[。；;\s]+$/, '');
-      story = '成分上它主打「' + k.commonName + '」' + (mech ? '——' + mech : '') + '。';
-      if (story.length > 120) story = story.slice(0, 118) + '。';
+    paras.push(p1);
+
+    // ③ 品牌来历 / 理念 + 典故或成分（每款都给：首款讲来历，其余讲理念，杜绝“只有第一款有故事”）
+    if(depth !== 'brief'){
+      let p2 = '';
+      if(bs){
+        if(i === 0 && bs.story){
+          p2 += pickUnused(TS_LEAD_STORY, used, '说起这个牌子——').split('{brand}').join(p.brand) + clipSentence(bs.story, depth === 'deep' ? 170 : 115);
+        } else if(bs.concept){
+          p2 += pickUnused(TS_LEAD_CONCEPT, used, '这个牌子做东西的讲究是——').split('{brand}').join(p.brand) + clipSentence(bs.concept, depth === 'deep' ? 120 : 78);
+        }
+      }
+      if(p.tale){
+        p2 += pickUnused(TS_LEAD_TALE, used, '里头还有个典故——') + clipSentence(p.tale, depth === 'deep' ? 110 : 72);
+      }
+      // 2026-09-12 核查修复：有 tale 的产品原本整段跳过成分行，而 deep 档只补第 2、3 个成分，
+      // 导致主成分在深度档完全没被提到（实测 28 款：小棕瓶 / SK-II / 海蓝之谜 / 兰蔻菁纯…）
+      if(p.keyIngredients && p.keyIngredients.length && (depth === 'deep' || !p.tale)){
+        const k = p.keyIngredients[0];
+        const mech = String(k.mechanism || '').replace(/[。；;\s]+$/, '');
+        p2 += clipSentence(pickUnused(TS_LEAD_ING, used, '成分上它主打「{ing}」——').split('{ing}').join(k.commonName) + (mech ? mech + '。' : '。'), depth === 'deep' ? 140 : 95);
+      }
+      if(p2) paras.push(p2);
     }
+
+    // ④ 段子 + 场景画面（normal 起给段子，full 起再叠加画面）
+    if(depth === 'full' || depth === 'deep'){
+      paras.push(pickUnused(TS_JOKES[type] || TS_JOKES.skincare, used, '') + pickUnused(TS_SCENES[type] || TS_SCENES.skincare, used, ''));
+    } else if(depth === 'normal'){
+      paras.push(pickUnused(TS_JOKES[type] || TS_JOKES.skincare, used, ''));
+    }
+
+    // ⑤ 使用时刻 + 适合人群 + 喝法 + 规格 + 互动 + 金句
+    let p4 = pickUnused(TS_MOMENTS[type] || TS_MOMENTS.skincare, used, '');
     const tgt = (p.targetSkinTypes || []).filter(function(t){ return t && t !== '所有人群' && t !== '所有肤质'; }).slice(0, 2);
-    const who = tgt.length ? '尤其适合' + tgt.join('、') + '的朋友。' : '';
-    const closer = pick(TS_CLOSERS[type] || TS_CLOSERS._generic);
-    const drinkTip = (BRAND_STORY[p.brand] && BRAND_STORY[p.brand].tip) ? '喝法上——' + BRAND_STORY[p.brand].tip + '。' : '';
-    return lead + hook + '这款「' + pName(p) + '」，' + benefit + '。' + story + who + drinkTip + TS_MOMENTS[type] + closer;
+    if(tgt.length && depth !== 'brief') p4 += pickUnused(TS_LEAD_WHO, used, '尤其适合{who}的朋友。').split('{who}').join(tgt.join('、'));
+    if(bs && bs.tip && (depth === 'full' || depth === 'deep')) p4 += '喝法上——' + bs.tip;
+    if(depth === 'deep'){
+      const more = (p.keyIngredients || []).slice(1, 3);
+      if(more.length){
+        p4 += pickUnused(TS_LEAD_INGMORE, used, '配方里还有{list}，各管一摊。').split('{list}').join(more.map(function(x){ return '「' + x.commonName + '」'; }).join('、'));
+      }
+      if(p.volume && p.origin){
+        p4 += pickUnused(TS_LEAD_SPEC, used, '规格是{vol}，{origin}原产。').split('{vol}').join(p.volume).split('{origin}').join(p.origin);
+      }
+    }
+    if(depth === 'full' || depth === 'deep') p4 += pickUnused(TS_ASK[type] || TS_ASK.skincare, used, '');
+    p4 += pickUnused(TS_CLOSERS[type] || TS_CLOSERS._generic, used, '');
+    paras.push(p4);
+
+    return paras.filter(function(x){ return x && String(x).trim(); }).join('\n');
   }
 
   // ================= 主生成：完整广播话术稿 =================
@@ -18901,23 +20043,39 @@ const talkShowEngine = (function(){
     const _nowH = new Date().getHours();
     const _autoTime = (_nowH >= 6 && _nowH < 11) ? 'morning' : (_nowH >= 11 && _nowH < 14) ? 'noon' : (_nowH >= 14 && _nowH < 18) ? 'afternoon' : 'evening';
     const _useTime = (opts.time && TS_OPEN_TIMES[opts.time]) ? opts.time : _autoTime;
-    let _useFest = (opts.holiday && TS_OPEN_FESTS[opts.holiday]) ? opts.holiday : '';
+    // 节日/节气挂载点统一由 DateMatch.resolveScript 产出（见 beauty 页尾 festivalKeyForScript）：
+    //   'fest:<key>'   → OPEN_FESTS 节日话术
+    //   'solar:<节气>' → OPEN_TERMS 节气话术（与 qa.html 的 qaTalkEngine 同一约定）
+    //   'auto' / 空    → 由 DateMatch 的当日匹配决定，最后才退回时段开场
+    const _hRaw = String(opts.holiday || '');
+    let _useFest = '', _useTerm = '';
+    if(_hRaw.indexOf('solar:') === 0) _useTerm = _hRaw.slice(6);
+    else if(_hRaw.indexOf('term:') === 0) _useTerm = _hRaw.slice(5);
+    else if(_hRaw.indexOf('fest:') === 0) _useFest = _hRaw.slice(5);
+    else if(opts.holiday && TS_OPEN_FESTS[opts.holiday]) _useFest = opts.holiday;
     let _matchInfo = { kind: 'time', key: _useTime };
-    if(!_useFest && (!opts.holiday || opts.holiday === 'auto')){
+    if(_useFest && TS_OPEN_FESTS[_useFest]) _matchInfo = { kind: 'festival', key: _useFest, name: festName(_useFest) };
+    if(_useTerm && TS_OPEN_SOLARS[_useTerm]) _matchInfo = { kind: 'solar', key: _useTerm };
+    if(!_useFest && !_useTerm && (!opts.holiday || opts.holiday === 'auto')){
       const _m = matchFor(new Date());
-      if(_m.festival){ _useFest = _m.festival; _matchInfo = { kind: 'festival', key: _m.festival, name: festName(_m.festival) }; }
-      else if(_m.solarTerm){ _useFest = 'solar:' + _m.solarTerm; _matchInfo = { kind: 'solar', key: _m.solarTerm }; }
+      if(_m.festival && TS_OPEN_FESTS[_m.festival]){ _useFest = _m.festival; _matchInfo = { kind: 'festival', key: _m.festival, name: festName(_m.festival) }; }
+      else if(_m.solarTerm && TS_OPEN_SOLARS[_m.solarTerm]){ _useTerm = _m.solarTerm; _matchInfo = { kind: 'solar', key: _m.solarTerm }; }
     }
-    if(_useFest){
-      if(_useFest.indexOf('solar:') === 0) blocks.push(pick(TS_OPEN_SOLARS[_useFest.slice(6)]));
-      else blocks.push(pick(TS_OPEN_FESTS[_useFest]));
-    } else {
-      blocks.push(pick(TS_OPEN_TIMES[_useTime] || TS_OPENERS));
+    if(_useTerm && TS_OPEN_SOLARS[_useTerm]) blocks.push(pick(TS_OPEN_SOLARS[_useTerm]));
+    else if(_useFest && TS_OPEN_FESTS[_useFest]) blocks.push(pick(TS_OPEN_FESTS[_useFest]));
+    else blocks.push(pick(TS_OPEN_TIMES[_useTime] || TS_OPENERS));
+    // 时长分档 + 跨产品素材去重（2026-09）：同一套餐内各款的钩子/段子/画面/时刻/金句不重复
+    const _talkUsed = new Set();
+    const _talkDepth = talkDepthOf(opts.duration);
+    // 标准/深度档：开场补一句预告，让旅客知道今天讲几款、怎么讲
+    if(_talkDepth === 'full' || _talkDepth === 'deep'){
+      blocks[0] = blocks[0] + '\n' + pick(TS_PREVIEW).split('{n}').join(prods.length);
     }
+    const _talkCp = (opts.showProfile && opts.customerProfile) ? opts.customerProfile : null;
     prods.forEach(function(p, i){
-      blocks.push(productTalk(p, i, bigType(prods[Math.max(0, i - 1)])));
+      blocks.push(productTalk(p, i, bigType(prods[Math.max(0, i - 1)]), { used: _talkUsed, depth: _talkDepth, cp: (i === 0 ? _talkCp : null) }));
     });
-    if(!single) blocks.push(pick(TS_SET));
+    if(!single) blocks.push((_talkDepth === 'deep') ? pick(TS_SET_DEEP) : pick(TS_SET));
     blocks.push(pick(TS_CLOSINGS));
 
     const cc = function(t){ return beautySceneEngine.complianceClean(t, mode); };
@@ -19208,14 +20366,14 @@ window.talkShowEngine = talkShowEngine;
                 '面霜': ['面霜是锁水的关键，这款面霜我自己也一直在用。', '好的面霜能让前面用的精华都发挥出最大效果，这款就是。', '面霜选对了，护肤就成功了一半。'],
                 '眼霜': ['眼周是最容易显老的地方，这款眼霜是很多旅客回购最多的。', '眼霜一定要趁早用，这款是旅客反馈最好的。', '眼周护理不能等，这款眼霜我自己也在用。'],
                 '化妆水': ['护肤第一步就是水，这款精华水是很多旅客的入门首选。', '水用对了，后面吸收效果翻倍。这款水口碑特别好。', '好水是护肤的地基，这款水回购率特别高。'],
-                '洁面': ['清洁是护肤的第一步，这款洁面是敏感肌也能放心用的。', '脸洗对了，护肤事半功倍。这款洁面我自己也推荐给家人。', '洁面选不好，后面用再贵的产品都白搭。'],
-                '防晒': ['防晒是抗老最重要的一步，这款防晒涂上脸完全不油腻。', '不防晒等于白护肤，这款防晒是旅客回购率最高的。', '防晒一年四季都要涂，这款是我自己出门必带的。'],
-                '粉底液': ['底妆是一切妆容的基础，这款粉底液持妆效果特别厉害。', '粉底选对了，整个妆就成功了一半。这款是油皮亲妈。', '好粉底让你从早美到晚，这款持妆16小时不是吹的。'],
+                '洁面': ['清洁是护肤的第一步，这款洁面洗完脸不紧绷，口碑很稳。', '脸洗对了，护肤事半功倍。这款洁面我自己也推荐给家人。', '洁面选不好，后面用再贵的产品都白搭。'],
+                '防晒': ['防晒是抗老很重要的一步，这款防晒涂上脸很清爽、不油腻。', '不防晒等于白护肤，这款防晒是旅客回购率最高的。', '防晒一年四季都要涂，这款是我自己出门必带的。'],
+                '粉底液': ['底妆是一切妆容的基础，这款粉底液持妆效果特别厉害。', '粉底选对了，整个妆就成功了一半。这款是油皮亲妈。', '好粉底让你从早美到晚，持妆力扛得住一整天。'],
                 '口红': ['口红是提升气色的好帮手，这款色号不挑肤色。', '一支好口红能让整个人都不一样，这款今年很受欢迎。', '口红我推荐这款，滋润又显色，日常通勤都合适。'],
                 '卸妆': ['卸妆比化妆更重要，这款卸妆油温和又干净。', '妆卸不干净，用再贵的护肤品都白搭。这款是我自己用的。', '卸妆一定要选温和的，这款连眼妆都能轻松卸。'],
                 '面膜': ['面膜是急救神器，这款面膜精华液特别多。', '敷一片面膜15分钟，皮肤马上不一样。这款是旅客回购王。', '面膜是最快见效的护肤单品，这款我逢人就夸。'],
                 '眼膜': ['眼膜是眼周急救的好帮手，这款敷完细纹和黑眼圈都有改善。', '熬夜后敷一片眼膜，眼周立刻精神了。这款是出差必备。'],
-                '隔离': ['隔离是护肤和彩妆之间的桥梁，这款防晒隔离二合一特别方便。', '隔离霜选对了，后续上妆更服帖。这款是通勤必备。'],
+                '隔离': ['隔离是护肤和彩妆之间的桥梁，这款上妆前打底特别方便。', '隔离霜选对了，后续上妆更服帖。这款是通勤必备。'],
                 '香水': ['香水是看不见的配饰，这款香味特别高级。', '好香水让人记住你，这款是我自己最喜欢的味道。', '香水是提升气质的秘密武器，这款适合各种场合。'],
                 '保健品': ['内调外养才是正道，这款保健品我自己也在吃。', '身体好皮肤才会好，这款保健品是很多旅客回购的。', '保健要坚持吃才有效，这款性价比特别高。'],
                 '护手霜': ['手是女人的第二张脸，这款护手霜滋润不油腻。', '护手霜一年四季都要涂，这款是我包里常备的。'],
@@ -19226,7 +20384,7 @@ window.talkShowEngine = talkShowEngine;
                 '乳液': ['乳液是水油平衡的关键，这款质地清爽吸收快。', '乳液选对，皮肤一整天都舒服，这款是年轻旅客的偏好。', '如果觉得面霜厚重，这款乳液刚刚好，水润不腻。'],
                 '身体护理': ['身体护理不能忽视，这款用完皮肤滑滑的。', '身体乳选对了一样重要，这款滋润又好吸收。'],
                 '香薰': ['舱内香氛能让整个人放松下来，这款是很多旅客的伴飞之选。', '点上香薰，旅途的疲惫一扫而空，这款味道很高级。'],
-                '清酒': ['这款清酒是我特别想跟您推荐的，口感真的不一样。', '好清酒讲究米和水，这款用的是顶级酒米酿造。'],
+                '清酒': ['这款清酒是我特别想跟您推荐的，口感真的不一样。', '好清酒讲究米和水，这款用的是严选酒米酿造。'],
                 '酒': ['好酒配好心情，这款是航班上很受欢迎的伴手酒。', '机上免税的酒很划算，这款正好适合小酌或送礼。'],
                 '红酒': ['这款红酒是很多旅客点名要买的，品质有保障。', '红酒选这款不会错，口感醇厚又好入口。'],
                 '梅子酒': ['梅子酒是女士最爱，这款酸甜适中特别好喝。', '梅子酒喝法多样，这款是我自己最喜欢的。'],
@@ -19395,6 +20553,9 @@ window.talkShowEngine = talkShowEngine;
                     } else {
                         benefitsText += '\n';
                     }
+                    // 2026-09：极简档补一句"适合谁"，避免每款只剩干巴巴的卖点+成分
+                    const _vs = (product.targetSkinTypes || []).filter(function(t){ return t && t !== '所有人群' && t !== '所有肤质'; });
+                    if (_vs.length) benefitsText += `适合：${_vs.slice(0, 2).join('、')}。\n`;
                 } else if (isShort) {
                     // 短时模式：精简到核心信息，每款产品2-3句话
                     benefitsText += `\n**${fullName(product)}**\n`;
@@ -19412,6 +20573,9 @@ window.talkShowEngine = talkShowEngine;
                     if (product.targetSkinTypes.length > 0) {
                         benefitsText += `适合：${product.targetSkinTypes.slice(0, 2).join('、')}。\n`;
                     }
+                    // 2026-09：短档也补一句品牌来头，让每款产品有自己的"出处"
+                    const _sh = brandHeadline(product.brand, pIdx === 0);
+                    if (_sh) benefitsText += `${_sh}\n`;
                 } else {
 
                         benefitsText += `\n**${fullName(product)}**\n`;
@@ -19424,6 +20588,9 @@ window.talkShowEngine = talkShowEngine;
                         } else {
                             benefitsText += `它主要能帮您：${product.coreBenefits.join('、')}。\n`;
                         }
+                        // 2026-09：每款都补一句品牌来头（首款讲来历、其余讲理念）
+                        const _bh = brandHeadline(product.brand, pIdx === 0);
+                        if (_bh) benefitsText += `${_bh}\n`;
                         
                         if (isMedium || isLong) {
                             benefitsText += `${getRandomUnique(pLifeScenarios, usedBenefitIntros)}\n`;
@@ -19984,8 +21151,9 @@ function beautyFeedbackMenu(btn){
       if(!state.selectedProductIds.length){ showAlert('请先选择产品'); return; }
       const prods = _sortForStory(state.selectedProductIds.map(function(id){ return getProductById(id); }).filter(Boolean));
       if(!prods.length){ showAlert('所选产品不存在'); return; }
-      const script = beautySceneEngine.build(prods, { mode: mode, duration: state.duration || 5, customerProfile: state.customerProfile, showProfile: state.showCustomerProfile });
+      const script = beautySceneEngine.build(prods, { mode: mode, duration: state.duration || 5, customerProfile: state.customerProfile, showProfile: state.showCustomerProfile, fest: festivalKeyForScript() });
       if(!script){ showAlert('话术生成失败，请重试'); return; }
+      window.applyScriptFestHint(script);
       state.generatedScript = script;
       state.viewMode = 'full';
       render();
@@ -19995,8 +21163,9 @@ function beautyFeedbackMenu(btn){
         if(!state.selectedProductIds.length){ showAlert('请先选择产品'); return; }
         const tprods = _sortForStory(state.selectedProductIds.map(function(id){ return getProductById(id); }).filter(Boolean));
         if(!tprods.length){ showAlert('所选产品不存在'); return; }
-        const tscript = talkShowEngine.build(tprods, { mode: mode, duration: state.duration || 5, time: state.scriptTime || 'auto', holiday: state.scriptHoliday || 'auto' });
+        const tscript = talkShowEngine.build(tprods, { mode: mode, duration: state.duration || 5, time: state.scriptTime || 'auto', holiday: festivalKeyForScript('talk'), customerProfile: state.customerProfile, showProfile: state.showCustomerProfile });
         if(!tscript){ showAlert('话术生成失败，请重试'); return; }
+        window.applyScriptFestHint(tscript);
         state.generatedScript = tscript;
         state.viewMode = 'full';
         render();
@@ -20009,7 +21178,77 @@ function beautyFeedbackMenu(btn){
   state.complianceMode = state.complianceMode || localStorage.getItem('beauty_compliance_mode') || 'strict';
   state.scriptTime = state.scriptTime || 'auto';
   state.scriptHoliday = state.scriptHoliday || 'auto';
+  state.scriptTopic = state.scriptTopic || '';
 })();
+
+/* ===== 日期匹配（DateMatch）统一入口：所有话术功能共用同一套识别结果 =====
+ * 优先级：手动选择的「机上场合」> 话术主题里识别到的节日 > 今日自动匹配
+ * 只有话术库里真有开场白的节日 key 才会被采用，其余仅作 UI 提示，避免生成空段
+ */
+/* 统一入口：主题文本 → 话术挂载点（'fest:x' / 'solar:节气'），识别不出则 'auto' */
+window.festivalKeyForScript = function(style){
+  const manual = state.scriptHoliday || 'auto';
+  if(manual && manual !== 'auto') return manual;          // 手动指定优先（'none' 表示常规航班）
+  const r = window.scriptFestPick();
+  if(r && r.script) return r.script.kind + ':' + r.script.key;
+  // 主题里识别到节日但话术库暂无该节日开场白：不丢弃识别结果，用节名做轻量植入
+  if(r && r.inlineHint) window.__scriptFestHint = r.inlineHint;
+  return 'auto';
+};
+/* 主题解析：一次解析、全页共用（UI 提示与生成逻辑读同一份结果，避免两套口径） */
+window.scriptFestPick = function(){
+  if(typeof DateMatch === 'undefined') return null;
+  return DateMatch.resolveScript(String(state.scriptTopic || ''));
+};
+window.dateMatchOf = function(text){
+  if(!text || typeof DateMatch === 'undefined') return null;
+  return DateMatch.parseBest(String(text));
+};
+/* 生成后把「识别到但无专属开场白」的节日提示插进开场段，保证识别结果不白费 */
+window.applyScriptFestHint = function(script){
+  if(!script || !script.modules || !script.modules.length) return script;
+  const hint = window.__scriptFestHint;
+  window.__scriptFestHint = '';
+  if(!hint) return script;
+  const m0 = script.modules[0];
+  if(m0 && m0.content && m0.content.indexOf(hint) < 0){
+    m0.content = m0.content + '\n' + hint;
+    script.fullText = script.modules.map(function(m){ return m.content; }).join('\n\n');
+  }
+  return script;
+};
+window.setScriptTopic = function(v){ state.scriptTopic = v || ''; render(); };
+window.dateMatchTipHtml = function(){
+  if(typeof DateMatch === 'undefined') return '';
+  const t = String(state.scriptTopic || '').trim();
+  // 未填主题：直接告诉用户会走今日匹配（避免"什么都没写也不知道会生成什么"）
+  if(!t){
+    const td = DateMatch.todayMatch(new Date());
+    if(!td) return '<div class="mt-2 text-xs text-gray-400">未填主题，按时段生成常规开场（可写：教师节快到了 / 中秋想送点礼 / 下个月出差）</div>';
+    return '<div class="mt-2 text-xs px-2 py-1.5 rounded-lg border text-teal-700 bg-teal-50 border-teal-100">📅 未填主题，将按今日匹配：'
+      + td.name + '（' + (td.label || td.start) + '）</div>';
+  }
+  const list = DateMatch.parse(t);
+  if(!list.length) return '<div class="mt-2 text-xs text-gray-400">未识别到节日或日期表达（可写：教师节快到了 / 中秋想送点礼 / 下个月出差）</div>';
+  const rows = list.map(function(m){
+    const ok = m.confidence >= 0.8;
+    const cls = ok ? 'text-emerald-700 bg-emerald-50 border-emerald-100' : 'text-amber-700 bg-amber-50 border-amber-100';
+    return '<div class="text-xs px-2 py-1.5 rounded-lg border ' + cls + '">🎯 ' + DateMatch.typeName(m.type) + '：' + m.name
+      + '（' + (m.label || ((m.start === m.end) ? m.start : m.start + ' ~ ' + m.end))
+      + '，置信度 ' + Math.round(m.confidence * 100) + '%' + (m.note ? '，' + m.note : '') + '）</div>';
+  }).join('');
+  // 挂载点提示：识别结果到底有没有被用上，必须让用户看得见
+  const r = DateMatch.resolveScript(t);
+  let use = '';
+  if(r && r.script){
+    use = '<div class="text-xs px-2 py-1.5 rounded-lg border text-emerald-700 bg-emerald-50 border-emerald-100">✅ 已挂载'
+      + (r.script.kind === 'term' ? '节气开场' : '节日开场') + '：' + r.name + '（' + (r.match.label || r.match.start) + '）</div>';
+  } else if(r && r.match){
+    use = '<div class="text-xs px-2 py-1.5 rounded-lg border text-gray-600 bg-gray-50 border-gray-200">ℹ ' + r.match.name
+      + ' 暂无专属开场白，将在开场补一句应景提示</div>';
+  }
+  return '<div class="mt-2 space-y-1">' + rows + use + '</div>';
+};
 
 /* E2E/测试钩子：指定产品 + 风格/合规模式生成（仅供自动化与自测） */
 
@@ -20029,9 +21268,10 @@ window.beautySetProducts = function(ids, style, mode){
 window.setScriptStyle = function(v){ state.scriptStyle = v; try{ localStorage.setItem('beauty_script_style', v); }catch(e){} render(); };
 window.festTodayTag = function(){
   try{
-    const m = talkShowEngine.matchFor(new Date());
-    if(m.festival) return '📅 今日匹配：' + talkShowEngine.festName(m.festival);
-    if(m.solarTerm) return '📅 今日节气：' + m.solarTerm;
+    if(typeof DateMatch !== 'undefined'){
+      const m = DateMatch.todayMatch(new Date());
+      if(m) return (m.type === 'term' ? '🍃 今日节气：' : '📅 今日匹配：') + m.name;
+    }
   }catch(e){}
   return '';
 };
@@ -22143,6 +23383,9 @@ window.setComplianceMode = function(v){ state.complianceMode = v; try{ localStor
 <div class="bg-gray-50 rounded-xl p-3 border border-gray-100"><div class="text-sm font-semibold text-gray-700 mb-2">🕐 航段时段</div><select onchange="state.scriptTime=this.value;render()" class="w-full px-3 py-2 bg-white border border-gray-200 rounded-lg text-sm"><option value="auto" ${state.scriptTime==='auto'?'selected':''}>自动（按当前时刻）</option><option value="morning" ${state.scriptTime==='morning'?'selected':''}>🌅 早班机</option><option value="noon" ${state.scriptTime==='noon'?'selected':''}>☀️ 午间</option><option value="afternoon" ${state.scriptTime==='afternoon'?'selected':''}>🌤 下午</option><option value="evening" ${state.scriptTime==='evening'?'selected':''}>🌙 夜航</option></select></div>
 <div class="bg-gray-50 rounded-xl p-3 border border-gray-100"><div class="text-sm font-semibold text-gray-700 mb-2">🎉 机上场合 <span class="ml-1 text-[10px] font-normal text-teal-600">${festTodayTag()}</span></div><select onchange="state.scriptHoliday=this.value;render()" class="w-full px-3 py-2 bg-white border border-gray-200 rounded-lg text-sm"><option value="auto" ${state.scriptHoliday==='auto'?'selected':''}>🎯 自动匹配（今日节假日/节气）</option><option value="none" ${state.scriptHoliday==='none'?'selected':''}>常规航班</option><option value="spring" ${state.scriptHoliday==='spring'?'selected':''}>🧧 春节</option><option value="midautumn" ${state.scriptHoliday==='midautumn'?'selected':''}>🥮 中秋</option><option value="national" ${state.scriptHoliday==='national'?'selected':''}>🇨🇳 国庆</option><option value="newyear" ${state.scriptHoliday==='newyear'?'selected':''}>🎆 元旦跨年</option><option value="valentine" ${state.scriptHoliday==='valentine'?'selected':''}>💝 情人节</option><option value="mothers" ${state.scriptHoliday==='mothers'?'selected':''}>🌸 母亲节</option><option value="qingming" ${state.scriptHoliday==='qingming'?'selected':''}>🌿 清明</option><option value="yuanxiao" ${state.scriptHoliday==='yuanxiao'?'selected':''}>🏮 元宵节</option><option value="duanwu" ${state.scriptHoliday==='duanwu'?'selected':''}>🎋 端午节</option><option value="qixi" ${state.scriptHoliday==='qixi'?'selected':''}>🌌 七夕</option><option value="chongyang" ${state.scriptHoliday==='chongyang'?'selected':''}>⛰ 重阳节</option><option value="laba" ${state.scriptHoliday==='laba'?'selected':''}>🍲 腊八节</option><option value="xiaonian" ${state.scriptHoliday==='xiaonian'?'selected':''}>🧹 小年</option><option value="chuxi" ${state.scriptHoliday==='chuxi'?'selected':''}>🏮 除夕</option><option value="women" ${state.scriptHoliday==='women'?'selected':''}>🌷 妇女节</option><option value="labor" ${state.scriptHoliday==='labor'?'selected':''}>🛠 劳动节</option><option value="teachers" ${state.scriptHoliday==='teachers'?'selected':''}>🍎 教师节</option></select></div>
 </div>
+<div class="border-t border-teal-100 pt-3"><div class="text-sm font-semibold text-gray-700 mb-2">🎯 话术主题 <span class="ml-1 text-[10px] font-normal text-teal-600">写了就自动识别节日/日期，优先于今日自动匹配</span></div>
+<input type="text" placeholder="如：教师节快到了，想给老师挑份礼物 / 中秋想送点礼 / 下个月出差要用" value="${state.scriptTopic}" oninput="setScriptTopic(this.value)" class="w-full px-3 py-2 bg-white border border-gray-200 rounded-lg text-sm focus:border-teal-300 focus:outline-none focus:ring-2 focus:ring-teal-100">
+${dateMatchTipHtml()}</div>
 <div class="flex items-center gap-2 flex-wrap pt-1">
 <button onclick="state.showCustomerProfile=!state.showCustomerProfile;render()" class="px-3 py-1.5 bg-white border border-gray-200 text-gray-600 rounded-lg text-xs font-medium transition-colors">${state.showCustomerProfile?'✓ 收起':'👤 顾客画像'}</button>
 <button onclick="openDurationPreview()" class="px-3 py-1.5 bg-teal-500 hover:bg-teal-600 text-white rounded-lg text-xs font-medium transition-colors shadow">📖 四档预览</button>

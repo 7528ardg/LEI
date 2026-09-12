@@ -12159,6 +12159,9 @@ https://github.com/nodeca/pako/blob/main/LICENSE
                         dataCache.set(cacheKey, data);
                         cacheTimestamps.set(cacheKey, Date.now());
                         await this._addToMonthIndex(monthKey);
+                        // 2026-09-12：通知「你问我答」板块刷新绩效缓存（qa 缓存只在启动时加载一次，
+                        // 不通知的话用户在绩效后台更新数据后，qa 会拿旧数据回答）
+                        try { localStorage.setItem('qa_perf_dirty', String(Date.now())); } catch(e) {}
                         console.log(`[Storage] 已保存月份 ${monthKey} 到 IndexedDB${DataEncryption.isReady() ? ' (已加密)' : ''}`);
                         if (typeof DataGuard !== 'undefined' && DataGuard.settings) DataGuard.updateFingerprint(true);
                         return true;
@@ -12259,6 +12262,8 @@ https://github.com/nodeca/pako/blob/main/LICENSE
                     return await this.safeExecute(async () => {
                         await del(DB_PREFIX + monthKey);
                         await this._removeFromMonthIndex(monthKey);
+                        // 2026-09-12：删除月份同样通知 qa 板块刷新绩效缓存
+                        try { localStorage.setItem('qa_perf_dirty', String(Date.now())); } catch(e) {}
                     });
                 },
                 async deleteMonth(monthKey) {

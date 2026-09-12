@@ -90,20 +90,30 @@ window.SeasonEngine = (function () {
     'valentine': ['各位旅客好！又到情人节，巧的是您正在这趟航班上。不管有没有伴儿，爱自己这件事都值得——机上好物，给心爱的人，也给自己一份。', '情人节快乐！香水、口红、护理好物，今天的机上清单格外应景。单身的朋友更该对自己好——爱自己，永远不会亏。'],
     'women': ['各位旅客节日快乐！今天是为她喝彩的日子。机上备了点悦己好物——对自己好，才是头等大事。', '女神节好！机上这几款，都是给自己添点好心情的。辛苦一年，值得。'],
     'xiaonian': ['各位旅客小年好！小年扫尘，迎新纳福。机上好物带一份，年货备齐，好心情也备齐。', '小年一过，家家户户开始忙年了。机上好物备一份，回家也添份喜气。'],
-    'yuanxiao': ['各位旅客元宵好！正月十五闹花灯，天上的航班也沾了喜气。机上备了点好意头的好物——团团圆圆，月圆人更圆。', '元宵节好！过了十五，这个年才算真正过完。机上这几款好物，给年味收个漂亮的尾。']
+    'yuanxiao': ['各位旅客元宵好！正月十五闹花灯，天上的航班也沾了喜气。机上备了点好意头的好物——团团圆圆，月圆人更圆。', '元宵节好！过了十五，这个年才算真正过完。机上这几款好物，给年味收个漂亮的尾。'],
+    'shopping618': ['六月过半，618 这几天买东西的人多。机上这几款跨境好物，包税含邮，落地前下单几天就到家，也算赶上了这一波。', '618 到了，机上的专享价也给您备着。不用蹲点、不用凑单，看中了直接带走，图的就是省心。'],
+    'shuang11': ['各位旅客，双十一这几天，机上的跨境好物也是实打实的专享价——不用熬夜抢、不用凑满减，看中就带走。', '双十一好！与其在网上比来比去，不如趁这趟航班把东西挑明白：跨境正品、包税到家，价格都标在明处。'],
+    'shuang12': ['双十二这几天，年货也可以开始备起来了。机上这几款跨境好物，包税到家，先挑几样，过年就从容。', '各位旅客，双十二好！机上专享价照旧，看中什么落地前下单，几天就能收到。'],
+    'christmas': ['各位旅客圣诞快乐！机上也沾了节日气氛——几款适合送礼的好物，包装体面，带回去就是一份心意。', '圣诞快乐！给自己或重要的人挑一份，机上这几款礼物感足，还省得您再去挤商场。'],
+    'nianhuo': ['年货节到了，年味也近了。机上这几款好物，当年货先备上，回家不用再赶场。', '各位旅客，年货备得早，过年就从容。机上跨境好物包税到家，先挑几样带回去。']
   };
 
   // 公历固定节日
+  // 公历固定节日（含通用购物节点，与 DateMatch 词表口径一致）
   var GREG_FESTS = {
     '01-01': 'newyear', '02-14': 'valentine', '03-08': 'women',
-    '05-01': 'labor', '06-01': 'children', '09-10': 'teachers', '10-01': 'national'
+    '05-01': 'labor', '06-01': 'children', '06-18': 'shopping618',
+    '09-10': 'teachers', '10-01': 'national',
+    '11-11': 'shuang11', '12-12': 'shuang12', '12-25': 'christmas'
   };
   var FEST_NAMES = {
     newyear: '元旦', spring: '春节', yuanxiao: '元宵节', valentine: '情人节',
     women: '妇女节', labor: '劳动节', children: '儿童节', fathers: '父亲节',
     teachers: '教师节', national: '国庆节', duanwu: '端午节', qixi: '七夕节',
     midautumn: '中秋节', chongyang: '重阳节', laba: '腊八节',
-    xiaonian: '小年', chuxi: '除夕', mothers: '母亲节'
+    xiaonian: '小年', chuxi: '除夕', mothers: '母亲节',
+    shopping618: '618年中大促', shuang11: '双十一', shuang12: '双十二',
+    christmas: '圣诞节', nianhuo: '年货节'
   };
   var WEEK = ['星期日', '星期一', '星期二', '星期三', '星期四', '星期五', '星期六'];
 
@@ -166,9 +176,24 @@ window.SeasonEngine = (function () {
     return '';
   }
 
-  // 匹配当日：公历节日 > 农历节日 > 24 节气
+  /* 匹配当日：统一委托 DateMatch.todayMatch（同日口径的唯一来源）
+   * 委托后的差异：认「假期区间」（春节第 3 天也算春节）、覆盖万圣节/感恩节等
+   * 本文件词表没有的节日、输出与文本解析同一结构。
+   * DateMatch 尚未加载时回退本文件原逻辑，保证任何加载顺序都能用。
+   */
   function match(dt) {
     dt = dt || new Date();
+    try {
+      var DM = (typeof window !== 'undefined') ? window.DateMatch : null;
+      if (DM && DM.todayMatch) {
+        var m2 = DM.todayMatch(dt);
+        if (!m2) return null;
+        return {
+          kind: (m2.type === 'term') ? 'solar' : 'festival',
+          key: m2.key, name: m2.name, type: m2.type, date: m2.start, via: 'DateMatch'
+        };
+      }
+    } catch (e) {}
     var f = festOf(dt);
     if (f) return { kind: 'festival', key: f, name: FEST_NAMES[f] || f };
     var t = solarTermOf(dt);
@@ -228,7 +253,10 @@ window.SeasonEngine = (function () {
     { k: 'valentine', l: '💝 情人节' }, { k: 'women', l: '🌷 妇女节' },
     { k: 'mothers', l: '🌸 母亲节' }, { k: 'fathers', l: '👔 父亲节' },
     { k: 'children', l: '🎈 儿童节' }, { k: 'labor', l: '🛠 劳动节' },
-    { k: 'teachers', l: '🍎 教师节' }, { k: 'national', l: '🇨🇳 国庆' }
+    { k: 'teachers', l: '🍎 教师节' }, { k: 'national', l: '🇨🇳 国庆' },
+    { k: 'shopping618', l: '🛒 618' }, { k: 'shuang11', l: '🛍 双十一' },
+    { k: 'shuang12', l: '🎁 双十二' }, { k: 'christmas', l: '🎄 圣诞' },
+    { k: 'nianhuo', l: '🧨 年货节' }
   ];
 
   return {

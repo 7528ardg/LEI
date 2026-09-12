@@ -1870,6 +1870,130 @@ a{color:var(--primary);text-decoration:none;}
 .me-home-card{background:linear-gradient(135deg,rgba(20,132,83,.08),rgba(34,197,94,.04));border-color:var(--primary-light);position:relative;overflow:hidden;}
 .me-home-card::before{content:'';position:absolute;left:0;top:0;bottom:0;width:3px;background:var(--grad-livery);}
 
+/* ===== 大撤应急程序专项 · 场景库（2026-09-12 重构；修正此前误置于导出模板的样式） ===== */
+.dc-wrap{max-width:1000px;margin:0 auto;}
+.dc-hero{position:relative;overflow:hidden;border-radius:20px;padding:22px 24px 18px;margin-bottom:16px;color:#fff;
+  background:linear-gradient(135deg,#0d5c3f 0%,#148453 55%,#1ea06d 100%);box-shadow:0 10px 30px -12px rgba(20,132,83,.55);}
+.dc-hero::after{content:'🚨';position:absolute;right:18px;top:-14px;font-size:6.5rem;opacity:.14;transform:rotate(12deg);pointer-events:none;}
+.dc-hero-kicker{display:inline-flex;align-items:center;gap:6px;background:rgba(255,255,255,.18);border:1px solid rgba(255,255,255,.28);
+  border-radius:20px;padding:3px 12px;font-size:.72rem;font-weight:800;letter-spacing:.06em;}
+.dc-hero h2{margin:10px 0 6px;font-size:1.5rem;font-weight:900;letter-spacing:.02em;}
+.dc-hero p{margin:0;font-size:.83rem;line-height:1.75;opacity:.94;max-width:92%;}
+.dc-hero p b{background:rgba(255,255,255,.16);padding:1px 7px;border-radius:8px;font-weight:800;}
+.dc-hero-stats{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-top:16px;}
+.dc-stat{background:rgba(255,255,255,.13);border:1px solid rgba(255,255,255,.22);border-radius:14px;padding:10px 12px;backdrop-filter:blur(2px);}
+.dc-stat .n{font-size:1.3rem;font-weight:900;line-height:1.1;}
+.dc-stat .l{font-size:.68rem;opacity:.92;margin-top:2px;font-weight:600;}
+@media (max-width:640px){ .dc-hero-stats{grid-template-columns:repeat(2,1fr);} .dc-hero p{max-width:100%;} }
+
+/* 区块标题（场景库统一） */
+.dc-sec-hd{display:flex;align-items:baseline;gap:8px;flex-wrap:wrap;font-weight:900;font-size:1.02rem;color:var(--text,#111827);margin:4px 2px 10px;}
+.dc-sec-sub{font-size:.72rem;color:var(--text3,#9CA3AF);font-weight:600;}
+
+/* 大撤八阶段 · 全景流程条 */
+.dc-flow{background:var(--bg-card,#fff);border:1px solid var(--border,#E5E7EB);border-radius:16px;padding:15px 16px 16px;margin-bottom:18px;
+  border-top:4px solid var(--primary,#148453);box-shadow:0 8px 24px -18px rgba(15,42,31,.25);}
+.dc-flow-strip{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;}
+.dc-flow-step{display:flex;flex-direction:column;gap:2px;background:var(--primary-mist,#F4F9F6);border:1px solid var(--border,#E5E7EB);border-radius:12px;padding:9px 10px;transition:transform .2s,box-shadow .2s;}
+.dc-flow-step:hover{transform:translateY(-2px);box-shadow:var(--shadow-sm,0 1px 2px rgba(20,132,83,.06));}
+.dc-flow-step i{font-style:normal;font-weight:900;font-size:.7rem;color:#fff;background:var(--primary,#148453);width:fit-content;padding:1px 8px;border-radius:10px;}
+.dc-flow-step b{font-size:.82rem;color:var(--text,#111827);}
+.dc-flow-step span{font-size:.66rem;color:var(--text3,#9CA3AF);line-height:1.45;}
+@media (max-width:640px){ .dc-flow-strip{grid-template-columns:repeat(2,1fr);} }
+
+/* 场景库 · 七大专题（独立存储各大场景） */
+.dc-lib{margin-bottom:18px;}
+.dc-lib-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(205px,1fr));gap:10px;}
+.dc-tile{display:flex;flex-direction:column;align-items:flex-start;gap:4px;border:1.5px solid var(--border,#E5E7EB);background:var(--bg-card,#fff);
+  border-radius:14px;padding:13px 15px 12px;cursor:pointer;transition:all .2s cubic-bezier(.4,0,.2,1);text-align:left;position:relative;overflow:hidden;font-family:var(--font-sans,-apple-system,sans-serif);}
+.dc-tile::before{content:'';position:absolute;left:0;top:0;bottom:0;width:4px;background:var(--dc-c,#94a3b8);opacity:.85;}
+.dc-tile:hover{transform:translateY(-2px);box-shadow:0 10px 22px -14px rgba(15,42,31,.3);border-color:var(--dc-c,#94a3b8);}
+.dc-tile-ic{font-size:1.35rem;line-height:1;}
+.dc-tile-t{font-weight:800;font-size:.9rem;color:var(--text,#111827);}
+.dc-tile small{font-size:.68rem;color:var(--text3,#9CA3AF);font-weight:700;}
+.dc-tile.on{background:linear-gradient(135deg,var(--dc-c,#148453),color-mix(in srgb, var(--dc-c,#148453) 72%, #000));border-color:var(--dc-c,#148453);color:#fff;box-shadow:0 10px 22px -10px var(--dc-c,#148453);}
+.dc-tile.on::before{background:#fff;}
+.dc-tile.on .dc-tile-t{color:#fff;}
+.dc-tile.on small{color:rgba(255,255,255,.88);}
+@media (max-width:520px){ .dc-lib-grid{grid-template-columns:repeat(2,1fr);} .dc-tile{padding:11px 12px;} }
+
+/* 场景详情区 */
+.dc-scene{scroll-margin-top:80px;}
+.dc-scene-hd{display:flex;align-items:center;gap:14px;background:var(--bg-card,#fff);border:1px solid var(--border,#E5E7EB);
+  border-left:5px solid var(--dc-c,#148453);border-radius:16px;padding:15px 18px;margin-bottom:12px;box-shadow:0 8px 24px -18px rgba(15,42,31,.3);}
+.dc-scene-ic{font-size:1.9rem;line-height:1;flex-shrink:0;}
+.dc-scene-tx{flex:1;min-width:0;}
+.dc-scene-name{font-weight:900;font-size:1.08rem;color:var(--text,#111827);display:flex;align-items:center;gap:8px;flex-wrap:wrap;}
+.dc-scene-tag{font-size:.66rem;font-weight:800;color:var(--dc-c,#148453);background:color-mix(in srgb, var(--dc-c,#148453) 12%, transparent);padding:3px 9px;border-radius:12px;letter-spacing:.03em;}
+.dc-scene-sum{font-size:.8rem;color:var(--text2,#374151);line-height:1.7;margin-top:5px;}
+.dc-scene-n{flex-shrink:0;font-weight:900;font-size:1.5rem;color:var(--dc-c,#148453);}
+.dc-scene-n small{font-size:.72rem;font-weight:700;color:var(--text3,#9CA3AF);}
+
+/* 速记要点 chips */
+.dc-chips{display:flex;flex-wrap:wrap;gap:7px;margin:0 0 12px;}
+.dc-chip{font-size:.74rem;font-weight:800;color:var(--dc-c,#148453);background:color-mix(in srgb, var(--dc-c,#148453) 9%, transparent);
+  border:1px solid color-mix(in srgb, var(--dc-c,#148453) 30%, transparent);padding:4px 11px;border-radius:20px;line-height:1.3;}
+
+/* 关键数字速记卡 */
+.dc-keys{background:var(--bg-card,#fff);border:1px solid var(--border,#E5E7EB);border-radius:16px;padding:16px 18px;margin-top:18px;
+  border-top:4px solid var(--gold,#F5B800);box-shadow:0 8px 24px -18px rgba(245,184,0,.35);}
+.dc-keys-g{margin-bottom:12px;}
+.dc-keys-g:last-child{margin-bottom:0;}
+.dc-keys-g-t{font-weight:900;font-size:.88rem;color:var(--text,#111827);margin-bottom:7px;}
+.dc-keys-row{display:flex;flex-wrap:wrap;gap:7px;}
+.dc-keys-item{display:inline-flex;align-items:baseline;gap:5px;background:var(--fog,#E5EDE9);border:1px solid var(--border,#E5E7EB);border-radius:9px;padding:5px 10px;font-size:.74rem;color:var(--text2,#374151);line-height:1.45;}
+.dc-keys-item b{color:var(--primary,#148453);font-weight:900;font-size:.8rem;white-space:nowrap;}
+
+.dc-card{position:relative;background:var(--bg-card,#fff);border:1px solid var(--border,#E5E7EB);border-left:4px solid var(--dc-c,#148453);
+  border-radius:14px;padding:14px 18px 14px 16px;margin-bottom:12px;transition:box-shadow .2s, transform .2s;overflow:hidden;}
+.dc-card:hover{box-shadow:0 10px 26px -14px rgba(15,42,31,.28);transform:translateY(-2px);}
+.dc-card-hd{font-weight:800;font-size:.96rem;color:var(--text,#111827);margin-bottom:9px;display:flex;align-items:center;gap:8px;flex-wrap:wrap;padding-right:8px;}
+.dc-card-no{width:24px;height:24px;border-radius:8px;background:var(--dc-c,#148453);color:#fff;display:inline-flex;align-items:center;justify-content:center;font-size:.76rem;font-weight:900;flex-shrink:0;box-shadow:0 2px 6px -2px var(--dc-c,#148453);}
+.dc-card-hd .dc-hd-ic{flex-shrink:0;font-size:1.05rem;}
+.dc-src{margin-left:auto;flex-shrink:0;font-size:.67rem;font-weight:700;color:var(--dc-c,#148453);background:color-mix(in srgb, var(--dc-c,#148453) 10%, transparent);padding:3px 10px;border-radius:12px;}
+.dc-card-bd{font-size:.875rem;color:var(--text2,#374151);line-height:1.85;}
+.dc-card-bd ul,.dc-card-bd ol{margin:6px 0 6px 2px;padding-left:18px;display:flex;flex-direction:column;gap:6px;}
+.dc-card-bd li::marker{color:var(--dc-c,#148453);font-weight:800;}
+.dc-card-bd strong{color:var(--dc-c,#148453);font-weight:800;}
+/* 可点击展开的流程卡（第 8 大场景 · 撤离程序） */
+.dc-card.dc-acc{cursor:pointer;padding-bottom:10px;}
+.dc-card.dc-acc .dc-card-hd{margin-bottom:2px;}
+.dc-card.dc-acc .dc-card-hd::after{content:'▾ 展开流程';margin-left:auto;flex-shrink:0;font-size:.68rem;font-weight:800;color:var(--dc-c,#148453);
+  background:color-mix(in srgb, var(--dc-c,#148453) 10%, transparent);padding:3px 10px;border-radius:12px;transition:transform .2s;}
+.dc-card.dc-acc.open .dc-card-hd::after{content:'▴ 收起';}
+.dc-card.dc-acc .dc-card-bd{display:none;padding-top:9px;border-top:1px dashed color-mix(in srgb, var(--dc-c,#148453) 30%, transparent);}
+.dc-card.dc-acc.open .dc-card-bd{display:block;animation:dcAccIn .25s ease;}
+@keyframes dcAccIn{from{opacity:0;transform:translateY(-4px);}to{opacity:1;transform:none;}}
+.dc-card-bd .kbox{margin-top:8px;}
+
+.dc-quiz-card{background:var(--bg-card,#fff);border:1px solid var(--border,#E5E7EB);border-radius:16px;padding:18px 20px;margin-top:18px;
+  border-top:4px solid var(--primary,#148453);box-shadow:0 8px 24px -18px rgba(15,42,31,.25);}
+.dc-quiz-hd{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:2px;}
+.dc-quiz-hd .t{font-weight:900;font-size:1.05rem;color:var(--text,#111827);}
+.dc-prog{margin-left:auto;display:flex;align-items:center;gap:8px;font-size:.75rem;font-weight:800;color:var(--text2,#5A6F65);}
+.dc-prog-bar{width:120px;height:8px;border-radius:6px;background:var(--border,#E5E7EB);overflow:hidden;}
+.dc-prog-bar i{display:block;height:100%;width:0;border-radius:6px;background:linear-gradient(90deg,#148453,#1ea06d);transition:width .3s;}
+.dc-quiz-sub{font-size:.78rem;color:var(--text3,#9CA3AF);margin-bottom:8px;}
+.dc-q{border:1px solid var(--border,#E5E7EB);border-radius:12px;padding:13px 15px;margin-top:10px;transition:border-color .2s;}
+.dc-q.done{border-color:color-mix(in srgb, var(--primary,#148453) 35%, var(--border,#E5E7EB));}
+.dc-q-t{font-weight:700;font-size:.9rem;color:var(--text,#111827);margin-bottom:9px;line-height:1.6;}
+.dc-q-type{font-size:.66rem;color:var(--text3,#9CA3AF);font-weight:700;margin-left:6px;background:var(--bg,#F5F7F6);padding:1px 8px;border-radius:10px;vertical-align:1px;}
+.dc-opt{border:1px solid var(--border,#E5E7EB);border-radius:10px;padding:9px 13px;margin-top:7px;font-size:.86rem;color:var(--text2,#374151);cursor:pointer;transition:all .15s;display:flex;gap:8px;align-items:baseline;}
+.dc-opt:hover{border-color:var(--primary,#148453);background:rgba(20,132,83,.05);transform:translateX(2px);}
+.dc-opt b{color:var(--primary,#148453);font-weight:800;flex-shrink:0;}
+.dc-opt.right{border-color:#2e9e5b;background:rgba(46,158,91,.10);color:#166534;font-weight:700;}
+.dc-opt.right b{color:#2e9e5b;}
+.dc-opt.wrong{border-color:#ef4444;background:rgba(239,68,68,.07);color:#991b1b;}
+.dc-opt.wrong b{color:#ef4444;}
+.dc-opt.lock{pointer-events:none;opacity:.82;}
+.dc-q-ex{margin-top:9px;font-size:.82rem;color:var(--text2,#374151);background:#F0FDF4;border-left:3px solid #148453;padding:9px 12px;border-radius:8px;line-height:1.75;}
+.dc-q.ex-wrong{background:#FEF2F2;border-left-color:#ef4444;}
+.dc-score{margin-top:14px;border-radius:12px;padding:12px 16px;font-weight:900;display:none;align-items:center;gap:10px;}
+.dc-score.perfect{background:linear-gradient(135deg,#148453,#1ea06d);color:#fff;}
+.dc-score.good{background:#F0FDF4;color:#166534;border:1px solid #86efac;}
+.dc-score.soso{background:#FFFBEB;color:#92400e;border:1px solid #fde68a;}
+.dc-score.bad{background:#FEF2F2;color:#991b1b;border:1px solid #fecaca;}
+
 </style>
 <script>
 /* 客舱小助手数据包引擎（_sync_packs.py 自动注入；改 docs/_packs_engine.js 后重跑 python _sync_packs.py） */
@@ -3149,7 +3273,6 @@ const sampleQuestions = [{"q": "《客舱乘务员手册》的代码是（）。
 {"q": "在使用便携式氧气瓶的过程中，应注意：", "type": "单选", "opts": ["A. 手上不可沾有水份或汗水", "B. 防止旅客呼吸时吸入外界空气", "C. 旅客不可擦油脂", "D. 手上不可沾有任何类型的油脂"], "ans": "D", "chapter": "第四章 客舱设备", "diff": "中", "origNum": "4.360", "section": "4.2 基本安全设备和系统", "explain": "便携式氧气瓶，用于急救。========== PAGE 261 =========="},
 {"q": "应急灯光系统包括：", "type": "单选", "opts": ["A. 撤离路径灯、客舱顶灯、上下出口指示灯和应急滑梯照明灯", "B. 客舱撤离路径灯、出口方位及指示灯、应急滑梯照明灯", "C. 出口指示灯、入口处乘务员工作灯、撤离路径灯", "D. 客舱入口灯、出口指示灯、安全带信号灯、撤离路径灯"], "ans": "A", "chapter": "第四章 客舱设备", "diff": "中", "origNum": "4.361", "section": "4.2 基本安全设备和系统", "explain": "旅客座位和乘务员座位均配备安全带，提示信号灯位于客舱内。========== PAGE 261 =========="},
 {"q": "以下适宜在夜间使用的信号器具是：", "type": "单选", "opts": ["A. 海水染色剂，信号反射镜", "B. 手电筒、信号反射镜", "C. 信号反射镜、信号弹", "D. 手电筒、信号弹、哨子"], "ans": "D", "chapter": "第四章 客舱设备", "diff": "中", "origNum": "4.362", "section": "4.2 基本安全设备和系统", "explain": "客舱内配备的应急手电筒，用于失火/烟雾等情况下照明。========== PAGE 261 =========="},
-{"q": "以下应急设备中，属于延伸跨水运行必须的是：", "type": "单选", "opts": ["A. 应急斧", "B. 辅助救生筏", "C. 手电筒", "D. 麦克风"], "ans": "B", "chapter": "第四章 客舱设备", "diff": "中", "origNum": "4.363", "section": "4.2 基本安全设备和系统", "explain": "飞机在特定飞行路线上距离最近海岸线超过一定距离的飞行。========== PAGE 261 =========="},
 {"q": "描述应急灯光系统正确的是：", "type": "单选", "opts": ["A. 客舱入口灯，出口指示灯，撤离路径灯等", "B. 地板上的撤离路径灯、客舱顶灯、上下出口指示灯和应急滑梯照明灯", "C. 出口指示灯、入口处乘务员工作灯、撤离路径灯", "D. 客舱入口灯、出口指示灯、安全带信号灯、撤离路径灯"], "ans": "B", "chapter": "第四章 客舱设备", "diff": "中", "origNum": "4.364", "section": "4.2 基本安全设备和系统", "explain": "旅客座位和乘务员座位均配备安全带，提示信号灯位于客舱内。========== PAGE 261 =========="},
 {"q": "氧气瓶容量为（ ）升。", "type": "单选", "opts": ["A. 110", "B. 210", "C. 310", "D. 410"], "ans": "C", "chapter": "第四章 客舱设备", "diff": "中", "origNum": "4.365", "section": "4.2 基本安全设备和系统", "explain": "便携式氧气瓶，用于急救。========== PAGE 261 =========="},
 {"q": "氧气瓶使用流量为4升/分钟时可用____分钟。", "type": "单选", "opts": ["A. 78", "B. 87", "C. 155", "D. 160"], "ans": "A", "chapter": "第四章 客舱设备", "diff": "中", "origNum": "4.366", "section": "4.2 基本安全设备和系统", "explain": "便携式氧气瓶，用于急救。========== PAGE 261 =========="},
@@ -3279,7 +3402,6 @@ const sampleQuestions = [{"q": "《客舱乘务员手册》的代码是（）。
 {"q": "救生衣上的定位灯一般可工作：", "type": "单选", "opts": ["A. 48—60小时", "B. 8—10小时", "C. 30小时", "D. 12—15小时"], "ans": "B", "chapter": "第四章 客舱设备", "diff": "中", "origNum": "4.528", "section": "4.6 应急撤离设备", "explain": "每位旅客座位配备一件救生衣。========== PAGE 351 =========="},
 {"q": "当___时，救生衣上的定位灯亮出。", "type": "单选", "opts": ["A. 拔下电池销", "B. 救生衣完成充气", "C. 电池的注水孔注入海水", "D. 当穿上救生衣时"], "ans": "C", "chapter": "第四章 客舱设备", "diff": "中", "origNum": "4.529", "section": "4.6 应急撤离设备", "explain": "每位旅客座位配备一件救生衣。========== PAGE 351 =========="},
 {"q": "当为儿童穿戴救生衣时应注意：", "type": "单选", "opts": ["A. 先将救生衣完全充气", "B. 带子应经小孩两腿间打叉后穿入环中扣好，系紧", "C. 应将儿童救生衣的带子与其监护人的救生衣相连接", "D. 告诉儿童人工充气带的位置"], "ans": "B", "chapter": "第四章 客舱设备", "diff": "中", "origNum": "4.530", "section": "4.6 应急撤离设备", "explain": "每位旅客座位配备一件救生衣。========== PAGE 351 =========="},
-{"q": "以下应急设备中，不属于延伸跨水运行必须的是：", "type": "单选", "opts": ["A. 救生包", "B. 旅客救生衣", "C. 应急斧", "D. 辅助救生筏"], "ans": "C", "chapter": "第四章 客舱设备", "diff": "中", "origNum": "4.531", "section": "4.6 应急撤离设备", "explain": "飞机在特定飞行路线上距离最近海岸线超过一定距离的飞行。========== PAGE 351 =========="},
 {"q": "用来割断滑梯救生筏系留绳的钩形小刀位于____。", "type": "单选", "opts": ["A. 乘务员座位下方", "B. 救生包内", "C. 滑梯救生筏上", "D. 行李架上"], "ans": "C", "chapter": "第四章 客舱设备", "diff": "中", "origNum": "4.532", "section": "4.6 应急撤离设备", "explain": "在跨水运行的飞机上配备。========== PAGE 351 =========="},
 {"q": "驾驶舱应急出口位于驾驶舱两侧滑动窗，数量几个？，", "type": "单选", "opts": ["A. 1个", "B. 2个", "C. 3个", "D. 4个"], "ans": "B", "chapter": "第四章 客舱设备", "diff": "中", "origNum": "4.533", "section": "4.6 应急撤离设备", "explain": "L1/L2/R1/R2门和翼上出口。========== PAGE 351 =========="},
 {"q": "键盘是位于FAP的侧边，用于客舱机组请示飞行员打开舱门-键盘上红色灯亮表示：", "type": "单选", "opts": ["A. 驾驶舱内有飞行员出来", "B. 被飞行机组拒绝进入，并且驾驶舱门保持关闭", "C. 要求紧急进入驾驶舱，在驾驶舱内会有连续的信号声，但是飞行机组尚未做出回应", "D. 可以随时进入驾驶舱"], "ans": "B", "chapter": "第四章 客舱设备", "diff": "中", "origNum": "4.534", "section": "4.6 应急撤离设备", "explain": "前乘务员控制面板(Forward Attendant Panel)，客舱系统主控制面板。========== PAGE 351 =========="},
@@ -3989,12 +4111,9 @@ const sampleQuestions = [{"q": "《客舱乘务员手册》的代码是（）。
 {"q": "III型便携式氧气瓶通过旋转流量调节旋钮来打开氧气瓶并调节高低流量。", "type": "判断", "opts": ["A. 对", "B. 错"], "ans": "B", "chapter": "第七章 机上急救", "diff": "易", "origNum": "7.186", "section": "7.1 一般规定", "explain": "便携式氧气瓶，用于急救。========== PAGE 566 =========="},
 {"q": "电量指示灯手电筒直接从支架上取下、灯即亮，通常可持续使用 4 小时以上。", "type": "判断", "opts": ["A. 对", "B. 错"], "ans": "A", "chapter": "第七章 机上急救", "diff": "易", "origNum": "7.187", "section": "7.1 一般规定", "explain": "客舱内配备的应急手电筒，用于失火/烟雾等情况下照明。========== PAGE 566 =========="},
 {"q": "电量指示灯手电筒用完不需要把断路开关嵌入支架、使之复位。", "type": "判断", "opts": ["A. 对", "B. 错"], "ans": "B", "chapter": "第七章 机上急救", "diff": "易", "origNum": "7.188", "section": "7.1 一般规定", "explain": "客舱内配备的应急手电筒，用于失火/烟雾等情况下照明。========== PAGE 566 =========="},
-{"q": "辅助救生筏重量为 79 磅、36 公斤，可承载 25 人，最大可承载 38 人。", "type": "判断", "opts": ["A. 对", "B. 错"], "ans": "A", "chapter": "第七章 机上急救", "diff": "易", "origNum": "7.189", "section": "7.1 一般规定", "explain": "在跨水运行的飞机上配备。========== PAGE 566 =========="},
-{"q": "辅助救生筏使用需使其漂离飞机一段距离，系留绳绷紧时，猛拉充气手柄使救生筏充气。充气可能需要10至12秒钟的时间。", "type": "判断", "opts": ["A. 对", "B. 错"], "ans": "B", "chapter": "第七章 机上急救", "diff": "易", "origNum": "7.190", "section": "7.1 一般规定", "explain": "在跨水运行的飞机上配备。========== PAGE 566 =========="},
 {"q": "卫生防疫包用于清除客舱内血液、尿液、呕吐物和排泄物等潜在传染性物质，护理可疑传染病病人。使用卫生防疫包对潜在传染性物质进行消毒处理时，应遵循传染病卫生防护原则，按照处理传染性及消毒技术规范的程序操作。每架飞机在每次载客飞行中均配备 2 个。", "type": "判断", "opts": ["A. 对", "B. 错"], "ans": "B", "chapter": "第七章 机上急救", "diff": "易", "origNum": "7.191", "section": "7.1 一般规定", "explain": "Universal Precaution Kit，UPK，用于处理污染物。========== PAGE 566 =========="},
 {"q": "186 座 A320 飞机后舱机门上的观察窗遮光板应始终处于打开状态。", "type": "判断", "opts": ["A. 对", "B. 错"], "ans": "A", "chapter": "第七章 机上急救", "diff": "易", "origNum": "7.192", "section": "7.1 一般规定", "explain": "空客A320系列窄体客机，包括A318/A319/A320/A321。========== PAGE 566 =========="},
 {"q": "天蓬用于防止暴晒，或利用其明亮，具有反射性的颜色可用作信号装置，并且也可用来收集雨水供饮用。", "type": "判断", "opts": ["A. 对", "B. 错"], "ans": "A", "chapter": "第七章 机上急救", "diff": "易", "origNum": "7.193", "section": "7.1 一般规定", "explain": "依据《客舱乘务员手册》 4.6.10.4.17：用于防止暴晒，或利用其明亮，具有反射性的颜色可用作信号装置 ，并且也可用来收集雨水供饮用。"},
-{"q": "辅助救生筏内配有救生包，包内叠放着天蓬。", "type": "判断", "opts": ["A. 对", "B. 错"], "ans": "A", "chapter": "第七章 机上急救", "diff": "易", "origNum": "7.194", "section": "7.1 一般规定", "explain": "在跨水运行的飞机上配备。========== PAGE 566 =========="},
 {"q": "滑梯救生筏转移的操作时，失效舱门的滑梯待命手柄必须处于待命状态。", "type": "判断", "opts": ["A. 对", "B. 错"], "ans": "A", "chapter": "第七章 机上急救", "diff": "易", "origNum": "7.195", "section": "7.1 一般规定", "explain": "在跨水运行的飞机上配备。========== PAGE 566 =========="},
 {"q": "我公司配备的救生衣按构造分为单气囊救生衣和双气囊救生衣。", "type": "判断", "opts": ["A. 对", "B. 错"], "ans": "A", "chapter": "第七章 机上急救", "diff": "易", "origNum": "7.196", "section": "7.1 一般规定", "explain": "每位旅客座位配备一件救生衣。========== PAGE 566 =========="},
 {"q": "驾驶舱撤离绳是一根长 5.5 米(18 英尺)有结的绳子。撤离绳可以负载 181 公斤(400 磅)重量。", "type": "判断", "opts": ["A. 对", "B. 错"], "ans": "A", "chapter": "第七章 机上急救", "diff": "易", "origNum": "7.197", "section": "7.1 一般规定", "explain": "依据《客舱乘务员手册》 4.6.12：4.6.12.1 描述 驾驶舱撤离绳是一根长5.5米（18英尺）有结的绳子。"},
@@ -4747,12 +4866,354 @@ const BADGE_CATEGORIES = [
   {id:'ultimate',label:'终极',icon:'🏆'},
 ];
 
+/* ===== 大撤专项知识库（单一来源 docs/_dache_kb.js，python _sync_dache.py 同步） ===== */
+/* DC_KB_BEGIN（同步标记块，请勿在标记块外修改以下内容） */
+window.DC_KB = [
+/* ---------- 大撤·流程 ---------- */
+{cat:'大撤·流程', icon:'🚨', src:'大撤专项·动态舱应急撤离流程', t:['大撤','动态舱','应急撤离','撤离流程','大撤流程','整体流程'], rel:['撤离','滑梯预位','清舱','防冲击姿势'],
+q:'动态舱应急撤离（大撤）整体流程分哪几个阶段？',
+a:`<strong>动态舱应急撤离（大撤）八个阶段</strong>：<ul>
+<li><strong>① 设备检查</strong>：各号位清点手电筒、SK包、扩音器、ELT、急救箱、应急医疗箱、舱单（I-PAD），检查完 PA 外话报告"X 号位客舱设备检查正常"；</li>
+<li><strong>② 滑梯预位</strong>：顺序<strong>先左后右</strong>，听看响动查说，双人制操作（听到 1 号门预位完成后，3 号位 PA 外话报告"4 号门滑梯预位完成"）；</li>
+<li><strong>③ 安全检查</strong>：前后舱各留一人在服务间（检查设备、锁闭洗手间、固定松散物品），另 2 人进客舱广播"请系好安全带、收起小桌板、打开遮阳板、手机调成飞行模式"，巡舱交接后返回责任号位；</li>
+<li><strong>④ 滑行阶段</strong>：客舱灯光变暗，回位坐好"我已坐好，系好安全带，肩带，静默 30 秒 STS"；</li>
+<li><strong>⑤ 平飞服务</strong>：灯光变亮、安全带灯熄灭一声铃后恢复服务；</li>
+<li><strong>⑥ 特情处置</strong>：颠簸 / 失火 / 释压（见对应专项条目）；</li>
+<li><strong>⑦ 有准备/有时限的撤离</strong>：乘务长进驾驶舱 → 准备会 → 客舱准备广播与演示 → 防冲击姿势 → 个人最后准备 → 500 英尺口令 → 15 秒撤离流程；</li>
+<li><strong>⑧ 清舱</strong>：手电筒照射、蹲下检查，口令"还有人吗，Anyone else, answer me"反复多次，逐个报告"已完成清舱，请求撤离"。</li></ul>`},
+{cat:'大撤·流程', icon:'🔦', src:'大撤专项·动态舱应急撤离流程', t:['设备检查','手电筒','SK包','急救箱','ELT','扩音器','号位携带'], rel:['大撤流程'],
+q:'大撤设备检查时各号位分别携带什么设备？',
+a:`<strong>各号位设备清单（检查完 PA 外话报告）</strong>：<ul>
+<li><strong>1 号位</strong>：手电筒、SK 包、扩音器、舱单（I-PAD）；</li>
+<li><strong>2 号位</strong>：手电筒、SK 包、急救箱在位；</li>
+<li><strong>3 号位</strong>：手电筒、SK 包、扩音器、ELT 在位；</li>
+<li><strong>4 号位</strong>：手电筒、SK 包、急救箱、应急医疗箱在位。</li></ul>
+<strong>撤离携带分工（陆地）</strong>：2 号位（R1 门）携<strong>手电筒、SK 包、急救箱</strong>；3 号位（L4 门）携<strong>手电筒、SK 包、扩音器、ELT</strong>；4 号位（R4 门）携<strong>手电筒、SK 包、急救箱、应急医疗箱</strong>。水上撤离 3 号位另拿检令纸（救生衣）。`},
+{cat:'大撤·流程', icon:'🔒', src:'大撤专项·动态舱应急撤离流程', t:['滑梯预位','交叉检查','先左后右','预位报告'], rel:['大撤流程'],
+q:'滑梯预位的顺序和交叉检查怎么做？',
+a:`<strong>滑梯预位操作检查</strong>：顺序<strong>先左后右</strong>，听看响动查说，双人制操作。<br>
+预位完成后进行交叉核对：听到 <strong>1 号门</strong>滑梯预位完成后，<strong>3 号位</strong>通过 PA 外话报告：<strong>"4 号门滑梯预位完成"</strong>。`},
+{cat:'大撤·流程', icon:'🤫', src:'大撤专项·动态舱应急撤离流程', t:['静默30秒','STS','滑行','坐好口令'], rel:['大撤流程'],
+q:'静默 30 秒（STS）是什么？',
+a:`<strong>静默 30 秒（STS, Silent Thirty Seconds）</strong>：客舱灯光变暗或安全检查完成后（滑行阶段），乘务员回座位坐好并完成个人准备，口令：<br>
+<strong>"我已坐好，系好安全带，肩带，静默 30 秒 STS"</strong>。<br>
+这是起飞关键阶段的最后准备，静默期间停止一切非安全必需的通讯与动作。`},
+{cat:'大撤·流程', icon:'⏱', src:'大撤专项·动态舱应急撤离流程', t:['15秒撤离','500英尺','撤离口令','清舱'], rel:['大撤流程','撤离'],
+q:'15 秒撤离流程和 500 英尺口令是什么？',
+a:`<strong>个人准备完成后</strong>：坐下口令"系好安全带、肩带，静默 30 秒 STS"，等待 <strong>500 英尺</strong>飞行机组口令后，<strong>15 秒撤离流程</strong>开始。<ul>
+<li><strong>如机长发布无需撤离</strong>：口令"镇静，听指挥！""我们安全了，请坐在原位，keep calm, we are safe, please remain seated"，2 人站前后服务间、2 人进客舱安抚；</li>
+<li><strong>实施撤离</strong>：飞机完全停稳后 15 秒内完成撤离；</li>
+<li><strong>清舱</strong>：所有号位口令"我已准备好撤离时需要带的应急设备"，拿出手电筒照射、蹲下仔细检查，口令"还有人吗，Anyone else, answer me"反复多次；</li>
+<li><strong>最后报告</strong>：2/3/4 号位依次报告"已完成清舱，请求撤离"，从就近出口撤离（水上：到门口救生衣充气、上船、割断系留绳）。</li></ul>`},
+/* ---------- 大撤·颠簸 ---------- */
+{cat:'大撤·颠簸', icon:'〰', src:'大撤专项·动态舱应急撤离流程', t:['颠簸','铃数','轻度颠簸','中度颠簸','重度颠簸','一声铃'], rel:['颠簸处置'],
+q:'颠簸铃数怎么区分轻重程度？',
+a:`<strong>颠簸程度按客舱铃数区分</strong>：<ul>
+<li><strong>1 声铃（轻度）</strong>：客舱继续服务，提示旅客抓好行李架下方辅助把手，前后服务间提醒洗手间旅客抓好扶手，就近 PA 乘务员广播；</li>
+<li><strong>2~3 声铃（中度）</strong>：提醒旅客回座位系好安全带、抓辅助把手，固定服务间松散物品，餐车推回就近服务间，停止服务；</li>
+<li><strong>4~5 声铃（重度）</strong>：立刻踩下餐车刹车、抓住餐车固定自己，提示站着的旅客立即坐下系好安全带，洗手间旅客抓住扶手固定自己。</li></ul>
+<strong>颠簸结束后</strong>：2 号位从第 1 排检查到 12 排、3 号位从最后检查到 13 排，给手势说各自检查过的区域，回前后舱交接。<strong>报告口令</strong>："报告乘务长，我是 X 号位乘务员，我检查了 XX 排（前/后服务间、卫生间），无旅客受伤，无设备损坏，报告完毕"。*轻度颠簸可以不报告。`},
+{cat:'大撤·颠簸', icon:'📢', src:'大撤专项·动态舱应急撤离流程', t:['颠簸广播','广播词','turbulence'], rel:['颠簸'],
+q:'颠簸的客舱广播词是什么？',
+a:`<strong>轻度颠簸【Turbulence】</strong>：女士们、先生们：飞机受航路气流影响正在颠簸。请您回原座位坐好，系好安全带。如您不能及时返回座位，请抓住就近的辅助把手。正在使用洗手间的旅客，也请抓好扶手。颠簸期间，请勿打开行李架，并保管好随身的松散物品。洗手间暂停使用。晕机的旅客，请使用您座位前口袋里的清洁袋。感谢您的合作。<br><br>
+<strong>中度及严重颠簸</strong>：在轻度词基础上增加"同时我们将暂停客舱服务"，英文版另含 "Refrain from using the lavatory or moving through the cabin at this time... The lavatory and cabin service will be suspended during this period."`},
+/* ---------- 大撤·失火 ---------- */
+{cat:'大撤·失火', icon:'🔥', src:'大撤专项·动态舱应急撤离流程 / CRM演练', t:['灭火小组','三人灭火','消防员','通讯员','辅助消防员','灭火分工'], rel:['失火','灭火瓶'],
+q:'三人灭火小组怎么分工？',
+a:`<strong>灭火程序最好由 3 名客舱乘务员组成灭火小组</strong>，同时履行各自分工：<ul>
+<li><strong>① 消防员</strong>（第一个发现者）：迅速通知其他乘务员 → 取下最近灭火瓶 → 立即确定火源 → 实施灭火。话术<strong>"我来灭火，你去报告"</strong>；</li>
+<li><strong>② 通讯员</strong>（第二个到达）：通知飞行机组（火灾位置、火源、严重程度/烟的浓度颜色气味、灭火进展、使用灭火瓶数量、灭火开始时间）→ 通知其他乘务员支援 → 保持客舱与驾驶舱通讯 → 客舱火警广播 → 观察客舱。话术："机长，你好！X排X坐X地方，现已查明是X座旅客X东西着火，现场有明火、黑烟，我们已经转移X排到X排的旅客前往安全区域，现在X号位正在灭火！"</li>
+<li><strong>③ 辅助消防员</strong>（第三个到达）：提供额外灭火设备、戴上 PBE 接替未防护的消防员、清除易燃物品、持续灭火，替换消防员。话术<strong>"我来接替你灭火"</strong>，并宣布火势的状态；</li>
+<li><strong>支援人员</strong>：传送灭火设备、重排旅客座位、提供急救、安抚旅客。话术："大家不要惊慌、请系好安全带！弯下腰，用衣袖捂住口鼻！"</li></ul>`},
+{cat:'大撤·失火', icon:'🚻', src:'大撤专项·动态舱应急撤离流程', t:['洗手间火灾','LD火灾','门是凉的','烤箱火灾','行李架火灾','锂电池失火'], rel:['失火','灭火小组'],
+q:'客舱常见失火点（洗手间/烤箱/行李架/舱壁）分别怎么处置？',
+a:`<strong>各失火点处置要点（3 人灭火小组启动）</strong>：<ul>
+<li><strong>洗手间火灾</strong>：敲门问"洗手间有人吗"2 遍 → 用<strong>手背</strong>感觉门的温度（上、中、下），说"门是凉的" → 开小缝 → 就近拿灭火瓶灭火 → 成功后锁闭洗手间。如洗手间损坏报告（XX 洗手间损坏），未损坏则报告具体损坏程度；</li>
+<li><strong>烤箱火灾</strong>：关闭电源、拔出跳开关 → 湿毛巾堵住通风孔 → 就近灭火瓶灭火。报告（XX 烤箱损坏）；</li>
+<li><strong>行李架火灾（锂电池）</strong>：开一条小缝 → 灭火瓶灭火，<strong>打开一下、灭一下，循环</strong> → 支援者移走氧气瓶、SK 包。报告（XX 行李架损坏或具体损坏程度）；</li>
+<li><strong>舱壁着火</strong>：手背探温找着火点 → 第一人拿灭火瓶、另一人拿<strong>应急斧</strong> → 灭火后监控者用湿毛巾堵住小洞。报告（舱壁损坏的具体程度）。</li></ul>`},
+{cat:'大撤·失火', icon:'🧯', src:'大撤专项·动态舱应急撤离流程 / CRM演练', t:['灭火后处置','防止复燃','火警解除广播','灭火报告','湿阻燃物'], rel:['失火'],
+q:'火灾扑灭后要做哪些工作、怎么报告？',
+a:`<strong>处置火灾或烟雾后</strong>：<ul>
+<li>用<strong>湿阻燃物</strong>（毛毯、门帘等）覆盖着火点<strong>防止复燃</strong>；指派一名乘务员监督受影响区域并定期向通讯员（包含组员）报告当前的状态；</li>
+<li><strong>辅助消防员</strong>传达处置阶段火情："明火已扑灭，还有少许烟雾，未发现机体破损！"；</li>
+<li><strong>监控人员（含支援人员）</strong>持续用水（消防水）对设备淋洒降温，冷却后将设备放入<strong>航空安全防护箱</strong>转移至后舱固定监控（大型行李箱、书包等用防火阻燃袋）；</li>
+<li><strong>通讯员</strong>向机长报告处置阶段情况："报告机长！X排X火已被扑灭，后续情况由乘务长向您报告！"；</li>
+<li>乘务长统计（各号位报告使用灭火瓶/PBE 数量、有无人员受伤、设备受损）后汇总报告机长，填写<strong>《客舱记录本》CLB、《机上事件报告单》</strong>；</li>
+<li>进行<strong>火警解除广播</strong>："现在客舱失火已被扑灭，飞机处于良好状态，对于给您带来的不便我们深表歉意…各位旅客，请不要担心，我们已经安全了！"；</li>
+<li>如火势无法控制，继续执行灭火程序并报告机长，由机长决定下一步。</li></ul>`},
+/* ---------- 大撤·释压 ---------- */
+{cat:'大撤·释压', icon:'💨', src:'大撤专项·动态舱应急撤离流程 / CRM演练 / CCM 释压程序', t:['释压','氧气面罩','紧急下降','释压处置'], rel:['释压','氧气瓶'],
+q:'客舱释压时乘务员的直接处置是什么？',
+a:`<strong>客舱释压程序启动后</strong>：<ul>
+<li>迅速戴上最近的<strong>氧气面罩</strong>，固定身体；</li>
+<li>立即在最近的座位坐下、系好安全带（<strong>坐在乘务员座椅必须系肩带</strong>）；没有空座位时直接坐到旅客身上，让旅客抱紧腰部，或蹲地握住行李档杆固定自己；</li>
+<li>戴上面罩后用手势和简短口令指示旅客："像我一样戴上氧气面罩，<strong>先大人后小孩</strong>。Pull your Oxygen mask, cover your nose and mouth, you first, then your children"，边说边用力拍打旁边的座位；</li>
+<li>指示旅客摘下眼镜；已戴面罩的成年人协助旁边的儿童；带儿童的旅客先戴好自己的面罩再协助儿童；</li>
+<li>到达安全高度前或释压警告解除前，<strong>停止客舱内一切活动</strong>。</li></ul>
+<strong>时间节点</strong>：氧气面罩脱落后 1 分钟内听到机长外话发布紧急下降（Emergency descent）→ 按程序执行；<strong>1 分钟后无驾驶舱任何信息</strong> → 乘务长内话联系驾驶舱告知面罩脱落情况；联系未果 → 前舱乘务员背便携式氧气瓶进驾驶舱查看，必要时（机组失能）实施救助。若听到紧急下降广播后 <strong>10 分钟</strong>未收到到达安全高度指令，乘务长立即内话联系；无回应更换便携式氧气瓶进驾驶舱急救。`},
+{cat:'大撤·释压', icon:'✅', src:'大撤专项·动态舱应急撤离流程 / CRM演练', t:['安全高度','释压后检查','氧气面罩打结','翼上出口检查','释压报告'], rel:['释压'],
+q:'到达安全高度后客舱检查怎么做、报告什么？',
+a:`<strong>飞行机组宣布到达安全高度后</strong>：<ul>
+<li>前后服务间乘务员起身将氧气面罩<strong>打结系高</strong>，检查两边舱门（四周摸一遍）、检查洗手间、检查其他设备；</li>
+<li>客舱乘务员起身打结系高，拿<strong>氧气瓶斜背竖抱</strong>进入客舱；口令："我们已经安全了，请不要惊慌；请将氧气面罩打结系高或放在前排座椅口袋内（第一排乘客及应急出口旅客只能打结系高）"；小声询问"有受伤的旅客吗？"</li>
+<li><strong>检查翼上出口（四扇都要检查，回字型检查）</strong>；交接口令："我检查了 1~12 排，左侧 2 个翼上出口"/"我检查了 13~最后 1 排，右侧 2 个翼上出口"；</li>
+<li><strong>报告口令</strong>："报告乘务长，我是 X 号位乘务员，我检查了 XX 排（服务间、卫生间），无旅客受伤，无设备损坏，我使用了 1 个氧气瓶，氧气瓶剩余压力 1300PSI，无火情，报告完毕"。*<strong>没有使用氧气瓶也要报告</strong>；</li>
+<li>乘务长汇总后向机长报告：设备损坏程度、人员伤亡、有无火情、氧气瓶使用数量，并填入 CLB。</li></ul>`},
+/* ---------- 大撤·撤离准备 ---------- */
+{cat:'大撤·撤离准备', icon:'📋', src:'大撤专项·动态舱应急撤离流程', t:['准备会','迫降准备','乘务长进驾驶舱','责任分区','对表'], rel:['撤离','防冲击姿势'],
+q:'有准备的迫降：准备会怎么开、区域怎么划分？',
+a:`<strong>① 机长决定实施迫降</strong>：广播"乘务长进驾驶舱，乘务长进驾驶舱，Purser to cockpit"，乘务长带好纸、笔、手表进驾驶舱；2 号位拿纸笔手表，口令"我已拿好纸、笔手表在前舱集合"；3、4 号位一起走向前舱。<br>
+<strong>② 准备会</strong>：乘务长通报迫降原因/时间/地点/天气，机长将以外话形式发出防冲撞指令和撤离指令。各号位报告分工：<ul>
+<li><strong>2 号位</strong>：负责 1~10 排（水上 1~15 排）旅客，从 <strong>R1 门</strong>撤离，携带手电筒、SK 包、急救箱；</li>
+<li><strong>3 号位</strong>：负责 21~最后 1 排（水上 16~最后 1 排），从 <strong>L4 门</strong>撤离，携带手电筒、SK 包、扩音器、ELT；</li>
+<li><strong>4 号位</strong>：负责 21~最后 1 排（水上 16~最后 1 排），从 <strong>R4 门</strong>撤离，携带手电筒、SK 包、急救箱、应急医疗箱。</li></ul>
+（3 号位与安全员传达信息：防冲击指令和撤离指令由谁发出、飞机预计降落的时间、迫降点：水上/陆地；将安全员调至 13D，如有旅客占座转移该旅客），拿好检令纸/救生衣去站位。水上撤离时救生衣放到座椅下："这是我的救生衣，请不要动"（2 号位 1 排、3 号位 10 排、4 号位 20 排）。`},
+{cat:'大撤·撤离准备', icon:'🎬', src:'大撤专项·动态舱应急撤离流程', t:['客舱准备广播','防冲击姿势','Heads down brace','演示','脱高跟鞋'], rel:['撤离准备'],
+q:'迫降前的客舱准备广播和防冲击姿势演示怎么做？',
+a:`<strong>客舱准备（乘务长广播后）</strong>：<ul>
+<li><strong>固定松散物品</strong>："固定小桌板，系好安全带。Stow your tray table, fasten your seat belt."（2 遍，过去中文回来英文）；</li>
+<li><strong>收取尖锐物品、穿好衣服</strong>：<strong>"请取下随身的尖锐物品（钢笔、手表、首饰等放入行李，取下领带、围巾），请勿放在座椅前方口袋内"</strong>（1 遍，黑体字 2 遍）；<strong>"取出衣服穿好，行李放到行李架上"</strong>（2 遍）；</li>
+<li><strong>脱高跟鞋</strong>（水上连鞋一起脱）：各号位拿毛毯或垃圾袋收鞋（前舱由前往后、后舱由后往前），收好的高跟鞋放到<strong>不朝机头方向的洗手间</strong>并锁闭；</li>
+<li><strong>水上撤离</strong>另有救生衣演示："请穿上救生衣，但在客舱内不要充气。Please put on your life vest, but do not inflate it while you are in the cabin."（2 遍）；</li>
+<li><strong>演示防冲击姿势</strong>：2 号位坐 1C 椅背向乘客演示，3 号位 10D，4 号位 20C。口令："低下头，紧迫用力。Heads down brace"（2 遍，去）；"解开安全带。Open your seat belt"（2 遍，回）；"请大家系好安全带！Please fasten your seat belt tight and low"（2 遍，去）；检查旅客安全带；</li>
+<li>做完回原位站好给手势。*有时限的陆地迫降，防冲击姿势结束后 3 号位往后舱找翼上援助者。</li></ul>`},
+{cat:'大撤·撤离准备', icon:'🧍', src:'大撤专项·动态舱应急撤离流程', t:['援助者','C型门援助者','翼上援助者','出口座位指示'], rel:['撤离准备','援助者'],
+q:'有准备迫降时如何选择和指导援助者？',
+a:`<strong>C 型门援助者口令（陆地）</strong>："你、你、你请跟我来！"带到机门旁：飞机停稳后挡住旅客，直到滑梯完全充气；充气后两位援助者先跳下滑梯，在滑梯两侧帮助旅客撤离并指挥远离飞机；一人站机门口抓门上把手指挥"到这边来，跳，滑"；<strong>"如果我不能开门，请帮我开门"</strong>（开门前注意机外情况，有烟、火、障碍物不要开门，指挥去其他出口）；"如果我受伤，请将我带下飞机，我的安全带是这样解开的"。让援助者复述任务；座位没变防冲击姿势不变，回原位坐好。<br>
+<strong>翼上出口旅客（水上）</strong>：站 11 排选 6 位援助者——2 位（靠窗）接指令后开翼上出口、舱门往机头方向抛出，组织旅客在翼上等待救援；2 位（当中）从行李架取出<strong>救生绳</strong>连接机翼环扣，协助旅客在翼上等待；2 位（靠过道）站座位上协助撤离。开门前注意机外情况（烟、火、障碍物、水位过高不开门）。<br>
+<strong>出口座位旅客指示</strong>：2 号位（1~10 排，水上 1~15 排）从前门撤离、前门不能用从后面门；3 号位（11~20 排）从中间门；4 号位（21~最后 1 排）从后面门。每号位询问 3 人（2 遍中文 1 遍英文）："请问您从哪个门撤离？如果这边的门不能使用，应从哪边的门撤离？"`},
+{cat:'大撤·撤离准备', icon:'🎒', src:'大撤专项·动态舱应急撤离流程', t:['个人准备','最后准备','应急灯光','关闭客舱灯光'], rel:['撤离准备'],
+q:'乘务员个人最后准备包括哪些内容？',
+a:`<strong>乘务长关闭客舱灯光、打开应急灯光</strong>，广播"全体乘务员做好最后准备。All attendant, prepare yourself"。所有乘务员回责任位，边走边提醒旅客系好安全带：<ul>
+<li><strong>2 号位</strong>：检查手电筒、SK 包、急救箱在位；固定前舱松散物品；</li>
+<li><strong>3 号位</strong>：检查手电筒、SK 包、扩音器、ELT 在位；打开后舱遮光板；固定后舱松散物品；</li>
+<li><strong>4 号位</strong>：检查手电筒、SK 包、急救箱、应急医疗箱在位；</li>
+<li>前后服务间固定松散物品；检查洗手间有无人、放下马桶盖、锁闭；关闭烤箱、烧水壶、烧水器等电器电源；</li>
+<li><strong>水上撤离</strong>：挂 SK 包；取下尖锐物品（肩章、胸章、领带）存入不朝机头方向的洗手间；检查撤离通道无障碍、手势清晰；</li>
+<li>个人准备完成后坐下口令"系好安全带、肩带，静默 30 秒 STS"。</li></ul>`},
+/* ---------- 大撤·特情 ---------- */
+{cat:'大撤·特情', icon:'🧑‍✈️', src:'大撤专项·CRM演练 / CCM 3.14', t:['机组失能','飞行机组失能','进驾驶舱','寻找医生','指挥权接替'], rel:['特情','失能'],
+q:'飞行机组失能怎么处置？',
+a:`<strong>判断</strong>：多次以正常及应急方式均无法与驾驶舱取得联系，可判定飞行机组失能；或机组内话/PA 外话呼叫乘务长进驾驶舱。<ul>
+<li><strong>第一人（乘务长）</strong>：立即进驾驶舱，轻拍高喊失能机组（<strong>至少两次</strong>）、查看呼吸脉搏；将失能者固定于座椅（双臂交叉放于安全带下扣紧、座椅后拉到最大限度、双腿后拉）；协助戴上氧气面罩并调整至 <strong>100% 纯氧</strong>；</li>
+<li><strong>第二人</strong>：广播找医生（<strong>避免透露机组失能</strong>，可用"机组""旅客"等代称呼，防旅客恐慌）；再铺毛毯、拿氧气瓶。安排安全员进前舱监控、2 号位进驾驶舱协助（2 号位先进驾驶舱，乘务长再替换，避免驾驶舱失控）、3 号位拿<strong>医疗物品补充箱</strong>从前向后逐排找医生、4 号位坚守后舱；</li>
+<li><strong>第三人</strong>：接 PA 通知后带医疗物品补充箱询问有无医生（有则查证件，<strong>护工、保姆等不可以</strong>），协助把失能机组抬到前舱服务间，<strong>在出驾驶舱前取下肩章、领带</strong>等机组标识；第二人进驾驶舱观察位坐下；</li>
+<li><strong>恢复后</strong>：就近安排靠窗座位（2A、2F），志愿者照顾；如发生应急撤离记得将失能机组带下飞机；</li>
+<li><strong>指挥权接替次序</strong>：机长 → 巡航机长 → C、B、A 类副驾驶 → 乘务长 → 客舱乘务员 → 航空安全员（相同职务按等级，高者优先）；</li>
+<li><strong>乘务长失能</strong>：优先有乘务长资质者接替；无则按乘务员等级排（同等级飞行小时多者优先），接替者第一时间报告机长并重新分工。</li></ul>`},
+{cat:'大撤·特情', icon:'🏃', src:'大撤专项·动态舱应急撤离流程 / CRM演练', t:['无准备撤离','15秒','第一次撞击','机外失火'], rel:['撤离','特情'],
+q:'无准备撤离的注意事项是什么？',
+a:`<strong>无准备撤离</strong>（起飞关键阶段着火、无准备迫降等）：<ul>
+<li>起飞关键阶段着火：拍打、大声告知机组失火，<strong>不能解开安全带</strong>；</li>
+<li>发生第一次撞击（有刹车感觉）时，乘务员口令<strong>"低下头，紧迫用力，Heads down brace"</strong>（3 遍）；</li>
+<li>等飞机<strong>完全停稳</strong>后，<strong>15 秒</strong>紧急撤离；*机外失火时可自行撤离，注意着火侧的门可能不能用，千万要观察！</li>
+<li>开门后口令："第 1 人，站在我对面，像我一样指挥旅客跳、滑；第 2、3 人跳下滑梯，站在滑梯 2 侧指挥旅客远离飞机！"</li></ul>`},
+{cat:'大撤·特情', icon:'🛬', src:'大撤专项·CRM演练 / CCM 6.29', t:['预防式离机','地面阶段','解除预位','离机广播'], rel:['特情','预防式离机'],
+q:'预防式离机（地面阶段）程序是什么？',
+a:`<strong>预防式离机（CCM 6.29）地面阶段</strong>：<ul>
+<li><strong>乘务长</strong>接机长内话后进驾驶舱了解：执行预防式离机、原因、通道及方式、升级应急撤离的发布方式及口令、其他协调内容，并传达给全体乘务员（含安全员）；</li>
+<li><strong>滑梯状态</strong>：如已预位——安全带灯关闭后指示<strong>解除所有舱门滑梯预位</strong>；如已解除——无需指示和报告；</li>
+<li><strong>全体乘务员</strong>：执行解除预位程序；安抚旅客："解开安全带，先不要动，不要拿行李。Open your seat belt. Don't move. Don't take your baggage."；清理通道保持出口通畅，回责任舱门附近等待指令；</li>
+<li><strong>离机广播</strong>："我是本次航班的乘务长，由于…原因，现在请大家快速有序地从前舱/后舱离开飞机，下机时请不要携带随身行李、不要使用电子设备进行拍摄、网聊等。"</li>
+<li><strong>离机出口乘务员</strong>：对接设备到位且听到敲门声后直接开启舱门（无需请示程序）；引导"到这边来，一个接一个，不要带行李，快速离开飞机。Come this way. One by one. No baggage! Be quick"；</li>
+<li><strong>非离机出口乘务员</strong>：值守责任舱门监控；如听到"乘务组各就各位。Cabin crew at stations"，立即将滑梯<strong>重新预位</strong>，按应急撤离程序实施；</li>
+<li><strong>清客</strong>："还有人吗？听到请回答。Anyone else? Answer me."机长与乘务长最后检查后离开飞机，可不携带应急设备。</li></ul>`},
+{cat:'大撤·特情', icon:'⚖️', src:'大撤专项·CRM演练', t:['撤离决定','自主撤离','乘务组各就各位','不需要撤离','EVA CMD'], rel:['撤离','特情'],
+q:'撤离决定怎么做出？什么情况可以自主撤离？',
+a:`<strong>撤离决定</strong>：<ul>
+<li>驾驶舱发布<strong>"乘务组各就各位！Cabin crew at stations"</strong> → 乘务员解开安全带站起来，口令"镇静、听指挥！Keep calm, follow my direction"，等待"撤离！Evacuate"指令；</li>
+<li><strong>飞机停稳后未接到任何指令</strong>：立即呼叫驾驶舱，<strong>呼叫 30 秒内无应答视为飞行机组失能</strong>，乘务组自主评估是否撤离；</li>
+<li><strong>可自主执行撤离</strong>：水上迫降、航空器严重损坏等非常紧急情况；威胁性失火、烟雾无法控制、燃油严重泄漏等——联系驾驶舱汇报，无应答即自主判断撤离；</li>
+<li><strong>自主发出撤离指令的方式</strong>：首先按压 <strong>FAP 上的 EVA CMD</strong>，其次 PA、扩音器、口头指令；</li>
+<li><strong>撤离指令一旦下达不可取消</strong>；</li>
+<li><strong>不需要撤离</strong>：驾驶舱发布"旅客留在原位。Passengers remain seated"→ 乘务员发布"镇静、听指挥！""我们安全了，请坐在原位。We are safe, remain seated."并进客舱安抚。</li></ul>`},
+/* ---------- 大撤·设备 ---------- */
+{cat:'大撤·设备', icon:'🫁', src:'大撤专项·机型设备 / CCM 第四章', t:['氧气瓶','I型氧气瓶','II型氧气瓶','III型氧气瓶','310升','1500PSI'], rel:['设备','释压'],
+q:'机上氧气瓶（I/II/III 型）的性能与操作有什么区别？',
+a:`<strong>共同点</strong>：氧气容量均 <strong>310 升</strong>；4 升/分钟可用 <strong>78 分钟</strong>，2 升/分钟可用 <strong>155 分钟</strong>（II/III 型）。<ul>
+<li><strong>I 型</strong>：仅一个接头可连接机上氧气面罩（4 升/分钟高流量），另一接头为<strong>非计量全流量出口</strong>供烟雾面罩（PBE）使用；逆时针（左转）开/关活门；</li>
+<li><strong>II 型</strong>：旋转开/关活门调节流量，数字<strong>"2"低流量、"4"高流量</strong>，只有数字位于流量观察窗中间氧气才流出；</li>
+<li><strong>III 型</strong>：通过<strong>流量调节旋钮</strong>调高低流量（"2"/"4"），其余同 II 型。</li></ul>
+<strong>检查</strong>：固定在支架上；压力指示 <strong>1500 PSI 以上</strong>；独立包装面罩连接在输出口上；多输出口需检查防尘帽在位。<br>
+<strong>特殊考虑</strong>：切勿放空——<strong>压力 200PSI 时停止使用</strong>以备急用；使用时前后四排（3 米）内禁烟；操作时手上切勿沾油脂；使用氧气瓶时客舱乘务员必须进行监控。<br>
+<strong>位置</strong>：A320 共 4 个（1 排 ABC、1 排 DEF 行李架内各 1 个，30/31 排 ABC 行李架内 2 个）；A321 共 5 个（1 排 ABC、1 排 DEF 各 1 个，3 号门乘务员上方行李架 1 个，39/40 排 ABC 行李架内 2 个）。`},
+{cat:'大撤·设备', icon:'🧯', src:'大撤专项·机型设备 / CCM 4.4', t:['灭火瓶','I型灭火瓶','II型灭火瓶','HALON','9-12秒','1.5-2米'], rel:['设备','失火'],
+q:'灭火瓶（I/II 型）怎么操作、使用时注意什么？',
+a:`<strong>检查（两型相同）</strong>：固定在支架上；压力表指示在<strong>绿色区域</strong>；安全锁扣和铅封/安全栓完好。<br>
+<strong>操作</strong>：取下 → 竖直握住、抓提把提起 → <strong>I 型</strong>：安全锁扣向下打开、压断铅封丝；<strong>II 型</strong>：取下安全栓 → 站在远离火源处对准<strong>火源底部</strong> → 压下/按压操作把手来回扫射 → 松开把手停止。<br>
+<strong>特殊考虑（II 型）</strong>：<ul>
+<li>灭火剂需<strong>完全雾化</strong>才有效；</li>
+<li>持续喷射约 <strong>9~12 秒</strong>，可反复按压直至用完；<strong>最优工作距离 1.5~2 米</strong>；</li>
+<li>HALON 灭火剂有微毒，开放空间可直接喷洒人体着火（<strong>禁止对头部喷洒</strong>，防窒息）；</li>
+<li>建议灭火时戴 PBE（燃烧烟尘与灭火剂气体会刺激眼睛、损伤呼吸器官）。</li></ul>
+<strong>位置</strong>：A320（180/186）4 个——前舱乘务员座位下方 1 个、1 排 DEF 行李架内 1 个、后舱左侧乘务员座位下方 1 个、后舱右侧乘务员座位上方/右侧 1 个；A321 共 6 个（增 3 号门乘务员座椅下方 1 个、后舱洗手间门乘务员座位下方 1 个等）。`},
+{cat:'大撤·设备', icon:'😷', src:'大撤专项·机型设备 / CCM 4.4', t:['PBE','烟雾面罩','15分钟','触发绳','I型PBE','II型PBE'], rel:['设备','失火'],
+q:'PBE（烟雾面罩）I/II 型怎么戴、有什么特殊考虑？',
+a:`<strong>PBE I 型（胸前型）佩戴</strong>：打开储存盒 → 撕开真空袋 → 展开 PBE → 双手扩大颈部密封圈、低头套在头上（罩住口鼻、头发在 PBE 内）→ <strong>用力拉动触发绳</strong>开始工作（听到"咝咝"气流声）→ 身体固定绳系腰间。取下：先解固定绳，双手由颈下插入面部松开调节带，向上拉起取下。<br>
+<strong>PBE II 型佩戴</strong>：取出真空袋撕开 → 取出 PBE → <strong>先拉动触发拉环</strong>（听到气流声）→ 扩大密封圈 → 套头 → 确保头发在内。取下：双手由颈下插入面部向上拉起。<br>
+<strong>特殊考虑</strong>：<ul>
+<li>拉触发绳/拉环后无氧气流出，再用力重复一次，否则取下面罩；</li>
+<li>头部有热感或面罩瘪下 = 供氧结束，<strong>离开火源</strong>后在安全处取下；</li>
+<li>取下后头发内残留氧气，不要靠近明火，充分抖散头发；</li>
+<li>供氧时间约 <strong>15 分钟</strong>（呼吸快时更短）；观察窗有水气雾气时迅速取下；</li>
+<li>I 型可通过面罩前部<strong>发话器</strong>与外界联系。</li></ul>
+<strong>数量位置</strong>：A320（180）6 个 /（186）5 个、A321 6 个，分布于 1 排 DEF 行李架、30/31（或 39/40）排行李架及后舱乘务员座位附近。`},
+{cat:'大撤·设备', icon:'📡', src:'大撤专项·机型设备', t:['ELT','应急定位发射器','121.5','406MHz','ARM','XMT'], rel:['设备','水上撤离'],
+q:'ELT（应急定位发射器）I 型和 III 型有什么区别、怎么用？',
+a:`<strong>I 型（加强型）频率</strong>：121.5MHz 民用遇险、243MHz 军用遇险、406MHz 全球卫星搜救（COSPAS-SARSAT）。<strong>III 型</strong>：121.5MHz + 406MHz。<br>
+<strong>I 型旋转电门</strong>：ARM（待命，自动启用）、XMT（发射，人工启用）、TEST（自测，维修用）、OFF（关闭，维修用）。<br>
+<strong>水上</strong>：电门旋到 <strong>ARM</strong> 位 → 系留绳固定绑在救生筏系留点 → 放到筏附近水中自动激活（I 型天线 5 分钟后发射；III 型<strong>接触水后 10 秒内自动激活</strong>）→ 与救生筏保持最大距离；中止发射时取出平放筏上。<br>
+<strong>陆地</strong>：I 型旋到 <strong>XMT</strong> 位（III 型调到 <strong>ON</strong> 位）→ 无障碍最高点 → 竖直天线 → 保持距离（I 型约 9.144 米/30 英尺；III 型至少 10 英尺/约 3 米内无障碍）。<br>
+<strong>III 型激活指示灯</strong>：琥珀色每 2 秒闪烁；GPS 被解码约 3 分钟后变<strong>绿色</strong>；发射最长持续 4 小时，之后变回琥珀色（表示无 GPS 位置发射）。<br>
+<strong>检查</strong>：固定在支架上。`},
+{cat:'大撤·设备', icon:'🔦', src:'大撤专项·机型设备', t:['扩音器','手电筒','应急手电筒','电量指示灯'], rel:['设备'],
+q:'扩音器和应急手电筒怎么检查使用？',
+a:`<strong>扩音器</strong>：检查——固定在支架上、按动开关有声音；操作——取下、喇叭面向旅客、按下送话键。注意：调节音量防啸叫；<strong>不要对着人耳使用</strong>，强声会损伤耳内。<br>
+<strong>应急手电筒（防水，落水会浮起）</strong>：<ul>
+<li><strong>电量指示灯手电筒</strong>：检查——铅封完好、指示灯间隙闪烁（间隔 10 秒内）且明亮；操作——取下即亮（续航 4 小时以上），用后把断路开关嵌回支架复位（否则电池耗光）；指示灯间隔超 10 秒或变暗 = 电量不足需换电池；</li>
+<li><strong>干电池手电筒</strong>：检查——可正常开启；操作——打开开关即亮，灯暗 = 电量不足，用后关电源放回支架。</li></ul>`},
+{cat:'大撤·设备', icon:'🛝', src:'大撤专项·机型设备 / CCM 第四章', t:['滑梯','翼上出口滑梯','滑梯救生筏','软梯','双通道','单通道'], rel:['设备','撤离'],
+q:'滑梯、翼上出口滑梯、滑梯救生筏三者的区别？',
+a:`<ul>
+<li><strong>滑梯</strong>：<strong>单通道、单用途</strong>（水上仅作漂浮装置）；配备在<strong>不具备延伸跨水运行能力</strong>的 A320 客舱 C 型机门上（4 个）及 A321 的 3 号门上（2 个）；检查——压力表指针在绿色区域（大温差下可能短暂红区，约 30 分钟内回绿；1、4 号门底部橘红色指示与地板箭头对齐 = 预位状态正常）；充气不足/不充气时用底部两侧手柄展开作<strong>软梯</strong>；</li>
+<li><strong>翼上出口滑梯</strong>：<strong>双通道、单用途</strong>，充气约 <strong>4 秒</strong>；位于 III 型门外机翼上、面向飞机后部，共 2 个；受损/漏气时仍可作<strong>脱离道</strong>使用——挂钩固定在机翼连接点，必须由 4 人拉住（每侧 2 名）；</li>
+<li><strong>滑梯救生筏</strong>：<strong>双通道、双用途</strong>（陆上滑梯、水上救生筏），作为救生筏可承载 <strong>44 人、最大 55 人</strong>；配备在具备延伸跨水运行能力的 A320 C 型机门上（4 个）及 A321 的 1、4 号门（4 个）；特殊——钩形小刀装在系留绳旁，用来割断系留绳使筏脱离飞机（钩形设计防划破筏体）。</li></ul>
+<strong>共同要求</strong>：飞行前必须检查滑梯压力。`},
+{cat:'大撤·设备', icon:'🩺', src:'大撤专项·机型设备 / CCM 应急医疗设备', t:['应急医疗箱','急救箱','医疗物品补充箱','卫生防疫包','配备数量'], rel:['设备','医疗'],
+q:'机上应急医疗设备（医疗箱/急救箱/防疫包）配备数量和位置？',
+a:`<strong>A320</strong>：应急医疗箱 <strong>1 个</strong>（180：28/29 排 DEF 行李架内；186：30/31 排 DEF 行李架内）、急救箱 <strong>2 个</strong>（2 排 DEF 1 个 + 28/29 或 30/31 排 DEF 1 个）、卫生防疫包 <strong>3 个</strong>（2 排 DEF 1 个 + 28/29 或 30/31 排 DEF 2 个）、医疗物品补充箱 1 个（2 排 DEF 行李架上、急救箱旁）。<br>
+<strong>A321</strong>：应急医疗箱 1 个（39/40 排 DEF）、急救箱 <strong>3 个</strong>（2 排 DEF 1 个 + 39/40 排 DEF 2 个）、卫生防疫包 <strong>4 个</strong>（2 排 DEF 2 个 + 39/40 排 DEF 2 个）、医疗物品补充箱 1 个。<br>
+<strong>检查</strong>：封条或签封完好、在有效期内。<br>
+<strong>特殊考虑</strong>：签封被打开 → 对照清单检查有无缺损，缺损通知值班航医补充；无缺损且在有效期内可铅封条临时签封继续运行、航后报告；缺损或过期 → 先用医疗物品补充箱补充，补不齐立即报 AOC（联系航卫处评估），补齐后方可运行；一次运行中使用过 → 立即报值班航医并报备客舱部值班经理，低于 CCAR-121 部要求必须补充后才能继续运行。<br>
+<strong>使用顺序</strong>：急救需要时先考虑使用<strong>医疗物品补充箱</strong>，补充箱没有的物品才用其余应急医疗设备（补充箱打开使用不影响航班运行，航后报告补充）。`},
+{cat:'大撤·设备', icon:'🧪', src:'大撤专项·机型设备', t:['卫生防疫包','消毒凝固剂','生物有害垃圾','操作步骤'], rel:['设备','医疗'],
+q:'卫生防疫包的操作步骤是什么？',
+a:`<strong>用途</strong>：清除客舱内血液、尿液、呕吐物和排泄物等潜在传染性物质，护理可疑传染病病人。<br>
+<strong>操作</strong>：<ol>
+<li>穿戴个人防护用品：依次<strong>医用口罩、眼罩、医用橡胶手套、防渗透围裙</strong>；</li>
+<li>配制消毒液：1 片表面清理消毒片放入 250~500 毫升清水，配成 1:500~1000 浓度；</li>
+<li>将<strong>消毒凝固剂</strong>均匀覆盖污物 <strong>3~5 分钟</strong>使其凝胶固化；</li>
+<li>用便携拾物铲将凝胶固化污物铲入<strong>生物有害物专用垃圾袋</strong>；</li>
+<li>用消毒液对污染物品消毒（滞留 3~5 分钟后清水擦拭、吸干），<strong>重复一遍</strong>，用过的毛巾和消毒用品入专用垃圾袋；</li>
+<li>依次脱手套、围裙，皮肤消毒擦拭纸巾擦手；再脱眼罩、口罩，擦手及可能接触部位；</li>
+<li>垃圾袋封闭，填写"生物有害垃圾标签"贴在封口处；</li>
+<li>暂存适当位置（防丢失破损、防污染餐食）；通知目的地地面部门接收；</li>
+<li>生物有害垃圾按医疗垃圾管理原则无害化处理。</li></ol>`},
+{cat:'大撤·设备', icon:'🫧', src:'大撤专项·机型设备 / CCM 第四章', t:['化学氧气','氧气面罩脱落','14000英尺','15分钟','22分钟'], rel:['设备','释压'],
+q:'客舱固定化学氧气系统是怎么工作的？',
+a:`<strong>描述</strong>：客舱紧急释压时为乘客供氧；氧气由<strong>化学发生器</strong>产生，每个发生器给 2、3 或 4 个一组的氧气面罩供氧；发生器和面罩在储存箱内（旅客座位上方、洗手间、厨房、客舱机组位置上方）。<br>
+<strong>操作</strong>：<ul>
+<li>座舱压力减小到相当于 <strong>14000(+250/-750) 英尺</strong>时，应急氧气系统盖板自动打开、面罩脱落（飞行机组也可手动放下）；</li>
+<li><strong>用力拉下</strong>任何一个面罩，氧气发生器开始工作产生氧气流；</li>
+<li>盖板不能打开时，将<strong>旅客氧气释放工具</strong>插入盖板小孔松开锁机构；</li>
+<li>面罩罩住口鼻正常呼吸；</li>
+<li>按飞机构型约可持续 <strong>15 分钟或 22 分钟</strong>；<strong>氧气不可被关断</strong>，用完气流即中止，直到发生器内化学物质耗尽。</li></ul>`},
+{cat:'大撤·设备', icon:'🌊', src:'大撤专项·机型设备', t:['信号弹','海水染色剂','信号反射镜','水净化药片','修补钳','海水淡化泵','求救设备'], rel:['设备','水上撤离'],
+q:'水上求生设备（信号弹/反射镜/染色剂等）怎么使用？',
+a:`<ul>
+<li><strong>信号弹</strong>（68273-101/63762-101）：红色伞状信号，昼夜可用，最高视程 30 英里、射程 300 米、烟雾持续 40 秒；手握螺纹把手垂直放于<strong>头上方</strong>，旋开红盖引燃，<strong>严禁对准人或物体</strong>；只在飞机/船确实可见或接近时发射；水上在船的<strong>风下侧</strong>伸出船外（防烧坏救生船、防烟雾吹向人员），陆地在高开阔地使用；</li>
+<li><strong>信号反射镜</strong>：反射太阳光，视程超 <strong>23 公里</strong>；先反射到近旁表面，再渐渐上移至眼睛水平，经观察孔看到光亮点后转动身体让光点落在目标上；镜角绳套在手上防丢失；可反复使用、船上人员可传用；</li>
+<li><strong>海水染色剂</strong>：把救生船周围 <strong>300 米</strong>水染成荧光绿色，持续约 <strong>45 分钟</strong>；绳索系在筏逆风一方，拉下盖片释放扔入水中；只在看到搜救人员且海面较平静时使用；</li>
+<li><strong>水净化药片</strong>：一片净化一升淡水，净化 10 分钟；水质差可加片延时；<strong>不是去盐药片</strong>，海水不能饮用；</li>
+<li><strong>修补钳</strong>：修补救生船破损面——垫片穿入磨损口、面向内层放平、盖片压下封严、翼形螺帽拧紧；长绳系在手上防掉出船外；</li>
+<li><strong>充气泵</strong>：给救生筏充气；<strong>海水淡化泵</strong>：撕开包装排出管内抑菌剂后使用。</li></ul>`},
+{cat:'大撤·特情', icon:'📱', src:'大撤专项·CRM演练', t:['手机发热','锂电池','电子设备发热','降温'], rel:['失火','锂电池'],
+q:'旅客手机/电子设备发热怎么处置？',
+a:`<strong>电子设备发热/起火处置（CRM 演练）</strong>：<ul>
+<li>确认设备电源关闭；</li>
+<li>在采取适当防护的前提下，<strong>置于装有冰块的不渗漏袋子</strong>上等降温方式冷却；</li>
+<li>冷却后由专人在适当区域监控（可由设备所属人进行，但客舱机组确保随时可采取进一步处置，并提前将可能措施告知设备所属人）；</li>
+<li>维持客舱秩序、安抚旅客，必要时人员疏散转移；</li>
+<li>报告机长、维持联络，必要时持续报告；</li>
+<li>行李架内锂电池起火的完整灭火程序（戴 PBE、防火手套、略微打开行李架伸入喷嘴、打开一下灭一下循环）见"大撤·失火"专项条目。</li></ul>`},
+/* ---------- 大撤·撤离程序（第 8 大场景：五张可点击流程卡） ---------- */
+{cat:'大撤·撤离程序', icon:'🛫', acc:true, src:'大撤专项·动态舱应急撤离流程', t:['有准备撤离','有准备的撤离程序','完整撤离程序','迫降撤离','撤离程序','有准备陆地','有准备水上'], rel:['撤离','撤离准备'],
+q:'有准备撤离的完整程序是什么？（陆地 / 水上 · 含手册口令）',
+a:`<strong>有准备撤离（时间充裕的迫降）完整流程</strong>：<ol>
+<li><strong>乘务长进驾驶舱</strong>：机长广播<strong>"乘务长进驾驶舱，乘务长进驾驶舱，Purser to cockpit"</strong>，乘务长带纸、笔、手表进驾驶舱；2 号位拿纸笔手表，口令<strong>"我已拿好纸、笔手表在前舱集合"</strong>；3、4 号位一起走向前舱；</li>
+<li><strong>准备会</strong>：乘务长通报迫降原因/时间/地点/天气；<strong>机长将以外话形式发出防冲撞指令和撤离指令</strong>。各号位报告分工：2 号位 1~10 排（水上 1~15 排）R1 门 / 3 号位 21~最后 1 排（水上 16~最后 1 排）L4 门 / 4 号位 21~最后 1 排（水上 16~最后 1 排）R4 门；3 号位与安全员传达信息（防冲击指令和撤离指令由谁发出、飞机预计降落的时间、迫降点：水上/陆地；将安全员调至 13D，如有旅客占座转移该旅客）；</li>
+<li><strong>客舱准备广播与演示</strong>：固定松散物品口令<strong>"固定小桌板，系好安全带。Stow your tray table, fasten your seat belt."</strong>（2 遍，过去中文回来英文）→ 收取尖锐物品<strong>"请取下随身的尖锐物品（钢笔、手表、首饰等放入行李，取下领带、围巾），请勿放在座椅前方口袋内"</strong>（1 遍，黑体字 2 遍）→ <strong>"取出衣服穿好，行李放到行李架上"</strong>（2 遍）→ 脱高跟鞋（各号位拿毛毯或垃圾袋收鞋，前舱由前往后、后舱由后往前，收好的高跟鞋放到<strong>不朝机头方向的洗手间</strong>并锁闭）；</li>
+<li><strong>防冲击姿势演示</strong>：2 号位坐 1C、3 号位 10D、4 号位 20C，口令<strong>"低下头！紧迫用力！Heads down brace！"</strong>（中英文交替发布，声音统一、响亮）→<strong>"解开安全带。Open your seat belt"</strong>（2 遍，回）→<strong>"请大家系好安全带！Please fasten your seat belt tight and low"</strong>（2 遍，去）→ 检查旅客安全带；</li>
+<li><strong>选择并指导援助者</strong>：口令<strong>"你、你、你请跟我来！"</strong>带到机门旁交代任务——飞机停稳后挡住旅客直到滑梯完全充气、"到这边来，跳，滑"、<strong>"如果我不能开门，请帮我开门"</strong>、"如果我受伤，请将我带下飞机，我的安全带是这样解开的"；让援助者复述任务，座位没变防冲击姿势不变，回原位坐好；</li>
+<li><strong>个人最后准备</strong>：乘务长<strong>关闭客舱灯光、打开应急灯光</strong>，广播<strong>"全体乘务员做好最后准备。All attendant, prepare yourself"</strong>；检查本号位设备在位、固定松散物品、锁闭洗手间、关闭电器电源；坐下口令<strong>"系好安全带、肩带，静默 30 秒 STS"</strong>；</li>
+<li><strong>驾驶舱口令（手册 6.2.5.13，中英文交替、声音统一响亮）</strong>：下降至 <strong>2000 英尺</strong>，驾驶舱发出<strong>"完成准备！完成准备！Finish preparation！Finish preparation！"</strong>——听到后停止所有准备工作、尽快就位，未完成的工作由乘务长通过 PA 广播告知旅客；下降至 <strong>500 英尺</strong>，驾驶舱发出<strong>"防冲击姿势！防冲击姿势！Brace for impact！Brace for impact！"</strong>，乘务员立即向旅客发布防冲击指令<strong>"低下头！紧迫用力！Heads down brace！"</strong>（中英文交替）；</li>
+<li><strong>撤离实施（手册 6.1 / 6.4.4.5）</strong>：飞机完全停稳后，飞行机组发出<strong>"乘务组各就各位！乘务组各就各位！Cabin crew at stations！Cabin crew at stations！"</strong>，乘务员解开安全带站起来，口令<strong>"镇静！听指挥！Keep calm, follow my direction."</strong>，等待撤离指令；接到<strong>"撤离！撤离！Evacuate！Evacuate！"</strong>后实施 <strong>15 秒撤离流程</strong>；滑梯充气过程中两手抓住门两侧辅助把手挡住出口，口令<strong>"解开安全带！不要带行李！脱下高跟鞋！"</strong>；滑梯充气完毕后引导口令<strong>"到这边来，跳、滑。Come this way, jump slide."</strong>（烟雾环境加"弯下腰，捂住口鼻。Bend over, cover your nose and mouth."；应急电源失效的黑暗环境加"朝灯光方向走。Come to the light."）；清舱口令<strong>"还有人吗，Anyone else, answer me"</strong>反复多次，逐个报告"已完成清舱，请求撤离"。</li></ol>
+<strong>水上撤离额外要求</strong>：<ul>
+<li><strong>救生衣演示</strong>："请穿上救生衣，但在客舱内不要充气。Please put on your life vest, but do not inflate it while you are in the cabin."（2 遍）；</li>
+<li><strong>脱高跟鞋</strong>：水上<strong>连鞋一起脱</strong>；</li>
+<li><strong>乘务员自身准备</strong>：挂 SK 包；取下尖锐物品（肩章、胸章、领带）存入不朝机头方向的洗手间；救生衣放到座椅下口令<strong>"这是我的救生衣，请不要动"</strong>（2 号位 1 排、3 号位 10 排、4 号位 20 排）；</li>
+<li><strong>撤离后</strong>：到门口救生衣再充气 → 上滑梯救生筏 → 钩形小刀割断系留绳脱离飞机 → ELT 旋到 ARM 位放入水中自动激活 → 与飞机保持最大距离等待救援。</li></ul>`},
+{cat:'大撤·撤离程序', icon:'⏳', acc:true, src:'大撤专项·动态舱应急撤离流程', t:['有时限撤离','有时限的撤离','时间有限迫降','陆地迫降','有时限陆地','有时限水上'], rel:['撤离','撤离准备'],
+q:'有时限撤离（时间有限的迫降）程序是什么？（陆地 / 水上 · 含手册口令）',
+a:`<strong>有时限撤离（迫降时间有限，准备程序压缩执行）</strong>：<ol>
+<li><strong>乘务长快速进驾驶舱</strong>接受机长通报，快速传达迫降原因、预计降落时间与各号位分工；</li>
+<li><strong>快速客舱准备</strong>：简短广播固定松散物品、系好安全带；快速收取尖锐物品、穿好衣服、脱高跟鞋；</li>
+<li><strong>防冲击姿势</strong>：口令<strong>"低下头！紧迫用力！Heads down brace！"</strong>（中英文交替发布，声音统一、响亮）；*<strong>有时限的陆地迫降，防冲击姿势结束后 3 号位往后舱找翼上援助者</strong>；</li>
+<li><strong>个人最后准备</strong>：快速检查设备与撤离通道，坐下口令"系好安全带、肩带，静默 30 秒 STS"静默待命；</li>
+<li><strong>驾驶舱口令（手册 6.2.5.13）</strong>：下降至 <strong>2000 英尺</strong>——<strong>"完成准备！完成准备！Finish preparation！Finish preparation！"</strong>；下降至 <strong>500 英尺</strong>——<strong>"防冲击姿势！防冲击姿势！Brace for impact！Brace for impact！"</strong>；</li>
+<li><strong>撤离实施（手册 6.1 / 6.4.4.5）</strong>：飞机完全停稳后，飞行机组发出<strong>"乘务组各就各位！乘务组各就各位！Cabin crew at stations！Cabin crew at stations！"</strong>，乘务员口令<strong>"镇静！听指挥！Keep calm, follow my direction."</strong>；接到<strong>"撤离！撤离！Evacuate！Evacuate！"</strong>后实施 <strong>15 秒撤离流程</strong>；滑梯充气中挡住出口口令<strong>"解开安全带！不要带行李！脱下高跟鞋！"</strong>，充气完毕后引导<strong>"到这边来，跳、滑。Come this way, jump slide."</strong>；清舱<strong>"还有人吗，Anyone else, answer me"</strong>反复多次。</li></ol>
+<strong>水上撤离额外要求</strong>：<ul>
+<li><strong>救生衣演示</strong>照常执行："请穿上救生衣，但在客舱内不要充气。Please put on your life vest, but do not inflate it while you are in the cabin."（2 遍）；</li>
+<li><strong>脱高跟鞋</strong>：水上<strong>连鞋一起脱</strong>；责任分区按水上划分（2 号位 1~15 排 / 3、4 号位 16~最后 1 排）；</li>
+<li><strong>乘务员自身准备</strong>：救生衣放到座椅下"这是我的救生衣，请不要动"（2 号位 1 排、3 号位 10 排、4 号位 20 排）；挂 SK 包、取下尖锐物品；</li>
+<li><strong>撤离后</strong>：到门口救生衣再充气、上筏、割断系留绳，ELT 旋到 ARM 位激活。</li></ul>`},
+{cat:'大撤·撤离程序', icon:'🏃', acc:true, src:'大撤专项·动态舱应急撤离流程 / CRM演练', t:['无准备撤离','无准备','突然迫降','第一次撞击'], rel:['撤离','特情'],
+q:'无准备撤离程序是什么？',
+a:`<strong>无准备撤离（起飞关键阶段着火、无准备迫降等）</strong>：<ol>
+<li><strong>起飞关键阶段着火</strong>：拍打、大声告知机组失火，<strong>不能解开安全带</strong>；</li>
+<li><strong>发生第一次撞击</strong>（有刹车感觉）时，乘务员口令<strong>"低下头！紧迫用力！Heads down brace！"</strong>（中英文交替发布，3 遍，声音统一、响亮）；</li>
+<li>等飞机<strong>完全停稳</strong>后，飞行机组发出<strong>"乘务组各就各位！乘务组各就各位！Cabin crew at stations！Cabin crew at stations！"</strong>；未接到任何指令且呼叫驾驶舱 <strong>30 秒</strong>无应答视为飞行机组失能，乘务组自主评估撤离；接到<strong>"撤离！撤离！Evacuate！Evacuate！"</strong>后实施 <strong>15 秒</strong>紧急撤离；*机外失火时可自行撤离，注意着火侧的门可能不能用，千万要观察；</li>
+<li><strong>开门后口令</strong>："第 1 人，站在我对面，像我一样指挥旅客跳、滑；第 2、3 人跳下滑梯，站在滑梯 2 侧指挥旅客远离飞机！"；引导口令<strong>"解开安全带！不要带行李！脱下高跟鞋！"</strong>、<strong>"到这边来，跳、滑。Come this way, jump slide."</strong>（烟雾环境加"弯下腰，捂住口鼻。Bend over, cover your nose and mouth."）；</li>
+<li><strong>清舱</strong>：手电筒照射、蹲下检查，"还有人吗，Anyone else, answer me"反复多次，依次报告后从就近出口撤离。</li></ol>`},
+{cat:'大撤·撤离程序', icon:'🌊', acc:true, src:'大撤专项·动态舱应急撤离流程', t:['水上撤离','水上迫降','救生筏','水面程序'], rel:['撤离','水上撤离'],
+q:'水上撤离（水上迫降）程序有什么特殊要求？',
+a:`<strong>水上撤离特殊要求</strong>：<ol>
+<li><strong>救生衣</strong>：客舱内<strong>不要充气</strong>，到门口/水面后再充气；水上撤离时乘务员救生衣放到座椅下"这是我的救生衣，请不要动"；</li>
+<li><strong>水上撤离引导口令（手册 6.1）</strong>：应穿好救生衣后撤离，口令<strong>"到这边来！充上救生衣！上筏！Come this way. Inflate your life vest. On board."</strong>；</li>
+<li><strong>撤离用筏</strong>：滑梯救生筏（<strong>44 人、最大 55 人</strong>）；系留绳固定，筏漂离飞机后猛拉充气手柄充气；</li>
+<li><strong>当（考）180 型飞机</strong>：开启舱门后需补充操作——<strong>掀开黑色盖布，拉开白色断开手柄，推筏</strong>；引导口令改为<strong>"到这边来！救生衣充气！跳！Come this way. Inflate your life vest. Jump."</strong>（中英文各两遍）；最后使用<strong>钩型小刀</strong>断开系留绳；</li>
+<li><strong>人员满载脱离</strong>：用钩形小刀割断系留绳使筏脱离飞机（钩形设计防划破筏体）；</li>
+<li><strong>ELT</strong>：电门旋到 ARM 位，系留绳固定绑在救生筏系留点，放到筏附近水中自动激活；</li>
+<li><strong>上筏后</strong>：与飞机保持最大距离，等待救援（信号弹、海水染色剂按需使用）。</li></ol>`},
+{cat:'大撤·撤离程序', icon:'⚖️', acc:true, src:'大撤专项·CRM演练', t:['撤离指令','撤离决定','EVA CMD','自主撤离','各就各位'], rel:['撤离','特情'],
+q:'撤离指令由谁发出、撤离决定怎么做出？',
+a:`<strong>撤离指令与撤离决定</strong>：<ol>
+<li>驾驶舱发布<strong>"乘务组各就各位！乘务组各就各位！Cabin crew at stations！Cabin crew at stations！"</strong> → 乘务员解开安全带站起来，口令<strong>"镇静！听指挥！Keep calm, follow my direction."</strong>，等待撤离指令；</li>
+<li><strong>飞机停稳后未接到任何指令</strong>：立即呼叫驾驶舱，<strong>呼叫 30 秒内无应答视为飞行机组失能</strong>，乘务组自主评估是否撤离；</li>
+<li><strong>自主发出撤离指令的方式</strong>：首先按压 <strong>FAP 上的 EVA CMD</strong>，其次 PA、扩音器、口头指令；</li>
+<li><strong>撤离指令（手册 6.1.7）</strong>：<strong>"撤离！撤离！Evacuate！Evacuate！"</strong>——<strong>撤离指令一旦下达不可取消</strong>；</li>
+<li><strong>不需要撤离（手册 6.1.7.4）</strong>：驾驶舱广播<strong>"旅客留在原位！旅客留在原位！Passengers remain seated！Passengers remain seated！"</strong> → 乘务员发布"镇静、听指挥！""我们安全了，请坐在原位。We are safe, remain seated."并进客舱安抚。</li></ol>`},
+{cat:'大撤·撤离程序', icon:'🔄', acc:true, src:'大撤专项·动态舱应急撤离流程', t:['完成准备','程序转换','有准备转有时限','迫降应急程序','个人准备下降'], rel:['撤离','撤离准备'],
+q:'听到"完成准备"口令时怎么执行？（有准备 → 有时限 转换）',
+a:`<strong>迫降应急程序的转换（有准备 → 有时限）</strong>：<ol>
+<li>在迫降的应急程序中，<strong>无论当前进行到哪一步程序</strong>（客舱准备广播、演示、选择援助者等任一环节），只要听到驾驶舱在<strong>下降至 2000 英尺</strong>时发出的口令<strong>"完成准备！完成准备！Finish preparation！Finish preparation！"</strong>（手册 6.2.5.11），<strong>立即停止当前程序</strong>；</li>
+<li><strong>直接做个人准备、准备下降</strong>：检查本号位设备在位、在洗手间内取下随身的尖锐物品，确认过道通畅，回责任位坐下口令<strong>"系好安全带、肩带，静默 30 秒 STS"</strong>——即从【有准备】程序切换到【有时限】程序；</li>
+<li><strong>开启舱门后，寻找援助者</strong>：C 型门口令<strong>"你、你、你请跟我来！"</strong>；有时限陆地迫降防冲击姿势结束后 3 号位往后舱找翼上援助者。</li></ol>`}
+];
+
+/* 大撤专项练习题（并入「你问我答」在线练习，章节：大撤专项） */
+window.DC_QUIZ = [
+{q:'动态舱应急撤离（大撤）的滑梯预位顺序是（）。',t:'单选',o:['A. 先右后左','B. 先左后右','C. 先前舱后后舱','D. 同时预位'],a:'B',c:'大撤专项',e:'滑梯预位操作检查顺序先左后右，听看响动查说，双人制操作；听到 1 号门滑梯预位完成后，3 号位 PA 外话报告"4 号门滑梯预位完成"。'},
+{q:'静默 30 秒（STS）的完整口令是（）。',t:'单选',o:['A. 我已坐好，系好安全带，肩带，静默 30 秒 STS','B. 全体注意，静默 30 秒','C. 系好安全带，静默准备','D. 静默 30 秒，听从指挥'],a:'A',c:'大撤专项',e:'客舱灯光变暗或安全检查完成后，乘务员回位坐好并报口令"我已坐好，系好安全带，肩带，静默 30 秒 STS"。'},
+{q:'三人灭火小组中，第二个到达现场的乘务员承担的角色是（）。',t:'单选',o:['A. 消防员','B. 辅助消防员','C. 通讯员','D. 支援人员'],a:'C',c:'大撤专项',e:'第一个发现者任消防员（"我来灭火，你去报告"），第二个到达任通讯员（报告机长并广播），第三个到达任辅助消防员（戴 PBE 接替灭火，"我来接替你灭火"）。'},
+{q:'II 型灭火瓶持续喷射时间约为（），最优工作距离（）。',t:'单选',o:['A. 5~8 秒；1~1.5 米','B. 9~12 秒；1.5~2 米','C. 15~20 秒；2~3 米','D. 30 秒以上；任意距离'],a:'B',c:'大撤专项',e:'灭火瓶持续喷射时间大约 9~12 秒，可反复按压多次直至用完；最优工作距离 1.5~2 米，对准火源底部来回扫射。'},
+{q:'氧气瓶使用时的特殊考虑，正确的是（）。',t:'单选',o:['A. 氧气应放空保存','B. 压力在 200PSI 时停止使用以备急用','C. 使用时两排内禁烟','D. 手上可沾少量油脂'],a:'B',c:'大撤专项',e:'切勿将氧气放空，压力 200PSI 时停止使用以备急用；使用时前后四排（3 米）内禁烟；操作时手上切勿沾油脂；使用氧气瓶时客舱乘务员必须进行监控。'},
+{q:'PBE（烟雾面罩）的供氧时间约为（）。',t:'单选',o:['A. 5 分钟','B. 10 分钟','C. 15 分钟','D. 30 分钟'],a:'C',c:'大撤专项',e:'PBE 供氧时间平均约 15 分钟（呼吸快时更短）；观察窗有水气雾气时迅速取下；取下后头发内残留氧气，不要靠近明火。'},
+{q:'客舱释压、氧气面罩脱落后，指示旅客戴面罩的口令要点是（）。',t:'单选',o:['A. 先小孩后大人','B. 先大人后小孩','C. 同时佩戴','D. 只给儿童佩戴'],a:'B',c:'大撤专项',e:'口令"像我一样戴上氧气面罩，先大人后小孩。Pull your oxygen mask, cover your nose and mouth, you first, then your children"，并指示旅客摘下眼镜、成年人协助儿童。'},
+{q:'飞机停稳后未接到驾驶舱任何指令，乘务员呼叫驾驶舱多少秒无应答可视为飞行机组失能？（）',t:'单选',o:['A. 10 秒','B. 15 秒','C. 30 秒','D. 60 秒'],a:'C',c:'大撤专项',e:'飞机停稳后未接到驾驶舱任何指令，客舱乘务员应立即呼叫驾驶舱，呼叫 30 秒内无应答视为驾驶舱飞行机组失能，乘务组自主评估是否撤离。'},
+{q:'滑梯救生筏作为救生筏使用时可承载（）。',t:'单选',o:['A. 25 人，最大 38 人','B. 44 人，最大 55 人','C. 30 人，最大 40 人','D. 50 人，最大 60 人'],a:'B',c:'大撤专项',e:'滑梯救生筏为双通道双用途（陆上滑梯/水上救生筏），作为救生筏可承载 44 人、最大 55 人。'},
+{q:'乘务员个人最后准备的内容不包括（）。',t:'单选',o:['A. 检查撤离携带设备在位','B. 固定松散物品、锁闭洗手间','C. 关闭烤箱、烧水壶等电器电源','D. 向旅客分发餐食'],a:'D',c:'大撤专项',e:'个人最后准备：检查本号位设备（手电筒/SK包/急救箱/ELT 等）、固定松散物品、检查洗手间并锁闭、关闭电器电源、水上撤离取下尖锐物品；不进行任何服务动作。'}
+];
+/* DC_KB_END（同步标记块结束） */
+
 const NAV_ITEMS = [
   {id:'home',icon:'🏠',label:'客舱'},
   {id:'quiz',icon:'✈️',label:'答题·启航'},
   {id:'mockExam',icon:'📜',label:'模拟考试'},
   {id:'bank',icon:'📋',label:'题库·航班清单'},
   {id:'chapter',icon:'🗂',label:'章节专项'},
+  {id:'dache',icon:'🚨',label:'大撤应急'},
   {id:'stats',icon:'📊',label:'飞行数据'},
   {id:'wrong',icon:'⬛',label:'错题本·黑匣子'},
   {id:'favorite',icon:'⭐',label:'收藏·VIP座位'},
@@ -5569,7 +6030,7 @@ function renderNav(){
 
 /* ===== BREADCRUMB ===== */
 function updateBreadcrumb(page){
-  const names = {home:'客舱',bank:'题库·航班清单',chapter:'章节专项练习',quiz:'答题·启航',mockExam:'模拟考试·自组卷',stats:'飞行数据',wrong:'错题本·黑匣子',favorite:'收藏·VIP座位',history:'历史航段',achievement:'成就·乘务成就',issues:'问题集合',settings:'客舱设置'};
+  const names = {home:'客舱',bank:'题库·航班清单',chapter:'章节专项练习',quiz:'答题·启航',mockExam:'模拟考试·自组卷',stats:'飞行数据',wrong:'错题本·黑匣子',favorite:'收藏·VIP座位',history:'历史航段',achievement:'成就·乘务成就',issues:'问题集合',settings:'客舱设置',dache:'大撤应急程序专项'};
   document.getElementById('breadcrumb').innerHTML = `<span>春秋航空</span><span class="sep">›</span><span class="current">${names[page]||page}</span>`;
 }
 
@@ -5648,7 +6109,7 @@ function go(page){
   m.innerHTML = '<div class="skeleton" style="height:200px;margin-bottom:16px;"></div><div class="skeleton" style="height:100px;margin-bottom:16px;"></div><div class="skeleton" style="height:150px;"></div>';
   // 短暂延迟后渲染实际内容
   setTimeout(()=>{
-    const renderers = {home:renderHome,bank:renderBank,chapter:renderChapterPractice,quiz:renderQuiz,stats:renderStats,wrong:renderWrong,favorite:renderFavorite,history:renderHistory,achievement:renderAchievement,settings:renderSettings,mockExam:renderMockExam,issues:renderIssues};
+    const renderers = {home:renderHome,bank:renderBank,chapter:renderChapterPractice,quiz:renderQuiz,stats:renderStats,wrong:renderWrong,favorite:renderFavorite,history:renderHistory,achievement:renderAchievement,settings:renderSettings,mockExam:renderMockExam,issues:renderIssues,dache:renderDache};
     if(renderers[page]) renderers[page]();
   },50);
   // close sidebar on mobile
@@ -6852,7 +7313,10 @@ function renderBank(){
       });
       return;
     }
-    container.innerHTML = list.map((q,i)=>{
+    // 连续滚动自然加载：先渲染首屏 30 张，滚动接近底部时自动追加（手机端长题库不卡顿）
+    const CHUNK = 30;
+    let shown = 0;
+    const ticketHtml = q => {
       const fnum = `9C ${1000+q.idx}`;
       const selected = APP._selected && APP._selected.has(q.idx);
       return `<div class="flight-ticket" onclick="startQuiz([${q.idx}])">
@@ -6873,7 +7337,28 @@ function renderBank(){
           </div>
         </div>
       </div>`;
-    }).join('');
+    };
+    function appendChunk(){
+      const slice = list.slice(shown, shown + CHUNK);
+      if(!slice.length) return;
+      container.insertAdjacentHTML('beforeend', slice.map(ticketHtml).join(''));
+      shown += slice.length;
+      const more = document.getElementById('bankMore');
+      if(more) more.style.display = shown < list.length ? 'flex' : 'none';
+    }
+    container.innerHTML = '<div id="bankMore" style="display:none;justify-content:center;align-items:center;gap:8px;padding:14px 0;color:var(--text3);font-size:.8rem;">✈️ 上滑自动加载更多…</div>';
+    appendChunk();
+    // 滚动监听（重渲染前先移除旧监听，避免重复叠加）
+    if(APP._bankOnScroll){ window.removeEventListener('scroll', APP._bankOnScroll); APP._bankOnScroll = null; }
+    const onScroll = function(){
+      const more = document.getElementById('bankMore');
+      if(!more || more.style.display === 'none' || shown >= list.length) return;
+      const r = more.getBoundingClientRect();
+      if(r.top < window.innerHeight + 420) appendChunk();
+    };
+    APP._bankOnScroll = onScroll;
+    window.addEventListener('scroll', onScroll, {passive:true});
+    requestAnimationFrame(onScroll); // 首屏未填满时立即补齐
   }
 
   document.getElementById('mainContent').innerHTML = `
@@ -9564,6 +10049,8 @@ function buildWrongPrintHTML(){
   .wi-exp,.wi-note{background:#F0FDF4;padding:8px 10px;border-radius:6px;margin-top:8px;font-size:13px;border-left:3px solid #148453;}
   .wi-note{background:#EFF6FF;border-left-color:#3B82F6;}
   @media print{body{margin:0;} .wi{box-shadow:none;}}
+
+  /* 大撤应急场景库样式已迁移至页面主样式表（见 <head> 内 <style> 区块） */
 </style>
 </head><body>
 <h1>⬛ 客舱乘务员题库·错题本</h1>
@@ -11189,6 +11676,243 @@ function addIssue(rec){
   arr.unshift(rec);
   saveIssues(arr);
 }
+/* ===== 大撤应急程序专项板块（2026-09-12 新增，12:40 视觉升级；场景库版 09-12 升级） =====
+ * 内容来源：docs/_dache_kb.js 单一来源（大撤/ 4 份资料整理归纳 + 与乘务员手册01.10核对）。
+ * 场景库 UI：八阶段全景流程条（归纳主线）+ 场景库七大专题网格（独立存储各大场景）
+ * + 场景详情（一句话总结/速记要点 chips + 序号知识卡）+ 关键数字速记卡 + 专项自测。 */
+let _dcTab = null;
+const _dcEsc = s => String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'>');
+/* 大撤场景库 · 专题归纳总结（summary=一句话总结 / points=速记要点 / tag=定位标签） */
+const DC_CAT_META = {
+  '大撤·流程':    { icon:'🚨', color:'#148453', tag:'全程主线 · 高频必考', desc:'八个阶段 · 口令 · 分工',
+    summary:'八个阶段串联全程：设备检查 → 滑梯预位 → 安全检查 → 静默STS → 平飞服务 → 特情处置 → 撤离准备 → 清舱，一步不可省略。',
+    points:['先左后右','静默30秒 STS','500英尺口令','15秒撤离','清舱 Anyone else'] },
+  '大撤·颠簸':    { icon:'〰️', color:'#2563eb', tag:'铃数分级 · 广播词', desc:'铃数分级 · 广播词',
+    summary:'按客舱铃数分级处置：1 声轻 / 2~3 声中 / 4~5 声重；重度先固定自己，颠簸结束分区巡舱并报告。',
+    points:['1声=轻度','2~3声=中度','4~5声=重度','抓扶手固定','巡舱报告口令'] },
+  '大撤·失火':    { icon:'🔥', color:'#ea580c', tag:'三人小组 · 四大火点', desc:'三人小组 · 四大火点',
+    summary:'三人灭火小组分工（消防员 / 通讯员 / 辅助消防员）覆盖洗手间、烤箱、行李架锂电池、舱壁四大火点，灭火后湿阻燃物覆盖防复燃并分级报告。',
+    points:['我来灭火你去报告','我来接替你灭火','门是凉的','打开一下灭一下','湿阻燃物防复燃'] },
+  '大撤·释压':    { icon:'💨', color:'#7c3aed', tag:'戴面罩 · 紧急下降', desc:'面罩 · 紧急下降 · 检查',
+    summary:'面罩脱落即戴面罩固定自己，先大人后小孩；到达安全高度后打结系高、斜背竖抱氧气瓶巡舱，翼上出口回字型检查并报告。',
+    points:['先大人后小孩','1分钟内联系驾驶舱','200PSI留用','氧气瓶斜背竖抱','回字型查翼上出口'] },
+  '大撤·撤离准备': { icon:'🎬', color:'#0d9488', tag:'准备会 · 演示 · 援助者', desc:'准备会 · 演示 · 援助者',
+    summary:'乘务长进驾驶舱 → 准备会 → 客舱广播与演示（防冲击姿势 / 救生衣 / 脱高跟鞋）→ 选择援助者 → 个人最后准备，全员静默STS待命。',
+    points:['乘务长进驾驶舱','Heads down brace','脱高跟鞋','C型门援助者','静默30秒 STS'] },
+  '大撤·特情':    { icon:'⚡', color:'#dc2626', tag:'失能 · 无准备 · 自主撤离', desc:'失能 · 无准备 · 预防式离机',
+    summary:'覆盖机组失能（指挥权接替次序）、无准备撤离（15 秒）、预防式离机、自主撤离（30 秒失能判定 + EVA CMD）及电子设备发热处置。',
+    points:['30秒无应答=失能','EVA CMD','15秒撤离','Cabin crew at stations','指挥权接替次序'] },
+  '大撤·设备':    { icon:'🧰', color:'#b45309', tag:'设备参数 · 检查要点', desc:'氧气瓶 · 灭火瓶 · 滑梯筏',
+    summary:'氧气瓶(310L / 1500PSI)、灭火瓶(9~12秒 / 1.5~2米)、PBE(15分钟)、滑梯救生筏(44人/最大55人)及应急医疗设备——检查口诀：在位 + 压力 + 签封。',
+    points:['310升/1500PSI','9~12秒 1.5~2米','PBE 15分钟','44人 vs 25人','14000英尺面罩脱落'] },
+  '大撤·撤离程序': { icon:'🛫', color:'#0369a1', tag:'有准备 · 有时限 · 无准备', desc:'撤离程序 · 六张流程卡',
+    summary:'有准备 / 有时限（陆地·水上完整流程与口令）/ 无准备撤离 + 撤离指令与决定 + "完成准备"程序转换——六张流程卡逐张点开，按序执行一步不可乱。（当考 180 型飞机，需在开启舱门后补充：掀开黑色盖布，拉开白色断开手柄，推筏——口令改为"到这边来！救生衣充气！跳！Come this way. Inflate your life vest. Jump."（中英文各两遍），最后使用钩型小刀断开系留绳。）',
+    points:['有准备完整程序','有时限压缩执行','无准备 15 秒','水上先不充气','完成准备=转有时限','180型：黑盖布·白手柄·推筏'] }
+};
+const _dcMeta = c => DC_CAT_META[c] || { icon:'📌', color:'#148453', desc:'', summary:'', points:[], tag:'' };
+
+/* 大撤八阶段 · 全景流程（归纳主线） */
+const DC_FLOW = [
+  { n:'①', t:'设备检查',  d:'各号位清点携带设备' },
+  { n:'②', t:'滑梯预位',  d:'先左后右·听看响动查说' },
+  { n:'③', t:'安全检查',  d:'锁洗手间·固定物品' },
+  { n:'④', t:'滑行静默',  d:'静默30秒 STS' },
+  { n:'⑤', t:'平飞服务',  d:'恢复客舱服务' },
+  { n:'⑥', t:'特情处置',  d:'颠簸/失火/释压' },
+  { n:'⑦', t:'撤离准备',  d:'准备会·演示·防冲击' },
+  { n:'⑧', t:'清舱撤离',  d:'15秒撤离·清舱报告' }
+];
+
+/* 关键数字速记卡（全部出自上方知识卡原文） */
+const DC_CHEATS = [
+  { icon:'⏱', g:'关键时间', items:[
+    { k:'15 秒', v:'停稳后完成撤离 / 无准备撤离时限' },
+    { k:'30 秒', v:'呼叫驾驶舱无应答 = 机组失能' },
+    { k:'500 英尺', v:'飞行机组下达撤离口令高度' },
+    { k:'4 秒', v:'翼上出口滑梯充气' },
+    { k:'9~12 秒', v:'灭火瓶持续喷射时间' },
+    { k:'15 分钟', v:'PBE 供氧 / 化学氧气(22分钟机型)' },
+    { k:'78 / 155 分钟', v:'氧气瓶 4L / 2L 每分钟可用时长' },
+    { k:'40 秒', v:'信号弹烟雾持续' }
+  ]},
+  { icon:'🎯', g:'高度与距离', items:[
+    { k:'14000 英尺', v:'化学氧气面罩自动脱落' },
+    { k:'1.5~2 米', v:'灭火瓶最优工作距离' },
+    { k:'3 米', v:'氧气使用前后四排禁烟' },
+    { k:'9.144 米', v:'ELT(陆地·I型)保持距离 30 英尺' },
+    { k:'300 米', v:'海水染色剂范围 / 信号弹射程' },
+    { k:'23 公里', v:'信号反射镜视程' }
+  ]},
+  { icon:'💪', g:'压力与载量', items:[
+    { k:'1500 PSI', v:'氧气瓶检查标准（压力指示以上）' },
+    { k:'200 PSI', v:'氧气瓶停止使用以备急用' },
+    { k:'310 升', v:'氧气瓶容量' },
+    { k:'44 / 55 人', v:'滑梯救生筏承载(最大)' }
+  ]},
+  { icon:'🗣', g:'关键口令', items:[
+    { k:'先左后右', v:'滑梯预位顺序' },
+    { k:'先大人后小孩', v:'氧气面罩佩戴顺序' },
+    { k:'我来灭火，你去报告', v:'消防员（第一发现者）' },
+    { k:'我来接替你灭火', v:'辅助消防员（第三到达）' },
+    { k:'低下头，紧迫用力', v:'防冲击姿势 Heads down brace' },
+    { k:'还有人吗？Anyone else', v:'清舱检查口令' }
+  ]}
+];
+
+function renderDache(){
+  const KB = window.DC_KB || [], QZ = window.DC_QUIZ || [];
+  const cats = [];
+  KB.forEach(k => { if(k.cat && cats.indexOf(k.cat) < 0) cats.push(k.cat); });
+  if(!_dcTab || cats.indexOf(_dcTab) < 0) _dcTab = cats[0] || '';
+  const meta = _dcMeta(_dcTab);
+  const items = KB.filter(k => k.cat === _dcTab);
+  const cheatsTotal = (DC_CHEATS||[]).reduce((s,g)=>s+(g.items?g.items.length:0),0);
+  const tiles = cats.map(c => {
+    const m = _dcMeta(c);
+    return `<button class="dc-tile${c===_dcTab?' on':''}" style="--dc-c:${m.color}" onclick="dcSetTab('${_dcEsc(c)}')" title="${_dcEsc(m.desc||'')}">
+      <span class="dc-tile-ic">${m.icon}</span>
+      <span class="dc-tile-t">${_dcEsc(c.replace('大撤·',''))}</span>
+      <small>${KB.filter(k=>k.cat===c).length} 张知识卡</small>
+    </button>`;
+  }).join('');
+  const flow = (DC_FLOW||[]).map(s => `
+    <div class="dc-flow-step"><i>${s.n}</i><b>${_dcEsc(s.t)}</b><span>${_dcEsc(s.d)}</span></div>`).join('');
+  const cards = items.map((k,ki) => `
+    <div class="dc-card${k.acc?' dc-acc':''}" style="--dc-c:${meta.color}"${k.acc?` onclick="dcToggleAcc(this)" title="点击展开/收起流程"`:''}>
+      <div class="dc-card-hd">
+        <span class="dc-card-no">${ki+1}</span>
+        <span class="dc-hd-ic">${k.icon||meta.icon}</span>
+        <span>${_dcEsc(k.q)}</span>
+        <span class="dc-src">${_dcEsc(k.src||'')}</span>
+      </div>
+      <div class="dc-card-bd">${k.a}</div>
+    </div>`).join('');
+  const chips = (meta.points||[]).map(p => `<span class="dc-chip">${_dcEsc(p)}</span>`).join('');
+  const cheats = (DC_CHEATS||[]).map(g => `
+    <div class="dc-keys-g">
+      <div class="dc-keys-g-t">${g.icon} ${_dcEsc(g.g)}</div>
+      <div class="dc-keys-row">${(g.items||[]).map(it=>`<span class="dc-keys-item"><b>${_dcEsc(it.k)}</b>${_dcEsc(it.v)}</span>`).join('')}</div>
+    </div>`).join('');
+  const quizHtml = QZ.map((q,qi) => {
+    const opts = (q.o||[]).map((op,oi) => {
+      const m = String(op).match(/^([A-D])[.．]\s*/);
+      const letter = m ? m[1] : String(op).trim();
+      const label = String(op).replace(/^[A-D][.．]\s*/,'');
+      return `<div class="dc-opt" id="dcq${qi}o${oi}" onclick="dcPick(${qi},${oi})"><b>${_dcEsc(letter)}</b><span>${_dcEsc(label)}</span></div>`;
+    }).join('');
+    return `<div class="dc-q" id="dcq${qi}" data-a="${_dcEsc(q.a)}">
+      <div class="dc-q-t">${qi+1}. ${_dcEsc(q.q)} <span class="dc-q-type">单选</span></div>
+      ${opts}
+      <div class="dc-q-ex" id="dcq${qi}ex" style="display:none"></div>
+    </div>`;
+  }).join('');
+  document.getElementById('mainContent').innerHTML = `
+  <div class="dc-wrap">
+    <div class="dc-hero">
+      <span class="dc-hero-kicker">✈️ 春秋航空广州分队 · 客舱小助手</span>
+      <h2>🚨 大撤应急 · 场景库</h2>
+      <p>依据「动态舱应急撤离流程（大撤）」「CRM机组演练」「机型设备」「设备背诵」四份资料整理归纳，并与《客舱乘务员手册》01.10 应急/设备条目逐项核对——重叠关键数字全部一致。全部考点已<strong>归纳为 ${cats.length} 大场景专题</strong>（含<strong>撤离程序</strong>五张可点击流程卡），每专题附<strong>一句话总结 + 速记要点</strong>，底部另有<strong>关键数字速记卡</strong>。<br>💬 在「你问我答」输入 <b>/大撤 关键词</b> 或点 <b>🚨 大撤专项</b> 库可随时提问。</p>
+      <div class="dc-hero-stats">
+        <div class="dc-stat"><div class="n">${KB.length}</div><div class="l">知识卡</div></div>
+        <div class="dc-stat"><div class="n">${cats.length}</div><div class="l">场景专题</div></div>
+        <div class="dc-stat"><div class="n">${cheatsTotal}<span style="font-size:.8rem">项</span></div><div class="l">关键数字速记</div></div>
+        <div class="dc-stat"><div class="n">${QZ.length}</div><div class="l">专项自测题</div></div>
+      </div>
+    </div>
+
+    <div class="dc-flow">
+      <div class="dc-sec-hd">🛫 大撤八阶段 · 全景流程 <span class="dc-sec-sub">动态舱应急撤离全程主线 · 点击下方场景专题查看对应阶段完整处置</span></div>
+      <div class="dc-flow-strip">${flow}</div>
+    </div>
+
+    <div class="dc-lib">
+      <div class="dc-sec-hd">🗂 场景库 · ${cats.length} 大场景专题 <span class="dc-sec-sub">每个专题是一类应急场景 · 点击方块进入该场景查看全部知识卡</span></div>
+      <div class="dc-lib-grid">${tiles}</div>
+    </div>
+
+    <div class="dc-scene" id="dcScene">
+      <div class="dc-scene-hd" style="--dc-c:${meta.color}">
+        <span class="dc-scene-ic">${meta.icon}</span>
+        <div class="dc-scene-tx">
+          <div class="dc-scene-name">${_dcEsc(_dcTab)} <span class="dc-scene-tag">${_dcEsc(meta.tag||'')}</span></div>
+          <div class="dc-scene-sum">${_dcEsc(meta.summary||meta.desc||'')}</div>
+        </div>
+        <span class="dc-scene-n">${items.length}<small> 张知识卡</small></span>
+      </div>
+      ${chips ? `<div class="dc-chips">${chips}</div>` : ''}
+      ${cards || '<div class="card" style="padding:18px;text-align:center;color:var(--text2)">该场景暂无内容</div>'}
+    </div>
+
+    <div class="dc-keys">
+      <div class="dc-sec-hd">⚡ 关键数字速记卡 <span class="dc-sec-sub">考前 30 秒扫一遍 · 全部出自上方知识卡原文</span></div>
+      ${cheats}
+    </div>
+
+    <div class="dc-quiz-card">
+      <div class="dc-quiz-hd">
+        <span class="t">✍️ 大撤专项自测</span>
+        <span style="font-size:.75rem;color:var(--text3)">${QZ.length} 题 · 点击选项即时批改</span>
+        <span class="dc-prog"><span id="dcProgText">0/${QZ.length}</span><span class="dc-prog-bar"><i id="dcProgBar"></i></span></span>
+      </div>
+      <div class="dc-quiz-sub">题目均出自上方知识卡原文，答错请回到对应场景专题复习（切换专题不会丢失已答进度）。</div>
+      ${quizHtml}
+      <div id="dcQuizScore" class="dc-score"></div>
+      <button class="btn" style="margin-top:12px" onclick="dcResetQuiz()">↻ 重做本组题</button>
+    </div>
+  </div>`;
+  _dcUpdateProg();
+}
+function dcToggleAcc(el){ if(el) el.classList.toggle('open'); }
+function dcSetTab(c){ _dcTab = c; renderDache();
+  const el = document.getElementById('dcScene');
+  if(el) setTimeout(()=>el.scrollIntoView({behavior:'smooth', block:'start'}), 60);
+}
+function _dcUpdateProg(){
+  const QZ = window.DC_QUIZ || [];
+  const all = document.querySelectorAll('[id^="dcq"][data-a]');
+  let done = 0, ok = 0;
+  all.forEach(b => { if(b.dataset.done === '1'){ done++; if(b.dataset.ok === '1') ok++; } });
+  const txt = document.getElementById('dcProgText'), bar = document.getElementById('dcProgBar');
+  if(txt) txt.textContent = done + '/' + all.length;
+  if(bar) bar.style.width = (all.length ? done / all.length * 100 : 0) + '%';
+  const sc = document.getElementById('dcQuizScore');
+  if(sc && all.length && done === all.length && sc.style.display !== 'block'){
+    const pct = Math.round(ok / all.length * 100);
+    const cls = pct === 100 ? 'perfect' : (pct >= 80 ? 'good' : (pct >= 60 ? 'soso' : 'bad'));
+    const msg = pct === 100 ? '🎉 全对，大撤稳了！' : (pct >= 80 ? '👍 很扎实，错题回卡复习即可。' : (pct >= 60 ? '💪 及格了，把错题对应的知识卡再看一遍。' : '📖 建议按分类把知识卡通读一遍再重做。'));
+    sc.className = 'dc-score ' + cls;
+    sc.style.display = 'flex';
+    sc.innerHTML = `<span style="font-size:1.25rem">${pct === 100 ? '🏆' : (pct >= 80 ? '✨' : '✍️')}</span><span>${ok} / ${all.length}（${pct}%）</span><span style="font-weight:600;font-size:.84rem;opacity:.92">${msg}</span>`;
+  }
+}
+function dcPick(qi, oi){
+  const box = document.getElementById('dcq' + qi);
+  if(!box || box.dataset.done === '1') return;
+  const q = (window.DC_QUIZ||[])[qi];
+  if(!q) return;
+  const m = String(q.o[oi]).match(/^([A-D])[.．]\s*/);
+  const picked = m ? m[1] : String(q.o[oi]).trim();
+  const ans = box.dataset.a;
+  const right = picked === ans;
+  box.dataset.done = '1';
+  if(right) box.dataset.ok = '1';
+  box.classList.add('done');
+  const opts = box.querySelectorAll('.dc-opt');
+  (q.o||[]).forEach((op, idx) => {
+    const mm = String(op).match(/^([A-D])[.．]\s*/);
+    const letter = mm ? mm[1] : String(op).trim();
+    if(letter === ans) opts[idx].classList.add('right');
+    else if(idx === oi && !right) opts[idx].classList.add('wrong');
+    opts[idx].classList.add('lock');
+  });
+  const ex = document.getElementById('dcq' + qi + 'ex');
+  ex.textContent = (right ? '✅ 回答正确。' : '❌ 回答错误，正确答案：' + ans + '。') + (q.e || '');
+  ex.style.display = 'block';
+  if(!right) ex.classList.add('ex-wrong');
+  _dcUpdateProg();
+}
+function dcResetQuiz(){ renderDache(); }
+
 function renderIssues(){
   const arr = loadIssues();
   const pending = arr.filter(i=>i.status==='pending').length;

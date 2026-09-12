@@ -103,6 +103,37 @@ body{font-family:var(--font-sans);background:var(--bg);color:var(--text);min-hei
   .toast-container{left:12px;right:12px;top:68px;}
   .toast{min-width:0;width:100%;}
 }
+:root{--tabbar-h:58px;}
+/* ===== 手机端 APP 化：底部 TabBar + 更多面板（与 index.html 壳同步） ===== */
+.m-tabbar,.m-sheet{display:none;}
+.m-sheet-mask{display:none;}
+@media(max-width:720px){
+  .brand-main{display:none;}
+  .brand-name{font-size:.92rem;}
+  .topbar{gap:8px;padding:0 10px;}
+  .module-tabs{display:none;}
+  .sys-clock{padding:4px 8px;font-size:.7rem;}
+  .sys-clock .sc-tag{display:none;}
+  .sys-area{bottom:calc(var(--tabbar-h) + env(safe-area-inset-bottom,0px));}
+  .m-tabbar{display:flex;position:fixed;left:0;right:0;bottom:0;height:calc(var(--tabbar-h) + env(safe-area-inset-bottom,0px));padding:0 4px env(safe-area-inset-bottom,0px);background:var(--bg-card);border-top:1px solid var(--border);z-index:200;box-shadow:0 -4px 16px rgba(15,42,31,.06);backdrop-filter:blur(20px);}
+  .m-tab{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;border:none;background:transparent;cursor:pointer;font-family:var(--font-sans);color:var(--text2);font-size:.62rem;font-weight:700;padding:6px 0 4px;border-radius:12px;transition:color .2s;}
+  .m-tab .mi{font-size:1.28rem;line-height:1.15;transition:transform .2s;}
+  .m-tab.active{color:var(--primary);}
+  .m-tab.active .mi{transform:translateY(-1px) scale(1.1);}
+  .m-tab.active .mi::after{content:'';display:block;width:14px;height:3px;border-radius:2px;background:var(--grad-primary);margin:2px auto 0;}
+  .m-tab:active .mi{transform:scale(.9);}
+  .m-sheet-mask{display:block;position:fixed;inset:0;background:rgba(0,0,0,.42);z-index:300;opacity:0;pointer-events:none;transition:opacity .25s;}
+  .m-sheet-mask.show{opacity:1;pointer-events:auto;}
+  .m-sheet{display:block;position:fixed;left:0;right:0;bottom:calc(var(--tabbar-h) + env(safe-area-inset-bottom,0px));z-index:301;background:var(--bg-card);border-radius:20px 20px 0 0;border-top:1px solid var(--border);padding:12px 14px calc(14px + env(safe-area-inset-bottom,0px));transform:translateY(115%);transition:transform .3s cubic-bezier(.32,.72,.34,1);box-shadow:0 -12px 32px rgba(15,42,31,.18);}
+  .m-sheet.show{transform:translateY(0);}
+  .m-sheet h4{font-size:.86rem;color:var(--text);margin:2px 4px 10px;font-weight:800;display:flex;align-items:center;justify-content:space-between;}
+  .m-sheet-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;}
+  .m-sheet-item{display:flex;flex-direction:column;align-items:center;gap:6px;padding:12px 4px;border:1px solid var(--border);border-radius:14px;background:var(--bg);cursor:pointer;font-size:.74rem;font-weight:700;color:var(--text);font-family:var(--font-sans);transition:all .15s;}
+  .m-sheet-item:active{transform:scale(.95);}
+  .m-sheet-item .mi{font-size:1.4rem;line-height:1;}
+  .m-sheet-item.active{border-color:var(--primary);background:var(--primary-soft);color:var(--primary);}
+  .toast-container{top:64px;}
+}
 .toast-container{position:fixed;top:76px;right:20px;z-index:300;display:flex;flex-direction:column;gap:8px;}
 .toast{padding:11px 18px;border-radius:8px;background:var(--bg-card);border:1px solid var(--border);box-shadow:0 4px 16px rgba(0,0,0,.1);font-size:.86rem;display:flex;align-items:center;gap:10px;animation:slideIn .3s;min-width:240px;border-left:4px solid var(--primary);}
 .toast.toast-info{border-left-color:var(--primary);}
@@ -453,7 +484,7 @@ body{font-family:var(--font-sans);background:var(--bg);color:var(--text);min-hei
       <path d="M11 26 Q16 12 20 20 Q24 12 29 26" fill="none" stroke="url(#lg)" stroke-width="2.5" stroke-linecap="round" opacity=".7"/>
     </svg>
     <div>
-      <div class="brand-name">春秋航空 <span class="brand-sub">客舱小助手</span></div>
+      <div class="brand-name"><span class="brand-main">春秋航空</span> <span class="brand-sub">客舱小助手</span></div>
     </div>
   </div>
 
@@ -526,6 +557,29 @@ body{font-family:var(--font-sans);background:var(--bg);color:var(--text);min-hei
 </main>
 
 <div class="toast-container" id="toastContainer"></div>
+
+<!-- ===== 手机端底部 TabBar（APP 式主导航） ===== -->
+<nav class="m-tabbar" id="mTabbar" aria-label="底部导航">
+  <button class="m-tab" data-mod="qa" onclick="mGo('qa')"><span class="mi">💬</span>问答</button>
+  <button class="m-tab" data-mod="quiz" onclick="mGo('quiz')"><span class="mi">📚</span>培训</button>
+  <button class="m-tab" data-mod="performance" onclick="mGo('performance')"><span class="mi">📊</span>绩效</button>
+  <button class="m-tab" data-mod="beauty" onclick="mGo('beauty')"><span class="mi">💄</span>美妆</button>
+  <button class="m-tab" data-mod="more" onclick="mGo('more')"><span class="mi">☰</span>更多</button>
+</nav>
+
+<!-- 「更多」底部面板 -->
+<div class="m-sheet-mask" id="mSheetMask" onclick="closeMoreSheet()"></div>
+<div class="m-sheet" id="mSheet" role="dialog" aria-label="全部板块">
+  <h4>全部板块 <button class="modal-x" onclick="closeMoreSheet()" aria-label="关闭">✕</button></h4>
+  <div class="m-sheet-grid">
+    <button class="m-sheet-item" data-mod="risk" onclick="mGoMod('risk')"><span class="mi">⚠️</span>风险预警</button>
+    <button class="m-sheet-item" data-mod="medical" onclick="mGoMod('medical')"><span class="mi">🚑</span>医疗急救</button>
+    <button class="m-sheet-item" data-mod="daily" onclick="mGoMod('daily')"><span class="mi">❓</span>日常问题</button>
+    <button class="m-sheet-item" data-mod="manual" onclick="mGoMod('manual')"><span class="mi">📕</span>手册奖惩</button>
+    <button class="m-sheet-item" data-mod="report" onclick="mGoMod('report')"><span class="mi">🗂</span>事件报告</button>
+    <button class="m-sheet-item" data-mod="kbadmin" onclick="mGoMod('kbadmin')"><span class="mi">📇</span>库管理</button>
+  </div>
+</div>
 
 <!-- ===== 全局数据备份 / 恢复 ===== -->
 <div class="modal-mask" id="backupModal" onclick="if(event.target===this)closeBackupModal()">
@@ -724,6 +778,7 @@ function switchModule(id){
 
   currentMod = id;
   document.querySelectorAll('.mod-tab').forEach(b => b.classList.toggle('active', b.dataset.mod===id));
+  if(typeof syncMTabbar === 'function') syncMTabbar();
   // 页签横向滚动时，把当前激活页签自动滚到可视区中部（手机/平板 9 个页签尤其需要）
   var _ab = document.querySelector('.mod-tab.active');
   if(_ab && _ab.scrollIntoView){ try{ _ab.scrollIntoView({behavior:'smooth',inline:'center',block:'nearest'}); }catch(e){ _ab.scrollIntoView(); } }
@@ -1214,6 +1269,43 @@ window.addEventListener('offline', updateNetworkStatus);
 checkPacksUpdate();
 renderUserChip();
 switchModule('quiz');
+/* ===================== 手机端底部 TabBar（APP 式导航） ===================== */
+const M_PRIMARY = ['qa','quiz','performance','beauty'];
+function mGo(id){
+  if(id === 'more'){ openMoreSheet(); return; }
+  closeMoreSheet();
+  switchModule(id);
+}
+function mGoMod(id){ closeMoreSheet(); switchModule(id); }
+function openMoreSheet(){
+  const sh = document.getElementById('mSheet'), mk = document.getElementById('mSheetMask');
+  if(!sh) return;
+  syncMoreSheet();
+  sh.classList.add('show'); mk.classList.add('show');
+}
+function closeMoreSheet(){
+  const sh = document.getElementById('mSheet'), mk = document.getElementById('mSheetMask');
+  if(sh) sh.classList.remove('show');
+  if(mk) mk.classList.remove('show');
+}
+function syncMoreSheet(){
+  document.querySelectorAll('.m-sheet-item').forEach(b => b.classList.toggle('active', b.dataset.mod === currentMod));
+}
+function syncMTabbar(){
+  document.querySelectorAll('#mTabbar .m-tab').forEach(b => {
+    const m = b.dataset.mod;
+    b.classList.toggle('active', m === 'more' ? M_PRIMARY.indexOf(currentMod) < 0 : m === currentMod);
+  });
+  if(document.getElementById('mSheet')) syncMoreSheet();
+}
+(function(){
+  if(document.readyState === 'loading'){
+    document.addEventListener('DOMContentLoaded', function(){ syncMTabbar(); });
+  } else { syncMTabbar(); }
+  window.addEventListener('resize', function(){
+    if(!window.matchMedia('(max-width:720px)').matches) closeMoreSheet();
+  });
+})();
 </script>
 <script>__SHELL_ENHANCE__</script>
 </body>
