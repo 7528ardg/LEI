@@ -2,7 +2,7 @@
 <html lang="zh-CN" data-theme="light">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover, interactive-widget=resizes-content">
 <meta name="theme-color" content="#148453">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="你问我答">
@@ -1374,6 +1374,46 @@ window.DateMatch = (function () {
 //__PACKS_ENGINE_END__
 </script>
 
+<style id="mobile-ux-patch">
+/* ===== 移动端统一设计规范补丁（2026-09-12）：主色 #00A650 / 圆角 12px / 统一阴影 / 点击态 ===== */
+:root{
+  --primary:#00A650;--primary-dark:#00793C;--primary-light:#2FB877;
+  --primary-soft:#E5F6EE;--primary-mist:#F2FAF6;
+  --grad-primary:linear-gradient(135deg,#00A650 0%,#22BE79 100%);
+  --grad-bot:linear-gradient(160deg,#008A46 0%,#00A650 100%);
+  --grad-user:linear-gradient(135deg,#00793C 0%,#00A650 45%,#22BE79 100%);
+  --radius:12px;--radius-lg:16px;
+  --shadow:0 4px 14px rgba(0,120,64,.10);--shadow-lg:0 12px 32px rgba(0,120,64,.14);
+  --ring:0 0 0 3px rgba(0,166,80,.16);
+}
+/* 统一卡片圆角：卡片 16px、卡片内元素 12px */
+.welcome{border-radius:var(--radius-lg);}
+.w-cat,.src-tab,.icon-btn,.jump-btn,.qb-chip,.wz-opt,.w-chip,.wz-gen,.cp-btn,.script-out{border-radius:var(--radius);}
+/* 快捷入口卡片：grid 均衡间距 + 图标居中 + 标题 14px */
+.w-cats{gap:10px;}
+.w-cat{align-items:center;text-align:center;gap:7px;padding:14px 8px;}
+.w-cat .wc-ic{font-size:1.4rem;line-height:1.2;}
+.w-cat .wc-tl{font-size:14px;font-weight:700;}
+.w-cat .wc-st{font-size:12px;line-height:1.5;}
+/* 点击态反馈：所有可点元素统一按压缩放，触屏设备清除 hover 残留 */
+button,.w-chip,.jump-btn{transition:transform .12s ease,box-shadow .2s ease,background-color .18s ease,border-color .18s ease,color .18s ease,opacity .12s ease;}
+button:active{transform:scale(.96);}
+button:disabled:active{transform:none;}
+@media (hover:none){
+  .icon-btn:hover,.jump-btn:hover,.w-cat:hover,.w-chip:hover,.wz-opt:hover,.qb-fb-btn:hover{transform:none;}
+  .wz-opt.sel{transform:none;}
+}
+/* 小屏（≤360px）间距收敛，避免拥挤 */
+@media(max-width:360px){
+  .chat-scroll{padding:10px 8px 4px;}
+  .welcome-body{padding:10px 10px 12px;}
+  .w-cats{gap:8px;}
+  .input-area{padding-left:8px;padding-right:8px;}
+  .src-tabs{padding:0 8px 6px;}
+}
+/* 软键盘适配：--kb-h 由 JS 写入（visualViewport），键盘弹起时压缩聊天区高度 */
+.chat-scroll{padding-bottom:max(6px,var(--kb-h,0px));}
+</style>
 </head>
 <body>
 
@@ -6697,6 +6737,31 @@ window.addEventListener('message', function(e){
   const d = e.data;
   if(d && d.type === 'theme-changed') updateAiStatus();
 });
+</script>
+<script>
+/* ===== 软键盘适配（2026-09-12）：键盘弹起时压缩布局高度，保证底部输入框可见可点 ===== */
+(function(){
+  var vv = window.visualViewport;
+  if(!vv) return;
+  function kbSync(){
+    var kb = Math.max(0, window.innerHeight - vv.height - vv.offsetTop);
+    if(kb > 60){
+      /* 键盘已弹起：把文档高度压到可视高度，flex 布局自动收缩聊天区 */
+      document.body.style.height = Math.round(vv.height) + 'px';
+      document.documentElement.style.setProperty('--kb-h','0px');
+      var ae = document.activeElement;
+      if(ae && ae !== document.body){
+        setTimeout(function(){ try{ ae.scrollIntoView({block:'nearest'}); }catch(e){} }, 80);
+      }
+      window.scrollTo(0, 0);
+    }else{
+      document.body.style.height = '';
+      document.documentElement.style.setProperty('--kb-h','0px');
+    }
+  }
+  vv.addEventListener('resize', kbSync);
+  vv.addEventListener('scroll', kbSync);
+})();
 </script>
 </body>
 </html>

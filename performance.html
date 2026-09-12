@@ -25,7 +25,7 @@
 <html lang="zh-CN">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=2.0, user-scalable=yes">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=2.0, user-scalable=yes, viewport-fit=cover, interactive-widget=resizes-content">
     <title>春秋航空 · 广州分队绩效管理 · 全能助手</title>
     <!-- 性能优化：DNS预解析 -->
     <!-- ========== 关键CSS资源（优先加载） ========== -->
@@ -9149,6 +9149,27 @@ https://github.com/nodeca/pako/blob/main/LICENSE
             }
         }
     </style>
+    <style id="mobile-ux-patch">
+/* ===== 移动端统一设计规范补丁（2026-09-12）：主色 #00A650 / 圆角 12px / 统一阴影 / 点击态 ===== */
+:root{--brand:#00A650;--radius:12px;--shadow-base:0 2px 10px rgba(0,110,60,.08);}
+html,body{max-width:100%;overflow-x:hidden;}
+/* 登录按钮对齐品牌主色 #00A650 */
+.btn-login-primary{background:linear-gradient(135deg,#008A46 0%,#00A650 50%,#22BE79 100%);box-shadow:0 4px 14px rgba(0,140,75,.28);}
+.btn-login-primary:hover{background:linear-gradient(135deg,#00793C 0%,#008A46 50%,#00A650 100%);box-shadow:0 8px 24px rgba(0,140,75,.35);}
+.btn-login-primary:active{transform:scale(.97);box-shadow:0 2px 8px rgba(0,140,75,.22);}
+/* 点击态反馈：全局按钮按压 + 触屏设备清除 hover 残留位移 */
+button,.form-check-input{transition:transform .12s ease,box-shadow .2s ease,background-color .18s ease,border-color .18s ease;}
+button:active{transform:scale(.96);}
+button:disabled:active{transform:none;}
+@media (hover:none){
+  .btn-login-primary:hover{transform:none;}
+  .warning-card:hover{transform:none;}
+}
+/* 小屏（≤360px）间距收敛 */
+@media(max-width:360px){
+  .skeleton-card{padding:14px;border-radius:var(--radius);}
+}
+</style>
 </head>
 <body>
     <!-- ========== 首屏骨架屏（提升首屏感知速度） ========== -->

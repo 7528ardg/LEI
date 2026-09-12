@@ -2,7 +2,7 @@
 <html lang="zh-CN">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover, interactive-widget=resizes-content">
     <title>春秋航空 · 美妆话术系统 · 全能助手</title>
     <style>
     *,::before,::after{box-sizing:border-box;border-width:0;border-style:solid;border-color:#e5e7eb}
@@ -684,6 +684,52 @@
 })(typeof window !== 'undefined' ? window : (typeof globalThis !== 'undefined' ? globalThis : this));
 //__PACKS_ENGINE_END__
 </script>
+
+<style id="mobile-ux-patch">
+/* ===== 移动端统一设计规范补丁（2026-09-12）：主色 #00A650 / 圆角 12px / 统一阴影 / 点击态 ===== */
+:root{--brand:#00A650;--radius:12px;--shadow-base:0 2px 10px rgba(0,110,60,.08);}
+html,body{max-width:100%;overflow-x:hidden;}
+/* 品牌主色统一：emerald 系强调色对齐 #00A650 */
+.bg-emerald-500{background-color:#00A650}
+.from-emerald-500{--tw-gradient-from:#00A650 var(--tw-gradient-from-position);--tw-gradient-to:rgba(0,166,80,0) var(--tw-gradient-to-position);--tw-gradient-stops:var(--tw-gradient-from),var(--tw-gradient-to)}
+.to-emerald-600{--tw-gradient-to:#00924A var(--tw-gradient-to-position)}
+.bg-emerald-600,.to-emerald-500{background-color:#00924A}
+.from-emerald-600{--tw-gradient-from:#00924A var(--tw-gradient-from-position);--tw-gradient-to:rgba(0,146,74,0) var(--tw-gradient-to-position);--tw-gradient-stops:var(--tw-gradient-from),var(--tw-gradient-to)}
+.text-emerald-500{color:#00A650}
+.text-emerald-600{color:#00924A}
+.text-emerald-700{color:#00793C}
+.border-emerald-200{--tw-border-opacity:1;border-color:rgb(191 232 214/var(--tw-border-opacity))}
+.border-emerald-400{--tw-border-opacity:1;border-color:rgb(47 184 119/var(--tw-border-opacity))}
+.bg-emerald-50{--tw-bg-opacity:1;background-color:rgb(234 248 241/var(--tw-bg-opacity))}
+.bg-emerald-100{--tw-bg-opacity:1;background-color:rgb(214 240 227/var(--tw-bg-opacity))}
+.hover\:bg-emerald-100:hover{--tw-bg-opacity:1;background-color:rgb(214 240 227/var(--tw-bg-opacity))}
+/* 横向滑动筛选（产品浏览分类/保健品筛选）：隐藏滚动条 + 平滑滚动 + 吸附 */
+.overflow-x-auto{scrollbar-width:none;-ms-overflow-style:none;-webkit-overflow-scrolling:touch;scroll-behavior:smooth;scroll-snap-type:x proximity;}
+.overflow-x-auto::-webkit-scrollbar{display:none;}
+.overflow-x-auto>button{scroll-snap-align:start;}
+/* 筛选标签统一圆角 + 点击态 */
+.overflow-x-auto>button{border-radius:999px;transition:transform .12s ease,background-color .18s ease,color .18s ease,box-shadow .2s ease;}
+.overflow-x-auto>button:active{transform:scale(.94);opacity:.9;}
+/* 品牌折叠面板：统一 12px 圆角 + 基础阴影 + 展开行点击态 */
+.space-y-3>div{border-radius:var(--radius);border-color:#EDF5F0;box-shadow:var(--shadow-base);transition:box-shadow .2s ease,border-color .2s ease;}
+.space-y-3>div{overflow:hidden;}
+[onclick*="toggleBrand"]{transition:background-color .15s ease;}
+[onclick*="toggleBrand"]:active{background:#F0F8F4;}
+/* 全局点击态：按钮按压缩放，触屏设备清除 hover 残留位移 */
+button{transition:transform .12s ease,background-color .18s ease,border-color .18s ease,color .18s ease,box-shadow .2s ease;}
+button:active{transform:scale(.96);}
+button:disabled:active{transform:none;}
+@media (hover:none){
+  .hover\:bg-emerald-100:hover{background-color:transparent;}
+  .hover\:from-emerald-50:hover{background:#fff;}
+}
+/* 小屏（≤380px）间距收敛，避免拥挤 */
+@media(max-width:380px){
+  .p-4{padding:.8rem}
+  .p-6{padding:1rem}
+  .space-y-3>*+*{margin-top:.65rem}
+}
+</style>
 
 </head>
 <body>

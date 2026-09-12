@@ -2,7 +2,7 @@
 <html lang="zh-CN" data-theme="light">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover, interactive-widget=resizes-content">
 <meta name="theme-color" content="#148453">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="日常问题">
@@ -129,6 +129,41 @@ html[data-theme="dark"] .ans mark{background:#8a7300;color:#ffe374;}
   .t-sub{display:none;}
   .search-btn{padding:8px 14px;}
   .fig img{max-height:260px;}
+}
+</style>
+<style id="mobile-ux-patch">
+/* ===== 移动端统一设计规范补丁（2026-09-12）：主色 #00A650 / 圆角 12px / 统一阴影 / 点击态 ===== */
+:root{
+  --primary:#00A650;--primary-dark:#00793C;--primary-light:#2FB877;
+  --primary-soft:#E5F6EE;--primary-mist:#F2FAF6;
+  --grad-primary:linear-gradient(135deg,#00A650 0%,#22BE79 100%);
+  --radius:12px;
+  --shadow:0 4px 14px rgba(0,120,64,.10);--shadow-lg:0 12px 32px rgba(0,120,64,.14);
+}
+/* 关键修复：小屏上问答卡片头部允许换行——问题占整行，徽标/来源/箭头排到第二行，
+   彻底解决问题文字被来源标签挤压成一字一行的问题（图5） */
+@media(max-width:640px){
+  .qa-head{flex-wrap:wrap;row-gap:8px;}
+  .qa-q{flex:1 1 100%;font-size:.94rem;}
+  .qa-meta{flex-wrap:wrap;order:2;min-width:0;}
+  .qa-src{white-space:normal;overflow:hidden;text-overflow:ellipsis;display:inline-block;max-width:100%;}
+  .chev{margin-left:auto;}
+}
+.qa{border-radius:var(--radius);}
+.search-box{border-radius:14px;}
+/* 分类/热门标签：小屏横向滑动备选——保持换行但控制标签尺寸 */
+@media(max-width:380px){
+  .wrap{padding:12px 10px 48px;}
+  .cat{padding:5px 11px;font-size:.78rem;}
+  .tag{padding:3px 10px;font-size:.72rem;}
+}
+/* 点击态反馈 */
+button{transition:transform .12s ease,background-color .18s ease,border-color .18s ease,color .18s ease;}
+button:active{transform:scale(.96);}
+.qa-head:active{background:#F4FAF6;}
+@media (hover:none){
+  .tag:hover,.cat:hover{background:var(--bg-card);color:var(--text2);}
+  .cat.on{background:var(--primary);color:#fff;}
 }
 </style>
 </head>

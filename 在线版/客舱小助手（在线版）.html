@@ -2,8 +2,8 @@
 <html lang="zh-CN" data-theme="light">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-<meta name="theme-color" content="#148453">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover, interactive-widget=resizes-content">
+<meta name="theme-color" content="#00A650">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="客舱小助手">
@@ -454,6 +454,32 @@ body{font-family:var(--font-sans);background:var(--bg);color:var(--text);min-hei
 })(typeof window !== 'undefined' ? window : (typeof globalThis !== 'undefined' ? globalThis : this));
 //__PACKS_ENGINE_END__
 </script>
+<style id="mobile-ux-patch">
+/* ===== 移动端统一设计规范补丁（2026-09-12）：主色 #00A650 / 圆角 12px / 点击态 ===== */
+:root{
+  --primary:#00A650;--primary-dark:#00793C;--primary-light:#2FB877;
+  --primary-soft:#E5F6EE;--primary-mist:#F2FAF6;
+  --grad-primary:linear-gradient(135deg,#00A650 0%,#22BE79 100%);
+  --radius:12px;
+  --shadow:0 4px 14px rgba(0,120,64,.10);--shadow-lg:0 12px 32px rgba(0,120,64,.14);
+}
+/* 底部 TabBar：按压缩放 + 按压背景反馈 */
+.m-tab{transition:color .2s,background-color .15s,transform .12s;}
+.m-tab:active{background:var(--primary-mist);transform:scale(.94);}
+.m-tab .mi{transition:transform .2s;}
+/* 「更多」面板项按压反馈 */
+.m-sheet-item{transition:all .15s;}
+.m-sheet-item:active{transform:scale(.94);background:var(--primary-soft);}
+/* 顶部页签与通用按钮按压反馈 */
+.mod-tab,.theme-btn,.user-chip,.bk-btn,.m-btn{transition:transform .12s ease,background-color .18s ease,color .18s ease,border-color .18s ease;}
+.mod-tab:active,.theme-btn:active,.user-chip:active,.bk-btn:active,.m-btn:active{transform:scale(.95);}
+button:active{transform:scale(.96);}
+button:disabled:active{transform:none;}
+@media (hover:none){
+  .mod-tab:hover{background:transparent;color:var(--text2);}
+  .mod-tab.active:hover{background:var(--grad-primary);color:#fff;}
+}
+</style>
 </head>
 <body>
 

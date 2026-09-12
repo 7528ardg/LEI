@@ -2,8 +2,8 @@
 <html lang="zh-CN" data-theme="light" data-page-node-id="VSLj8BdQgy2DWknsJxLUQw">
 <head data-page-node-id="0xbXcYtQxSV8bUz18cVPOi">
 <meta charset="UTF-8" data-page-node-id="RhmiGUxXKJMyUyWAEXl1eK">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" data-page-node-id="LLNnj8nlQNdDZbi0nfhkfj">
-<meta name="theme-color" content="#148453" data-page-node-id="JNtjTuL8GGfnMi8jRVTuAF">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover, interactive-widget=resizes-content" data-page-node-id="LLNnj8nlQNdDZbi0nfhkfj">
+<meta name="theme-color" content="#00A650" data-page-node-id="JNtjTuL8GGfnMi8jRVTuAF">
 <meta name="apple-mobile-web-app-capable" content="yes" data-page-node-id="YPmL6PXkDa30BbpyyT7Ous">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" data-page-node-id="p5edaBm2FLdUYHer1Gjxfx">
 <meta name="apple-mobile-web-app-title" content="客舱小助手" data-page-node-id="itkruqlUaLE0fxuiELjMFW">
@@ -1349,6 +1349,23 @@ window.DateMatch = (function () {
 })(typeof window !== 'undefined' ? window : (typeof globalThis !== 'undefined' ? globalThis : this));
 //__PACKS_ENGINE_END__
 </script>
+<style id="mobile-ux-patch">
+/* ===== 移动端统一设计规范补丁（2026-09-12）：主色 #00A650 / 点击态 ===== */
+:root{
+  --primary:#00A650;--primary-dark:#00793C;--primary-light:#2FB877;
+  --primary-soft:#E5F6EE;--primary-mist:#F2FAF6;
+  --grad-primary:linear-gradient(135deg,#00A650 0%,#22BE79 100%);
+  --shadow:0 4px 14px rgba(0,120,64,.10);--shadow-lg:0 12px 32px rgba(0,120,64,.14);
+}
+.mod-tab,.theme-btn,.user-chip,.bk-btn,.m-btn{transition:transform .12s ease,background-color .18s ease,color .18s ease,border-color .18s ease;}
+.mod-tab:active,.theme-btn:active,.user-chip:active,.bk-btn:active,.m-btn:active{transform:scale(.95);}
+button:active{transform:scale(.96);}
+button:disabled:active{transform:none;}
+@media (hover:none){
+  .mod-tab:hover{background:transparent;color:var(--text2);}
+  .mod-tab.active:hover{background:var(--grad-primary);color:#fff;}
+}
+</style>
 </head>
 <body data-page-node-id="FLxiHeQI5kmsKgyNL5hpnW">
 
