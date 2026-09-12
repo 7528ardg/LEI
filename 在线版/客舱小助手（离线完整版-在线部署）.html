@@ -1253,7 +1253,6 @@ checkPacksUpdate();
 renderUserChip();
 switchModule('quiz');
 /* ===================== 手机端底部 TabBar（APP 式导航） ===================== */
-const M_PRIMARY = ['qa','quiz','performance','beauty'];
 function mGo(id){
   if(id === 'more'){ openMoreSheet(); return; }
   closeMoreSheet();
@@ -1275,9 +1274,10 @@ function syncMoreSheet(){
   document.querySelectorAll('.m-sheet-item').forEach(b => b.classList.toggle('active', b.dataset.mod === currentMod));
 }
 function syncMTabbar(){
+  const pri = ['qa','quiz','performance','beauty'];
   document.querySelectorAll('#mTabbar .m-tab').forEach(b => {
     const m = b.dataset.mod;
-    b.classList.toggle('active', m === 'more' ? M_PRIMARY.indexOf(currentMod) < 0 : m === currentMod);
+    b.classList.toggle('active', m === 'more' ? pri.indexOf(currentMod) < 0 : m === currentMod);
   });
   if(document.getElementById('mSheet')) syncMoreSheet();
 }
