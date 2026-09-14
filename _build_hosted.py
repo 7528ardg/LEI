@@ -23,14 +23,14 @@ MODS_DIR = os.path.join(OUT_DIR, u'mods')
 MODULES = ['qa', 'quiz', 'performance', 'beauty', 'medical', 'daily', 'manual', 'report', 'kbadmin', 'issues']
 MODULES_4IN1 = ['qa', 'quiz', 'performance', 'beauty', 'medical', 'risk', 'daily', 'manual', 'report', 'kbadmin', 'issues']
 SRC = {
-    'qa': u'qa.html', 'quiz': u'quiz.html', 'performance': u'performance.html',
+    'qa': u'qa.html', 'home': u'cc-home.html', 'quiz': u'quiz.html', 'performance': u'performance.html',
     'beauty': u'beauty.html', 'medical': u'medical.html', 'risk': u'risk-lite.html',
     'daily': u'daily.html', 'manual': u'manual.html', 'report': u'report.html',
     'kbadmin': u'kb-admin.html', 'issues': u'issues.html',
 }
 
 # 匹配 MODULES 对象里形如  "  key: "H4sI...很长的base64...", "  的整行，把 base64 置空
-B64_LINE = re.compile(r'^[ \t]*((?:qa|quiz|performance|beauty|medical|risk|daily|manual|report|kbadmin|issues)\s*:\s*)"[A-Za-z0-9+/=]{120,}"[,]?\s*$', re.MULTILINE)
+B64_LINE = re.compile(r'^[ \t]*((?:qa|quiz|performance|beauty|medical|risk|daily|manual|report|kbadmin|issues|home)\s*:\s*)"[A-Za-z0-9+/=]{120,}"[,]?\s*$', re.MULTILINE)
 
 
 def strip_modules(html):
@@ -138,6 +138,42 @@ def main():
 
     # 4) mods/*.gz + mods/*.js
     gzs = build_mods()
+
+    # 4.5) 真 3D 形象资产：模块是以 srcdoc 注入 iframe 的，srcdoc 的 base URL 继承父页
+    #      （在线版/index.html），所以 CC3D 用的相对路径 形象IP/models/... 必须在
+    #      OUT_DIR 下真实存在。http(s) 走 fetch(ccNN.glb)，file:// 走 js/ccNN.js 的 base64 包装。
+    import shutil
+    import fnmatch
+
+    def _sync_tree(src, dst, ignore_files=(), ignore_dirs=()):
+        """覆盖式同步：不删目录、不批量删除（批量删除会被文件安全策略拦下），可反复重跑"""
+        n = 0
+        for r, ds, fs in os.walk(src):
+            ds[:] = [d for d in ds if d not in ignore_dirs]
+            rel = os.path.relpath(r, src)
+            out = dst if rel == '.' else os.path.join(dst, rel)
+            if not os.path.isdir(out):
+                os.makedirs(out)
+            for f in fs:
+                if any(fnmatch.fnmatch(f, p) for p in ignore_files):
+                    continue
+                shutil.copyfile(os.path.join(r, f), os.path.join(out, f))
+                n += 1
+        return n
+
+    md_src = os.path.join(BASE, u'形象IP', u'models')
+    md_dst = os.path.join(OUT_DIR, u'形象IP', u'models')
+    if os.path.isdir(md_src):
+        _sync_tree(md_src, md_dst,
+                   ignore_files=(u'*_raw.glb', u'lichun-3d.glb', u'lichun-3d-viewer.html'))
+        # 背景图已全部 base64 内嵌进页面（`_bd_embed.py`），在线版不再需要外部 backdrops 副本
+        print(u'  形象IP/backdrops/ 跳过同步（背景图已内嵌，省约 5MB）')
+        n_glb = len([f for f in os.listdir(md_src)
+                     if f.startswith('cc') and f.endswith('.glb')])
+        sz = sum(os.path.getsize(os.path.join(r, f))
+                 for r, d, fs in os.walk(md_dst) for f in fs)
+        print(u'  形象IP/models/ 已同步（3D 模型 {} 个，合计 {:.1f}MB）'.format(n_glb, sz / 1048576.0))
+
     # 5) 辅助文件：本地服务启动器 / index 跳转 / 说明
     write_helpers(out9)
 

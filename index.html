@@ -1385,8 +1385,9 @@ button:disabled:active{transform:none;}
   </div>
 
   <nav class="module-tabs" id="moduleTabs" data-page-node-id="BsxJNHUQnwWWkzX8mQ7PdA">
-    <button class="mod-tab" data-mod="qa" onclick="switchModule('qa')" data-page-node-id="ThWuLHNdXekrpR8s6aKg4k">💬 你问我答</button>
-    <button class="mod-tab active" data-mod="quiz" onclick="switchModule('quiz')" data-page-node-id="AfTAaJatoJoPJYGMUFg51D">📚 培训考核</button>
+    <button class="mod-tab" data-mod="home" onclick="switchModule('home')">🏠 CC 之家</button>
+    <button class="mod-tab active" data-mod="qa" onclick="switchModule('qa')" data-page-node-id="ThWuLHNdXekrpR8s6aKg4k">💬 你问我答</button>
+    <button class="mod-tab" data-mod="quiz" onclick="switchModule('quiz')" data-page-node-id="AfTAaJatoJoPJYGMUFg51D">📚 培训考核</button>
     <button class="mod-tab" data-mod="performance" onclick="switchModule('performance')" data-page-node-id="cTO8HrxlLuSrzd9nDy4qrp">📊 绩效管理</button>
     <button class="mod-tab" data-mod="beauty" onclick="switchModule('beauty')" data-page-node-id="maSEZIZaLq7esXXJABvoUv">💄 美妆话术</button>
     <button class="mod-tab" data-mod="risk" onclick="switchModule('risk')" data-page-node-id="zBc8alWHgO1Jtz1ynUv3Nd">⚠️ 风险预警</button>
@@ -1415,6 +1416,11 @@ button:disabled:active{transform:none;}
   <div class="sys-wrap" id="wrap-qa" data-page-node-id="GwgjLW14ktHie3nHv7jO5s">
     <div class="sys-loader" id="loader-qa" data-page-node-id="ZRD03i38QjWgBMUyEZJXWs"><div class="sys-spinner" data-page-node-id="wiJ4PcdC5gCyVCTuz3EIqU"></div><div class="sl-text" data-page-node-id="lIWoPnqFTXlQMn6B5ioBbz">正在进入 你问我答 …</div></div>
     <iframe class="sys-frame" id="frame-qa" data-page-node-id="SSrdizLOYnjKX7IhO8mUp6"></iframe>
+  </div>
+  <div class="sys-wrap" id="wrap-home">
+    <div class="sys-loader" id="loader-home"><div class="sys-spinner"></div><div class="sl-text">正在进入 CC 之家 …</div></div>
+    <iframe class="sys-frame" id="frame-home"></iframe>
+  </div>
   </div>
   <div class="sys-wrap active" id="wrap-quiz" data-page-node-id="8rSBkUt5GL83LMJBXNhCXR">
     <div class="sys-loader" id="loader-quiz" data-page-node-id="3r6vzxpO7lVdbkV5OGVnIT"><div class="sys-spinner" data-page-node-id="h2xQOHG532keHmnqLtQjk8"></div><div class="sl-text" data-page-node-id="r9zheqO2IK7wweyGTuQS5z">正在进入 培训考核 …</div></div>
@@ -1540,6 +1546,7 @@ button:disabled:active{transform:none;}
 /* ===================== 拆分版：按需加载三大模块 ===================== */
 const MOD_SRC = {
   qa: 'qa.html',
+  home: 'cc-home.html',
   quiz: 'quiz.html',
   performance: 'performance.html',
   beauty: 'beauty.html',
@@ -2121,7 +2128,7 @@ window.addEventListener('offline', updateNetworkStatus);
 window.addEventListener('focus', checkPacksUpdate); // 回到前台时重新检查（受 manifest 缓存频率约束，不会频繁请求）
 checkPacksUpdate();
 renderUserChip();
-switchModule('quiz');
+switchModule('qa');
 </script>
 <script>
 /* ============================================================
@@ -2336,11 +2343,11 @@ window.shellLogout = function(){
 
 /* ---------- 新手教程 ---------- */
 var TOUR_STEPS = [
+  { mod:'qa', icon:'💬', title:'你问我答', desc:'五库知识问答（日常 / 手册 / 管理 / 规范 / 大撤专项）+ 智能查询增强：<br>· 有问题反馈、更好的建议与想法，请 SMP 联系 <b>雷炜豪</b>；<br>· 输入「张露2026年7月的绩效」→ 自动解析姓名/时间/类型，返回结构化数据卡片；<br>· 输入「来10道第三章的题」→ 在线组卷、作答、自动批改；<br>· 可用 <code>/导入绩效</code> 上传自己的绩效数据。' },
   { mod:'beauty', icon:'💄', title:'美妆话术库', desc:'场景化话术一键生成：选择品类/效果/品牌 → 生成「像朋友聊天」式的销售话术。支持 <b>严格版/宽松版</b> 合规口径切换（默认严格版，无医美类比），生成后可以 👍 点赞、👎 提意见，话术会越用越懂你的风格。' },
-  { mod:'qa', icon:'💬', title:'你问我答', desc:'四库知识问答 + 智能查询增强：<br>· 输入「张露2026年7月的绩效」→ 自动解析姓名/时间/类型，返回结构化数据卡片；<br>· 输入「来10道第三章的题」→ 在线组卷、作答、自动批改；<br>· 可用 <code>/导入绩效</code> 上传自己的绩效数据。' },
   { mod:'performance', icon:'📊', title:'绩效看板', desc:'汇总 / 绩效 / 飞行小时 / 销售 / 个人分析 / 班组排名 / 个人画像全维度数据，支持导入导出与备份恢复。' },
   { mod:'quiz', icon:'📚', title:'培训中心', desc:'题库 / 顺序练习 / 背题 / 错题重练 / 模拟考试 / 章节专项，配合成就系统高效备考。' },
-  { mod:null, icon:'⚖️', title:'免责声明', desc:'<div class="disclaimer-box">本系统中存在的数据均为预测和模拟，并非真实数据。一切数据以官方提供的数据和文件为最终参考，本系统数据仅供参考和娱乐，如有雷同纯属巧合。感谢您的理解与使用。</div>' }
+  { mod:null, icon:'⚖️', title:'免责声明', desc:'<div class="disclaimer-box">本系统中存在的数据均为预测和模拟，并非真实数据。一切数据以官方提供的数据和文件为最终参考，本系统数据仅供参考和娱乐，如有雷同纯属巧合。感谢您的理解与使用。</div><div style="margin-top:10px;font-weight:700;color:#0F2A1F">💬 如有问题反馈、更好的建议与想法，请 SMP 联系 <b>雷炜豪</b>。</div>' }
 ];
 var tourStep = 0, tourTimer = null, tourCount = 3;
 function maybeStartTour(){

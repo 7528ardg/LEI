@@ -7,6 +7,7 @@ import os
 
 SOURCES = {
     'qa': u'qa.html',
+    'home': u'cc-home.html',
     'quiz': u'quiz.html',
     'performance': u'performance.html',
     'beauty': u'beauty.html',
@@ -522,8 +523,9 @@ button:disabled:active{transform:none;}
   </div>
 
   <nav class="module-tabs" id="moduleTabs">
-    <button class="mod-tab" data-mod="qa" onclick="switchModule('qa')">💬 你问我答</button>
-    <button class="mod-tab active" data-mod="quiz" onclick="switchModule('quiz')">📚 培训考核</button>
+    <button class="mod-tab" data-mod="home" onclick="switchModule('home')">🏠 CC 之家</button>
+    <button class="mod-tab active" data-mod="qa" onclick="switchModule('qa')">💬 你问我答</button>
+    <button class="mod-tab" data-mod="quiz" onclick="switchModule('quiz')">📚 培训考核</button>
     <button class="mod-tab" data-mod="performance" onclick="switchModule('performance')">📊 绩效管理</button>
     <button class="mod-tab" data-mod="beauty" onclick="switchModule('beauty')">💄 美妆话术</button>
     <button class="mod-tab" data-mod="medical" onclick="switchModule('medical')">🚑 医疗急救</button>
@@ -550,6 +552,11 @@ button:disabled:active{transform:none;}
   <div class="sys-wrap" id="wrap-qa">
     <div class="sys-loader" id="loader-qa"><div class="sys-spinner"></div><div class="sl-text">正在进入 你问我答 …</div></div>
     <iframe class="sys-frame" id="frame-qa"></iframe>
+  </div>
+  <div class="sys-wrap" id="wrap-home">
+    <div class="sys-loader" id="loader-home"><div class="sys-spinner"></div><div class="sl-text">正在进入 CC 之家 …</div></div>
+    <iframe class="sys-frame" id="frame-home"></iframe>
+  </div>
   </div>
   <div class="sys-wrap active" id="wrap-quiz">
     <div class="sys-loader" id="loader-quiz"><div class="sys-spinner"></div><div class="sl-text">正在进入 培训考核 …</div></div>
@@ -593,6 +600,7 @@ button:disabled:active{transform:none;}
 
 <!-- ===== 手机端底部 TabBar（APP 式主导航） ===== -->
 <nav class="m-tabbar" id="mTabbar" aria-label="底部导航">
+  <button class="m-tab" data-mod="home" onclick="mGo('home')"><span class="mi">🏠</span>之家</button>
   <button class="m-tab" data-mod="qa" onclick="mGo('qa')"><span class="mi">💬</span>问答</button>
   <button class="m-tab" data-mod="quiz" onclick="mGo('quiz')"><span class="mi">📚</span>培训</button>
   <button class="m-tab" data-mod="performance" onclick="mGo('performance')"><span class="mi">📊</span>绩效</button>
@@ -669,6 +677,7 @@ button:disabled:active{transform:none;}
 <script>
 /* ===================== 三大系统完整功能数据（gzip 压缩 base64 内嵌，运行时解压） ===================== */
 const MODULES = {
+  home: "__B64_home__",
   qa: "__B64_qa__",
   quiz: "__B64_quiz__",
   performance: "__B64_performance__",
@@ -1359,7 +1368,7 @@ window.addEventListener('online', updateNetworkStatus);
 window.addEventListener('offline', updateNetworkStatus);
 checkPacksUpdate();
 renderUserChip();
-switchModule('quiz');
+switchModule('qa');
 /* ===================== 手机端底部 TabBar（APP 式导航） ===================== */
 function mGo(id){
   if(id === 'more'){ openMoreSheet(); return; }

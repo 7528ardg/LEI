@@ -1,0 +1,1 @@
+window.CC3D_READY=[1, 2, 3, 4];

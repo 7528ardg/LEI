@@ -51,6 +51,7 @@ VERIFY_SCRIPTS = [
 # 全量语法检查覆盖：全部模块源 + 三外壳/产物（排除 .tmp_ 调试文件）
 SYNTAX_FILES = [
     u'index.html',
+    u'cc-home.html',
     u'qa.html', u'quiz.html', u'performance.html', u'beauty.html',
     u'medical.html', u'daily.html', u'manual.html', u'report.html',
     u'risk-lite.html', u'kb-admin.html', u'kb-admin.template.html',

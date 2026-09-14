@@ -22,6 +22,10 @@
         .machine-switch button.on{background:#0f766e;color:#fff;box-shadow:0 3px 10px rgba(15,118,110,.35)}
         .card{background:#fff;border:1px solid #eef2f7;border-radius:16px;box-shadow:0 4px 14px rgba(17,24,39,.05);margin-bottom:14px;overflow:hidden}
         .card-h{padding:13px 16px;font-weight:800;font-size:15px;display:flex;align-items:center;gap:8px}
+        /* 2026-09-14 卡片修复：标题占满剩余宽自动换行、徽标不被挤压；桌面双列等高、按钮沉底 */
+        .card-h>span.t{flex:1;min-width:0;overflow-wrap:anywhere;text-align:left}
+        .card-h>span.chip{flex:none;white-space:nowrap}
+        @media(min-width:561px){.grid2>.card{display:flex;flex-direction:column;height:100%}.grid2>.card>.card-b{flex:1;display:flex;flex-direction:column}.grid2>.card>.card-b>.s-btn{margin-top:auto!important}}
         .card-b{padding:14px 16px}
         .sec-title{font-size:14px;font-weight:800;color:#111827;margin:14px 0 8px;display:flex;align-items:center;gap:6px}
         .chip{display:inline-flex;align-items:center;gap:4px;padding:3px 10px;border-radius:12px;font-size:12px;font-weight:700}
@@ -52,7 +56,7 @@
         .f-bad{background:#fee2e2!important;border-color:#dc2626}
         .grid2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
         .grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
-        @media(max-width:560px){.grid2,.grid3{grid-template-columns:1fr 1fr}}
+        @media(max-width:560px){.grid2{grid-template-columns:1fr}.grid3{grid-template-columns:1fr 1fr}}
         .lv-cards{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
         @media(max-width:640px){.lv-cards{grid-template-columns:1fr}}
         .lv-btn{border:none;border-radius:14px;padding:14px;text-align:left;cursor:pointer;color:#fff;font-weight:800;box-shadow:0 4px 12px rgba(0,0,0,.12);transition:transform .15s}
@@ -466,7 +470,7 @@ function renderHome() {
     h += '</div></div>';
     h += '<div class="card"><div class="card-h">🧭 发现旅客不适的快速判断流程 <span class="src-tag">手册7.3/7.7/7.11</span></div><div class="card-b"><ul class="pts">' + TRIAGE_STEPS.map(x => '<li class="warn">' + x.t + '：' + x.d + '</li>').join('') + '</ul><div class="warn-box">⚠️ 处置原则：先救命、后治伤；先重后轻；乘务员的职责是「基本紧急救治直到专业医务人员到场」，不是诊断与预先治疗；危重伤（患）者四大生命体征至少每10分钟检测记录一次。</div></div></div>';
     h += '<div class="sec-title">🧰 专项急救技能（按需直达）</div>';
-    h += '<div class="grid2">' + SKILLS.map(s => '<div class="card lv-' + s.lv + '" style="margin-bottom:10px"><div class="card-h">' + s.i + ' ' + s.n + ' ' + lvChip(s.lv) + '</div><div class="card-b" style="padding-top:4px"><p class="hint" style="margin-top:0">' + s.sx[0] + '</p><button class="s-btn" style="margin-top:10px" onclick="openSkill(\'' + s.id + '\')">查看完整流程+动作图解 →</button></div></div>').join('') + '</div>';
+    h += '<div class="grid2">' + SKILLS.map(s => '<div class="card lv-' + s.lv + '" style="margin-bottom:10px"><div class="card-h">' + s.i + ' <span class="t">' + s.n + '</span> ' + lvChip(s.lv) + '</div><div class="card-b" style="padding-top:4px"><p class="hint" style="margin-top:0">' + s.sx[0] + '</p><button class="s-btn" style="margin-top:10px" onclick="openSkill(\'' + s.id + '\')">查看完整流程+动作图解 →</button></div></div>').join('') + '</div>';
     h += '<div class="sec-title">📷 动作图解（气道异物 · CPR · 止血带）</div>';
     h += '<div class="fig-wrap">' + [
         ['choke_back5', '<b>成人拍背5次</b>：肩胛骨连线中点，掌根叩击'],
@@ -527,7 +531,7 @@ function disListHtml() {
     });
     if (list.length === 0) h += '<div class="hint">未找到匹配病种，请调整筛选条件。</div>';
     list.forEach(d => {
-        h += '<div class="card lv-' + d.lv + '" style="margin-bottom:12px"><div class="card-h">' + d.i + ' ' + d.n + ' ' + lvChip(d.lv) + '<span class="src-tag" style="margin-left:auto">来源：' + d.s + '</span></div><div class="card-b" style="padding-top:4px">';
+        h += '<div class="card lv-' + d.lv + '" style="margin-bottom:12px"><div class="card-h">' + d.i + ' <span class="t">' + d.n + '</span> ' + lvChip(d.lv) + '<span class="src-tag" style="margin-left:auto">来源：' + d.s + '</span></div><div class="card-b" style="padding-top:4px">';
         if (d.pop) h += '<div style="font-size:12.5px;color:#6b7280;margin:2px 0 8px">👥 好发/诱因：' + d.pop + '</div>';
         h += '<div class="sec-title" style="margin:6px 0 4px">🔍 症状识别</div><ul class="pts">' + d.sx.map(x => typeof x === 'object' ? '<li class="warn">⚠️ ' + x.w + '</li>' : '<li>' + x + '</li>').join('') + '</ul>';
         h += '<div class="sec-title" style="margin:8px 0 4px">🧾 处置流程</div><ul class="pts">' + d.st.map((x, i) => '<li><span class="step-tag">' + (i + 1) + '</span>' + x.t + '</li>').join('') + '</ul>';
