@@ -148,8 +148,8 @@ body{font-family:var(--font-sans);background:var(--bg);color:var(--text);min-hei
   /* 「更多」底部面板（Bottom Sheet） */
   .m-sheet-mask{display:block;position:fixed;inset:0;background:rgba(0,0,0,.42);z-index:300;opacity:0;pointer-events:none;transition:opacity .25s;}
   .m-sheet-mask.show{opacity:1;pointer-events:auto;}
-  .m-sheet{display:block;position:fixed;left:0;right:0;bottom:calc(var(--tabbar-h) + env(safe-area-inset-bottom,0px));z-index:301;background:var(--bg-card);border-radius:20px 20px 0 0;border-top:1px solid var(--border);padding:12px 14px calc(14px + env(safe-area-inset-bottom,0px));transform:translateY(115%);transition:transform .3s cubic-bezier(.32,.72,.34,1);box-shadow:0 -12px 32px rgba(15,42,31,.18);}
-  .m-sheet.show{transform:translateY(0);}
+  .m-sheet{display:block;position:fixed;left:0;right:0;bottom:calc(var(--tabbar-h) + env(safe-area-inset-bottom,0px));z-index:301;background:var(--bg-card);border-radius:20px 20px 0 0;border-top:1px solid var(--border);padding:12px 14px calc(14px + env(safe-area-inset-bottom,0px));transform:translateY(115%);visibility:hidden;pointer-events:none;transition:transform .3s cubic-bezier(.32,.72,.34,1),visibility 0s linear .32s;box-shadow:0 -12px 32px rgba(15,42,31,.18);max-height:72vh;overflow-y:auto;-webkit-overflow-scrolling:touch;}
+  .m-sheet.show{transform:translateY(0);visibility:visible;pointer-events:auto;transition:transform .3s cubic-bezier(.32,.72,.34,1);}
   .m-sheet h4{font-size:.86rem;color:var(--text);margin:2px 4px 10px;font-weight:800;display:flex;align-items:center;justify-content:space-between;}
   .m-sheet-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;}
   .m-sheet-item{display:flex;flex-direction:column;align-items:center;gap:6px;padding:12px 4px;border:1px solid var(--border);border-radius:14px;background:var(--bg);cursor:pointer;font-size:.74rem;font-weight:700;color:var(--text);font-family:var(--font-sans);transition:all .15s;}
@@ -1395,6 +1395,7 @@ button:disabled:active{transform:none;}
     <button class="mod-tab" data-mod="manual" onclick="switchModule('manual')" data-page-node-id="16VCdRNReCMYPnJQ1m9LZd">📕 手册奖惩</button>
     <button class="mod-tab" data-mod="report" onclick="switchModule('report')" data-page-node-id="zuRGGdaicD84fn0TQmDPKC">🗂 事件报告</button>
     <button class="mod-tab" data-mod="kbadmin" onclick="switchModule('kbadmin')" data-page-node-id="tx5VFathdAJZK2NlztrCsA">📇 库管理</button>
+    <button class="mod-tab" data-mod="issues" onclick="switchModule('issues')">🐞 问题反馈</button>
   </nav>
 
   <div class="actions" data-page-node-id="xvsfdyRVOsuES5oDEHTAxU">
@@ -1451,6 +1452,10 @@ button:disabled:active{transform:none;}
     <div class="sys-loader" id="loader-kbadmin" data-page-node-id="82UDFi4F6Lx9nCsTUaewCE"><div class="sys-spinner" data-page-node-id="DyRHgpKzSyImGCST0JubJM"></div><div class="sl-text" data-page-node-id="advWN40lqoStM0V3jl6wEn">正在进入 库管理 …</div></div>
     <iframe class="sys-frame" id="frame-kbadmin" data-page-node-id="vA4yUapkclkXCRjkH7VnhQ"></iframe>
   </div>
+  <div class="sys-wrap" id="wrap-issues">
+    <div class="sys-loader" id="loader-issues"><div class="sys-spinner"></div><div class="sl-text">正在进入 问题反馈 …</div></div>
+    <iframe class="sys-frame" id="frame-issues"></iframe>
+  </div>
 </main>
 
 <div class="toast-container" id="toastContainer" data-page-node-id="AerawCVWWcwZLY3UZqOgsE"></div>
@@ -1475,6 +1480,7 @@ button:disabled:active{transform:none;}
     <button class="m-sheet-item" data-mod="manual" onclick="mGoMod('manual')"><span class="mi">📕</span>手册奖惩</button>
     <button class="m-sheet-item" data-mod="report" onclick="mGoMod('report')"><span class="mi">🗂</span>事件报告</button>
     <button class="m-sheet-item" data-mod="kbadmin" onclick="mGoMod('kbadmin')"><span class="mi">📇</span>库管理</button>
+    <button class="m-sheet-item" data-mod="issues" onclick="mGoMod('issues')"><span class="mi">🐞</span>问题反馈</button>
   </div>
 </div>
 
@@ -1542,7 +1548,8 @@ const MOD_SRC = {
   daily: 'daily.html',
   manual: 'manual.html',
   report: 'report.html',
-  kbadmin: 'kb-admin.html'
+  kbadmin: 'kb-admin.html',
+  issues: 'issues.html'
 };
 const _loaded = {};
 const _modScroll = {};
@@ -1575,6 +1582,7 @@ const EMBED_CSS = {
   medical: '.headbar{display:none!important}',
   risk: '.topbar .logo,.topbar .user-chip,#appVersionBadge,#btnBackup,#btnGlobalRefresh,button[onclick="logout()"]{display:none!important}.topbar .breadcrumb{flex:1!important;min-width:0!important}',
   kbadmin: 'header.kb-top{display:none!important}.kb-tabs{top:0!important}',
+  issues: '.livery-stripe,header.topbar{display:none!important}',
 };
 function injectEmbedCss(id, frame){
   const css = EMBED_CSS[id];
@@ -1679,7 +1687,7 @@ function applyTheme(t){
   document.documentElement.setAttribute('data-theme', t);
   const btn = document.getElementById('themeBtn');
   btn.textContent = t==='dark' ? '🌙' : '☀️';
-  ['qa','quiz','performance','beauty','risk','medical','daily','manual','report','kbadmin'].forEach(id=>{
+  ['qa','quiz','performance','beauty','risk','medical','daily','manual','report','kbadmin','issues'].forEach(id=>{
     const f = document.getElementById('frame-'+id);
     if(f && f.contentDocument){
       try{ f.contentDocument.documentElement.setAttribute('data-theme', t); }catch(e){}
@@ -2521,6 +2529,76 @@ function syncMTabbar(){
   window.addEventListener('resize', function(){
     if(!window.matchMedia('(max-width:720px)').matches) closeMoreSheet();
   });
+})();
+</script>
+<style id="mobile-native-hardening">
+/* === mobile-native-hardening 2026-09-14 · finesse-ui h5-mobile + impeccable === */
+html{-webkit-text-size-adjust:100%;text-size-adjust:100%}
+*{-webkit-tap-highlight-color:transparent}
+a,button,input,select,textarea,label,summary,[onclick],[role=button]{touch-action:manipulation}
+button,[onclick],[role=button]{-webkit-user-select:none;user-select:none}
+img{max-width:100%}
+button:active,[onclick]:active,a:active,summary:active,[role=button]:active{filter:brightness(.93)}
+@media (pointer:coarse){
+  input,select,textarea{font-size:16px}
+  *{scrollbar-width:none}
+  *::-webkit-scrollbar{width:0;height:0;display:none}
+}
+@media (prefers-reduced-motion:reduce){
+  *,*::before,*::after{animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important}
+}
+</style>
+<script id="mobile-native-js">
+(function(){
+  'use strict';
+  if(!window.matchMedia||!matchMedia('(pointer:coarse)').matches)return;
+  /* 1) 触感反馈（Android 原生手感；iOS/Safari 自动忽略 vibrate） */
+  if(navigator.vibrate){
+    addEventListener('pointerdown',function(e){
+      var t=e.target;
+      if(t&&t.closest&&t.closest('button,[onclick],a,[role="button"]')){
+        try{navigator.vibrate(8)}catch(_){}
+      }
+    },{passive:true,capture:true});
+  }
+  /* 2) 安全区自动注入：贴边的 fixed/sticky 条补 env(safe-area-inset-*)；
+        无贴边条的页面则给 body 补，保证内容不钻进刘海/小白条 */
+  var px=function(v){return parseFloat(v)||0};
+  function patchOne(el,edge){
+    var cs=getComputedStyle(el);
+    if(edge==='top'){el.style.paddingTop='calc('+px(cs.paddingTop)+'px + env(safe-area-inset-top,0px))';}
+    else{el.style.paddingBottom='calc('+px(cs.paddingBottom)+'px + env(safe-area-inset-bottom,0px))';}
+  }
+  function walk(){
+    var vw=innerWidth,vh=innerHeight,gotTop=false,gotBot=false;
+    var els=document.querySelectorAll('body *');
+    for(var i=0;i<els.length;i++){
+      var el=els[i];if(el.dataset.msa)continue;el.dataset.msa='1';
+      var cs=getComputedStyle(el),pos=cs.position;
+      if(pos!=='fixed'&&pos!=='sticky')continue;
+      var r=el.getBoundingClientRect();
+      if(r.width===0||r.height===0)continue;
+      if(r.width>=vw*0.95&&r.height>=vh*0.9)continue; /* 全屏遮罩类不碰 */
+      var wide=(r.width>=vw*0.9);
+      if(!wide)continue;
+      if(pos==='fixed'){
+        var t=px(cs.top),b=px(cs.bottom);
+        if(t>=0&&t<=6){patchOne(el,'top');gotTop=true;}
+        else if(b>=0&&b<=2){patchOne(el,'bot');gotBot=true;}
+      }else{
+        var st=px(cs.top),sb=px(cs.bottom);
+        if(cs.top!=='auto'&&st<=6){patchOne(el,'top');gotTop=true;}
+        else if(cs.bottom!=='auto'&&sb<=2){patchOne(el,'bot');gotBot=true;}
+      }
+    }
+    var b=document.body,bs=getComputedStyle(b);
+    if(!gotTop){b.style.paddingTop='calc('+px(bs.paddingTop)+'px + env(safe-area-inset-top,0px))';}
+    if(!gotBot){b.style.paddingBottom='calc('+px(bs.paddingBottom)+'px + env(safe-area-inset-bottom,0px))';}
+  }
+  function safe(){try{walk()}catch(_){}}
+  if(document.readyState==='loading'){document.addEventListener('DOMContentLoaded',safe)}else{safe()}
+  addEventListener('load',safe);
+  setTimeout(safe,800);
 })();
 </script>
 </body>

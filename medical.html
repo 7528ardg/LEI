@@ -2,7 +2,8 @@
 <html lang="zh-CN">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, interactive-widget=resizes-content">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, interactive-widget=resizes-content, viewport-fit=cover">
+<meta name="theme-color" content="#00A650">
     <title>春秋航空 · 机上医疗急救 · 全能助手</title>
     <style>
         *,::before,::after{box-sizing:border-box;margin:0;padding:0}
@@ -339,6 +340,39 @@ const DISEASES = [
         [{ w: '急性起病、腹痛剧烈（病史+诱因+疼痛部位+性质初步判断）' }],
         [{ t: '诊断未明确前禁止止痛药、禁止热敷、禁止运动' }, { t: '询问病史；育龄女性询问月经史（警惕宫外孕）' }, { t: '禁食，观察生命体征' }, { t: '广播找医生、通知机长' }, { t: '安抚情绪、保持安静，取舒适体位（坐/半卧）' }, { t: '呕吐防误吸，保持呼吸道通畅' }, { t: '出现休克按休克救护' }],
         '诊断未明确禁止痛药；育龄女性停经+腹痛为高危。', '', '黄色；休克/腹膜炎体征转红色并备降。', '手册7.13.28'),
+    /* ===== 以下为扩充病种（手册7.13 之外，依据红十字救护与航空医学常识整理） ===== */
+    D('allergy', '过敏反应/过敏性休克', '🌸', '过敏/免疫', 'red', '食物（海鲜/坚果）、药物（青霉素类）、昆虫叮蜇、花粉等过敏原；有过敏史者高危',
+        ['皮肤瘙痒、荨麻疹、面部/口唇/眼睑血管性水肿', { w: '喉头水肿致声音嘶哑、呼吸困难、喘鸣；血压骤降、面色苍白、脉搏细速、意识模糊（过敏性休克）' }],
+        [{ t: '立即脱离/停止接触可疑过敏原' }, { t: '有自备肾上腺素自动注射笔（如随身携带）协助其按说明书大腿外侧注射' }, { t: '平卧位、下肢抬高；呼吸困难者取坐位' }, { t: '立即吸氧；广播找医生' }, { t: '密切观察呼吸与意识，喉头水肿窒息时按气道异物/通气支持准备' }, { t: '血压下降按休克救护（保暖、禁食）' }, { t: '报告机长，建议备降并通知地面急救' }],
+        '过敏性休克进展可数分钟内致命，勿观望等待；处方药不得擅自提供给他人。', '医,氧,急', '红色级别；立即报告机长评估备降。', '红十字救护·航空医学常识'),
+    D('hypo', '低血糖', '🍬', '内分泌/代谢', 'yellow', '糖尿病者注射胰岛素/口服降糖药后未进食或过量、长时间未进食、酗酒空腹',
+        ['心慌、手抖、出冷汗、强烈饥饿感、面色苍白、头晕乏力', { w: '进展为意识模糊、行为异常、抽搐甚至昏迷' }],
+        [{ t: '询问糖尿病史与降糖药使用情况' }, { t: '意识清醒者：立即给含糖饮料/糖果/糖水，15分钟后观察症状是否缓解，可重复' }, { t: '意识不清者：严禁喂食喂水（防误吸），侧卧保持气道通畅' }, { t: '广播找医生；有条件时测血糖' }, { t: '缓解后进食饼干/面包等维持，防再次发作' }, { t: '持续不缓解或昏迷，立即报告机长并通知地面急救' }],
+        '昏迷者禁喂糖水——误吸比低血糖更危险；勿误将"意识不清"当"睡着"。', '', '黄色；昏迷/抽搐转红色并备降。', '红十字救护·航空医学常识'),
+    D('gastro', '急性胃肠炎/腹泻', '🚻', '消化系统', 'green', '进食不洁/生冷食物、旅途劳累、腹部受凉；机上常见于餐食因素',
+        ['腹痛、腹泻、恶心呕吐，可伴低热、乏力；多次水样便'],
+        [{ t: '休息、腹部保暖' }, { t: '少量多次补充水分与盐分（淡盐水/清汤），防脱水' }, { t: '清淡饮食，避免油腻乳制品与咖啡酒精' }, { t: '观察脱水征象：口渴加重、尿量减少、皮肤弹性差、虚弱' }, { t: '自备口服补液盐/蒙脱石散等可按说明书协助使用' }, { t: '严重脱水、便血、高热或持续呕吐，转黄色并广播找医生、报告机长' }],
+        '呕吐时侧卧防误吸；协助用药仅限旅客自备药。', '', '绿色；脱水明显/便血转黄色并报告。', '红十字救护·航空医学常识'),
+    D('motion', '晕动病（晕机）', '🤢', '旅行相关', 'green', '颠簸、视觉与前庭冲突、机舱气味、睡眠不足、饱食后乘机',
+        ['恶心、呕吐、头晕头痛、面色苍白、出冷汗、上腹不适'],
+        [{ t: '协助调换至靠窗/机翼附近颠簸较小的座位' }, { t: '注视远处固定点或地平线，避免看书看手机' }, { t: '闭眼平躺、头部固定减少晃动' }, { t: '前额冷敷；打开通风孔保持空气流通' }, { t: '自备晕机药按说明书服用（登机前服用效果更佳）' }, { t: '呕吐后清水漱口，少量补水' }],
+        '勿在颠簸中走动；频繁呕吐注意补水防脱水。', '', '绿色；持续呕吐脱水转黄色。', '红十字救护·航空医学常识'),
+    D('ear', '航空性中耳炎（耳气压伤）', '👂', '耳鼻喉', 'green', '起降气压变化+感冒鼻塞、鼻炎、咽鼓管功能差（婴儿更易发生）',
+        ['起降时耳痛、耳闷胀感、听力下降、耳鸣，剧痛者可致鼓膜穿孔出血'],
+        [{ t: '捏鼻鼓气法（瓦尔萨尔瓦动作）：捏鼻闭嘴轻轻向耳鼓气' }, { t: '吞咽、张口、打哈欠、嚼口香糖促进咽鼓管开放' }, { t: '感冒鼻塞者可自备减充血剂喷鼻后再做上述动作' }, { t: '婴幼儿：起飞下降时喂水/喂奶促吞咽' }, { t: '剧痛难忍者少量多次饮水休息；落地后持续疼痛/出血建议就医' }],
+        '鼓气勿过猛；鼓膜已穿孔者勿进水、勿滴药。', '', '绿色；持续剧痛或出血转黄色。', '红十字救护·航空医学常识'),
+    D('dvt', '深静脉血栓（经济舱综合征）', '🦵', '循环系统', 'yellow', '长途飞行久坐、脱水、口服避孕药、近期手术/妊娠、肥胖、高龄',
+        ['单侧小腿/大腿肿胀、疼痛、压痛、皮温升高、皮肤发红发紫', { w: '血栓脱落致肺栓塞：突发胸痛、呼吸困难、咯血、晕厥——立即转红色' }],
+        [{ t: '患肢制动、禁止按摩揉捏（防血栓脱落）' }, { t: '抬高患肢促进回流' }, { t: '多饮水、避免进一步久坐，条件允许时在照看下缓慢活动' }, { t: '询问病史与用药（是否抗凝治疗）' }, { t: '广播找医生；观察呼吸情况' }, { t: '出现胸痛/呼吸困难/咯血立即吸氧、按肺栓塞红色处置并报告机长备降' }],
+        '切忌热敷、按摩患肢；疑似肺栓塞为飞行中最危险情形之一。', '氧,医', '黄色；肺栓塞征象转红色并立即备降。', '红十字救护·航空医学常识'),
+    D('arrhythmia', '心律失常/心悸', '💓', '循环系统', 'yellow', '冠心病、高血压、甲亢、情绪紧张、咖啡/酒精/过量浓茶、电解质紊乱',
+        ['心慌、自觉心跳过快/过慢/不规则、胸闷、乏力、头晕', { w: '严重者胸痛、黑视、晕厥、面色苍白、脉搏摸不清——转红色' }],
+        [{ t: '立即停止活动、安静休息、安抚情绪' }, { t: '询问心脏病史与自备药物（如β受体阻滞剂等，协助按医嘱服用）' }, { t: '触脉搏计数节律与速率，记录时间与变化' }, { t: '吸氧；广播找医生' }, { t: '持续观察生命体征，症状加重或持续不缓解报告机长' }, { t: '意识丧失、大动脉搏动消失立即CPR并取AED' }],
+        '含咖啡因饮料勿再提供；胸痛伴心悸按心梗流程处置。', '氧,医', '黄色；晕厥/胸痛/脉搏异常转红色并备降。', '红十字救护·航空医学常识'),
+    D('pregnancy', '妊娠急症/机上分娩', '🤰', '妇产科', 'yellow', '孕晚期乘机、早产征兆、胎盘早剥等；多数航司要求孕32~36周以上提供医疗证明',
+        ['孕晚期腹痛、阴道出血、破水、规律宫缩（临产征兆）', { w: '出血量大、剧烈腹痛、意识改变——转红色' }],
+        [{ t: '询问孕周与产检情况、是否有产科并发症' }, { t: '平卧位、双腿屈曲、保暖，避免走动' }, { t: '广播找医生（重点寻找产科/医护背景）' }, { t: '观察宫缩间隔与出血量，做好记录' }, { t: '准备机上接生物品（急救箱无菌手套/毛巾/毛毯等）' }, { t: '安抚情绪，陪伴照护' }, { t: '立即报告机长评估就近备降，通知地面救护车接应' }, { t: '若不可避免在机上分娩，按手册接生与新生儿处置程序执行' }],
+        '阴道出血者禁做阴道检查与腹部按压；新生儿出生后保暖、清理气道、刺激啼哭。', '医,急', '黄色；大出血/分娩征兆转红色并立即备降。', '红十字救护·航空医学常识'),
 ];
 
 /* ---------- 练习题库（情景判断，答案含解析与来源） ---------- */
@@ -391,6 +425,12 @@ const TABS = [
 
 function render() {
     const app = document.getElementById('app');
+    // 焦点/滚动保持：搜索框 oninput → render() 会重建输入框导致失焦，重绘前记录，重绘后找回
+    const _sc0 = app.querySelector('.main-scroll-container');
+    const _prevST = _sc0 ? _sc0.scrollTop : 0;
+    const _kfAE = document.activeElement;
+    const _kfInfo = (_kfAE && (_kfAE.tagName === 'INPUT' || _kfAE.tagName === 'TEXTAREA') && _kfAE.placeholder)
+        ? { ph: _kfAE.placeholder, s: _kfAE.selectionStart, e: _kfAE.selectionEnd } : null;
     let h = '';
     h += '<div class="headbar"><div class="title">🚑 机上医疗急救<small>依据《客舱乘务员手册》01.10 · 红十字应急救护 · CCAR-121 · 国际文献（详见资料来源）</small></div>';
     h += '<div class="machine-switch"><button class="' + (state.machine === '320' ? 'on' : '') + '" onclick="setMachine(\'320\')">A320</button><button class="' + (state.machine === '321' ? 'on' : '') + '" onclick="setMachine(\'321\')">A321</button></div></div>';
@@ -404,6 +444,15 @@ function render() {
     if (state.tab === 'sources') h += renderSources();
     h += '</div>';
     app.innerHTML = h;
+    if (_kfInfo) {
+        const _kfEl = document.querySelector('input[placeholder="' + _kfInfo.ph + '"],textarea[placeholder="' + _kfInfo.ph + '"]');
+        if (_kfEl) {
+            _kfEl.focus();
+            try { _kfEl.setSelectionRange(_kfInfo.s, _kfInfo.e); } catch (_) {}
+        }
+    }
+    const _sc1 = app.querySelector('.main-scroll-container');
+    if (_sc1 && _prevST > 0) _sc1.scrollTop = Math.min(_prevST, _sc1.scrollHeight - _sc1.clientHeight);
 }
 
 function goTab(t) { state.tab = t; render(); }
@@ -458,16 +507,18 @@ const DIS_KW = {
     syncope: '昏倒 晕倒 眼前一黑 黑视', epilepsy: '羊癫疯 抽风 羊角风', convulsion: '抽风 抽搐',
     asthma: '喘 憋气 喘息', hyperventilation: '换气过度', abdomen: '肚子疼 腹痛 胀痛',
     nosebleed: '流鼻血', cut: '划伤 擦伤', burn1: '烫伤 烧伤 烫', burn2: '烫伤 烧伤 烫', burn3: '烫伤 烧伤 烫',
-    fracture: '骨折 脱臼', heatstroke: '热射病', hypothermia: '失温', frostbite: '冻僵', psych: '精神异常 发疯'
+    fracture: '骨折 脱臼', heatstroke: '热射病', hypothermia: '失温', frostbite: '冻僵', psych: '精神异常 发疯',
+    allergy: '过敏 荨麻疹 皮疹 嘴唇肿 海鲜 坚果 过敏性休克', hypo: '低血糖 糖尿病 胰岛素 心慌 手抖 出冷汗 饥饿',
+    gastro: '腹泻 拉肚子 肠胃炎 呕吐 拉稀 吃坏肚子', motion: '晕机 晕车 恶心 颠簸 想吐',
+    ear: '耳痛 耳鸣 耳闷 中耳炎 起降 耳朵疼 气压', dvt: '血栓 经济舱 小腿肿 腿肿 久坐 肺栓塞',
+    arrhythmia: '心律失常 心悸 心慌 心跳快 早搏 房颤', pregnancy: '怀孕 孕妇 临产 分娩 破水 宫缩 见红'
 };
 function diseaseHay(d) { return (d.n + d.cat + d.sx.map(x => typeof x === 'object' ? x.w : x).join(' ') + ' ' + (DIS_KW[d.id] || '')).toLowerCase(); }
 
 /* ---------- 病种速查 ---------- */
-function renderDiseases() {
-    let h = '<div class="card"><div class="card-h">🩺 机上常见病速查（共 ' + DISEASES.length + ' 种 · 手册7.13）</div><div class="card-b">';
-    h += '<div class="filter-row"><input type="text" placeholder="🔍 搜索病名/症状关键词..." value="' + esc(state.search) + '" oninput="state.search=this.value;render()" style="max-width:240px">';
-    h += '<select onchange="state.cat=this.value;render()" style="max-width:150px"><option value="all">全部系统</option>' + [...new Set(DISEASES.map(d => d.cat))].map(c => '<option value="' + c + '" ' + (state.cat === c ? 'selected' : '') + '>' + c + '</option>').join('') + '</select>';
-    h += '<select onchange="state.lv=this.value;render()" style="max-width:130px"><option value="all">全部分级</option><option value="red" ' + (state.lv === 'red' ? 'selected' : '') + '>🔴 威胁生命</option><option value="yellow" ' + (state.lv === 'yellow' ? 'selected' : '') + '>🟡 紧急</option><option value="green" ' + (state.lv === 'green' ? 'selected' : '') + '>🟢 一般</option></select></div>';
+/* 列表 HTML 独立成函数：搜索/筛选时只重绘 #disList，输入框节点保持不动，杜绝打字失焦（含中文输入法组词被打断） */
+function disListHtml() {
+    let h = '';
     let list = DISEASES.filter(d => {
         if (state.cat !== 'all' && d.cat !== state.cat) return false;
         if (state.lv !== 'all' && d.lv !== state.lv) return false;
@@ -485,6 +536,18 @@ function renderDiseases() {
         if (d.rf) h += '<div class="hint">📋 报告：' + d.rf + '</div>';
         h += '</div></div>';
     });
+    return h;
+}
+function disApplyFilters() {
+    const el = document.getElementById('disList');
+    if (el) el.innerHTML = disListHtml();
+}
+function renderDiseases() {
+    let h = '<div class="card"><div class="card-h">🩺 机上常见病速查（共 ' + DISEASES.length + ' 种 · 手册7.13+扩充）</div><div class="card-b">';
+    h += '<div class="filter-row"><input type="text" placeholder="🔍 搜索病名/症状关键词..." value="' + esc(state.search) + '" oninput="state.search=this.value;disApplyFilters()" style="max-width:240px">';
+    h += '<select onchange="state.cat=this.value;disApplyFilters()" style="max-width:150px"><option value="all">全部系统</option>' + [...new Set(DISEASES.map(d => d.cat))].map(c => '<option value="' + c + '" ' + (state.cat === c ? 'selected' : '') + '>' + c + '</option>').join('') + '</select>';
+    h += '<select onchange="state.lv=this.value;disApplyFilters()" style="max-width:130px"><option value="all">全部分级</option><option value="red" ' + (state.lv === 'red' ? 'selected' : '') + '>🔴 威胁生命</option><option value="yellow" ' + (state.lv === 'yellow' ? 'selected' : '') + '>🟡 紧急</option><option value="green" ' + (state.lv === 'green' ? 'selected' : '') + '>🟢 一般</option></select></div>';
+    h += '<div id="disList">' + disListHtml() + '</div>';
     h += '</div></div>';
     return h;
 }
@@ -680,6 +743,76 @@ function toast(msg) {
 }
 
 render();
+</script>
+<style id="mobile-native-hardening">
+/* === mobile-native-hardening 2026-09-14 · finesse-ui h5-mobile + impeccable === */
+html{-webkit-text-size-adjust:100%;text-size-adjust:100%}
+*{-webkit-tap-highlight-color:transparent}
+a,button,input,select,textarea,label,summary,[onclick],[role=button]{touch-action:manipulation}
+button,[onclick],[role=button]{-webkit-user-select:none;user-select:none}
+img{max-width:100%}
+button:active,[onclick]:active,a:active,summary:active,[role=button]:active{filter:brightness(.93)}
+@media (pointer:coarse){
+  input,select,textarea{font-size:16px}
+  *{scrollbar-width:none}
+  *::-webkit-scrollbar{width:0;height:0;display:none}
+}
+@media (prefers-reduced-motion:reduce){
+  *,*::before,*::after{animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important}
+}
+</style>
+<script id="mobile-native-js">
+(function(){
+  'use strict';
+  if(!window.matchMedia||!matchMedia('(pointer:coarse)').matches)return;
+  /* 1) 触感反馈（Android 原生手感；iOS/Safari 自动忽略 vibrate） */
+  if(navigator.vibrate){
+    addEventListener('pointerdown',function(e){
+      var t=e.target;
+      if(t&&t.closest&&t.closest('button,[onclick],a,[role="button"]')){
+        try{navigator.vibrate(8)}catch(_){}
+      }
+    },{passive:true,capture:true});
+  }
+  /* 2) 安全区自动注入：贴边的 fixed/sticky 条补 env(safe-area-inset-*)；
+        无贴边条的页面则给 body 补，保证内容不钻进刘海/小白条 */
+  var px=function(v){return parseFloat(v)||0};
+  function patchOne(el,edge){
+    var cs=getComputedStyle(el);
+    if(edge==='top'){el.style.paddingTop='calc('+px(cs.paddingTop)+'px + env(safe-area-inset-top,0px))';}
+    else{el.style.paddingBottom='calc('+px(cs.paddingBottom)+'px + env(safe-area-inset-bottom,0px))';}
+  }
+  function walk(){
+    var vw=innerWidth,vh=innerHeight,gotTop=false,gotBot=false;
+    var els=document.querySelectorAll('body *');
+    for(var i=0;i<els.length;i++){
+      var el=els[i];if(el.dataset.msa)continue;el.dataset.msa='1';
+      var cs=getComputedStyle(el),pos=cs.position;
+      if(pos!=='fixed'&&pos!=='sticky')continue;
+      var r=el.getBoundingClientRect();
+      if(r.width===0||r.height===0)continue;
+      if(r.width>=vw*0.95&&r.height>=vh*0.9)continue; /* 全屏遮罩类不碰 */
+      var wide=(r.width>=vw*0.9);
+      if(!wide)continue;
+      if(pos==='fixed'){
+        var t=px(cs.top),b=px(cs.bottom);
+        if(t>=0&&t<=6){patchOne(el,'top');gotTop=true;}
+        else if(b>=0&&b<=2){patchOne(el,'bot');gotBot=true;}
+      }else{
+        var st=px(cs.top),sb=px(cs.bottom);
+        if(cs.top!=='auto'&&st<=6){patchOne(el,'top');gotTop=true;}
+        else if(cs.bottom!=='auto'&&sb<=2){patchOne(el,'bot');gotBot=true;}
+      }
+    }
+    var b=document.body,bs=getComputedStyle(b);
+    if(!gotTop){b.style.paddingTop='calc('+px(bs.paddingTop)+'px + env(safe-area-inset-top,0px))';}
+    if(!gotBot){b.style.paddingBottom='calc('+px(bs.paddingBottom)+'px + env(safe-area-inset-bottom,0px))';}
+  }
+  function safe(){try{walk()}catch(_){}}
+  if(document.readyState==='loading'){document.addEventListener('DOMContentLoaded',safe)}else{safe()}
+  addEventListener('load',safe);
+  setTimeout(safe,800);
+})();
 </script>
 </body>
 </html>

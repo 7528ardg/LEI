@@ -31,6 +31,7 @@ MAPPING = {
     'm07s2': '07yue_s07_26100.png',
     'm07s3': '07yue_s07_8761.png',
     'm08t1': '08yue_s04_56162.png',
+    'm09h1': 'swap_case.jpg',
 }
 
 def compress_to_jpeg(path):

@@ -2,7 +2,8 @@
 <html lang="zh-CN">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover, interactive-widget=resizes-content">
+<meta name="theme-color" content="#00A650">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <title>客舱小助手 · 库管理</title>
 <style>
@@ -1389,6 +1390,76 @@ function renderLibChips(){
 initTargetLib();
 renderLibChips();
 renderOverlay();
+</script>
+<style id="mobile-native-hardening">
+/* === mobile-native-hardening 2026-09-14 · finesse-ui h5-mobile + impeccable === */
+html{-webkit-text-size-adjust:100%;text-size-adjust:100%}
+*{-webkit-tap-highlight-color:transparent}
+a,button,input,select,textarea,label,summary,[onclick],[role=button]{touch-action:manipulation}
+button,[onclick],[role=button]{-webkit-user-select:none;user-select:none}
+img{max-width:100%}
+button:active,[onclick]:active,a:active,summary:active,[role=button]:active{filter:brightness(.93)}
+@media (pointer:coarse){
+  input,select,textarea{font-size:16px}
+  *{scrollbar-width:none}
+  *::-webkit-scrollbar{width:0;height:0;display:none}
+}
+@media (prefers-reduced-motion:reduce){
+  *,*::before,*::after{animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important}
+}
+</style>
+<script id="mobile-native-js">
+(function(){
+  'use strict';
+  if(!window.matchMedia||!matchMedia('(pointer:coarse)').matches)return;
+  /* 1) 触感反馈（Android 原生手感；iOS/Safari 自动忽略 vibrate） */
+  if(navigator.vibrate){
+    addEventListener('pointerdown',function(e){
+      var t=e.target;
+      if(t&&t.closest&&t.closest('button,[onclick],a,[role="button"]')){
+        try{navigator.vibrate(8)}catch(_){}
+      }
+    },{passive:true,capture:true});
+  }
+  /* 2) 安全区自动注入：贴边的 fixed/sticky 条补 env(safe-area-inset-*)；
+        无贴边条的页面则给 body 补，保证内容不钻进刘海/小白条 */
+  var px=function(v){return parseFloat(v)||0};
+  function patchOne(el,edge){
+    var cs=getComputedStyle(el);
+    if(edge==='top'){el.style.paddingTop='calc('+px(cs.paddingTop)+'px + env(safe-area-inset-top,0px))';}
+    else{el.style.paddingBottom='calc('+px(cs.paddingBottom)+'px + env(safe-area-inset-bottom,0px))';}
+  }
+  function walk(){
+    var vw=innerWidth,vh=innerHeight,gotTop=false,gotBot=false;
+    var els=document.querySelectorAll('body *');
+    for(var i=0;i<els.length;i++){
+      var el=els[i];if(el.dataset.msa)continue;el.dataset.msa='1';
+      var cs=getComputedStyle(el),pos=cs.position;
+      if(pos!=='fixed'&&pos!=='sticky')continue;
+      var r=el.getBoundingClientRect();
+      if(r.width===0||r.height===0)continue;
+      if(r.width>=vw*0.95&&r.height>=vh*0.9)continue; /* 全屏遮罩类不碰 */
+      var wide=(r.width>=vw*0.9);
+      if(!wide)continue;
+      if(pos==='fixed'){
+        var t=px(cs.top),b=px(cs.bottom);
+        if(t>=0&&t<=6){patchOne(el,'top');gotTop=true;}
+        else if(b>=0&&b<=2){patchOne(el,'bot');gotBot=true;}
+      }else{
+        var st=px(cs.top),sb=px(cs.bottom);
+        if(cs.top!=='auto'&&st<=6){patchOne(el,'top');gotTop=true;}
+        else if(cs.bottom!=='auto'&&sb<=2){patchOne(el,'bot');gotBot=true;}
+      }
+    }
+    var b=document.body,bs=getComputedStyle(b);
+    if(!gotTop){b.style.paddingTop='calc('+px(bs.paddingTop)+'px + env(safe-area-inset-top,0px))';}
+    if(!gotBot){b.style.paddingBottom='calc('+px(bs.paddingBottom)+'px + env(safe-area-inset-bottom,0px))';}
+  }
+  function safe(){try{walk()}catch(_){}}
+  if(document.readyState==='loading'){document.addEventListener('DOMContentLoaded',safe)}else{safe()}
+  addEventListener('load',safe);
+  setTimeout(safe,800);
+})();
 </script>
 </body>
 </html>

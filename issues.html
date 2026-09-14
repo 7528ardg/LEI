@@ -1,0 +1,340 @@
+<!DOCTYPE html>
+<html lang="zh-CN" data-theme="light">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover, interactive-widget=resizes-content">
+<meta name="theme-color" content="#00A650">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="问题反馈">
+<meta name="format-detection" content="telephone=no">
+<title>问题反馈 · 客舱小助手</title>
+<style>
+:root{
+  --font-sans:-apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei",sans-serif;
+  --primary:#148453;--primary-dark:#0C5F3A;--primary-light:#67AC91;
+  --primary-soft:#E8F3EE;--primary-mist:#F4F9F6;
+  --gold:#F5B800;--gold-soft:#FEF6DC;--gold-dark:#8A5A0B;
+  --danger:#C62828;--danger-soft:#FDE7E7;
+  --info:#2563eb;--info-soft:#E3ECFD;
+  --success:#148453;--success-soft:#E8F3EE;
+  --warning:#F5B800;--warning-soft:#FEF6DC;
+  --grad-primary:linear-gradient(135deg,#148453 0%,#1FA56A 100%);
+  --bg:#F5F8F6;--bg-card:#fff;--text:#0F2A1F;--text2:#5A6F65;--text3:#9DB0A6;
+  --border:#E5EDE9;--shadow:0 4px 14px rgba(20,132,83,.10);--shadow-lg:0 12px 32px rgba(20,132,83,.14);
+}
+html[data-theme="dark"]{
+  --bg:#0F1A14;--bg-card:#162420;--text:#E8F3EE;--text2:#8FA89C;--text3:#4A6358;--border:#1E3A2C;
+  --primary-soft:#1A3D2A;--primary-mist:#142E22;--danger-soft:#2A1616;--gold-soft:#2A2410;--info-soft:#16283F;
+  --shadow:0 4px 14px rgba(0,0,0,.35);--shadow-lg:0 12px 32px rgba(0,0,0,.45);
+}
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+body{font-family:var(--font-sans);background:var(--bg);color:var(--text);min-height:100vh;transition:background .3s,color .3s;}
+button{font-family:var(--font-sans);cursor:pointer;}
+.livery-stripe{height:3px;background:linear-gradient(90deg,#148453 0%,#4FA86C 18%,#8FC85C 35%,#C9D745 52%,#F5B800 68%,#F08A00 85%,#E64A19 100%);}
+.topbar{position:sticky;top:0;z-index:50;background:var(--bg-card);border-bottom:1px solid var(--border);display:flex;align-items:center;padding:12px 18px;gap:10px;backdrop-filter:blur(16px);}
+.t-title{font-size:1.08rem;font-weight:800;color:var(--primary);display:flex;align-items:center;gap:8px;}
+.t-sub{font-size:.72rem;color:var(--text2);margin-left:auto;}
+.wrap{max-width:860px;margin:0 auto;padding:16px 14px 40px;}
+.hero{background:var(--grad-primary);border-radius:16px;padding:20px 22px;color:#fff;margin-bottom:14px;box-shadow:var(--shadow);}
+.hero h1{font-size:1.2rem;font-weight:800;display:flex;align-items:center;gap:8px;}
+.hero p{font-size:.78rem;opacity:.92;margin-top:4px;}
+.stat-row{display:flex;gap:10px;margin-bottom:14px;flex-wrap:wrap;}
+.stat{flex:1;min-width:104px;text-align:center;padding:12px 8px;border-radius:12px;background:var(--primary-mist);border:1px solid var(--primary-light);}
+.stat .v{font-size:1.4rem;font-weight:800;color:var(--primary);line-height:1;}
+.stat .k{font-size:.72rem;color:var(--text2);margin-top:4px;font-weight:600;}
+.tab-bar{display:flex;gap:8px;margin-bottom:14px;}
+.tab{flex:1;text-align:center;padding:10px;border-radius:12px;border:1px solid var(--border);background:var(--bg-card);color:var(--text2);font-size:.9rem;font-weight:700;cursor:pointer;transition:all .2s;}
+.tab.active{background:var(--grad-primary);color:#fff;border-color:transparent;box-shadow:var(--shadow);}
+.card{background:var(--bg-card);border:1px solid var(--border);border-radius:14px;padding:18px 20px;margin-bottom:16px;box-shadow:var(--shadow);}
+.card-title{font-size:1rem;font-weight:700;margin-bottom:14px;display:flex;align-items:center;gap:8px;padding-bottom:12px;border-bottom:1px dashed var(--border);}
+.field{margin-bottom:14px;}
+.field label{display:block;font-size:.78rem;color:var(--text2);margin-bottom:6px;font-weight:600;}
+.field select,.field textarea{width:100%;padding:10px 12px;border-radius:10px;border:1px solid var(--border);background:var(--bg);color:var(--text);font-size:.9rem;outline:none;box-sizing:border-box;font-family:var(--font-sans);}
+.field select:focus,.field textarea:focus{border-color:var(--primary);box-shadow:0 0 0 3px var(--primary-soft);}
+.field textarea{min-height:96px;resize:vertical;line-height:1.6;}
+.submit{display:inline-flex;align-items:center;justify-content:center;gap:8px;width:100%;padding:12px;border-radius:12px;border:none;background:var(--grad-primary);color:#fff;font-size:.94rem;font-weight:700;box-shadow:var(--shadow);transition:all .2s;}
+.submit:active{transform:scale(.97);}
+.legend{font-size:.76rem;color:var(--text3);margin-top:10px;line-height:1.6;background:var(--primary-mist);border:1px dashed var(--primary-light);border-radius:10px;padding:10px 14px;}
+.filter-row{display:flex;gap:8px;margin-bottom:12px;flex-wrap:wrap;}
+.chip{padding:6px 14px;border-radius:20px;border:1px solid var(--border);background:var(--bg-card);color:var(--text2);font-size:.8rem;font-weight:600;}
+.chip.on{background:var(--primary-soft);color:var(--primary);border-color:var(--primary-light);}
+.item{background:var(--bg-card);border:1px solid var(--border);border-radius:12px;padding:14px 16px;margin-bottom:10px;box-shadow:var(--shadow);}
+.item-head{display:flex;align-items:center;gap:8px;margin-bottom:8px;flex-wrap:wrap;}
+.tag{font-size:.72rem;font-weight:700;padding:3px 10px;border-radius:20px;white-space:nowrap;}
+.tag-pending{background:var(--warning-soft);color:var(--gold-dark);}
+.tag-done{background:var(--success-soft);color:var(--success);}
+.tag-auto{background:var(--info-soft);color:var(--info);}
+.tag-manual{background:var(--primary-soft);color:var(--primary);}
+.loc{font-size:.8rem;font-weight:600;color:var(--text2);background:var(--bg);border:1px solid var(--border);padding:3px 10px;border-radius:20px;}
+.time{font-size:.72rem;color:var(--text3);margin-left:auto;}
+.msg{font-size:.9rem;line-height:1.6;word-break:break-word;}
+.item-actions{display:flex;gap:8px;margin-top:10px;flex-wrap:wrap;}
+.act{padding:6px 14px;border-radius:8px;border:1px solid var(--border);background:var(--bg);color:var(--text2);font-size:.8rem;font-weight:600;transition:all .2s;}
+.act:hover{border-color:var(--primary);color:var(--primary);background:var(--primary-soft);}
+.act.primary{background:var(--success-soft);border-color:var(--success);color:var(--success);}
+.act.danger:hover{border-color:var(--danger);color:var(--danger);background:var(--danger-soft);}
+.empty{text-align:center;padding:36px 16px;color:var(--text3);font-size:.86rem;line-height:1.7;}
+.toast{position:fixed;left:50%;bottom:36px;transform:translateX(-50%) translateY(20px);background:rgba(15,42,31,.92);color:#fff;padding:10px 18px;border-radius:24px;font-size:.86rem;opacity:0;pointer-events:none;transition:all .25s;z-index:99;}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
+/* 移动端统一补丁：主色 #00A650 / 点击态 */
+:root{--brand:#00A650;}
+button:active{transform:scale(.96);}
+.submit:active{transform:scale(.98);}
+@media(max-width:480px){ .wrap{padding:12px 10px 32px;} .card{padding:14px;} .stat{min-width:80px;} }
+</style>
+</head>
+<body>
+<div class="livery-stripe"></div>
+<header class="topbar">
+  <div class="t-title">🐞 问题反馈</div>
+  <span class="t-sub">留言反馈 · BUG 记录监控 · 全模块通用</span>
+</header>
+
+<div class="wrap">
+  <div class="hero">
+    <h1>🐞 问题集合</h1>
+    <p>留言反馈 · 问题定位 · BUG 记录监控（记录本地留存，与「培训考核」共用一套记录）</p>
+  </div>
+
+  <div class="stat-row">
+    <div class="stat"><div class="v" id="stTotal">0</div><div class="k">总记录</div></div>
+    <div class="stat"><div class="v" id="stPending" style="color:var(--gold-dark)">0</div><div class="k">待处理</div></div>
+    <div class="stat"><div class="v" id="stManual">0</div><div class="k">手动留言</div></div>
+    <div class="stat"><div class="v" id="stAuto" style="color:var(--info)">0</div><div class="k">自动捕获</div></div>
+  </div>
+
+  <div class="tab-bar">
+    <div class="tab active" id="tabReport" onclick="switchTab('report')">📝 留言反馈</div>
+    <div class="tab" id="tabRecords" onclick="switchTab('records')">🗂 记录监控</div>
+  </div>
+
+  <div id="viewReport">
+    <div class="card">
+      <div class="card-title">📝 提交问题 / 留言</div>
+      <div class="field">
+        <label for="issLoc">问题所在位置（板块）</label>
+        <select id="issLoc"></select>
+      </div>
+      <div class="field">
+        <label for="issMsg">问题描述 / 留言内容</label>
+        <textarea id="issMsg" placeholder="请描述遇到的问题、操作步骤、期望效果等，便于定位与修复……"></textarea>
+      </div>
+      <button class="submit" onclick="submitIssue()">✈️ 提交留言</button>
+      <div class="legend">💡 提示：提交后记录将留存于「记录监控」中，随时可查看与追踪处理状态；系统运行异常也会自动记录在这里。</div>
+    </div>
+  </div>
+
+  <div id="viewRecords" style="display:none">
+    <div class="card">
+      <div class="card-title">🗂 BUG 记录监控 <span style="margin-left:auto;font-size:.76rem;color:var(--text3);font-weight:400;">自动捕获运行时异常 · 本地留存</span></div>
+      <div class="filter-row" id="filterRow">
+        <button class="chip on" data-f="all" onclick="setFilter('all')">全部</button>
+        <button class="chip" data-f="pending" onclick="setFilter('pending')">⏳ 待处理</button>
+        <button class="chip" data-f="done" onclick="setFilter('done')">✓ 已处理</button>
+        <button class="chip" data-f="manual" onclick="setFilter('manual')">手动留言</button>
+        <button class="chip" data-f="auto" onclick="setFilter('auto')">自动捕获</button>
+      </div>
+      <div id="recordList"></div>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+"use strict";
+/* 与培训考核（quiz.html）共用同一存储键：留言与自动捕获的 BUG 记录互通 */
+const ISSUE_STORAGE_KEY = 'spring_quiz_issues';
+const ISSUE_LOCS = ['你问我答','培训考核','绩效管理','美妆话术','医疗急救','风险管理','日常问题','手册奖惩','事件报告','库管理','首页','系统运行时','其他'];
+let curTab = 'report', curFilter = 'all';
+
+function esc(s){ return String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+function loadIssues(){
+  try{
+    const raw = localStorage.getItem(ISSUE_STORAGE_KEY);
+    const arr = raw ? JSON.parse(raw) : [];
+    return Array.isArray(arr) ? arr : [];
+  }catch(e){ return []; }
+}
+function saveIssues(arr){
+  try{ localStorage.setItem(ISSUE_STORAGE_KEY, JSON.stringify(arr.slice(0, 200))); }catch(e){}
+}
+function addIssue(rec){
+  const arr = loadIssues();
+  rec.id = 'iss_' + Date.now() + '_' + Math.random().toString(36).slice(2,7);
+  rec.time = new Date().toISOString();
+  rec.status = rec.status || 'pending';
+  arr.unshift(rec);
+  saveIssues(arr);
+}
+function toast(text){
+  const t = document.getElementById('toast');
+  t.textContent = text;
+  t.classList.add('show');
+  clearTimeout(t._tm);
+  t._tm = setTimeout(function(){ t.classList.remove('show'); }, 2200);
+}
+function formatTime(iso){
+  try{
+    const d = new Date(iso);
+    const p = n => (n<10?'0':'')+n;
+    return d.getFullYear()+'-'+p(d.getMonth()+1)+'-'+p(d.getDate())+' '+p(d.getHours())+':'+p(d.getMinutes());
+  }catch(e){ return iso||''; }
+}
+function switchTab(t){
+  curTab = t;
+  document.getElementById('tabReport').classList.toggle('active', t==='report');
+  document.getElementById('tabRecords').classList.toggle('active', t==='records');
+  document.getElementById('viewReport').style.display = t==='report' ? '' : 'none';
+  document.getElementById('viewRecords').style.display = t==='records' ? '' : 'none';
+  if(t==='records') renderRecords();
+}
+function setFilter(f){
+  curFilter = f;
+  document.querySelectorAll('#filterRow .chip').forEach(function(c){ c.classList.toggle('on', c.getAttribute('data-f')===f); });
+  renderRecords();
+}
+function renderStats(){
+  const arr = loadIssues();
+  const pending = arr.filter(function(i){ return i.status==='pending'; }).length;
+  const auto = arr.filter(function(i){ return i.source==='auto'; }).length;
+  document.getElementById('stTotal').textContent = arr.length;
+  document.getElementById('stPending').textContent = pending;
+  document.getElementById('stManual').textContent = arr.length - auto;
+  document.getElementById('stAuto').textContent = auto;
+}
+function renderRecords(){
+  let arr = loadIssues();
+  if(curFilter==='pending') arr = arr.filter(function(i){ return i.status==='pending'; });
+  else if(curFilter==='done') arr = arr.filter(function(i){ return i.status==='done'; });
+  else if(curFilter==='manual') arr = arr.filter(function(i){ return i.source!=='auto'; });
+  else if(curFilter==='auto') arr = arr.filter(function(i){ return i.source==='auto'; });
+  document.getElementById('recordList').innerHTML = arr.length ? arr.map(function(it){
+    return '<div class="item" style="'+(it.status==='done'?'opacity:.68;':'')+'">'
+      + '<div class="item-head">'
+      + '<span class="tag '+(it.status==='done'?'tag-done':'tag-pending')+'">'+(it.status==='done'?'✓ 已处理':'⏳ 待处理')+'</span>'
+      + '<span class="tag '+(it.source==='auto'?'tag-auto':'tag-manual')+'">'+(it.source==='auto'?'自动捕获':'手动留言')+'</span>'
+      + '<span class="loc">📍 '+esc(it.loc||'未知')+'</span>'
+      + '<span class="time">'+formatTime(it.time)+'</span>'
+      + '</div>'
+      + '<div class="msg">'+esc(it.msg)+'</div>'
+      + '<div class="item-actions">'
+      + (it.status==='pending' ? '<button class="act primary" onclick="markDone(\''+it.id+'\')">✔ 标记已处理</button>' : '')
+      + '<button class="act danger" onclick="delIssue(\''+it.id+'\')">🗑 删除</button>'
+      + '</div></div>';
+  }).join('') : '<div class="empty">✈️ 暂无记录<br><span style="font-size:.8rem;">提交问题留言后，记录将在此处持续留存监控</span></div>';
+  renderStats();
+}
+function submitIssue(){
+  const loc = document.getElementById('issLoc').value || '其他';
+  const msg = (document.getElementById('issMsg').value || '').trim();
+  if(!msg){ toast('请填写问题描述或留言内容'); return; }
+  addIssue({ loc:loc, msg:msg, source:'manual', status:'pending' });
+  document.getElementById('issMsg').value = '';
+  toast('✅ 留言已提交并留存，感谢反馈！');
+  renderStats();
+}
+function markDone(id){
+  const arr = loadIssues();
+  const it = arr.find(function(x){ return x.id===id; });
+  if(it){ it.status='done'; saveIssues(arr); }
+  toast('已标记为已处理');
+  renderRecords();
+}
+function delIssue(id){
+  saveIssues(loadIssues().filter(function(x){ return x.id!==id; }));
+  toast('记录已删除');
+  renderRecords();
+}
+/* 自动捕获运行时异常（与培训考核同源逻辑：记录到共享存储，跨板块可见） */
+function _captureRuntimeError(type, msg){
+  try{ addIssue({ loc:'系统运行时', msg:'['+type+'] '+msg, source:'auto', status:'pending' }); }catch(e){}
+}
+window.addEventListener('error', function(ev){
+  _captureRuntimeError('JS错误', (ev.message||'未知错误') + ' @ ' + (ev.filename||'') + ':' + (ev.lineno||''));
+});
+window.addEventListener('unhandledrejection', function(ev){
+  const reason = ev && ev.reason;
+  let msg = '';
+  try{ msg = reason && reason.message ? reason.message : String(reason); }catch(e){ msg = String(reason||'未知'); }
+  _captureRuntimeError('Promise异常', msg);
+});
+/* 启动 */
+(function(){
+  const sel = document.getElementById('issLoc');
+  sel.innerHTML = ISSUE_LOCS.map(function(l){ return '<option value="'+l+'">'+l+'</option>'; }).join('');
+  renderStats();
+})();
+</script>
+<style id="mobile-native-hardening">
+/* === mobile-native-hardening 2026-09-14 · finesse-ui h5-mobile + impeccable === */
+html{-webkit-text-size-adjust:100%;text-size-adjust:100%}
+*{-webkit-tap-highlight-color:transparent}
+a,button,input,select,textarea,label,summary,[onclick],[role=button]{touch-action:manipulation}
+button,[onclick],[role=button]{-webkit-user-select:none;user-select:none}
+img{max-width:100%}
+button:active,[onclick]:active,a:active,summary:active,[role=button]:active{filter:brightness(.93)}
+@media (pointer:coarse){
+  input,select,textarea{font-size:16px}
+  *{scrollbar-width:none}
+  *::-webkit-scrollbar{width:0;height:0;display:none}
+}
+@media (prefers-reduced-motion:reduce){
+  *,*::before,*::after{animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important}
+}
+</style>
+<script id="mobile-native-js">
+(function(){
+  'use strict';
+  if(!window.matchMedia||!matchMedia('(pointer:coarse)').matches)return;
+  /* 1) 触感反馈（Android 原生手感；iOS/Safari 自动忽略 vibrate） */
+  if(navigator.vibrate){
+    addEventListener('pointerdown',function(e){
+      var t=e.target;
+      if(t&&t.closest&&t.closest('button,[onclick],a,[role="button"]')){
+        try{navigator.vibrate(8)}catch(_){}
+      }
+    },{passive:true,capture:true});
+  }
+  /* 2) 安全区自动注入：贴边的 fixed/sticky 条补 env(safe-area-inset-*)；
+        无贴边条的页面则给 body 补，保证内容不钻进刘海/小白条 */
+  var px=function(v){return parseFloat(v)||0};
+  function patchOne(el,edge){
+    var cs=getComputedStyle(el);
+    if(edge==='top'){el.style.paddingTop='calc('+px(cs.paddingTop)+'px + env(safe-area-inset-top,0px))';}
+    else{el.style.paddingBottom='calc('+px(cs.paddingBottom)+'px + env(safe-area-inset-bottom,0px))';}
+  }
+  function walk(){
+    var vw=innerWidth,vh=innerHeight,gotTop=false,gotBot=false;
+    var els=document.querySelectorAll('body *');
+    for(var i=0;i<els.length;i++){
+      var el=els[i];if(el.dataset.msa)continue;el.dataset.msa='1';
+      var cs=getComputedStyle(el),pos=cs.position;
+      if(pos!=='fixed'&&pos!=='sticky')continue;
+      var r=el.getBoundingClientRect();
+      if(r.width===0||r.height===0)continue;
+      if(r.width>=vw*0.95&&r.height>=vh*0.9)continue; /* 全屏遮罩类不碰 */
+      var wide=(r.width>=vw*0.9);
+      if(!wide)continue;
+      if(pos==='fixed'){
+        var t=px(cs.top),b=px(cs.bottom);
+        if(t>=0&&t<=6){patchOne(el,'top');gotTop=true;}
+        else if(b>=0&&b<=2){patchOne(el,'bot');gotBot=true;}
+      }else{
+        var st=px(cs.top),sb=px(cs.bottom);
+        if(cs.top!=='auto'&&st<=6){patchOne(el,'top');gotTop=true;}
+        else if(cs.bottom!=='auto'&&sb<=2){patchOne(el,'bot');gotBot=true;}
+      }
+    }
+    var b=document.body,bs=getComputedStyle(b);
+    if(!gotTop){b.style.paddingTop='calc('+px(bs.paddingTop)+'px + env(safe-area-inset-top,0px))';}
+    if(!gotBot){b.style.paddingBottom='calc('+px(bs.paddingBottom)+'px + env(safe-area-inset-bottom,0px))';}
+  }
+  function safe(){try{walk()}catch(_){}}
+  if(document.readyState==='loading'){document.addEventListener('DOMContentLoaded',safe)}else{safe()}
+  addEventListener('load',safe);
+  setTimeout(safe,800);
+})();
+</script>
+</body>
+</html>

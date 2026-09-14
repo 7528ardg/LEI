@@ -105,8 +105,8 @@ body{font-family:var(--font-sans);background:var(--bg);color:var(--text);min-hei
   .m-tab:active .mi{transform:scale(.9);}
   .m-sheet-mask{display:block;position:fixed;inset:0;background:rgba(0,0,0,.42);z-index:300;opacity:0;pointer-events:none;transition:opacity .25s;}
   .m-sheet-mask.show{opacity:1;pointer-events:auto;}
-  .m-sheet{display:block;position:fixed;left:0;right:0;bottom:calc(var(--tabbar-h) + env(safe-area-inset-bottom,0px));z-index:301;background:var(--bg-card);border-radius:20px 20px 0 0;border-top:1px solid var(--border);padding:12px 14px calc(14px + env(safe-area-inset-bottom,0px));transform:translateY(115%);transition:transform .3s cubic-bezier(.32,.72,.34,1);box-shadow:0 -12px 32px rgba(15,42,31,.18);}
-  .m-sheet.show{transform:translateY(0);}
+  .m-sheet{display:block;position:fixed;left:0;right:0;bottom:calc(var(--tabbar-h) + env(safe-area-inset-bottom,0px));z-index:301;background:var(--bg-card);border-radius:20px 20px 0 0;border-top:1px solid var(--border);padding:12px 14px calc(14px + env(safe-area-inset-bottom,0px));transform:translateY(115%);visibility:hidden;pointer-events:none;transition:transform .3s cubic-bezier(.32,.72,.34,1),visibility 0s linear .32s;box-shadow:0 -12px 32px rgba(15,42,31,.18);max-height:72vh;overflow-y:auto;-webkit-overflow-scrolling:touch;}
+  .m-sheet.show{transform:translateY(0);visibility:visible;pointer-events:auto;transition:transform .3s cubic-bezier(.32,.72,.34,1);}
   .m-sheet h4{font-size:.86rem;color:var(--text);margin:2px 4px 10px;font-weight:800;display:flex;align-items:center;justify-content:space-between;}
   .m-sheet-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;}
   .m-sheet-item{display:flex;flex-direction:column;align-items:center;gap:6px;padding:12px 4px;border:1px solid var(--border);border-radius:14px;background:var(--bg);cursor:pointer;font-size:.74rem;font-weight:700;color:var(--text);font-family:var(--font-sans);transition:all .15s;}
@@ -503,6 +503,7 @@ button:disabled:active{transform:none;}
     <button class="mod-tab" data-mod="manual" onclick="switchModule('manual')">📕 手册奖惩</button>
     <button class="mod-tab" data-mod="report" onclick="switchModule('report')">🗂 事件报告</button>
     <button class="mod-tab" data-mod="kbadmin" onclick="switchModule('kbadmin')">📇 库管理</button>
+    <button class="mod-tab" data-mod="issues" onclick="switchModule('issues')">🐞 问题反馈</button>
   </nav>
 
   <div class="actions">
@@ -558,6 +559,10 @@ button:disabled:active{transform:none;}
     <div class="sys-loader" id="loader-kbadmin"><div class="sys-spinner"></div><div class="sl-text">正在进入 库管理 …</div></div>
     <iframe class="sys-frame" id="frame-kbadmin"></iframe>
   </div>
+  <div class="sys-wrap" id="wrap-issues">
+    <div class="sys-loader" id="loader-issues"><div class="sys-spinner"></div><div class="sl-text">正在进入 问题反馈 …</div></div>
+    <iframe class="sys-frame" id="frame-issues"></iframe>
+  </div>
 </main>
 
 <div class="toast-container" id="toastContainer"></div>
@@ -582,6 +587,7 @@ button:disabled:active{transform:none;}
     <button class="m-sheet-item" data-mod="manual" onclick="mGoMod('manual')"><span class="mi">📕</span>手册奖惩</button>
     <button class="m-sheet-item" data-mod="report" onclick="mGoMod('report')"><span class="mi">🗂</span>事件报告</button>
     <button class="m-sheet-item" data-mod="kbadmin" onclick="mGoMod('kbadmin')"><span class="mi">📇</span>库管理</button>
+    <button class="m-sheet-item" data-mod="issues" onclick="mGoMod('issues')"><span class="mi">🐞</span>问题反馈</button>
   </div>
 </div>
 
@@ -649,7 +655,8 @@ risk: "",
 daily: "",
 manual: "",
 report: "",
-kbadmin: ""
+kbadmin: "",
+issues: ""
 };
 
 /* ===================== 解码引擎（gzip 解压；兼容未压缩旧数据回退） ===================== */
@@ -694,7 +701,10 @@ async function _b64ToHtml(b64){
 }
 /* ===================== 在线模式：瘦壳按需拉取 mods/<id>.gz + Cache API 缓存 =====================
    （离线单文件 MODULES 内嵌数据非空时不受影响；GitHub Pages 等静态托管部署时首屏只需下载瘦壳，
-    各模块按需加载并缓存到 Cache Storage，二次打开/切页签秒开） */
+    各模块按需加载并缓存到 Cache Storage，二次打开/切页签秒开）
+   兼容：双击本地文件用 file:// 打开时 fetch 会被浏览器 CORS 拦截（origin null），
+   此时自动回退到经典 <script> 注入 mods/<id>.js（脚本标签不受 CORS 限制），本地双击同样可用。 */
+var _IS_FILE = (location.protocol === 'file:');
 async function _fetchModule(id){
   const url = './mods/' + id + '.gz';
   try{
@@ -714,15 +724,35 @@ async function _fetchModule(id){
   if(!resp.ok) throw new Error('模块 [' + id + '] 下载失败（HTTP ' + resp.status + '）。请检查网络连接，或确认已上传 mods 目录（对应在线版部署包）。');
   return await _bytesToHtml(new Uint8Array(await resp.arrayBuffer()));
 }
+/* file:// 回退：经典脚本标签加载 mods/<id>.js（其内容为 base64(gzip)，载入后写入 window.__MODSRC__） */
+function _loadLocalScript(id){
+  return new Promise(function(resolve, reject){
+    var s = document.createElement('script');
+    s.src = './mods/' + id + '.js';
+    s.async = true;
+    s.onload = function(){
+      var b64 = (window.__MODSRC__ || {})[id];
+      if(!b64){ reject(new Error('本地模块 [' + id + '] 脚本已加载但内容为空')); return; }
+      _b64ToHtml(b64).then(resolve, reject);
+    };
+    s.onerror = function(){
+      _fetchModule(id).then(resolve, function(){
+        reject(new Error('本地模块 [' + id + '] 加载失败：请确认 mods 文件夹与本页面放在同一目录下'));
+      });
+    };
+    (document.head || document.documentElement).appendChild(s);
+  });
+}
 async function _loadModule(id){
   if(MODULES[id]) return await _b64ToHtml(MODULES[id]);      // 离线单文件：内嵌数据直接解压
+  if(_IS_FILE) return await _loadLocalScript(id);             // file:// 双击打开：脚本注入回退
   return await _fetchModule(id);                             // 在线瘦壳：按需加载并缓存
 }
 /* 在线模式空闲预取：首屏尽量轻，进入后悄悄缓存其余模块，切换页签时秒开 */
 (function(){
   var hasEmbed = Object.keys(MODULES).some(function(k){ return !!MODULES[k]; });
   if(hasEmbed) return;
-  if(!('caches' in window)) return;
+  if(!_IS_FILE && !('caches' in window)) return;   // file:// 下 Cache API 不可用，但仍可脚本预取
   setTimeout(function(){
     var keys = Object.keys(MODULES).filter(function(k){ return !MODULES[k]; });
     var i = 0;
@@ -730,9 +760,9 @@ async function _loadModule(id){
       if(i >= keys.length) return;
       var id = keys[i++];
       _loadModule(id).catch(function(){});
-      setTimeout(next, 700);
+      setTimeout(next, _IS_FILE ? 300 : 700);
     })();
-  }, 1500);
+  }, _IS_FILE ? 2500 : 1500);
 })();
 
 /* ===================== 模块切换（懒加载 + 缓存 + 解压） ===================== */
@@ -751,7 +781,8 @@ const EMBED_CSS = {
   beauty: 'header[class*="bg-gradient-to-r"]{display:none!important}nav[class*="bg-white/80"]{top:0!important}div[class*="top-[120px]"]{top:52px!important}',
   medical: '.headbar{display:none!important}',
   risk: '.topbar .logo,.topbar .user-chip,#appVersionBadge,#btnBackup,#btnGlobalRefresh,button[onclick="logout()"]{display:none!important}.topbar .breadcrumb{flex:1!important;min-width:0!important}',
-  kbadmin: 'header.kb-top{display:none!important}.kb-tabs{top:0!important}'
+  kbadmin: 'header.kb-top{display:none!important}.kb-tabs{top:0!important}',
+  issues: '.livery-stripe,header.topbar{display:none!important}'
 };
 function injectEmbedCss(id, frame){
   const css = EMBED_CSS[id];
@@ -765,6 +796,46 @@ function injectEmbedCss(id, frame){
     st.id = 'embed-mode-css';
     st.textContent = css;
     (d.head || d.documentElement).appendChild(st);
+  }catch(e){}
+}
+
+/* ===== 把模块 HTML 填进 iframe =====
+   file:// 双击打开时 srcdoc 文档是 opaque origin（origin null），模块内的 localStorage /
+   跨窗访问可能被浏览器拦截；此时改为写入 about:blank 文档（继承外壳 origin），并补一个
+   <base> 保证相对路径资源仍能解析。http(s) 部署时保持 srcdoc（与历史版本表现一致）。 */
+function _fillFrame(frame, html){
+  if(_IS_FILE){
+    try{
+      var d = frame.contentDocument;
+      if(d){
+        if(/<head[^>]*>/i.test(html)){
+          html = html.replace(/<head[^>]*>/i, function(m){ return m + '<base href="' + location.href + '">'; });
+        }
+        d.open(); d.write(html); d.close();
+        return true;            // 同步写入完成，不会再触发 onload
+      }
+    }catch(e){ /* 写入失败则回退 srcdoc */ }
+  }
+  frame.srcdoc = html;
+  return false;
+}
+function _onFrameReady(id, frame, loader){
+  if(loader) loader.classList.add('hidden');
+  _frames[id] = frame;          // 标记已加载，避免每次切模块重复解压初始化
+  injectEmbedCss(id, frame);
+  if(_modScroll[id] != null){
+    requestAnimationFrame(function(){
+      try{
+        const _sc = frame.contentDocument && frame.contentDocument.querySelector('.main-scroll-container');
+        if(_sc) _sc.scrollTop = _modScroll[id];
+        else if(frame.contentWindow) frame.contentWindow.scrollTo(0, _modScroll[id]);
+      }catch(e){}
+    });
+  }
+  try{
+    const doc = frame.contentDocument;
+    const t = document.documentElement.getAttribute('data-theme');
+    if(doc && doc.documentElement) doc.documentElement.setAttribute('data-theme', t);
   }catch(e){}
 }
 
@@ -797,29 +868,14 @@ function switchModule(id){
     const frame = document.getElementById('frame-'+id);
     _loadModule(id).then(function(html){
       if(loader) loader.classList.remove('hidden');
-      frame.srcdoc = html;
-      frame.onload = function(){
-        if(loader) loader.classList.add('hidden');
-        _frames[id] = frame; // 标记已加载，避免每次切模块重复解压初始化（此前 _frames 从未被赋值）
-        injectEmbedCss(id, frame);
-        if(_modScroll[id] != null){
-          requestAnimationFrame(function(){
-            try{
-              const _sc = frame.contentDocument && frame.contentDocument.querySelector('.main-scroll-container');
-              if(_sc) _sc.scrollTop = _modScroll[id];
-              else if(frame.contentWindow) frame.contentWindow.scrollTo(0, _modScroll[id]);
-            }catch(e){}
-          });
-        }
-        try{
-          const doc = frame.contentDocument;
-          const t = document.documentElement.getAttribute('data-theme');
-          if(doc && doc.documentElement) doc.documentElement.setAttribute('data-theme', t);
-        }catch(e){}
-      };
+      var wrote = _fillFrame(frame, html);
+      frame.onload = function(){ _onFrameReady(id, frame, loader); };
+      if(wrote) _onFrameReady(id, frame, loader);
     }).catch(function(e){
       console.error('模块加载失败:', id, e);
-      if(loader) loader.querySelector('.sl-text').textContent = '加载失败，请刷新重试';
+      if(loader) loader.querySelector('.sl-text').textContent = _IS_FILE
+        ? '加载失败：请把 mods 文件夹与本页放在同一目录'
+        : '加载失败，请刷新重试';
     });
   } else if(_modScroll[id] != null){
     const frame = _frames[id];
@@ -840,7 +896,7 @@ function applyTheme(t){
   document.documentElement.setAttribute('data-theme', t);
   const btn = document.getElementById('themeBtn');
   btn.textContent = t==='dark' ? '🌙' : '☀️';
-  ['qa','quiz','performance','beauty','medical','risk','daily','manual','report','kbadmin'].forEach(id=>{
+  ['qa','quiz','performance','beauty','medical','risk','daily','manual','report','kbadmin','issues'].forEach(id=>{
     const f = frameObj(id);
     if(f && f.contentDocument){
       try{ f.contentDocument.documentElement.setAttribute('data-theme', t); }catch(e){}
@@ -1639,6 +1695,76 @@ function finishTour(){
     showAuth();
   }
 })();
+})();
+</script>
+<style id="mobile-native-hardening">
+/* === mobile-native-hardening 2026-09-14 · finesse-ui h5-mobile + impeccable === */
+html{-webkit-text-size-adjust:100%;text-size-adjust:100%}
+*{-webkit-tap-highlight-color:transparent}
+a,button,input,select,textarea,label,summary,[onclick],[role=button]{touch-action:manipulation}
+button,[onclick],[role=button]{-webkit-user-select:none;user-select:none}
+img{max-width:100%}
+button:active,[onclick]:active,a:active,summary:active,[role=button]:active{filter:brightness(.93)}
+@media (pointer:coarse){
+  input,select,textarea{font-size:16px}
+  *{scrollbar-width:none}
+  *::-webkit-scrollbar{width:0;height:0;display:none}
+}
+@media (prefers-reduced-motion:reduce){
+  *,*::before,*::after{animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important}
+}
+</style>
+<script id="mobile-native-js">
+(function(){
+  'use strict';
+  if(!window.matchMedia||!matchMedia('(pointer:coarse)').matches)return;
+  /* 1) 触感反馈（Android 原生手感；iOS/Safari 自动忽略 vibrate） */
+  if(navigator.vibrate){
+    addEventListener('pointerdown',function(e){
+      var t=e.target;
+      if(t&&t.closest&&t.closest('button,[onclick],a,[role="button"]')){
+        try{navigator.vibrate(8)}catch(_){}
+      }
+    },{passive:true,capture:true});
+  }
+  /* 2) 安全区自动注入：贴边的 fixed/sticky 条补 env(safe-area-inset-*)；
+        无贴边条的页面则给 body 补，保证内容不钻进刘海/小白条 */
+  var px=function(v){return parseFloat(v)||0};
+  function patchOne(el,edge){
+    var cs=getComputedStyle(el);
+    if(edge==='top'){el.style.paddingTop='calc('+px(cs.paddingTop)+'px + env(safe-area-inset-top,0px))';}
+    else{el.style.paddingBottom='calc('+px(cs.paddingBottom)+'px + env(safe-area-inset-bottom,0px))';}
+  }
+  function walk(){
+    var vw=innerWidth,vh=innerHeight,gotTop=false,gotBot=false;
+    var els=document.querySelectorAll('body *');
+    for(var i=0;i<els.length;i++){
+      var el=els[i];if(el.dataset.msa)continue;el.dataset.msa='1';
+      var cs=getComputedStyle(el),pos=cs.position;
+      if(pos!=='fixed'&&pos!=='sticky')continue;
+      var r=el.getBoundingClientRect();
+      if(r.width===0||r.height===0)continue;
+      if(r.width>=vw*0.95&&r.height>=vh*0.9)continue; /* 全屏遮罩类不碰 */
+      var wide=(r.width>=vw*0.9);
+      if(!wide)continue;
+      if(pos==='fixed'){
+        var t=px(cs.top),b=px(cs.bottom);
+        if(t>=0&&t<=6){patchOne(el,'top');gotTop=true;}
+        else if(b>=0&&b<=2){patchOne(el,'bot');gotBot=true;}
+      }else{
+        var st=px(cs.top),sb=px(cs.bottom);
+        if(cs.top!=='auto'&&st<=6){patchOne(el,'top');gotTop=true;}
+        else if(cs.bottom!=='auto'&&sb<=2){patchOne(el,'bot');gotBot=true;}
+      }
+    }
+    var b=document.body,bs=getComputedStyle(b);
+    if(!gotTop){b.style.paddingTop='calc('+px(bs.paddingTop)+'px + env(safe-area-inset-top,0px))';}
+    if(!gotBot){b.style.paddingBottom='calc('+px(bs.paddingBottom)+'px + env(safe-area-inset-bottom,0px))';}
+  }
+  function safe(){try{walk()}catch(_){}}
+  if(document.readyState==='loading'){document.addEventListener('DOMContentLoaded',safe)}else{safe()}
+  addEventListener('load',safe);
+  setTimeout(safe,800);
 })();
 </script>
 </body>

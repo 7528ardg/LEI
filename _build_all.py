@@ -44,6 +44,7 @@ VERIFY_SCRIPTS = [
     u'node _verify_script_gen.js 20260829',  # 话术生成引擎回归（6类x12套组合 × 品类匹配审计）
     u'node _verify_full_script.js 20260829', # 全话术链路回归（随机24套×3次：开场→落地前下单 结构/语义/违禁词/品牌重复/句级重复）
     u'node _verify_ai_price.js',   # 竞品分析 AI 更新价格（JSON 解析/覆盖层/预设与自定义应用）
+    u'node _verify_qa_wakeup.js',   # 你问我答跨板块唤醒（33 用例：日常/手册/大撤/医疗/绩效/事件报告/病假）
     u'python _verify_packs_m3.py', # 发布管线 19
 ]
 
@@ -53,6 +54,7 @@ SYNTAX_FILES = [
     u'qa.html', u'quiz.html', u'performance.html', u'beauty.html',
     u'medical.html', u'daily.html', u'manual.html', u'report.html',
     u'risk-lite.html', u'kb-admin.html', u'kb-admin.template.html',
+    u'issues.html',
     u'spring-assistant.html', u'客舱小助手（离线完整版）.html',
 ]
 

@@ -195,7 +195,7 @@ button:active{transform:scale(.96);}
   <div id="list"></div>
 
   <div class="foot">
-    ✈️ 资料整理自：4份OJT销售培训PPT、《销售和病假资料》及管理手册细则（2026.08 整理）<br>
+    ✈️ 资料整理自：4份OJT销售培训PPT、《销售和病假资料》、《常见问题解决20260814》及管理手册细则（2026.09 更新）<br>
     知识点为速查摘要，涉及标准流程的细节请以培训材料与手册原文为准 · 离线可用
   </div>
 </div>
@@ -219,10 +219,15 @@ const CATS = [
   {id:'sales', name:'销售收款', ic:'💰'},
   {id:'deliver', name:'配送系统', ic:'📦'},
   {id:'inflight', name:'机上销售', ic:'✈️'},
+  {id:'weding', name:'网订餐', ic:'🧺'},
+  {id:'goods', name:'商品知识', ic:'🛍️'},
+  {id:'scan', name:'桌面扫码', ic:'📷'},
+  {id:'after', name:'售后服务', ic:'🛎️'},
+  {id:'crew', name:'乘务管理', ic:'👩‍✈️'},
   {id:'sick', name:'病假管理', ic:'🏥'},
   {id:'invoice', name:'电子发票', ic:'🧾'}
 ];
-const HOT = ['转账附言','现金缴存','病假材料','SMP占位','开电子发票','WIFI订单','销转保','退税退款','医疗观察期','值班经理'];
+const HOT = ['转账附言','现金缴存','病假材料','SMP占位','开电子发票','WIFI订单','销转保','退税退款','医疗观察期','值班经理','网订餐未配送','跨境额度','补款账号','加机组','更换飞机'];
 
 const DATA = [
 /* ============ 💰 销售收款 ============ */
@@ -254,6 +259,7 @@ const DATA = [
  t:['学习','培训','专题','课程','29项'],
  a:`<ul>
    <li>入口：<strong>我的培训 → 专题 → 客舱销售专题</strong>。</li>
+   <li>线上专题直达：<a href="https://spring.yidianzhishi.com/personal.html#!/-专题-客舱销售专题" target="_blank" rel="noopener" style="color:var(--primary,#148453);text-decoration:underline;word-break:break-all;">spring.yidianzhishi.com/personal.html → 专题 → 客舱销售专题</a>（壹点知识平台，手机浏览器打开后可登录学习）。</li>
    <li>在线业务学习材料目前共 <strong>29 项</strong>（客舱销售专题页显示 45 门课），含单个知识点讲解、每月 OJT 销售培训内容等。</li>
    <li>180 / 186 飞机商品存放要求，也可在 SMP 客舱销售培训专题中学习。</li>
    </ul>
@@ -310,15 +316,16 @@ const DATA = [
    <li><strong>提交</strong>：由<strong>最后一段的四号位</strong>统一提交「航后完成」即可，中间航段无需重复操作。</li>
    </ul>
    <div class="box warn">⚠️ 第一段的<strong>四联单必须拍照上传</strong>（航班任务四步之③），交接前务必确认照片已上传，否则结算无法闭环。</div>`},
-{id:'d5',cat:'deliver',hot:false,src:'4月OJT / 汇总表',q:'临时更换飞机，配送系统怎么操作？',
- t:['换机','临时换飞机','四联单','总库'],
+{id:'d5',cat:'deliver',hot:false,src:'4月OJT / 配送系统操作案例',q:'临时更换飞机，配送系统怎么操作？',
+ t:['换机','临时换飞机','四联单','总库','清除缓存','实时库存'],
  a:`按「原飞机 / 新飞机」分别处理：
    <table><tr><th>飞机</th><th>销售情况</th><th>四联单</th><th>配送系统</th><th>备注</th></tr>
    <tr><td>原飞机</td><td>未销售</td><td>无需操作</td><td>无需操作</td><td>—</td></tr>
-   <tr><td>原飞机</td><td>已销售</td><td>正常填写，拍照备用，四联单留在机上，与后续乘务组沟通</td><td>暂不操作</td><td>需与总库报备</td></tr>
-   <tr><td>新飞机</td><td>—</td><td>正常填写</td><td>①登机后清除缓存，更新任务，获取新飞机数量；②航前确认；③获取销售时剔除原飞机销售数量；④保证实时库存与实际一致，再做航后完成；⑤上传两架飞机四联单</td><td>—</td></tr>
+   <tr><td>原飞机</td><td>已销售</td><td>正常填写所有内容、拍照备用，<strong>四联单留在飞机上</strong>，与后续乘务组做好沟通（系统数量与实际数量不符属正常——原飞机销售未计入新任务）</td><td>暂不操作</td><td><strong>需要与总库报备</strong></td></tr>
+   <tr><td>新飞机</td><td>—</td><td>正常填写和使用</td><td>①登机后<strong>先清除缓存，更新任务信息</strong>，确保获取到新飞机的商品数量（如未更新，半小时后重复操作）；②检查确认后，进行<strong>航前确认</strong>操作；③获取销售时，<strong>关注销售数量，勿刷原飞机上的销售数量</strong>；④保证「实时库存」与实际数量一致，再进行航后完成操作；⑤<strong>上传原飞机和新飞机的四联单</strong></td><td>—</td></tr>
    </table>
-   <div class="box tip">💡 遇临时换机任务会拆分，主动清除缓存、更新任务信息、获取新的航班任务。</div>`},
+   <div class="box tip">💡 遇临时换机任务会拆分，主动清除缓存、更新任务信息、获取新的航班任务；离机时确保商品数量与系统「实时库存」一致，并经 SMP 联系后续组告知情况。</div>
+   <div class="imgs"><figure class="fig" onclick="openLb('m09h1')"><img data-k="m09h1"><figcaption>📄 配送系统操作案例：临时更换飞机（原飞机/新飞机 × 四联单/配送系统 全景表）<span class="zoom-hint">点击放大</span></figcaption></figure></div>`},
 {id:'d6',cat:'deliver',hot:false,src:'5月OJT',q:'航后讲评阶段要核查哪些内容？',
  t:['航后讲评','核查','四联单','金额','照片时间'],
  a:`航后讲评阶段，乘务长务必用 IPAD 核实操作结果：
@@ -475,7 +482,283 @@ const DATA = [
    <li>机上<strong>桌面扫码订单支持自助开票</strong>。</li>
    <li>补充新增：<strong>地面扫码订单可通过小程序直接开具电子发票</strong>，无需柜台排队。</li>
    </ul>
-   <div class="box tip">💡 开票是基于订单关联的，先确认订单渠道（地面扫码单 / 机上桌面扫码单），再进入对应小程序开票。</div>`}
+   <div class="box tip">💡 开票是基于订单关联的，先确认订单渠道（地面扫码单 / 机上桌面扫码单），再进入对应小程序开票。</div>`},
+{id:'n2',cat:'invoice',hot:false,src:'常见问题解决20260814',q:'旅客想开发票怎么处理？哪些商品可以开票？',
+ t:['发票','开票','跨境','增值税','普票','公众号'],
+ a:`<ul>
+   <li><strong>跨境品暂不支持开具发票</strong>（属境外采购，目前只有税务证明）。</li>
+   <li><strong>快递到家、飞亚达、卡西欧、纪念品、现货商品</strong>可开具<strong>增值税普通电子发票（普票）</strong>。</li>
+   <li>途径：「春秋航空绿翼商城」公众号 → 机上订单 → 订单列表，登录订单预订人手机号自助开具（<strong>订单完成收货后</strong>才可申请）。</li>
+   </ul>`},
+
+/* ============ 📦 配送系统 / 机供品（常见问题解决20260814） ============ */
+{id:'d10',cat:'deliver',hot:false,src:'常见问题解决20260814',q:'现货纪念品破损（旅客原因，如拆开后发现瑕疵）怎么处理？',
+ t:['纪念品','破损','退换','机供品','交接'],
+ a:`先<strong>保管好</strong>，避免进一步损坏，再按航班类型处理：
+   <ul>
+   <li><strong>基地站始发航班</strong>发现：直接退回或更换。</li>
+   <li><strong>非基地站始发、经过基地航站</strong>：找机供品退回或更换。</li>
+   <li><strong>航班不经过基地站</strong>、无法退换：与后续组做好交接。</li>
+   </ul>`},
+{id:'d11',cat:'deliver',hot:true,src:'常见问题解决20260814',q:'食品（餐食/饮料/小吃）破损、变质、异物、临保怎么处理？',
+ t:['食品','破损','变质','食品异物','临保','拍照','销毁','问题餐食反馈'],
+ a:`<ul>
+   <li>① 发现问题食品，<strong>拍照留证：2 张以上不同角度、图像清晰</strong>，需包含生产日期、外包装、破损处。</li>
+   <li>② <strong>销毁</strong>问题食品并丢弃。</li>
+   <li>③ 配送系统：旧版通过「修订→销毁」处理；新版端口通过「<strong>销转保→破损变质</strong>」处理。</li>
+   <li>④ 机上销售系统「客舱社区」栏的「<strong>问题餐食反馈</strong>」处填写。</li>
+   </ul>
+   <div class="box warn">⚠️ 销毁食品涉及更改四联单数量的，应在四联单上填写备注，配送系统需做相应更改。</div>`},
+{id:'d12',cat:'deliver',hot:false,src:'常见问题解决20260814',q:'基地站早出港航班（只与机供品交接），四联单和配送系统与实际数量不一致怎么办？',
+ t:['四联单','数量不一致','基地站','早出港','机供品仓库'],
+ a:`<strong>联系当地机供品仓库或总库确认</strong>后，更改四联单和系统，确保与实际数量一致。
+   <div class="box tip">💡 适用：虹桥、浦东、石家庄、深圳、沈阳、揭阳、扬州等基地站当日早出港航班（第一套组，只和机供品有交接）。</div>`},
+{id:'d13',cat:'deliver',hot:false,src:'常见问题解决20260814',q:'过站航班（与前套组交接）四联单和配送系统与实际数量不一致怎么办？',
+ t:['过站','四联单','数量不一致','前套组','总库报备'],
+ a:`<strong>联系前套组确认</strong>后更改；如涉及更改四联单，<strong>两组间单据和系统数据需保持一致</strong>，并<strong>报备机操部总库</strong>。`},
+{id:'d14',cat:'deliver',hot:true,src:'常见问题解决20260814',q:'配送系统「销转保」处理的适用范围有哪些？',
+ t:['销转保','适用范围','尊享飞','无陪儿童','客舱急救','失窃'],
+ a:`仅限以下情形：
+   <ul>
+   <li>① 尊享飞服务使用；② 无陪儿童或要客服务使用；③ 网订服务使用；④ 客舱急救使用；</li>
+   <li>⑤ 机上商品失窃遗失；⑥ 机组餐无法食用，使用机上食品替代；⑦ 机组有除机组餐外的饮食需求，食用机上食品；</li>
+   <li>⑧ 发现破损变质的餐饮类商品需要销毁。</li>
+   </ul>`},
+{id:'d15',cat:'deliver',hot:false,src:'常见问题解决20260814',q:'所飞基地机供品仓库联系不上怎么办？',
+ t:['机供品','仓库','值班电话','联系不上'],
+ a:`联系<strong>机操部 24 小时值班</strong>，电话：<strong>18918002391</strong>。`},
+{id:'d16',cat:'deliver',hot:false,src:'常见问题解决20260814',q:'航班结束后商品数量与四联单有出入，或需主动与仓库确认数量，找谁？',
+ t:['总库','四联单','数量','电话','确认'],
+ a:`联系<strong>机操部总库</strong>，电话：<strong>021-32315332 / 32315337</strong>（每天 <strong>9:00~17:30</strong> 可用）。`},
+{id:'d17',cat:'deliver',hot:true,src:'常见问题解决20260814',q:'配送系统航班任务临时变更，系统任务与实际不一致怎么办？',
+ t:['任务变更','清除缓存','更新任务','实时库存','SMP'],
+ a:`<ul>
+   <li>① 点击「<strong>清除缓存</strong>」「<strong>更新任务信息</strong>」按钮，获取新的任务信息（如还未更新，<strong>半小时后重复操作</strong>）。</li>
+   <li>② 按照更新后的任务操作，离机时确保商品数量与系统「<strong>实时库存</strong>」一致。</li>
+   <li>③ 经 SMP 联系后续组告知情况。</li>
+   </ul>
+   <div class="box tip">💡 若是<strong>临时更换飞机</strong>的完整处置（原飞机/新飞机、四联单留存与上传），见「📦 配送系统」分类下「临时更换飞机」条目。</div>`},
+{id:'d18',cat:'deliver',hot:false,src:'常见问题解决20260814',q:'配送系统前段操作完成了，但原库存都是 0、刷新也刷不出来怎么办？',
+ t:['原库存','0','刷新','清除缓存','重新登录','销售咨询群'],
+ a:`<ul>
+   <li>① 尝试<strong>退出到配送系统首页，清除缓存再进入</strong>；或退出系统<strong>重新登录</strong>。</li>
+   <li>② 在<strong>销售咨询群</strong>内反馈。</li>
+   </ul>`},
+{id:'d19',cat:'deliver',hot:false,src:'常见问题解决20260814',q:'配送系统无法获取销售数怎么办？',
+ t:['获取销售','销售数量','手工输入','上传'],
+ a:`<ul>
+   <li>① 确认是否都完成了<strong>销售系统上传</strong>。</li>
+   <li>② <strong>手工输入销售数量</strong>，完成系统操作。</li>
+   <li>③ 在<strong>销售咨询群</strong>内反馈。</li>
+   </ul>`},
+{id:'d20',cat:'deliver',hot:false,src:'常见问题解决20260814',q:'网络正常但配送系统没反应，清缓存/换账号都不行怎么办？',
+ t:['系统无反应','内存已满','卸载','重装','清缓存','点不动','没反应','卡住'],
+ a:`可能是<strong>系统内存已满</strong>造成的，可以尝试<strong>卸载 APP 后重新安装</strong>。`},
+
+/* ============ 💰 销售收款 / 系统操作（常见问题解决20260814） ============ */
+{id:'s5',cat:'sales',hot:true,src:'常见问题解决20260814',q:'空中无网状态下，旅客不要商品了怎么处理？',
+ t:['退货','无网','没有网络','机上无网','断网','销售清单','取消订单'],
+ a:`在<strong>销售系统的销售清单</strong>中找到对应订单，点击「<strong>退货</strong>」——一定记得操作，不要遗漏！`},
+{id:'s6',cat:'sales',hot:false,src:'常见问题解决20260814',q:'地面有网状态下，旅客不要商品了怎么处理？',
+ t:['退货','现金','微信','支付宝','绿翼客服','后台审核','有网','地面退货'],
+ a:`按收款方式分别处理：
+   <ul>
+   <li><strong>现金收款</strong>订单：取消现金缴存操作，退回现金。</li>
+   <li><strong>微信扫码</strong>收款订单：不扫码即可。</li>
+   <li><strong>支付宝离线收款</strong>的跨境/预售订单：引导旅客联系绿翼商城客服按退款操作，同时乘务员将相应订单联系绿翼客服；如是机上餐饮、纪念品现货订单，需<strong>联系销售组</strong>处理退款。</li>
+   <li><strong>现货订单</strong>：已增加退货功能，可直接在销售系统内点「退货」。注意现货退款需<strong>后台审核 1~2 个工作日</strong>，与旅客做好说明；产生过退货订单的，配送系统获取销售数量时注意销售数是否正确并及时更正。</li>
+   </ul>`},
+{id:'s7',cat:'sales',hot:false,src:'常见问题解决20260814',q:'销售系统里实际卖的是乐事，订单做成了上好佳，怎么纠正？',
+ t:['品名错误','销售','配送系统','四联单','手工修改'],
+ a:`配送系统获取销售后，<strong>手工修改配送系统的「销售」数</strong>，并在<strong>纸质四联单上写清楚原因</strong>。`},
+{id:'s8',cat:'sales',hot:false,src:'常见问题解决20260814',q:'「现金缴存」功能适用于免税品销售吗？',
+ t:['现金缴存','免税品','封包','不适用'],
+ a:`<strong>不适用！</strong>免税品销售收取的现金，由四号位<strong>封存在免税品封包内</strong>，航后投入<strong>免税品封包箱</strong>中。`},
+{id:'s9',cat:'sales',hot:false,src:'常见问题解决20260814',q:'现货销售和预售订单做反了，如何相互转化？',
+ t:['现货','预售','做反','订单','销售组'],
+ a:`<ul>
+   <li>旅客购买商品，订单做成<strong>预售</strong>但<strong>现货</strong>已给旅客且订单已上传：<strong>联系销售组</strong>，提供订单号和事件描述。</li>
+   <li>旅客下了<strong>现货</strong>订单，无法现场交付或落地后坚持要<strong>邮寄</strong>：联系销售组，提供订单号和旅客收货地址。</li>
+   </ul>`},
+{id:'s10',cat:'sales',hot:false,src:'常见问题解决20260814',q:'销售做错了需要给公司补款，补款方式是什么？',
+ t:['补款','银行转账','账号','附言','中国银行','销售做错','补给公司','转错'],
+ a:`通过<strong>银行转账</strong>方式，客舱现货销售的公司收款账号：
+   <ul>
+   <li>开户行：<strong>中国银行</strong>；户名：<strong>春秋航空股份有限公司</strong>；账号：<strong>4468 6792 3492</strong>。</li>
+   <li>转账必须填写<strong>附言</strong>，至少包括<strong>日期、航班号</strong>（详见「转账有哪些要求」条目）。</li>
+   </ul>`},
+
+/* ============ 🧺 网订餐（常见问题解决20260814） ============ */
+{id:'w1',cat:'weding',hot:false,src:'常见问题解决20260814',q:'智慧客舱系统中未显示网订餐食的信息怎么办？',
+ t:['网订餐','未显示','智慧客舱','X产品未享用单'],
+ a:`<ul>
+   <li>① 确认是否旅客自行购票，请旅客自行查看是否有<strong>支付记录</strong>。</li>
+   <li>② 确认旅客是否把餐食预定在了<strong>回程航班</strong>上——可让旅客查询预定成功信息（APP 或手机短信），或下机后咨询 <strong>95524</strong> 客服。</li>
+   <li>③ 最终<strong>以智慧客舱系统展示为准</strong>，可在销售系统填写「<strong>X产品未享用单</strong>」，相关工作人员收到反馈后处理。</li>
+   </ul>`},
+{id:'w2',cat:'weding',hot:true,src:'常见问题解决20260814',q:'网订餐食未配送（机上没有/漏配）怎么保障？',
+ t:['网订餐','未配送','同款替代','销转保','等价金额','主食','X产品未享用单'],
+ a:`<strong>如旅客需要</strong>：
+   <ul>
+   <li>使用机上<strong>同款商品</strong>替代，配送系统做「<strong>销转保</strong>」处理，纸质四联单填写机上物品使用情况，<strong>乘务长签字确认</strong>。</li>
+   <li>机上没有同款商品：询问旅客订餐金额，<strong>按同等金额保障</strong>（可选品类：餐食、小吃、饮料）。</li>
+   <li>预定的是<strong>主食类</strong>（米饭、面食）：可提供机上任意一份主食类产品。</li>
+   <li>预定含<strong>矿泉水</strong>：可提供一瓶机组水/销售水。</li>
+   </ul>
+   <strong>如旅客不需要</strong>：乘务员填写「X产品未享用单」，相关工作人员收到反馈后处理。`},
+{id:'w3',cat:'weding',hot:false,src:'常见问题解决20260814',q:'旅客只想要网订套餐里的部分餐食（如只要赠的橙汁）怎么办？',
+ t:['网订餐','部分食用','退款','X产品未享用单'],
+ a:`加热餐食前<strong>明确告知旅客：无法只吃一半退一半</strong>。可以为旅客登记「<strong>X产品未享用单</strong>」<strong>整份退款</strong>，然后按机上售价<strong>单独销售</strong>旅客需要的餐饮。`},
+{id:'w4',cat:'weding',hot:false,src:'常见问题解决20260814',q:'旅客说登机前已致电 95524 要求退网订餐，机上怎么处理？',
+ t:['网订餐','退款','95524','鲜食','常温餐','X产品未享用单'],
+ a:`<ul>
+   <li>购买的是<strong>常温餐或小吃饮料</strong>：填写「X产品未享用单」，申请退款。</li>
+   <li>购买的是<strong>航食配送的鲜食</strong>：先告知旅客<strong>鲜食无法退款</strong>；旅客坚持要退，帮旅客填写「X产品未享用单」，并告知<strong>是否申请成功以后台审核为准</strong>。</li>
+   </ul>`},
+
+/* ============ 🛍️ 商品知识（常见问题解决20260814） ============ */
+{id:'g1',cat:'goods',hot:true,src:'常见问题解决20260814',q:'跨境商品（带保税字样）的真伪怎么向旅客解释？',
+ t:['跨境','保税','真伪','掌上海关','海关'],
+ a:`跨境商品从<strong>正规渠道采购、国内保税仓发出</strong>，所有跨境进口商品都经<strong>海关严格把关</strong>。支持购买人通过中国海关官方 APP「<strong>掌上海关</strong>」注册登录，关联身份证后查询<strong>完整链路</strong>：报关清关时间、付款金额、购买人信息、征收关税等。`},
+{id:'g2',cat:'goods',hot:false,src:'常见问题解决20260814',q:'跨境商品的税费问题怎么解释？退货要承担税费吗？',
+ t:['跨境','税费','关税','消费税','增值税','退货'],
+ a:`跨境商品<strong>不是免税品</strong>，仅<strong>减免关税</strong>，仍须缴纳<strong>消费税和增值税</strong>。如旅客因<strong>非商品质量问题</strong>提出退货退款，<strong>旅客需承担相关税费</strong>。`},
+{id:'g3',cat:'goods',hot:true,src:'常见问题解决20260814',q:'跨境商品个人年度额度是多少？超额度退款/怎么查额度？',
+ t:['跨境','额度','26000','5000','掌上海关','小程序'],
+ a:`<ul>
+   <li><strong>额度</strong>：每人每年 <strong>26000 元</strong>跨境额度（365 个自然日滚动累计）；单笔订单不超过 <strong>5000 元</strong>，同一订单商品数量不超过 <strong>10 个</strong>，多件需分开下单——<strong>下单前一定要告知旅客</strong>。</li>
+   <li><strong>超额度</strong>预定将被海关拦截导致无法入境、订单退款。</li>
+   <li><strong>查询方式</strong>：「掌上海关」APP 或微信小程序 → 首页 → 跨境电商个人消费信息，输入姓名和身份证号即可查看已消费额度和剩余额度。</li>
+   </ul>`},
+{id:'g4',cat:'goods',hot:true,src:'常见问题解决20260814',q:'商品介绍有哪些禁忌话术？',
+ t:['介绍','禁忌','最优惠','最低价','免税店','买一赠一','套装'],
+ a:`<ul>
+   <li>不要出现<strong>极端描述</strong>：最优惠、最低价、最便宜。</li>
+   <li>不要承诺「比免税店便宜」——各地免税店价格实时变动，平台还会有补贴。</li>
+   <li>套装产品直接描述<strong>套装里包含什么</strong>，不要说「买一赠一」，避免旅客误以为买一套赠一套。</li>
+   <li>注意<strong>一般贸易产品和跨境产品的区别</strong>，不要误导旅客。</li>
+   </ul>`},
+{id:'g5',cat:'goods',hot:false,src:'常见问题解决20260814',q:'一般贸易产品和跨境产品怎么区分？',
+ t:['一般贸易','跨境','保税','直邮','发货仓库'],
+ a:`<ul>
+   <li><strong>跨境品</strong>（商品名称含「保税」字样）：正规渠道采购、<strong>国内保税仓发出</strong>，等同于在国外购买，以消费者个人名义报关通关，海关按个人行邮物品监管收税。</li>
+   <li><strong>一般贸易</strong>：从品牌官方授权渠道集中采购、<strong>国内仓库发出</strong>，正品与链路资料可提供。</li>
+   </ul>`},
+{id:'g6',cat:'goods',hot:false,src:'常见问题解决20260814',q:'商品材质介绍不详细、有无包装/礼袋怎么查？',
+ t:['包装','礼袋','详情页','实拍图'],
+ a:`所有商品都在<strong>标签尾部</strong>备注是套装还是独立包装、商品包含内容、发货仓库等信息；客单价较高的详情页会备注有无礼袋。<strong>市场部已把产品实拍图、礼品袋图更新到产品详情页</strong>。`},
+{id:'g7',cat:'goods',hot:false,src:'常见问题解决20260814',q:'旅客查跨境商品批次号显示已过期，怎么准确查询批次号信息？',
+ t:['批次号','效期','生产日期','绿翼商城客服'],
+ a:`跨境商品包装上一般<strong>不单独标注生产日期/有效日期，只标注生产批次号</strong>，具体生产日期按批次号查询，仓库按批次随机发货。如旅客需查询效期：收货后提供<strong>批次号照片</strong>（一般位于外盒，字母+数字；找不到就提供商品 6 面照）给<strong>绿翼商城客服</strong>帮助查询。`},
+{id:'g8',cat:'goods',hot:false,src:'常见问题解决20260814',q:'旅客问米饭为什么可以放半年不坏，怎么说明？',
+ t:['常温餐','保鲜','含气调理','保质期','鲜食'],
+ a:`<ul>
+   <li><strong>常温餐</strong>（秘制卤肉饭、番茄牛肉饭、炸酱面、意大利肉酱面等）：使用<strong>新含气调理保鲜加工技术</strong>——初加工、灭菌化处理、充氮换包装、多阶段升温调理杀菌，达到商业无菌要求，常温避光可储存<strong>半年至一年</strong>。</li>
+   <li><strong>鲜食</strong>（仅网订）：需<strong>冷藏/冷冻</strong>保存，仅供配送航段销售，未售出的<strong>销毁</strong>。</li>
+   </ul>`},
+
+/* ============ 📷 桌面扫码（常见问题解决20260814） ============ */
+{id:'c1',cat:'scan',hot:false,src:'常见问题解决20260814',q:'旅客座位二维码缺失或损坏怎么办？',
+ t:['二维码','缺失','损坏','就近扫码','销售咨询群'],
+ a:`<ul>
+   <li><strong>成排/多座位缺失</strong>：反馈在销售咨询群（会有工作人员统计和定期补充）。</li>
+   <li><strong>个别缺失</strong>：提醒旅客扫描<strong>就近二维码</strong>购买，配送时注意核对旅客手机号（注意沟通方式）。</li>
+   <li>也可提醒旅客阅读机上菜单，将购买需求告知乘务组，或平飞后推车销售经过时购买（也可提供某座位二维码，购买后核对手机号配送）。</li>
+   </ul>`},
+{id:'c2',cat:'scan',hot:false,src:'常见问题解决20260814',q:'旅客扫码后不显示内容或座位信息有误怎么办？',
+ t:['扫码','不显示','座位信息','撕掉二维码'],
+ a:`<ul>
+   <li>① 检查<strong>打开开始销售的航段</strong>是否准确。</li>
+   <li>② 确认<strong>其他座位</strong>扫码是否正常。</li>
+   <li>③ 确认不是本飞机二维码：将二维码<strong>拍照发销售咨询群</strong>，并<strong>撕掉此二维码</strong>。</li>
+   </ul>`},
+{id:'c3',cat:'scan',hot:false,src:'常见问题解决20260814',q:'旅客扫码支付成功（有付款记录）但销售系统查不到订单怎么办？',
+ t:['支付成功','查不到订单','刷新','航班号','撕掉二维码','付款成功','没有订单','订单不见'],
+ a:`<ul>
+   <li>① 检查 IPAD<strong>网络</strong>是否正常，并<strong>刷新订单</strong>。</li>
+   <li>② 乘务员可<strong>自己扫旅客扫过的二维码</strong>确认航班号信息（也可查看旅客手机上的订单确认座位、航班号）。</li>
+   <li>③ 确认不是本航班二维码：拍照发销售咨询群，并<strong>撕掉此二维码</strong>。</li>
+   </ul>`},
+
+/* ============ 🛎️ 售后服务（常见问题解决20260814） ============ */
+{id:'a1',cat:'after',hot:true,src:'常见问题解决20260814',q:'旅客售后问题（破损/退换货/订单信息错误/收货地址填错）找谁处理？',
+ t:['售后','退换货','收货地址','绿翼商城','公众号','客服'],
+ a:`在「<strong>春秋航空绿翼商城</strong>」微信公众号上联系商城客服协助处理。
+   <ul>
+   <li>示例（收货手机号填错）：公众号 → 在线服务 → 联系客服 → 提供填错的手机号查到订单 → 提供正确的收货人手机号、名字、地址，在线客服修改。</li>
+   <li>如查询不到订单，需提供<strong>支付凭证详情截图</strong>（点开支付记录中的「更多」，显示「<strong>商家订单号</strong>」，截图给客服）。</li>
+   </ul>`},
+{id:'a2',cat:'after',hot:false,src:'常见问题解决20260814',q:'旅客需要延迟发货怎么办？（下单时一定要先问）',
+ t:['延迟发货','稍后填写收货地址','30天','跨境','海关','晚点发货','推迟发货','发货时间'],
+ a:`填写收货地址前<strong>一定要先询问旅客</strong>是否需要正常时效发货：
+   <ul>
+   <li><strong>需要延迟发货</strong>：销售订单选「<strong>稍后填写收货地址</strong>」，引导旅客关注绿翼商城公众号，确定能收货时联系客服填地址。仅支持发货日期距下单日期 <strong>&lt;30 天</strong>。</li>
+   <li><strong>无需延迟</strong>：选「立即填写收货地址」即可。</li>
+   <li><strong>已填地址再要求延迟</strong>：一般贸易（快递到家、飞亚达、卡西欧、纪念品）请旅客或协助旅客立即联系绿翼商城客服提供发货日期，客服处理；<strong>跨境商品只能按正常时效发货，一旦发货无法延迟</strong>。</li>
+   </ul>
+   <div class="box warn">⚠️ 延迟发货存在最终无法发出的风险（海关挂单导致漏单退单等）。</div>`},
+{id:'a3',cat:'after',hot:false,src:'常见问题解决20260814',q:'微信扫码支付，旅客互相扫错了二维码（付了对方的商品）怎么处理？',
+ t:['扫错码','退单','SMP工作证','订单编号','绿翼客服'],
+ a:`第一时间提供「<strong>个人 SMP 工作证截图</strong>」及相关<strong>订单编号</strong>，关注「春秋航空绿翼商城」公众号 → 在线服务 → 联系客服处理<strong>退单</strong>。`},
+{id:'a4',cat:'after',hot:false,src:'常见问题解决20260814',q:'怎么协助旅客查询机上订单的物流信息？',
+ t:['物流','查询','公众号','SMP截图','订单号'],
+ a:`告知旅客关注「春秋航空绿翼商城」公众号，右下角「<strong>机上订单</strong>」中用预订人手机号登录查询订单和物流。
+   <div class="box tip">💡 如乘务员代查，必须直接提供 <strong>SMP 截图 + 订单号</strong>人工速查（避免多个不同账号查同一单的重复工作）。</div>`},
+{id:'a5',cat:'after',hot:false,src:'常见问题解决20260814',q:'商品未收货前旅客不想要了想退货怎么办？',
+ t:['退货','未收货','快递到家','跨境','客服'],
+ a:`<ul>
+   <li><strong>快递到家、飞亚达、卡西欧、纪念品</strong>：旅客可自己在绿翼商城订单提交退货、退款申请。</li>
+   <li><strong>跨境商品</strong>（带保税字样）：需联系<strong>绿翼商城后台客服</strong>处理退货、退款。</li>
+   </ul>`},
+{id:'a6',cat:'after',hot:false,src:'常见问题解决20260814',q:'商品签收后不想要了想退货，支持 7 天无理由吗？',
+ t:['7天无理由','退货','运费','跨境','拒收'],
+ a:`<ul>
+   <li><strong>快递到家、飞亚达、卡西欧、纪念品</strong>：未拆封（不影响二次销售）支持 <strong>7 天无理由退货</strong>，运费旅客自理。</li>
+   <li><strong>跨境商品</strong>：一旦快递签收<strong>不支持</strong> 7 天无理由；未签收可联系绿翼商城客服<strong>拦截商品</strong>，同时主动电联快递员<strong>拒收</strong>。</li>
+   </ul>`},
+{id:'a7',cat:'after',hot:false,src:'常见问题解决20260814',q:'桌面扫码订单支付成功后、未配送前点「退款」，多久到账？',
+ t:['退款','到账','30分钟','退货','审核','1-2个工作日'],
+ a:`<ul>
+   <li>未点击「配送」且网络正常：<strong>30 分钟内</strong>退款到账。</li>
+   <li>已点击「配送」：可点「<strong>退货</strong>」，此类退款需<strong>后台人工审核，1~2 个工作日</strong>到账。</li>
+   </ul>`},
+{id:'a8',cat:'after',hot:false,src:'常见问题解决20260814',q:'预售、跨境订单同意退货退款后，多少天到账？',
+ t:['预售','跨境','退款时效','5个工作日','原路退回'],
+ a:`<ul>
+   <li><strong>未发货</strong>：申请退款之日起 <strong>5 个工作日内</strong>（通常 2 天内到账）自动退回原支付账户。</li>
+   <li><strong>已发货</strong>：仓库签收退件后约 <strong>3 个工作日</strong>内完成理货和退货审核，审核通过后预计 <strong>2~10 个工作日</strong>完成退款、原路退回，具体以银行/支付平台通知为准。</li>
+   </ul>`},
+{id:'a9',cat:'after',hot:false,src:'常见问题解决20260814',q:'咨询绿翼商城客服有哪些方式？',
+ t:['绿翼商城','客服','电话','公众号','工作时间'],
+ a:`<ul>
+   <li>微信 →「春秋航空绿翼商城」公众号 → 客服，留言等待回复。</li>
+   <li>绿翼商城电话：<strong>021-32315785</strong>（工作日 09:00-20:00；周末及节假日 09:00-17:30）。</li>
+   </ul>`},
+{id:'a10',cat:'after',hot:false,src:'常见问题解决20260814',q:'机上跨境商品和快递到家商品有问题（产品描述、无法下单等）找谁？',
+ t:['跨境','快递到家','产品描述','无法下单','杨柳'],
+ a:`在销售咨询群内 <strong>@杨柳老师</strong>。`},
+{id:'a11',cat:'after',hot:false,src:'常见问题解决20260814',q:'纪念品、卡西欧、飞亚达商品有问题（产品描述、无法下单等）找谁？',
+ t:['纪念品','卡西欧','飞亚达','产品描述','无法下单','张杰'],
+ a:`在销售咨询群内 <strong>@张杰老师</strong>。`},
+{id:'a12',cat:'after',hot:false,src:'常见问题解决20260814',q:'销售系统、配送系统登录不进去，提示账号有问题怎么办？',
+ t:['登录','账号','航空信息技术部','服务台','24小时'],
+ a:`在 SMP 内搜索「<strong>航空信息技术部服务台</strong>」，留言或语音寻求帮助（<strong>24 小时值班</strong>）。`},
+
+/* ============ 👩‍✈️ 乘务管理 · 加机组（管理手册 8.6） ============ */
+{id:'m1',cat:'crew',hot:true,src:'管理手册 8.6 加入机组管理规定',q:'因公加机组和因私加机组分别是什么？定义与要求一览',
+ t:['加机组','因公','因私','定义','旅客座位','2名','国际航线'],
+ a:`<ul>
+   <li><strong>因公加机组</strong>：因<strong>临时公务派遣或航班生产需要</strong>加入机组。仅受理公务/生产原因，<strong>不接受私人原因</strong>；部门只接受距离计划起飞前 <strong>5 小时外、72 小时内</strong>的因公临时加机组申请；<strong>任何航班计划起飞前 5 小时内不接受任何形式的加机组申请</strong>。临时加机组原则上<strong>不得占用旅客座位</strong>，需生产派遣处经理评估确认座位数量。</li>
+   <li><strong>因私加机组</strong>：因私人原因（年假/探亲假等）加入机组，<strong>不得占用旅客座位</strong>；每个航班因私加入机组的空勤人员<strong>不得超过 2 名（含）</strong>；<strong>国际/地区航班</strong>不接受除合同/协议已明确人员以外的因私加机组申请。</li>
+   <li><strong>通用要求</strong>：加机组的乘务员须在所加航班<strong>签到前 5 分钟到达机组准备室签到</strong>；携带物品中不得有危险品、毒品、非法刊物等<strong>禁运物品</strong>。</li>
+   </ul>`},
+{id:'m2',cat:'crew',hot:false,src:'管理手册 8.6 加入机组管理规定',q:'加机组怎么申请？提前多久？年假探亲可以加机组吗？',
+ t:['加机组','申请','96小时','72小时','年假','探亲假','户口所在地','春运'],
+ a:`<ul>
+   <li><strong>已公布航班</strong>：航班计划起飞前提前 <strong>96 小时</strong>将加机组申请单提交各处/分部经理审批，经审批后分队长于起飞前提前 <strong>72 小时</strong>交生产派遣处经理审批。</li>
+   <li><strong>未公布航班</strong>：航班发布日（每周五）<strong>10:00 前</strong>提交各处/分部经理，<strong>12:00 前</strong>交生产派遣处。取消或变更须在起飞前 <strong>10 小时</strong>报 AOC 专员。</li>
+   <li><strong>年假/探亲假加机组</strong>（连续工作满一年）：每年可加机组往返<strong>本人或配偶户口所在地</strong>一次，只能选择<strong>点对点直达航班</strong>（无直达的可选户口所在地省份内任一城市）；<strong>春运、暑运期间不得申请</strong>休假加机组。</li>
+   </ul>`}
 ];
 
 /* ================= 渲染 ================= */
@@ -608,6 +891,76 @@ totalEl.textContent = DATA.length + ' 条知识点';
 renderHot();
 renderCats();
 clearAll();
+</script>
+<style id="mobile-native-hardening">
+/* === mobile-native-hardening 2026-09-14 · finesse-ui h5-mobile + impeccable === */
+html{-webkit-text-size-adjust:100%;text-size-adjust:100%}
+*{-webkit-tap-highlight-color:transparent}
+a,button,input,select,textarea,label,summary,[onclick],[role=button]{touch-action:manipulation}
+button,[onclick],[role=button]{-webkit-user-select:none;user-select:none}
+img{max-width:100%}
+button:active,[onclick]:active,a:active,summary:active,[role=button]:active{filter:brightness(.93)}
+@media (pointer:coarse){
+  input,select,textarea{font-size:16px}
+  *{scrollbar-width:none}
+  *::-webkit-scrollbar{width:0;height:0;display:none}
+}
+@media (prefers-reduced-motion:reduce){
+  *,*::before,*::after{animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important}
+}
+</style>
+<script id="mobile-native-js">
+(function(){
+  'use strict';
+  if(!window.matchMedia||!matchMedia('(pointer:coarse)').matches)return;
+  /* 1) 触感反馈（Android 原生手感；iOS/Safari 自动忽略 vibrate） */
+  if(navigator.vibrate){
+    addEventListener('pointerdown',function(e){
+      var t=e.target;
+      if(t&&t.closest&&t.closest('button,[onclick],a,[role="button"]')){
+        try{navigator.vibrate(8)}catch(_){}
+      }
+    },{passive:true,capture:true});
+  }
+  /* 2) 安全区自动注入：贴边的 fixed/sticky 条补 env(safe-area-inset-*)；
+        无贴边条的页面则给 body 补，保证内容不钻进刘海/小白条 */
+  var px=function(v){return parseFloat(v)||0};
+  function patchOne(el,edge){
+    var cs=getComputedStyle(el);
+    if(edge==='top'){el.style.paddingTop='calc('+px(cs.paddingTop)+'px + env(safe-area-inset-top,0px))';}
+    else{el.style.paddingBottom='calc('+px(cs.paddingBottom)+'px + env(safe-area-inset-bottom,0px))';}
+  }
+  function walk(){
+    var vw=innerWidth,vh=innerHeight,gotTop=false,gotBot=false;
+    var els=document.querySelectorAll('body *');
+    for(var i=0;i<els.length;i++){
+      var el=els[i];if(el.dataset.msa)continue;el.dataset.msa='1';
+      var cs=getComputedStyle(el),pos=cs.position;
+      if(pos!=='fixed'&&pos!=='sticky')continue;
+      var r=el.getBoundingClientRect();
+      if(r.width===0||r.height===0)continue;
+      if(r.width>=vw*0.95&&r.height>=vh*0.9)continue; /* 全屏遮罩类不碰 */
+      var wide=(r.width>=vw*0.9);
+      if(!wide)continue;
+      if(pos==='fixed'){
+        var t=px(cs.top),b=px(cs.bottom);
+        if(t>=0&&t<=6){patchOne(el,'top');gotTop=true;}
+        else if(b>=0&&b<=2){patchOne(el,'bot');gotBot=true;}
+      }else{
+        var st=px(cs.top),sb=px(cs.bottom);
+        if(cs.top!=='auto'&&st<=6){patchOne(el,'top');gotTop=true;}
+        else if(cs.bottom!=='auto'&&sb<=2){patchOne(el,'bot');gotBot=true;}
+      }
+    }
+    var b=document.body,bs=getComputedStyle(b);
+    if(!gotTop){b.style.paddingTop='calc('+px(bs.paddingTop)+'px + env(safe-area-inset-top,0px))';}
+    if(!gotBot){b.style.paddingBottom='calc('+px(bs.paddingBottom)+'px + env(safe-area-inset-bottom,0px))';}
+  }
+  function safe(){try{walk()}catch(_){}}
+  if(document.readyState==='loading'){document.addEventListener('DOMContentLoaded',safe)}else{safe()}
+  addEventListener('load',safe);
+  setTimeout(safe,800);
+})();
 </script>
 </body>
 </html>
