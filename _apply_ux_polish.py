@@ -52,6 +52,38 @@ QA = COMMON + """
 small{font-size:11.5px;}
 #aiStatus{font-size:11px;}
 .lbl{font-size:11px;}
+
+/* ---- qa：手机档（≤640px）排版修复 · 2026-09-15 ----
+   用户反馈：手机打开后排版不正确 / 底部对话框与切换栏有黑边。
+   注意：本标记块由 _apply_ux_polish.py 幂等重建——规则改这里才不会被冲掉，
+   直接改 HTML 里的标记块会在下次构建时丢失（2026-09-15 已发生过一次）。 */
+@media (max-width:640px){
+  /* ① 欢迎卡整行铺开：不再被 74% 气泡宽度挤成 ~200px 细长条且偏左；
+     去头像与气泡壳、时间戳（配合 qa.html renderChat 给含 .welcome 的消息加的 .msg-welcome 标记） */
+  #chatWrap .msg.msg-welcome{max-width:100%;}
+  #chatWrap .msg.msg-welcome .avatar{display:none;}
+  #chatWrap .msg.msg-welcome .bubble{background:transparent;border-color:transparent;box-shadow:none;padding:0;
+    backdrop-filter:none;-webkit-backdrop-filter:none;}
+  #chatWrap .msg.msg-welcome .ts{display:none;}
+  /* ② 顶栏：AI 状态徽章收进「AI设置」——手机上一行放不下，还会把 360px 窄屏横向挤爆被裁 */
+  .topbar{padding:7px 10px;gap:8px;}
+  .topbar .ai-status{display:none;}
+  .t-ai{gap:4px;}
+  .t-ai .icon-btn{padding:0 6px;}
+  /* ③ 底部提示一行省略号，不折两行顶到屏幕底边 */
+  .tip-bar{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+  /* ④ 底部功能区贴明度（反馈：对话框/切换栏「黑边」）——形象条 / 五库 / 输入区以 58% 玻璃
+     浮在深色原画上会透成暗灰一片；手机档抬到近实底（97% + 轻模糊），玻璃质感只留给聊天气泡 */
+  #petBar{background:color-mix(in srgb, var(--bg-card,#fff) 97%, transparent);
+    backdrop-filter:blur(10px) saturate(1.1);-webkit-backdrop-filter:blur(10px) saturate(1.1);}
+  .input-area{background:color-mix(in srgb, var(--bg-card,#fff) 97%, transparent);
+    backdrop-filter:blur(10px) saturate(1.1);-webkit-backdrop-filter:blur(10px) saturate(1.1);}
+  .ti-wrap{background:var(--bg-card,#fff);}
+  .ti-wrap:focus-within{background:var(--bg-card,#fff);}
+  .tip-bar{color:var(--text2,#5A6F65);}
+  /* ⑤ 输入框占位文字单行显示：手机档两行折行会被 1 行高的输入框拦腰截断，观感差 */
+  .ti::placeholder{white-space:nowrap;overflow:hidden;}
+}
 """
 
 BEAUTY = COMMON + """

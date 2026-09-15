@@ -44,8 +44,11 @@ VERIFY_SCRIPTS = [
     u'node _verify_fest_hookup.js',        # 节日识别 → 话术挂载 端到端
     u'node _verify_script_gen.js 20260829',  # 话术生成引擎回归（6类x12套组合 × 品类匹配审计）
     u'node _verify_full_script.js 20260829', # 全话术链路回归（随机24套×3次：开场→落地前下单 结构/语义/违禁词/品牌重复/句级重复）
+    u'node _verify_prod_cats.js',  # 商品库×品类路由×竞品库结构核验（字段完整/分型不误判/场景覆盖/工作台可选中/竞品价格合法）
+    u'node _verify_batches.js',    # 批量补录批次数据合规核验（品类白名单/违禁词/价格行/话术分类/id 唯一）
     u'node _verify_ai_price.js',   # 竞品分析 AI 更新价格（JSON 解析/覆盖层/预设与自定义应用）
     u'node _verify_qa_wakeup.js',   # 你问我答跨板块唤醒（33 用例：日常/手册/大撤/医疗/绩效/事件报告/病假）
+    u'node _verify_qa_assoc.js',    # 你问我答候选追问+联想记忆（未收录表述候选收集/确认写入记忆/精确模糊命中/都不是跳过/撤销/200条上限/失效降级）
     u'python _verify_packs_m3.py', # 发布管线 19
     u'python _verify_assets.py',   # 形象IP 素材完整性（母版/抠图/精灵/原稿_clean 覆盖/模型登记）
     u'python _apply_ux_polish.py --check',  # UX 美化标记块在位（14 个模块/模板）
