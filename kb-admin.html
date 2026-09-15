@@ -415,6 +415,10 @@ label.lbl{font-size:.74rem;color:var(--text2);display:block;margin-bottom:4px;}
   --ux-gold:#F5B800;--ux-danger:#C62828;--ux-warn:#E64A19;
   --ux-ink:#0F2A1F;--ux-ink2:#5A6F65;--ux-border:#E5EDE9;
   --ux-radius-sm:8px;--ux-radius:12px;--ux-radius-lg:16px;
+  /* 嵌入态底部补偿：index 壳层内嵌时由宿主注入实际 TabBar 高度；
+     独立打开时回退 0px，模块自身安全区逻辑照旧（2026-09-16 遮挡修复） */
+  --embed-bottom:0px;
+  --embed-top:0px;
 }
 ::selection{background:rgba(20,132,83,.24);}
 *{scrollbar-width:thin;scrollbar-color:rgba(20,132,83,.35) transparent;}
@@ -429,6 +433,54 @@ button:active:not(:disabled){transform:translateY(1px);}
 @media (prefers-reduced-motion:reduce){
   *,*::before,*::after{animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important;scroll-behavior:auto!important;}
 }
+/* ---- 深色模式：滚动条随主题（浅色令牌在 :root，各模块 dark 规则见下）---- */
+html[data-theme="dark"] *{scrollbar-color:rgba(255,255,255,.22) transparent;}
+html[data-theme="dark"] ::-webkit-scrollbar-thumb{background:rgba(255,255,255,.20);border:2px solid transparent;background-clip:content-box;}
+html[data-theme="dark"] ::selection{background:rgba(31,165,106,.34);}
+
+/* ---- UX Polish v1 · 深色模式兜底层（2026-09-16）----
+   用户反馈：深色模式只有边框在变、美妆与医疗未覆盖、深色下部分文字看不清。
+   本层为「无令牌体系」的模块补最小暗色变量，并统一修高对比度问题。 */
+html[data-theme="dark"]{
+  color-scheme:dark;
+  --bg:#0F1A14;--bg-card:#162420;--bg-elev:#1B2E26;
+  --text:#E8F3EE;--text2:#9CB3A7;--text3:#6E8479;
+  --border:#24402F;--border-strong:#2E5240;
+  --primary-soft:#1A3D2A;--primary-mist:#132C21;
+  --shadow:0 4px 14px rgba(0,0,0,.42);--shadow-lg:0 14px 36px rgba(0,0,0,.55);
+}
+html[data-theme="dark"] body{background:var(--bg);color:var(--text);}
+/* 输入类：深色下浏览器默认白底白字，必须显式覆盖 */
+html[data-theme="dark"] input,
+html[data-theme="dark"] select,
+html[data-theme="dark"] textarea{
+  background:var(--bg-elev);color:var(--text);border-color:var(--border);
+}
+html[data-theme="dark"] input::placeholder,
+html[data-theme="dark"] textarea::placeholder{color:var(--text3);}
+/* 深色下「浅色底 + 浅色字」组合的兜底可读性修复 */
+html[data-theme="dark"] .bg-white,
+html[data-theme="dark"] .bg-gray-50,
+html[data-theme="dark"] .bg-gray-100,
+html[data-theme="dark"] .bg-slate-50,
+html[data-theme="dark"] .bg-slate-100{background:var(--bg-card)!important;}
+html[data-theme="dark"] .text-gray-900,
+html[data-theme="dark"] .text-gray-800,
+html[data-theme="dark"] .text-slate-900,
+html[data-theme="dark"] .text-slate-800,
+html[data-theme="dark"] .text-black{color:var(--text)!important;}
+html[data-theme="dark"] .text-gray-700,
+html[data-theme="dark"] .text-gray-600,
+html[data-theme="dark"] .text-slate-700,
+html[data-theme="dark"] .text-slate-600{color:#C3D6CB!important;}
+html[data-theme="dark"] .text-gray-500,
+html[data-theme="dark"] .text-gray-400,
+html[data-theme="dark"] .text-slate-500,
+html[data-theme="dark"] .text-slate-400{color:var(--text2)!important;}
+html[data-theme="dark"] .border-gray-100,
+html[data-theme="dark"] .border-gray-200,
+html[data-theme="dark"] .border-gray-300,
+html[data-theme="dark"] .border-slate-200{ border-color:var(--border)!important;}
 /*__UX_POLISH_END__*/</style>
 </head>
 <body>

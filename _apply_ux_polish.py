@@ -25,6 +25,10 @@ COMMON = """
   --ux-gold:#F5B800;--ux-danger:#C62828;--ux-warn:#E64A19;
   --ux-ink:#0F2A1F;--ux-ink2:#5A6F65;--ux-border:#E5EDE9;
   --ux-radius-sm:8px;--ux-radius:12px;--ux-radius-lg:16px;
+  /* 嵌入态底部补偿：index 壳层内嵌时由宿主注入实际 TabBar 高度；
+     独立打开时回退 0px，模块自身安全区逻辑照旧（2026-09-16 遮挡修复） */
+  --embed-bottom:0px;
+  --embed-top:0px;
 }
 ::selection{background:rgba(20,132,83,.24);}
 *{scrollbar-width:thin;scrollbar-color:rgba(20,132,83,.35) transparent;}
@@ -39,9 +43,64 @@ button:active:not(:disabled){transform:translateY(1px);}
 @media (prefers-reduced-motion:reduce){
   *,*::before,*::after{animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important;scroll-behavior:auto!important;}
 }
+/* ---- 深色模式：滚动条随主题（浅色令牌在 :root，各模块 dark 规则见下）---- */
+html[data-theme="dark"] *{scrollbar-color:rgba(255,255,255,.22) transparent;}
+html[data-theme="dark"] ::-webkit-scrollbar-thumb{background:rgba(255,255,255,.20);border:2px solid transparent;background-clip:content-box;}
+html[data-theme="dark"] ::selection{background:rgba(31,165,106,.34);}
 """
 
-QA = COMMON + """
+# ---------- 深色模式：通用兜底层（所有模块共用，防「只有边框变深」）----------
+# 说明：各模块自带的 --bg/--text 令牌优先；此层负责
+# ① 给尚无令牌体系的模块提供最小可用暗色变量
+# ② 修正深色下「浅底浅字」造成的不可读
+DARK_COMMON = """
+/* ---- UX Polish v1 · 深色模式兜底层（2026-09-16）----
+   用户反馈：深色模式只有边框在变、美妆与医疗未覆盖、深色下部分文字看不清。
+   本层为「无令牌体系」的模块补最小暗色变量，并统一修高对比度问题。 */
+html[data-theme="dark"]{
+  color-scheme:dark;
+  --bg:#0F1A14;--bg-card:#162420;--bg-elev:#1B2E26;
+  --text:#E8F3EE;--text2:#9CB3A7;--text3:#6E8479;
+  --border:#24402F;--border-strong:#2E5240;
+  --primary-soft:#1A3D2A;--primary-mist:#132C21;
+  --shadow:0 4px 14px rgba(0,0,0,.42);--shadow-lg:0 14px 36px rgba(0,0,0,.55);
+}
+html[data-theme="dark"] body{background:var(--bg);color:var(--text);}
+/* 输入类：深色下浏览器默认白底白字，必须显式覆盖 */
+html[data-theme="dark"] input,
+html[data-theme="dark"] select,
+html[data-theme="dark"] textarea{
+  background:var(--bg-elev);color:var(--text);border-color:var(--border);
+}
+html[data-theme="dark"] input::placeholder,
+html[data-theme="dark"] textarea::placeholder{color:var(--text3);}
+/* 深色下「浅色底 + 浅色字」组合的兜底可读性修复 */
+html[data-theme="dark"] .bg-white,
+html[data-theme="dark"] .bg-gray-50,
+html[data-theme="dark"] .bg-gray-100,
+html[data-theme="dark"] .bg-slate-50,
+html[data-theme="dark"] .bg-slate-100{background:var(--bg-card)!important;}
+html[data-theme="dark"] .text-gray-900,
+html[data-theme="dark"] .text-gray-800,
+html[data-theme="dark"] .text-slate-900,
+html[data-theme="dark"] .text-slate-800,
+html[data-theme="dark"] .text-black{color:var(--text)!important;}
+html[data-theme="dark"] .text-gray-700,
+html[data-theme="dark"] .text-gray-600,
+html[data-theme="dark"] .text-slate-700,
+html[data-theme="dark"] .text-slate-600{color:#C3D6CB!important;}
+html[data-theme="dark"] .text-gray-500,
+html[data-theme="dark"] .text-gray-400,
+html[data-theme="dark"] .text-slate-500,
+html[data-theme="dark"] .text-slate-400{color:var(--text2)!important;}
+html[data-theme="dark"] .border-gray-100,
+html[data-theme="dark"] .border-gray-200,
+html[data-theme="dark"] .border-gray-300,
+html[data-theme="dark"] .border-slate-200{ border-color:var(--border)!important;}
+"""
+
+
+QA = COMMON + DARK_COMMON + """
 /* qa：手机档顶栏按钮防裁切 + 小字下限 */
 @media (max-width:760px){
   .t-ai{gap:5px;}
@@ -52,6 +111,13 @@ QA = COMMON + """
 small{font-size:11.5px;}
 #aiStatus{font-size:11px;}
 .lbl{font-size:11px;}
+
+/* qa 深色专项（2026-09-16）：qa 已有完整 :root 令牌，此处只补深色下的可读性微调 */
+html[data-theme="dark"]{color-scheme:dark;--bg:#0F1A14;--bg-card:#162420;--border:#1E3A2C;}
+html[data-theme="dark"] .bubble{color:#E8F3EE;}
+html[data-theme="dark"] .ts{color:#7C9489;}
+html[data-theme="dark"] .kb-card,
+html[data-theme="dark"] .dc-card{background:#162420;border-color:#1E3A2C;color:#E8F3EE;}
 
 /* ---- qa：手机档（≤640px）排版修复 · 2026-09-15 ----
    用户反馈：手机打开后排版不正确 / 底部对话框与切换栏有黑边。
@@ -86,7 +152,7 @@ small{font-size:11.5px;}
 }
 """
 
-BEAUTY = COMMON + """
+BEAUTY = COMMON + DARK_COMMON + """
 /* beauty：令牌对齐壳层（原翡翠绿系已字面量收拢为春秋绿系） */
 :root{
   --primary:#148453;--primary-dark:#0C5F3A;--primary-light:#1FA56A;
@@ -94,15 +160,93 @@ BEAUTY = COMMON + """
   --gold:#F5B800;--danger:#C62828;
   --bg:#F5F8F6;--bg-card:#fff;--text:#0F2A1F;--text2:#5A6F65;--border:#E5EDE9;
 }
+/* ---- beauty 深色专项（2026-09-16）----
+   beauty 是 Tailwind 类名驱动（bg-white×181 / text-gray-800×347 / bg-gray-50×45…），
+   没有令牌体系，因此深色必须做「类名级」映射，否则只有边框变深。 */
+html[data-theme="dark"]{
+  --bg:#0E1713;--bg-card:#17231E;--text:#E8F3EE;--text2:#9CB3A7;--border:#25402F;
+  --primary-soft:#17352a;--primary-mist:#12281F;
+}
+html[data-theme="dark"] #app{background:var(--bg);}
+/* 卡片 / 面板：白底一律转深卡 */
+html[data-theme="dark"] .card-shadow,
+html[data-theme="dark"] .bg-white\\/95,
+html[data-theme="dark"] .bg-white\\/80,
+html[data-theme="dark"] .bg-white\\/90,
+html[data-theme="dark"] .bg-white\\/70{background:rgba(23,35,30,.96)!important;border-color:var(--border)!important;}
+/* 次级底：gray-50/100 转深一档 */
+html[data-theme="dark"] .bg-gray-50,
+html[data-theme="dark"] .bg-gray-100,
+html[data-theme="dark"] .bg-gray-200{background:#1D2C25!important;}
+/* 正文 / 次要文字：保证深底上可读（浅色下原为 gray-800/700/600/500/400） */
+html[data-theme="dark"] .text-gray-900,
+html[data-theme="dark"] .text-gray-800{color:#E8F3EE!important;}
+html[data-theme="dark"] .text-gray-700{color:#CFE0D6!important;}
+html[data-theme="dark"] .text-gray-600{color:#B4C9BD!important;}
+html[data-theme="dark"] .text-gray-500{color:#93ABA0!important;}
+html[data-theme="dark"] .text-gray-400{color:#7C9489!important;}
+/* 边框 */
+html[data-theme="dark"] .border-gray-100,
+html[data-theme="dark"] .border-gray-200,
+html[data-theme="dark"] .border-gray-300{border-color:var(--border)!important;}
+/* 品牌绿在深底上要提亮一档，否则「墨绿压墨绿」看不清 */
+html[data-theme="dark"] .text-emerald-600,
+html[data-theme="dark"] .text-emerald-700,
+html[data-theme="dark"] .text-emerald-800{color:#3FCB8B!important;}
+html[data-theme="dark"] .text-emerald-500{color:#4FD79A!important;}
+html[data-theme="dark"] .bg-emerald-50,
+html[data-theme="dark"] .bg-emerald-100{background:#17352A!important;}
+html[data-theme="dark"] .border-emerald-100,
+html[data-theme="dark"] .border-emerald-200,
+html[data-theme="dark"] .border-emerald-300,
+html[data-theme="dark"] .border-emerald-400{border-color:#2C5C43!important;}
+/* 语义色（警告/危险/提示）在深底的浅底块同样要压深，否则刺眼且文字发灰 */
+html[data-theme="dark"] .bg-red-50,
+html[data-theme="dark"] .bg-red-100{background:#3A1D1D!important;}
+html[data-theme="dark"] .bg-rose-50{background:#3A1D22!important;}
+html[data-theme="dark"] .bg-amber-50,
+html[data-theme="dark"] .bg-amber-100{background:#33290F!important;}
+html[data-theme="dark"] .bg-orange-50,
+html[data-theme="dark"] .bg-orange-100{background:#3A2513!important;}
+html[data-theme="dark"] .bg-blue-50,
+html[data-theme="dark"] .bg-indigo-50{background:#182B3A!important;}
+html[data-theme="dark"] .text-amber-700,
+html[data-theme="dark"] .text-amber-800{color:#F0C94A!important;}
+html[data-theme="dark"] .text-red-600,
+html[data-theme="dark"] .text-rose-700{color:#F98A8A!important;}
+html[data-theme="dark"] .text-orange-700{color:#F5A76A!important;}
+html[data-theme="dark"] .text-cyan-800{color:#7FD8E8!important;}
+html[data-theme="dark"] .text-green-600{color:#4FD79A!important;}
+/* 选中态卡片 / 渐变按钮在深色下的可读性 */
+html[data-theme="dark"] .selected-product-card{background:linear-gradient(135deg,#16332A 0%,#16332A 100%)!important;}
+html[data-theme="dark"] .selected-product-card .text-gray-800,
+html[data-theme="dark"] .selected-product-card span{color:#E8F3EE!important;}
+/* 顶部 sticky 工具条（原 bg-white/95）与搜索框 */
+html[data-theme="dark"] .sticky.top-\\[120px\\]{background:rgba(23,35,30,.94)!important;border-color:var(--border)!important;}
+html[data-theme="dark"] #search-input{background:#1D2C25!important;color:var(--text)!important;border-color:var(--border)!important;}
+/* 表格 / 分隔线 */
+html[data-theme="dark"] .divide-gray-100 > * + *,
+html[data-theme="dark"] .divide-gray-200 > * + *{border-color:var(--border)!important;}
 @media (max-width:760px){
   button.px-3\\.py-1\\.5{min-height:36px;}
   select.px-3\\.py-2{min-height:42px;font-size:15px;}
   #search-input{min-height:44px;font-size:15px;}
   button.flex.items-center{min-height:38px;}
 }
+/* ---- 嵌入态底部留白（2026-09-16 遮挡修复）----
+   内联 max-height:calc(100vh - 160px) 在壳层内嵌时按模块自身视口算，
+   与 iframe 实际高度不符，导致列表底边与 iframe 底边之间出现死带。
+   改用 --embed-bottom（宿主注入 TabBar 高度）参与计算。 */
+.main-scroll-container{
+  max-height:calc(100vh - 160px - var(--embed-bottom,0px))!important;
+  padding-bottom:calc(16px + var(--embed-bottom,0px))!important;
+}
+@media (max-width:760px){
+  .main-scroll-container{max-height:calc(100dvh - 150px - var(--embed-bottom,0px))!important;}
+}
 """
 
-QUIZ = COMMON + """
+QUIZ = COMMON + DARK_COMMON + """
 /* quiz：手机档顶栏防溢出（+hamburger/logo/面包屑/胶囊 弹性收缩）+ 小字下限 */
 @media (max-width:700px){
   .topbar{gap:8px;padding:0 10px;}
@@ -117,7 +261,7 @@ QUIZ = COMMON + """
 .qt-tag{font-size:12px;}
 """
 
-MANUAL = COMMON + """
+MANUAL = COMMON + DARK_COMMON + """
 /* manual：小字下限 + 手机档触控目标 */
 small{font-size:12px;}
 .f-label,#f-cat-cnt{font-size:11.5px;}
@@ -128,7 +272,7 @@ small{font-size:12px;}
 }
 """
 
-REPORT = COMMON + """
+REPORT = COMMON + DARK_COMMON + """
 /* report：手机档触控目标 */
 @media (max-width:760px){
   .m-tab{min-height:40px;}
@@ -137,15 +281,56 @@ REPORT = COMMON + """
 }
 """
 
-MEDICAL = COMMON + """
+MEDICAL = COMMON + DARK_COMMON + """
 /* medical：手机档基础触控目标 */
 @media (max-width:760px){
   button{min-height:36px;}
   input,select{min-height:42px;font-size:15px;}
 }
+/* ---- medical 深色专项（2026-09-16）----
+   medical 为纯十六进制写死的语义类体系（body #f6f8fa / .card #fff / .sec-title #111827…），
+   令牌缺失 → 深色下只有边框变化、文字仍为深灰，故按类名精确映射。 */
+html[data-theme="dark"] body{background:#0E1713!important;color:#E8F3EE!important;}
+html[data-theme="dark"] .card{background:#17231E!important;border-color:#25402F!important;box-shadow:0 4px 14px rgba(0,0,0,.42)!important;}
+html[data-theme="dark"] .card-h{color:#E8F3EE!important;}
+html[data-theme="dark"] .sec-title{color:#E8F3EE!important;}
+html[data-theme="dark"] .menu{background:rgba(23,35,30,.94)!important;border-bottom-color:#25402F!important;}
+/* 说明块 / 报告区 / 标签：浅灰底在深色下必须压深，否则浅底浅字不可读 */
+html[data-theme="dark"] .hint{background:#1B2B24!important;border-color:#2C4636!important;color:#A7BDB2!important;}
+html[data-theme="dark"] .report-area{background:#1B2B24!important;border-color:#25402F!important;color:#CFE0D6!important;}
+html[data-theme="dark"] .src-tag{background:#22352C!important;color:#A7BDB2!important;}
+html[data-theme="dark"] .chip{background:#22352C!important;color:#CFE0D6!important;}
+/* 警示块：橙色系在深色下压深并提亮文字，保留「警示」语义 */
+html[data-theme="dark"] .warn-box{background:#3A2513!important;border-color:#7A4A1E!important;color:#F5C08A!important;}
+html[data-theme="dark"] ul.pts li{color:#C3D6CB!important;}
+html[data-theme="dark"] ul.pts li:before{background:#4A6358!important;}
+html[data-theme="dark"] ul.pts li.warn{color:#F98A8A!important;}
+/* 红/黄/绿语义 chip 深色适配（原为 #fee2e2+#b91c1c 这类浅底深字） */
+html[data-theme="dark"] .chip.red{background:#3A1D1D!important;color:#F98A8A!important;}
+html[data-theme="dark"] .chip.yellow{background:#33290F!important;color:#F0C94A!important;}
+html[data-theme="dark"] .chip.green{background:#17352A!important;color:#4FD79A!important;}
+html[data-theme="dark"] .chip.gray{background:#22352C!important;color:#A7BDB2!important;}
+/* 表单控件 */
+html[data-theme="dark"] input[type=text],
+html[data-theme="dark"] input[type=datetime-local],
+html[data-theme="dark"] select,
+html[data-theme="dark"] textarea{background:#1B2B24!important;color:#E8F3EE!important;border-color:#2C4636!important;}
+html[data-theme="dark"] .fig{color:#A7BDB2!important;}
+html[data-theme="dark"] .fig figcaption{background:#1B2B24!important;color:#A7BDB2!important;border:1px solid #2C4636;}
+html[data-theme="dark"] .fig b{color:#F98A8A!important;}
+html[data-theme="dark"] .fig img{background:#17231E!important;border-color:#25402F!important;}
+html[data-theme="dark"] .fig-wrap .fig span{background:#22352C!important;}
+/* 页头标题：原文 .title 是 #111827（深字），深色下必须压浅 */
+html[data-theme="dark"] .title{color:#F2F8F5!important;}
+html[data-theme="dark"] .headbar .sub,
+html[data-theme="dark"] .headbar small{color:#A7BDB2!important;}
+html[data-theme="dark"] .step-tag{background:#17352A!important;color:#4FD79A!important;}
+html[data-theme="dark"] .eq-tag{background:#22352C!important;color:#CFE0D6!important;}
+html[data-theme="dark"] .f-label{color:#A7BDB2!important;}
+html[data-theme="dark"] .add-row-btn{background:#22352C!important;color:#8FD9B4!important;border-color:#2C4636!important;}
 """
 
-PERF = COMMON + """
+PERF = COMMON + DARK_COMMON + """
 /* performance：Bootstrap 令牌收拢为春秋绿系 + 图表小字下限 + 表单触控 */
 :root{
   --bs-primary:#148453;--bs-primary-rgb:20,132,83;
@@ -160,9 +345,164 @@ svg text{font-size:10.5px;}
   #loginUsername,#loginPassword{min-height:46px;}
   .navbar-toggler{min-width:46px;min-height:46px;}
 }
+/* ---- performance 深色专项（2026-09-16）----
+   该模块是 Bootstrap 5：原生暗色靠 data-bs-theme="dark"（自带 163 条规则），
+   但壳层只设了 data-theme，故深色一直没生效。此处把两者打通 + 修绿系在深底的对比度。
+   特别注意：performance 内有一条「全局文字颜色统一为黑色」的旧规则
+   （body,.card,div,span,p,h1..h6,td,th,li,button{color:#000}），会与暗色互斥，
+   必须在暗色下用同等选择器 + !important 明确压回浅色文字。 */
+html[data-theme="dark"]{
+  --bs-body-bg:#0F1A14;--bs-body-color:#E8F3EE;
+  --bs-emphasis-color:#F2F8F5;--bs-secondary-color:#9CB3A7;
+  --bs-tertiary-bg:#1B2B24;--bs-secondary-bg:#17231E;
+  --bs-border-color:#25402F;--bs-border-color-translucent:rgba(255,255,255,.10);
+  --bs-body-bg-rgb:15,26,20;
+}
+/* 压回旧「全局黑色文字」规则：暗色下这些元素一律用浅色文字 */
+html[data-theme="dark"] body,
+html[data-theme="dark"] .module-content,
+html[data-theme="dark"] div,
+html[data-theme="dark"] p,
+html[data-theme="dark"] span,
+html[data-theme="dark"] label,
+html[data-theme="dark"] small,
+html[data-theme="dark"] h1,
+html[data-theme="dark"] h2,
+html[data-theme="dark"] h3,
+html[data-theme="dark"] h4,
+html[data-theme="dark"] h5,
+html[data-theme="dark"] h6,
+html[data-theme="dark"] li,
+html[data-theme="dark"] dt,
+html[data-theme="dark"] dd,
+html[data-theme="dark"] td,
+html[data-theme="dark"] th,
+html[data-theme="dark"] .form-label,
+html[data-theme="dark"] .form-text,
+html[data-theme="dark"] .metric-label,
+html[data-theme="dark"] .module-section-title,
+html[data-theme="dark"] .user-info{color:#E8F3EE!important;}
+html[data-theme="dark"] .text-muted,
+html[data-theme="dark"] .form-text,
+html[data-theme="dark"] small{color:#9CB3A7!important;}
+/* 按钮：旧规则给 button 也上了黑色文字，但主按钮是绿底白字，需单独排除 */
+html[data-theme="dark"] .btn-primary,
+html[data-theme="dark"] .btn-success,
+html[data-theme="dark"] .btn-danger{color:#fff!important;}
+html[data-theme="dark"] button:not(.btn-primary):not(.btn-success):not(.btn-danger):not(.navbar-toggler){color:#E8F3EE;}
+/* Bootstrap 组件在深色下的显式兜底（部分版本 dark 变量不覆盖这些） */
+html[data-theme="dark"] .card,
+html[data-theme="dark"] .card-body,
+html[data-theme="dark"] .card-header,
+html[data-theme="dark"] .modal-content,
+html[data-theme="dark"] .offcanvas,
+html[data-theme="dark"] .dropdown-menu,
+html[data-theme="dark"] .list-group-item{background:#17231E!important;color:#E8F3EE!important;border-color:#25402F!important;}
+html[data-theme="dark"] .card-header{border-bottom-color:#25402F!important;}
+html[data-theme="dark"] .modal-header,
+html[data-theme="dark"] .modal-footer{border-color:#25402F!important;}
+html[data-theme="dark"] .table{--bs-table-color:#E8F3EE;--bs-table-bg:transparent;--bs-table-border-color:#25402F;color:#E8F3EE;}
+html[data-theme="dark"] .table-striped>tbody>tr:nth-of-type(odd)>*{--bs-table-accent-bg:#1B2B24;color:#E8F3EE;}
+/* 表头：Bootstrap 的 thead 默认背景是 #fafbfc 浅灰，深色下会变浅底浅字 */
+html[data-theme="dark"] thead,
+html[data-theme="dark"] .table>thead,
+html[data-theme="dark"] .table-light>thead,
+html[data-theme="dark"] table thead tr{background:#1E2E27!important;}
+html[data-theme="dark"] thead th,
+html[data-theme="dark"] .table>thead th,
+html[data-theme="dark"] table th{background:#1E2E27!important;color:#C3D6CB!important;border-bottom-color:#2C4636!important;}
+html[data-theme="dark"] tbody td{color:#E8F3EE;border-color:#22362C;}
+/* 顶部状态提示条 / 底部固定页脚（rgba(255,255,255,.8) 半透明白） */
+html[data-theme="dark"] .save-status,
+html[data-theme="dark"] .status-bar,
+html[data-theme="dark"] .toast-bar,
+html[data-theme="dark"] .top-status,
+html[data-theme="dark"] footer.fixed-bottom,
+html[data-theme="dark"] .fixed-bottom{background:rgba(23,35,30,.92)!important;color:#C3D6CB!important;border-color:#25402F!important;}
+html[data-theme="dark"] footer.fixed-bottom *,
+html[data-theme="dark"] .fixed-bottom *{color:#C3D6CB!important;}
+html[data-theme="dark"] footer.fixed-bottom a,
+html[data-theme="dark"] .fixed-bottom a{color:#5BD9A0!important;}
+html[data-theme="dark"] .form-control,
+html[data-theme="dark"] .form-select{background:#1B2B24!important;color:#E8F3EE!important;border-color:#2C4636!important;}
+html[data-theme="dark"] .form-control::placeholder{color:#6E8479!important;}
+html[data-theme="dark"] .bg-white,
+html[data-theme="dark"] .bg-body{background:#17231E!important;}
+html[data-theme="dark"] .bg-light{background:#1B2B24!important;}
+html[data-theme="dark"] .border{ border-color:#25402F!important;}
+/* 登录页：左品牌区是深绿渐变（保持），右表单区 #f8fafc 白底要转深底深字 */
+html[data-theme="dark"] .login-container{background:linear-gradient(135deg,#0A2B1D 0%,#0E3B28 35%,#124D34 70%,#155C3E 100%);}
+html[data-theme="dark"] .login-form-section{background:#121E19!important;}
+html[data-theme="dark"] .login-body,
+html[data-theme="dark"] .login-card,
+html[data-theme="dark"] .login-wrapper .login-form,
+html[data-theme="dark"] .login-right,
+html[data-theme="dark"] .form-inner{background:transparent!important;color:#E8F3EE!important;}
+html[data-theme="dark"] .login-body h2,
+html[data-theme="dark"] .login-body .login-title,
+html[data-theme="dark"] .login-sub{color:#E8F3EE!important;}
+/* 登录区显式硬编码色全部转深色系（原文：h3 #0f172a / p #64748b / label #334155 / input #fff 底） */
+html[data-theme="dark"] .form-welcome h3{color:#F2F8F5!important;}
+html[data-theme="dark"] .form-welcome p{color:#A7BCB1!important;}
+html[data-theme="dark"] .form-field label{color:#D3E3D9!important;}
+html[data-theme="dark"] .label-icon{color:#4FD79A!important;}
+html[data-theme="dark"] .input-container input{background:#1B2B24!important;color:#E8F3EE!important;border-color:#2C4636!important;}
+html[data-theme="dark"] .input-container input::placeholder{color:#6E8479!important;}
+html[data-theme="dark"] .input-container input:hover{border-color:#3A6B52!important;}
+html[data-theme="dark"] .input-container input:focus{border-color:#1FA56A!important;box-shadow:0 0 0 4px rgba(31,165,106,0.18)!important;}
+/* 游客模式 / 辅助链接 / 底部提示 等浅底浅字 */
+html[data-theme="dark"] .guest-btn,
+html[data-theme="dark"] .login-footer,
+html[data-theme="dark"] .login-divider,
+html[data-theme="dark"] .form-tip,
+html[data-theme="dark"] .form-hint{color:#A7BCB1!important;}
+html[data-theme="dark"] .login-input{background:#1B2B24!important;color:#E8F3EE!important;border-color:#2C4636!important;}
+html[data-theme="dark"] .login-input::placeholder{color:#6E8479!important;}
+/* error toast / 表单校验提示 的浅底块 */
+html[data-theme="dark"] .form-error,
+html[data-theme="dark"] .error-msg{background:#3A1F22!important;color:#FFB4B4!important;border-color:#5C2E33!important;}
+/* 品牌绿在深底提亮，避免墨绿压墨绿 */
+html[data-theme="dark"] .text-success,
+html[data-theme="dark"] .text-primary{color:#4FD79A!important;}
+html[data-theme="dark"] .btn-outline-primary{--bs-btn-color:#4FD79A;--bs-btn-border-color:#3A6B52;color:#4FD79A!important;}
+html[data-theme="dark"] .brand-subtitle{color:#9CB3A7!important;}
+/* 图表：深底上刻度线/文字要换成浅色，否则不可见 */
+html[data-theme="dark"] svg text{fill:#C3D6CB!important;}
+html[data-theme="dark"] canvas{filter:none;}
+/* 侧边导航：旧规则用白底下黑字，暗色下转深底 */
+html[data-theme="dark"] .sidebar,
+html[data-theme="dark"] .module-nav{background:#14201A!important;}
+html[data-theme="dark"] .nav-link{color:#CFE0D6!important;}
+html[data-theme="dark"] .nav-link.active{background:#1FA56A!important;color:#fff!important;}
+/* ---- performance 自定义组件深色映射（2026-09-16 复盘补）----
+   这些是本模块自写的白底组件（background:white / #fff 写死），
+   Bootstrap 暗色变量覆盖不到，必须按类名逐个压深。 */
+html[data-theme="dark"] .batch-toolbar{background:#17231E!important;box-shadow:0 6px 18px rgba(0,0,0,.35)!important;color:#E8F3EE!important;border:1px solid #25402F!important;}
+html[data-theme="dark"] .custom-months-panel{background:#17231E!important;border-color:#2C4636!important;color:#E8F3EE!important;}
+html[data-theme="dark"] .stat-card{background:#17231E!important;border-color:#25402F!important;}
+html[data-theme="dark"] .period-pill{background:#1B2B24!important;color:#CFE0D6!important;border-color:#2C4636!important;}
+html[data-theme="dark"] .period-pill.active{background:#1FA56A!important;color:#fff!important;border-color:#1FA56A!important;}
+html[data-theme="dark"] .metric-label{color:#A7BCB1!important;}
+html[data-theme="dark"] .metric-value{color:#F2F8F5!important;}
+/* 登录页辅助元素（游客按钮 / 分隔线 / 提示语） */
+html[data-theme="dark"] .btn-guest{background:#1B2B24!important;color:#D3E3D9!important;border-color:#2C4636!important;}
+html[data-theme="dark"] .btn-guest:hover{background:#22352C!important;border-color:#3A6B52!important;}
+html[data-theme="dark"] .guest-hint{color:#8FA69A!important;}
+html[data-theme="dark"] .divider-text{color:#8FA69A!important;}
+html[data-theme="dark"] .form-divider:before,
+html[data-theme="dark"] .form-divider:after{background-color:#2C4636!important;}
+/* Bootstrap 描边按钮：深色下透明底 + 亮字，确保在深底可见 */
+html[data-theme="dark"] .btn-outline-secondary,
+html[data-theme="dark"] .btn-outline-primary,
+html[data-theme="dark"] .btn-outline-warning,
+html[data-theme="dark"] .btn-outline-info{background:transparent!important;}
+html[data-theme="dark"] .btn-outline-secondary{--bs-btn-color:#C3D6CB;--bs-btn-border-color:#3A5748;--bs-btn-hover-bg:#2A3F35;--bs-btn-hover-color:#E8F3EE;}
+html[data-theme="dark"] .btn-outline-primary{--bs-btn-color:#5BD9A0;--bs-btn-border-color:#2C6B4C;--bs-btn-hover-bg:#1FA56A;--bs-btn-hover-color:#fff;}
+html[data-theme="dark"] .btn-outline-warning{--bs-btn-color:#F0C94A;--bs-btn-border-color:#6B5417;--bs-btn-hover-bg:#8A6C1A;--bs-btn-hover-color:#141309;}
 """
 
-RISK = COMMON + """
+
+RISK = COMMON + DARK_COMMON + """
 /* risk-lite：stat-pill 内联 min-width 撑破文档流（手机档改为纵向堆叠）+ 顶栏可见性 */
 @media (max-width:900px){
   .stat-pill[style]{min-width:0!important;flex:1 1 100%!important;}
@@ -177,6 +517,42 @@ RISK = COMMON + """
   .topbar{flex-wrap:wrap;}
   .topbar .breadcrumb{display:none!important;}
 }
+/* ---- risk-lite 深色专项（2026-09-16）----
+   该模块虽多处带 data-theme 标记，但没有任何暗色规则 → 深色下只有边框变。
+   它用的是自定义类 + 深蓝灰（#2D3E5C / #9FB3CC），按语义类补暗色。 */
+html[data-theme="dark"]{
+  --bg:#0E1622;--bg-card:#151F2E;--text:#E6EDF6;--text2:#95A6BF;--border:#24344A;
+}
+html[data-theme="dark"] body{background:#0E1622!important;color:#E6EDF6!important;}
+html[data-theme="dark"] .topbar{background:#151F2E!important;border-bottom-color:#24344A!important;}
+html[data-theme="dark"] .topbar .logo span,
+html[data-theme="dark"] .breadcrumb{color:#E6EDF6!important;}
+html[data-theme="dark"] .stat-pill{background:#182335!important;border-color:#24344A!important;color:#E6EDF6!important;}
+html[data-theme="dark"] .stat-pill .sp-val,
+html[data-theme="dark"] .stat-pill b{color:#5FE0A6!important;}
+html[data-theme="dark"] .card,
+html[data-theme="dark"] .risk-card,
+html[data-theme="dark"] .panel{background:#151F2E!important;border-color:#24344A!important;color:#E6EDF6!important;}
+html[data-theme="dark"] .panel-h,
+html[data-theme="dark"] .card-h{background:#1A2637!important;color:#E6EDF6!important;border-color:#24344A!important;}
+html[data-theme="dark"] input,
+html[data-theme="dark"] select,
+html[data-theme="dark"] textarea{background:#1A2637!important;color:#E6EDF6!important;border-color:#2B3E57!important;}
+html[data-theme="dark"] .text-muted,
+html[data-theme="dark"] .meta{color:#95A6BF!important;}
+html[data-theme="dark"] .bg-white{background:#151F2E!important;}
+html[data-theme="dark"] .bg-light,
+html[data-theme="dark"] .bg-gray-50{background:#1A2637!important;}
+html[data-theme="dark"] .border{ border-color:#24344A!important;}
+html[data-theme="dark"] .btn-briefing,
+html[data-theme="dark"] .btn-theme-toggle{background:#1A2637!important;color:#E6EDF6!important;border-color:#2B3E57!important;}
+/* 风险等级语义色：深底上提亮，保留警示可读性 */
+html[data-theme="dark"] .lv-high,
+html[data-theme="dark"] .risk-high{color:#FF7A70!important;}
+html[data-theme="dark"] .lv-mid,
+html[data-theme="dark"] .risk-mid{color:#FFB95E!important;}
+html[data-theme="dark"] .lv-low,
+html[data-theme="dark"] .risk-low{color:#5FE0A6!important;}
 """
 
 # beauty 品牌色收拢映射（Tailwind 翡翠绿 -> 春秋绿系，字面量替换）
@@ -195,15 +571,15 @@ TARGETS = {
     'quiz.html': QUIZ,
     'manual.html': MANUAL,
     'report.html': REPORT,
-    'issues.html': COMMON,
+    'issues.html': COMMON + DARK_COMMON,
     'medical.html': MEDICAL,
     'performance.html': PERF,
     'risk-lite.html': RISK,
-    'spring-assistant.html': COMMON,
-    'daily.template.html': COMMON,
-    'kb-admin.template.html': COMMON,
-    'daily.html': COMMON,
-    'kb-admin.html': COMMON,
+    'spring-assistant.html': COMMON + DARK_COMMON,
+    'daily.template.html': COMMON + DARK_COMMON,
+    'kb-admin.template.html': COMMON + DARK_COMMON,
+    'daily.html': COMMON + DARK_COMMON,
+    'kb-admin.html': COMMON + DARK_COMMON,
     # cc-home.html 刻意跳过：桌面三栏为 2026-09-14 手调定稿，不在本轮范围
 }
 

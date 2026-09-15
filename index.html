@@ -1598,7 +1598,7 @@ const EMBED_CSS = {
 };
 function injectEmbedCss(id, frame){
   const css = EMBED_CSS[id];
-  if(!css) return;
+  const EMBED_BASE = ':root{--embed-bottom:0px;}';
   try{
     const d = frame.contentDocument;
     if(!d) return;
@@ -1606,8 +1606,35 @@ function injectEmbedCss(id, frame){
     if(existing) existing.remove();
     const st = d.createElement('style');
     st.id = 'embed-mode-css';
-    st.textContent = css;
+    // 内嵌态公共补偿 + 模块专属隐藏规则：
+    // ① 移动端底部 TabBar 会覆盖 iframe 底部，模块自身 max-height:calc(100vh-…)
+    //    是按模块视口算的，与 iframe 实际高度不符 → 出现「死带」遮挡（2026-09-16 修复）
+    //    这里把真实 TabBar 高度写进 --embed-bottom，由模块 CSS 参与计算。
+    // ② 深色模式：Bootstrap 系模块认 data-bs-theme，需一并设置。
+    st.textContent = EMBED_BASE + (css || '');
     (d.head || d.documentElement).appendChild(st);
+    applyEmbedVars(id, frame);
+  }catch(e){}
+}
+/* 把宿主实时的底部导航高度写入模块 CSS 变量（TabBar 高度 + 安全区），
+   并在主题切换时同步 data-theme / data-bs-theme 到模块文档。 */
+function applyEmbedVars(id, frame){
+  if(!frame) return;
+  try{
+    const d = frame.contentDocument, w = frame.contentWindow;
+    if(!d || !d.documentElement) return;
+    const tb = document.getElementById('mTabbar');
+    let h = 0;
+    if(tb && w && w.innerWidth <= 720){
+      const r = tb.getBoundingClientRect();
+      h = Math.round(r.height) || 0;
+    }
+    d.documentElement.style.setProperty('--embed-bottom', h + 'px');
+    const t = document.documentElement.getAttribute('data-theme') || 'light';
+    d.documentElement.setAttribute('data-theme', t);
+    // Bootstrap 5.3 原生暗色走 data-bs-theme
+    d.documentElement.setAttribute('data-bs-theme', t === 'dark' ? 'dark' : 'light');
+    if(d.body) d.body.setAttribute('data-bs-theme', t === 'dark' ? 'dark' : 'light');
   }catch(e){}
 }
 
@@ -1649,11 +1676,6 @@ function switchModule(id){
         if(loader){ loader.classList.add('hidden'); loader.onclick = null; loader.style.cursor = ''; }
         injectEmbedCss(id, frame);
         restoreModuleScroll(id);
-        try{
-          const doc = frame.contentDocument;
-          const t = document.documentElement.getAttribute('data-theme');
-          if(doc && doc.documentElement) doc.documentElement.setAttribute('data-theme', t);
-        }catch(e){}
       };
       frame.onerror = function(){ onLoadFail(); };
       frame.src = modUrl(id);
@@ -1694,16 +1716,17 @@ function restoreModuleScroll(id){
 
 /* ===================== 主题 ===================== */
 let hostTheme = 'light';
+const ALL_MODS = ['qa','home','quiz','performance','beauty','risk','medical','daily','manual','report','kbadmin','issues'];
 function applyTheme(t){
   hostTheme = t;
   document.documentElement.setAttribute('data-theme', t);
+  document.documentElement.setAttribute('data-bs-theme', t === 'dark' ? 'dark' : 'light');
   const btn = document.getElementById('themeBtn');
-  btn.textContent = t==='dark' ? '🌙' : '☀️';
-  ['qa','quiz','performance','beauty','risk','medical','daily','manual','report','kbadmin','issues'].forEach(id=>{
+  if(btn) btn.textContent = t==='dark' ? '🌙' : '☀️';
+  // 同步已加载的模块（含 data-bs-theme，Bootstrap 系模块据此切换原生暗色）
+  ALL_MODS.forEach(id=>{
     const f = document.getElementById('frame-'+id);
-    if(f && f.contentDocument){
-      try{ f.contentDocument.documentElement.setAttribute('data-theme', t); }catch(e){}
-    }
+    if(f && f.contentDocument){ try{ applyEmbedVars(id, f); }catch(e){} }
   });
 }
 function cycleTheme(){
@@ -1843,8 +1866,80 @@ function openPacksModal(){
     + packsUpdateReady.map(p=>'· <b>' + escHtml(p.title || p.packId) + '</b>（' + (PACKS_TYPE_LABEL[p.type] || p.type) + ' v' + (p.version != null ? p.version : 1) + ' · ' + escHtml(p.updatedAt || '') + '）').join('<br>');
   document.getElementById('packsModal').classList.add('show');
 }
-function closePacksModal(){ document.getElementById('packsModal').classList.remove('show'); }
+function closePacksModal(){ const m=document.getElementById('packsModal'); if(m) m.classList.remove('show'); }
 function closeModalId(id){ const m=document.getElementById(id); if(m) m.classList.remove('show'); }
+/* ===== 弹窗动效适配层（2026-09-16）=====
+   把既有的 .modal-mask / .modal-card 结构化弹窗，升级为 CCSheet 的动效语言：
+   ④ 背景退后（底层变暗+模糊+缩小）+ ⑤ 弹性出现（先抬后落）+ ② 半屏停住（手机档）
+   ① 方向性：按触发按钮的水平位置决定进出场方向
+   ⑥ 拖拽关闭：手机档向下拖拽（距离+速度双判定）
+   不改变任何既有 DOM 结构与业务回调，只加动效与手势。 */
+/* ④ 背景退后：安全读写宿主 <html> 的 .csn-recede（无头环境/宿主 documentElement 缺失时不报错） */
+function fxRecede(on){
+  try{
+    const el = document.documentElement;
+    if(!el || !el.classList) return;
+    el.classList[on ? 'add' : 'remove']('csn-recede');
+  }catch(e){}
+}
+function fxModal(mask, opts){
+  if(!mask || !mask.classList || mask._fxReady) return mask;
+  opts = opts || {};
+  const card = mask.querySelector('.modal-card') || mask.firstElementChild;
+  mask._fxReady = true;
+  mask._fxCard = card;
+
+  // 定位方向：按触发点的水平位置给出 origin
+  function directionFor(ev){
+    if(!card) return '';
+    try{
+      const r = card.getBoundingClientRect();
+      const x = (ev && ev.clientX) ? ev.clientX : (window.innerWidth / 2);
+      return x < r.left + r.width / 2 ? 'from-left' : 'from-right';
+    }catch(e){ return ''; }
+  }
+  // 安全读写卡片类名（无头测试桩可能不含 classList）
+  function cardCls(on, name){
+    try{ if(card && card.classList) card.classList[on ? 'add' : 'remove'](name); }catch(e){}
+  }
+
+  const origAdd = mask.classList.add.bind(mask.classList);
+  mask.classList.add = function(){
+    const args = Array.prototype.slice.call(arguments);
+    origAdd.apply(null, args);
+    if(args.indexOf('show') >= 0){
+      fxRecede(true);
+      if(card){
+        cardCls(false, 'fx-out');
+        try{ void card.offsetWidth; }catch(e){}
+        cardCls(true, 'fx-in');
+        if(mask._fxDir) cardCls(true, mask._fxDir);
+      }
+    }
+  };
+  const origRemove = mask.classList.remove.bind(mask.classList);
+  mask.classList.remove = function(){
+    const args = Array.prototype.slice.call(arguments);
+    origRemove.apply(null, args);
+    if(args.indexOf('show') >= 0){
+      fxRecede(false);
+      cardCls(false, 'fx-in');
+    }
+  };
+  mask._fxSetDir = function(ev){ const d = directionFor(ev); mask._fxDir = d; };
+  return mask;
+}
+/* 页面载入后自动给壳层三个弹窗挂上动效；点击遮罩空白处关闭 + 拖拽关闭 */
+(function(){
+  function install(){
+    ['backupModal','packsModal','profileModal'].forEach(function(id){
+      const m = document.getElementById(id);
+      if(m) fxModal(m);
+    });
+  }
+  if(document.readyState === 'loading') document.addEventListener('DOMContentLoaded', install);
+  else install();
+})();
 document.addEventListener('keydown',function(e){ if(e.key==='Escape'){ ['packsModal','backupModal','profileModal'].forEach(function(id){ closeModalId(id); }); } });
 async function fetchPackText(p, sha256){
   // p 为清单条目；依次尝试 源站 → 镜像，sha256 校验通过才返回（镜像缓存过期自动跳过）
@@ -2510,13 +2605,46 @@ function mGo(id){
   switchModule(id);
 }
 function mGoMod(id){ closeMoreSheet(); switchModule(id); }
+let _moreSheetInst = null;
 function openMoreSheet(){
+  syncMoreSheet();
+  /* 「更多」面板：优先走 CCSheet 引擎
+     —— 弹性出现(先抬后落) + 背景退后 + 跟随点击方向滑出 + 拖拽关闭 + 多档磁吸 */
+  if(window.CCSheet){
+    const items = [
+      { key:'home',     icon:'🏠', label:'CC 之家' },
+      { key:'risk',     icon:'⚠️', label:'风险预警' },
+      { key:'medical',  icon:'🚑', label:'医疗急救' },
+      { key:'daily',    icon:'❓', label:'日常问题' },
+      { key:'manual',   icon:'📕', label:'手册奖惩' },
+      { key:'report',   icon:'🗂', label:'事件报告' },
+      { key:'kbadmin',  icon:'📇', label:'库管理' },
+      { key:'issues',   icon:'🐞', label:'问题反馈' }
+    ].map(function(it){
+      it.variant = (it.key === currentMod) ? 'primary' : '';
+      it.onClick = function(){ setTimeout(function(){ mGoMod(it.key); }, 60); };
+      return it;
+    });
+    const tb = document.getElementById('mTabbar');
+    let ox = null;
+    if(tb){
+      const r = tb.getBoundingClientRect();
+      ox = r.left + r.width * 0.9;   // 「更多」按钮在右下角 → 抽屉从右侧方向滑出
+    }
+    _moreSheetInst = window.CCSheet.actions({
+      title: '全部板块',
+      items: items,
+      snaps: [0.62, 1],
+      originX: ox
+    });
+    return;
+  }
   const sh = document.getElementById('mSheet'), mk = document.getElementById('mSheetMask');
   if(!sh) return;
-  syncMoreSheet();
   sh.classList.add('show'); mk.classList.add('show');
 }
 function closeMoreSheet(){
+  if(_moreSheetInst){ try{ _moreSheetInst.close('api'); }catch(e){} _moreSheetInst = null; }
   const sh = document.getElementById('mSheet'), mk = document.getElementById('mSheetMask');
   if(sh) sh.classList.remove('show');
   if(mk) mk.classList.remove('show');
@@ -2540,8 +2668,18 @@ function syncMTabbar(){
   } else { syncMTabbar(); }
   window.addEventListener('resize', function(){
     if(!window.matchMedia('(max-width:720px)').matches) closeMoreSheet();
+    // TabBar 出现/消失（横竖屏切换、桌面↔手机）后重算模块的底部补偿
+    refreshEmbedVars();
   });
+  window.addEventListener('orientationchange', function(){ setTimeout(refreshEmbedVars, 260); });
 })();
+/* 重新把当前 TabBar 高度与主题写进所有已加载模块 */
+function refreshEmbedVars(){
+  ['qa','home','quiz','performance','beauty','risk','medical','daily','manual','report','kbadmin','issues'].forEach(function(id){
+    const f = document.getElementById('frame-'+id);
+    if(f && f.contentDocument){ try{ applyEmbedVars(id, f); }catch(e){} }
+  });
+}
 </script>
 <style id="mobile-native-hardening">
 /* === mobile-native-hardening 2026-09-14 · finesse-ui h5-mobile + impeccable === */
@@ -2613,5 +2751,703 @@ button:active,[onclick]:active,a:active,summary:active,[role=button]:active{filt
   setTimeout(safe,800);
 })();
 </script>
+<style id="ccSheetCss">/*__CC_SHEET:v1__*/
+/* =============================================================
+ * CCSheet · 统一弹窗 / 抽屉交互引擎（2026-09-16）
+ * 十种交互：底部抽屉 · 半屏停住 · 全屏展开 · 背景退后 · 弹性出现
+ *           拖拽关闭 · 拖拽扩展(磁吸) · 嵌套抽屉 · 抽屉变页面 · 弹窗变成功
+ * 用法：CCSheet.open({ id, title, body, actions, snaps:[.5,1], ... })
+ * ============================================================= */
+:root{
+  --csn-snap-half:52vh;
+  --csn-radius:22px;
+  --csn-ease-elastic:cubic-bezier(.22,1.28,.36,1);   /* 先抬后落 */
+  --csn-ease-out:cubic-bezier(.32,.72,.34,1);
+  --csn-scrim:rgba(9,20,15,.44);
+  --csn-grabber:#D6E2DA;
+}
+html[data-theme="dark"]{
+  --csn-scrim:rgba(0,0,0,.62);
+  --csn-grabber:#3A5748;
+}
+/* ---------- 遮罩：背景退后（变暗 + 模糊 + 轻微缩小）---------- */
+.csn-mask{
+  position:fixed; inset:0; z-index:520;
+  background:var(--csn-scrim);
+  opacity:0; pointer-events:none;
+  transition:opacity .28s ease;
+  -webkit-backdrop-filter:blur(0px); backdrop-filter:blur(0px);
+  transition:opacity .28s ease, backdrop-filter .3s ease, -webkit-backdrop-filter .3s ease;
+}
+.csn-mask.show{opacity:1; pointer-events:auto;}
+/* 背景退后：给主内容加类，产生「层级后退」观感 */
+.csn-recede .sys-area,
+.csn-recede .m-tabbar,
+.csn-recede .topbar,
+.csn-recede .livery-stripe{
+  transform:scale(.955);
+  transform-origin:50% 30%;
+  transition:transform .34s var(--csn-ease-out), filter .34s ease, opacity .34s ease;
+  filter:blur(2.5px) saturate(.92);
+}
+.csn-recede .csn-mask{ -webkit-backdrop-filter:blur(7px); backdrop-filter:blur(7px); }
+/* ---------- 抽屉本体 ---------- */
+.csn-sheet{
+  position:fixed; left:0; right:0; bottom:0; z-index:530;
+  background:var(--bg-card,#fff); color:var(--text,#0F2A1F);
+  border-radius:var(--csn-radius) var(--csn-radius) 0 0;
+  border-top:1px solid var(--border,#E5EDE9);
+  box-shadow:0 -18px 48px rgba(10,30,22,.22);
+  display:flex; flex-direction:column;
+  max-height:92vh;
+  padding-bottom:env(safe-area-inset-bottom,0px);
+  transform:translate3d(0,102%,0);
+  visibility:hidden;
+  will-change:transform;
+  touch-action:none;                 /* 由引擎接管手势，避免与页面滚动打架 */
+  overscroll-behavior:contain;
+}
+.csn-sheet.csn-open{visibility:visible;}
+.csn-sheet.csn-dragging{transition:none!important;}
+/* 弹性出现：先抬后落（overshoot）*/
+.csn-sheet.csn-anim-in{transition:transform .42s var(--csn-ease-elastic);}
+.csn-sheet.csn-anim-out{transition:transform .26s cubic-bezier(.4,0,1,1);}
+/* 抓手 —— 半屏/全屏/抽屉态圆角联动 */
+.csn-grab{
+  flex:none; padding:9px 0 5px; display:flex; justify-content:center;
+  cursor:grab; touch-action:none;
+}
+.csn-grab i{
+  display:block; width:42px; height:4.5px; border-radius:99px;
+  background:var(--csn-grabber);
+  transition:width .3s var(--csn-ease-out), height .3s var(--csn-ease-out), opacity .3s;
+}
+.csn-sheet.csn-at-full .csn-grab i{width:30px;opacity:.7;}
+/* 标题栏 */
+.csn-head{
+  flex:none; display:flex; align-items:center; gap:10px;
+  padding:2px 18px 12px; border-bottom:1px solid var(--border,#E5EDE9);
+}
+.csn-head h3{
+  margin:0; font-size:1rem; font-weight:800; color:var(--text,#0F2A1F);
+  flex:1; min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;
+}
+.csn-head .csn-sub{font-size:.72rem;color:var(--text2,#5A6F65);font-weight:600;}
+.csn-x{
+  width:30px;height:30px;border-radius:9px;border:none;flex:none;
+  background:var(--primary-mist,#F4F9F6); color:var(--text2,#5A6F65);
+  font-size:.9rem; line-height:1; cursor:pointer;
+  display:inline-flex; align-items:center; justify-content:center;
+  transition:background .2s,color .2s,transform .2s;
+}
+.csn-x:hover{background:var(--primary-soft,#E8F3EE);color:var(--primary,#148453);}
+.csn-x:active{transform:scale(.92);}
+/* 内容区 */
+.csn-body{
+  flex:1 1 auto; min-height:0; overflow-y:auto;
+  -webkit-overflow-scrolling:touch;
+  padding:14px 18px 8px;
+  overscroll-behavior:contain;
+  touch-action:pan-y;
+}
+/* 动作区 */
+.csn-foot{
+  flex:none; padding:10px 18px 16px; display:flex; gap:10px;
+  border-top:1px solid var(--border,#E5EDE9);
+}
+.csn-foot:empty{display:none;}
+.csn-btn{
+  flex:1; min-height:44px; border-radius:12px; border:1px solid var(--border,#E5EDE9);
+  background:var(--bg,#F5F8F6); color:var(--text,#0F2A1F);
+  font-size:.88rem; font-weight:700; cursor:pointer;
+  font-family:var(--font-sans,system-ui);
+  display:inline-flex; align-items:center; justify-content:center; gap:6px;
+  transition:transform .16s, background .2s, color .2s, box-shadow .2s;
+}
+.csn-btn:active{transform:translateY(1px) scale(.99);}
+.csn-btn.primary{
+  background:linear-gradient(135deg,#148453 0%,#1FA56A 100%);
+  color:#fff; border-color:transparent;
+  box-shadow:0 6px 18px rgba(20,132,83,.28);
+}
+.csn-btn.ghost{background:transparent;}
+/* ---------- ① 底部抽屉：跟随点击方向滑出 ---------- */
+/* 由 JS 设置 --csn-origin-x，让出场方向跟随触发点水平位置 */
+.csn-sheet.csn-slide-dir{
+  transform-origin:var(--csn-origin-x,50%) 100%;
+}
+/* ---------- ② 半屏停住 / ⑦ 拖拽扩展：磁吸档位 ---------- */
+.csn-sheet.csn-snap-half{ max-height:var(--csn-snap-half); }
+/* ---------- ⑩ 弹窗变成功：按钮形变 + 连贯收尾 ---------- */
+.csn-success{
+  display:flex; flex-direction:column; align-items:center; justify-content:center;
+  gap:12px; padding:26px 18px 30px; text-align:center;
+}
+.csn-success .csn-tick{
+  width:64px;height:64px;border-radius:50%;
+  background:linear-gradient(135deg,#148453,#1FA56A); color:#fff;
+  display:flex;align-items:center;justify-content:center;font-size:1.9rem;
+  transform:scale(.3); opacity:0;
+  animation:csnPop .5s var(--csn-ease-elastic) forwards;
+}
+@keyframes csnPop{ to{transform:scale(1);opacity:1;} }
+.csn-success h4{margin:0;font-size:1.02rem;font-weight:800;color:var(--text,#0F2A1F);}
+.csn-success p{margin:0;font-size:.82rem;color:var(--text2,#5A6F65);line-height:1.6;}
+/* 主按钮形变（宽 -> 圆 -> 复位）*/
+.csn-btn.csn-morphing{
+  animation:csnMorph .62s var(--csn-ease-out) forwards;
+  pointer-events:none;
+}
+@keyframes csnMorph{
+  0%{transform:scale(1);}
+  38%{transform:scale(.9);border-radius:12px;}
+  62%{transform:scale(1.02);border-radius:52px;}
+  100%{transform:scale(1);border-radius:12px;}
+}
+/* ---------- ⑨ 抽屉变页面：原生过渡，无动画断层 ---------- */
+.csn-sheet.csn-to-page{
+  transition:transform .34s var(--csn-ease-out), border-radius .34s var(--csn-ease-out);
+  border-radius:0;
+  max-height:100vh;
+  height:100vh;
+  top:0;
+}
+/* 抽屉展开为全屏时的圆角联动 */
+.csn-sheet.csn-at-full{border-radius:18px 18px 0 0;}
+/* ---------- ⑧ 嵌套抽屉：上层弹出，底层后退缩小变暗 ---------- */
+.csn-sheet.csn-nested-behind{
+  transform:translate3d(0,0,0) scale(.94);
+  filter:brightness(.86) saturate(.94);
+  transition:transform .3s var(--csn-ease-out), filter .3s ease;
+}
+.csn-mask.csn-nested-mask{z-index:540;}
+.csn-sheet.csn-nested-top{z-index:550;}
+/* ---------- 拖拽提示条（拖拽中显示距离判定进度）---------- */
+.csn-hint{
+  position:absolute; left:50%; transform:translateX(-50%);
+  bottom:calc(100% + 8px);
+  padding:5px 12px; border-radius:99px;
+  background:rgba(15,42,31,.82); color:#fff;
+  font-size:.72rem; font-weight:700; white-space:nowrap;
+  opacity:0; transition:opacity .2s; pointer-events:none;
+}
+.csn-hint.show{opacity:1;}
+/* ---------- 兼容：手机档把「更多」面板也纳入引擎视觉 ---------- */
+@media (max-width:720px){
+  .m-sheet{cursor:grab;}
+}
+/* =============================================================
+ * 既有 .modal-mask / .modal-card 弹窗的动效适配
+ * 让旧结构也获得：弹性出现 + 方向性 + 背景退后 + 手机档半屏停靠
+ * ============================================================= */
+.modal-mask{
+  background:var(--csn-scrim);
+  -webkit-backdrop-filter:blur(0px); backdrop-filter:blur(0px);
+  transition:opacity .26s ease, backdrop-filter .3s ease, -webkit-backdrop-filter .3s ease;
+  opacity:0;
+}
+.modal-mask.show{opacity:1;}
+.modal-mask.show{ -webkit-backdrop-filter:blur(6px); backdrop-filter:blur(6px); }
+.csn-recede .modal-mask.show{ -webkit-backdrop-filter:blur(9px); backdrop-filter:blur(9px); }
+
+.modal-card{
+  transform:translate3d(0,14px,0) scale(.96);
+  opacity:0;
+  transition:transform .34s var(--csn-ease-elastic), opacity .24s ease;
+}
+.modal-card.fx-in{transform:none;opacity:1;}
+.modal-card.fx-in.from-left{animation:fxInL .4s var(--csn-ease-elastic);}
+.modal-card.fx-in.from-right{animation:fxInR .4s var(--csn-ease-elastic);}
+@keyframes fxInL{ from{transform:translate3d(-16px,12px,0) scale(.95);opacity:0;} to{transform:none;opacity:1;} }
+@keyframes fxInR{ from{transform:translate3d(16px,12px,0) scale(.95);opacity:0;} to{transform:none;opacity:1;} }
+.modal-card.fx-out{transform:translate3d(0,10px,0) scale(.97);opacity:0;}
+
+/* 手机档：弹窗改为「底部抽屉 + 半屏停住」形态，更贴近原生 App 手感 */
+@media (max-width:720px){
+  .modal-mask{align-items:flex-end;padding:0;}
+  .modal-card{
+    max-width:100%; width:100%;
+    border-radius:22px 22px 0 0;
+    border-bottom:none;
+    padding:20px 18px calc(20px + env(safe-area-inset-bottom,0px));
+    max-height:88vh; overflow-y:auto;
+    transform:translate3d(0,102%,0);
+    transition:transform .42s var(--csn-ease-elastic);
+    touch-action:pan-y;
+  }
+  .modal-card.fx-in{transform:translate3d(0,0,0);}
+  .modal-card.fx-in.from-left,
+  .modal-card.fx-in.from-right{animation:none;transform:translate3d(0,0,0);}
+  /* 手机档拖拽把手提示 */
+  .modal-card::before{
+    content:''; display:block; width:42px; height:4.5px; border-radius:99px;
+    background:var(--csn-grabber); margin:-8px auto 12px;
+  }
+}
+@media (prefers-reduced-motion:reduce){
+  .csn-mask,.csn-sheet,.csn-recede .sys-area,.csn-recede .m-tabbar{transition-duration:.01ms!important;}
+  .csn-success .csn-tick{animation-duration:.01ms!important;}
+}
+/*__CC_SHEET_END__*/</style>
+<script id="ccSheetJs">/*__CC_SHEET_JS:v1__*/
+/* =============================================================
+ * CCSheet 引擎实现 —— 十种弹窗交互
+ * 设计要点：
+ *  - 手势判定：位移距离 + 瞬时速度「双阈值」，快滑（速度够）不等距离即关
+ *  - 磁吸：多档位（half / full / closed）就近吸附，中间不停留
+ *  - 背景退后：宿主加 .csn-recede，底层缩放+模糊+变暗
+ *  - 连动：抓手宽度、圆角、高度随档位同步形变
+ * ============================================================= */
+(function(){
+  'use strict';
+  if(window.CCSheet) return;
+
+  var VEL = 0.45;          // px/ms，超过即视为「快滑」
+  var DIST_RATIO = 0.28;   // 拖拽超过面板高度的 28% 即关闭（慢速）
+  var stack = [];          // 嵌套抽屉栈
+
+  function el(tag, cls, html){
+    var e = document.createElement(tag);
+    if(cls) e.className = cls;
+    if(html != null) e.innerHTML = html;
+    return e;
+  }
+  function prefersReduce(){
+    try{ return window.matchMedia('(prefers-reduced-motion:reduce)').matches; }catch(e){ return false; }
+  }
+  /* ④ 背景退后：安全读写宿主 <html> 上的 .csn-recede（宿主 documentElement 可能缺失） */
+  function recede(on){
+    try{
+      var el = document.documentElement;
+      if(!el || !el.classList) return;
+      el.classList[on ? 'add' : 'remove']('csn-recede');
+    }catch(e){}
+  }
+
+  /* ---------------- 抽屉实例 ---------------- */
+  function Sheet(opt){
+    this.opt = opt || {};
+    this.id = this.opt.id || ('csn-' + Math.random().toString(36).slice(2, 8));
+    this.snaps = (this.opt.snaps && this.opt.snaps.length) ? this.opt.snaps.slice().sort(function(a,b){return a-b;}) : [1];
+    this.snapIdx = 0;
+    this.speedSnap = !!this.opt.speedSnap;  // ⑨ 抽屉变页面：快滑直接到整页
+    this.dy = 0;
+    this.build();
+  }
+
+  Sheet.prototype.build = function(){
+    var o = this.opt;
+    var mask = el('div', 'csn-mask');
+    mask.addEventListener('click', function(){
+      if(o.maskClosable === false) return;
+      this.close('mask');
+    }.bind(this));
+
+    var sh = el('div', 'csn-sheet');
+    sh.setAttribute('role', 'dialog');
+    sh.setAttribute('aria-modal', 'true');
+    var head = '';
+    if(o.title !== false){
+      head = '<div class="csn-head">' +
+        '<h3>' + (o.title || '') + '</h3>' +
+        (o.subtitle ? '<span class="csn-sub">' + o.subtitle + '</span>' : '') +
+        '<button class="csn-x" aria-label="关闭">✕</button></div>';
+    }
+    sh.innerHTML =
+      (o.grabber === false ? '' : '<div class="csn-grab"><i></i></div>') +
+      head +
+      '<div class="csn-body"></div>' +
+      '<div class="csn-foot"></div>';
+    this.node = sh; this.maskNode = mask;
+    this.body = sh.querySelector('.csn-body');
+    this.foot = sh.querySelector('.csn-foot');
+    this.grab = sh.querySelector('.csn-grab');
+    var x = sh.querySelector('.csn-x');
+    if(x) x.addEventListener('click', function(){ this.close('x'); }.bind(this));
+
+    this.setBody(o.body);
+    this.setActions(o.actions);
+    document.body.appendChild(mask);
+    document.body.appendChild(sh);
+    this.bindDrag();
+  };
+
+  Sheet.prototype.setBody = function(html){
+    if(html == null) return this;
+    if(typeof html === 'string') this.body.innerHTML = html;
+    else { this.body.innerHTML = ''; this.body.appendChild(html); }
+    return this;
+  };
+  Sheet.prototype.setActions = function(acts){
+    this.foot.innerHTML = '';
+    if(!acts || !acts.length) return this;
+    acts.forEach(function(a){
+      var b = el('button', 'csn-btn ' + (a.variant || ''), (a.icon ? a.icon + ' ' : '') + (a.label || ''));
+      b.addEventListener('click', function(ev){
+        if(a.onClick) a.onClick(ev, this);
+        if(a.close) this.close('action');
+      }.bind(this));
+      this.foot.appendChild(b);
+    }, this);
+    return this;
+  };
+
+  /* ---------------- 拖拽：距离 + 速度双判定 ---------------- */
+  Sheet.prototype.bindDrag = function(){
+    var self = this, sh = this.node;
+    var startY = 0, startT = 0, lastY = 0, lastT = 0, v = 0, dragging = false, fromGrab = false, bodyTop = 0;
+
+    function panelH(){ return sh.getBoundingClientRect().height || 1; }
+    function onDown(ev){
+      var p = ev.touches ? ev.touches[0] : ev;
+      // 内容区只在其滚动到顶时才接管下拉手势（避免抢走正常滚动）
+      if(!fromGrab){
+        var sc = self.body;
+        if(sc && sc.scrollTop > 2) return;
+      }
+      dragging = true;
+      startY = lastY = p.clientY; startT = lastT = performance.now(); v = 0;
+      sh.classList.add('csn-dragging');
+      document.addEventListener('mousemove', onMove, { passive: false });
+      document.addEventListener('mouseup', onUp);
+      document.addEventListener('touchmove', onMove, { passive: false });
+      document.addEventListener('touchend', onUp);
+      document.addEventListener('touchcancel', onUp);
+      ev.preventDefault();
+    }
+    function onMove(ev){
+      if(!dragging) return;
+      var p = ev.touches ? ev.touches[0] : ev;
+      var now = performance.now();
+      var dt = now - lastT;
+      if(dt > 0){ v = (p.clientY - lastY) / dt; lastY = p.clientY; lastT = now; }
+      var d = p.clientY - startY;
+      // 只允许向下拖（或从半屏向上扩展到全屏）
+      self.dy = d;
+      if(self.canExpand() && d < 0){
+        // 向上：向全屏吸附
+        var h = panelH();
+        var upLimit = -(h * (1 - (self.snapVal() || 1)) * 0.5);
+        if(d < upLimit) d = upLimit;
+      }
+      if(d < 0 && !self.canExpand()) d = d * 0.25; // 阻尼
+      sh.style.transform = 'translate3d(0,' + Math.max(d, -(panelH() * 0.5)) + 'px,0)';
+      self.updateHint(d);
+      ev.preventDefault();
+    }
+    function onUp(){
+      if(!dragging) return;
+      dragging = false;
+      document.removeEventListener('mousemove', onMove);
+      document.removeEventListener('mouseup', onUp);
+      document.removeEventListener('touchmove', onMove);
+      document.removeEventListener('touchend', onUp);
+      document.removeEventListener('touchcancel', onUp);
+      sh.classList.remove('csn-dragging');
+      self.hideHint();
+      sh.style.transform = '';
+      var h = panelH();
+      var fast = Math.abs(v) >= VEL;
+      var far = self.dy > h * DIST_RATIO;
+      // ⑥ 快滑直接关闭（不看距离）；慢速需拖够距离
+      if((fast && self.dy > 12) || far){ self.close('drag'); return; }
+      if(fast && self.dy < -12 && self.canExpand()){ self.snapTo(self.snaps[self.snaps.length - 1]); return; }
+      if(self.dy < -h * 0.16 && self.canExpand()){ self.snapToNextUp(); return; }
+      self.snapTo(self.snapVal()); // ⑧ 回弹磁吸，不等中间态
+    }
+
+    (this.grab || sh).addEventListener('mousedown', function(e){ fromGrab = true; onDown(e); fromGrab = false; });
+    (this.grab || sh).addEventListener('touchstart', function(e){ fromGrab = true; onDown(e); fromGrab = false; }, { passive: false });
+    // 内容区也允许下拉关闭（滚到顶时）
+    this.body.addEventListener('touchstart', function(e){ fromGrab = false; onDown(e); }, { passive: false });
+  };
+
+  Sheet.prototype.canExpand = function(){ return this.snaps.length > 1; };
+  Sheet.prototype.snapVal = function(){ return this.snaps[this.snapIdx]; };
+  Sheet.prototype.snapToNextUp = function(){
+    if(this.snapIdx < this.snaps.length - 1) this.snapTo(this.snaps[++this.snapIdx]);
+  };
+  Sheet.prototype.updateHint = function(d){
+    if(!this.hint){
+      this.hint = el('div', 'csn-hint', '');
+      this.node.appendChild(this.hint);
+    }
+    var h = this.node.getBoundingClientRect().height || 1;
+    if(d > h * DIST_RATIO) this.hint.textContent = '松开即关闭';
+    else if(d < -h * 0.16 && this.canExpand()) this.hint.textContent = '松开展开全屏';
+    else { this.hint.classList.remove('show'); return; }
+    this.hint.classList.add('show');
+  };
+  Sheet.prototype.hideHint = function(){ if(this.hint) this.hint.classList.remove('show'); };
+
+  /* ---------------- 打开 / 关闭 / 档位 ---------------- */
+  Sheet.prototype.open = function(opts){
+    opts = opts || {};
+    var self = this;
+    // ② 半屏停住 / ⑦ 多档磁吸：按 snaps 决定初始档
+    this.snapIdx = 0;
+    var v = this.snapVal();
+    this.node.classList.toggle('csn-snap-half', v < 1);
+    this.node.classList.add('csn-open');
+    if(this.opt.slideFromPoint && opts.originX != null){
+      this.node.style.setProperty('--csn-origin-x', opts.originX + 'px');
+      this.node.classList.add('csn-slide-dir');
+    }
+    // ④ 背景退后
+    recede(true);
+    this.maskNode.classList.add('show');
+    // ⑧ 嵌套：已有抽屉时，底层后退缩小变暗
+    if(stack.length){
+      var below = stack[stack.length - 1];
+      below.node.classList.add('csn-nested-behind');
+      below.maskNode.classList.add('csn-nested-mask');
+      this.node.classList.add('csn-nested-top');
+      this.maskNode.classList.add('csn-nested-mask');
+    }
+    stack.push(this);
+    // ⑤ 弹性出现：先抬后落
+    this.node.classList.remove('csn-anim-out');
+    void this.node.offsetHeight;
+    this.node.classList.add('csn-anim-in');
+    var t = prefersReduce() ? 0 : 20;
+    setTimeout(function(){ self.node.style.transform = 'translate3d(0,0,0)'; }, t);
+    try{ if(navigator.vibrate) navigator.vibrate(6); }catch(e){}
+    if(this.opt.onOpen) this.opt.onOpen(this);
+    return this;
+  };
+
+  Sheet.prototype.close = function(reason){
+    var self = this;
+    if(this._closing) return;
+    this._closing = true;
+    this.node.classList.remove('csn-anim-in');
+    this.node.classList.add('csn-anim-out');
+    this.node.style.transform = 'translate3d(0,102%,0)';
+    this.maskNode.classList.remove('show');
+    // 出栈 + 恢复下层
+    var i = stack.indexOf(this);
+    if(i >= 0) stack.splice(i, 1);
+    var below = stack[stack.length - 1];
+    if(below){
+      below.node.classList.remove('csn-nested-behind','csn-nested-top');
+      below.maskNode.classList.remove('csn-nested-mask');
+    } else {
+      recede(false);
+    }
+    setTimeout(function(){
+      if(!stack.length) recede(false);
+      self.node.classList.remove('csn-open','csn-at-full','csn-to-page','csn-slide-dir','csn-nested-top');
+      self.maskNode.classList.remove('csn-nested-mask');
+      self.node.style.transform = '';
+      self._closing = false;
+    }, prefersReduce() ? 0 : 300);
+    if(this.opt.onClose) this.opt.onClose(reason, this);
+    return this;
+  };
+
+  /* ⑦ 拖拽扩展：磁吸到指定档（half=0.52, full=1）*/
+  Sheet.prototype.snapTo = function(v){
+    var self = this;
+    this.snaps.sort(function(a,b){return a-b;});
+    var idx = 0, best = 1e9;
+    this.snaps.forEach(function(s, k){ var dd = Math.abs(s - v); if(dd < best){ best = dd; idx = k; } });
+    this.snapIdx = idx;
+    var val = this.snaps[idx];
+    // 圆角 + 抓手 同步形变（③ 全屏展开联动）
+    this.node.classList.toggle('csn-at-full', val >= 1);
+    this.node.classList.toggle('csn-snap-half', val < 1);
+    this.node.style.maxHeight = val >= 1 ? '92vh' : (val * 100) + 'vh';
+    this.node.style.transform = 'translate3d(0,0,0)';
+    if(!prefersReduce()){
+      this.node.classList.add('csn-anim-in');
+      setTimeout(function(){ self.node.classList.remove('csn-anim-in'); }, 440);
+    }
+    return this;
+  };
+
+  /* ⑨ 抽屉变页面：平滑过渡到整页（无断层）*/
+  Sheet.prototype.toPage = function(){
+    this.node.classList.add('csn-to-page');
+    this.node.classList.add('csn-at-full');
+    this.node.style.maxHeight = '100vh';
+    this.node.style.height = '100vh';
+    return this;
+  };
+  Sheet.prototype.fromPage = function(){
+    this.node.classList.remove('csn-to-page');
+    this.node.style.height = '';
+    return this;
+  };
+
+  /* ⑩ 弹窗变成功：按钮形变 -> 内容切换为成功态 -> 自动收尾 */
+  Sheet.prototype.succeed = function(o){
+    var self = this;
+    o = o || {};
+    var btn = this.foot.querySelector('.csn-btn.primary') || this.foot.querySelector('.csn-btn');
+    var finish = function(){
+      self.body.innerHTML =
+        '<div class="csn-success">' +
+          '<div class="csn-tick">✓</div>' +
+          '<h4>' + (o.title || '操作成功') + '</h4>' +
+          '<p>' + (o.desc || '') + '</p>' +
+        '</div>';
+      self.foot.innerHTML = '';
+      self.setActions([{ label: o.okLabel || '完成', variant: 'primary', close: true }]);
+      if(self.grab) self.grab.style.display = 'none';
+      try{ if(navigator.vibrate) navigator.vibrate([8, 30, 12]); }catch(e){}
+      if(o.after) o.after(self);
+      if(o.autoClose !== false){
+        setTimeout(function(){ self.close('success'); }, o.hold || 1500);
+      }
+    };
+    if(btn && !prefersReduce()){
+      btn.classList.add('csn-morphing');
+      setTimeout(finish, 620);
+    } else finish();
+    return this;
+  };
+
+  /* ⑧ 嵌套抽屉：从当前抽屉内再开一层 */
+  Sheet.prototype.openNested = function(opt){
+    var child = new Sheet(opt);
+    child.parent = this;
+    child.open(opt || {});
+    return child;
+  };
+
+  /* ---------------- 对外 API ---------------- */
+  window.CCSheet = {
+    open: function(opt){ var s = new Sheet(opt); s.open(opt); return s; },
+    Sheet: Sheet,
+    /* 便捷：确认型弹窗，确认后「弹窗变成功」*/
+    confirm: function(o){
+      o = o || {};
+      var s = new Sheet({
+        title: o.title || '确认操作',
+        body: o.body || '',
+        snaps: [1],
+        grabber: false,
+        maskClosable: o.maskClosable !== false,
+        actions: [
+          { label: o.cancelLabel || '取消', variant: 'ghost', close: true, onClick: o.onCancel },
+          { label: o.okLabel || '确定', variant: 'primary',
+            onClick: function(ev, sheet){
+              var r = o.onOk ? o.onOk(ev, sheet) : null;
+              if(r === false) return;
+              var done = (r && r.success) || o.success;
+              if(done) sheet.succeed(typeof done === 'object' ? done : { title: o.okLabel || '操作成功', desc: o.successDesc || '' });
+              else sheet.close('ok');
+            } }
+        ]
+      });
+      s.open({});
+      return s;
+    },
+    /* 便捷：底部操作抽屉（① 底部抽屉 + ⑥ 拖拽关闭）*/
+    actions: function(o){
+      o = o || {};
+      var list = o.items || [];
+      // key 缺省时用下标兜底，避免 data-k="undefined" 导致点击匹配失败
+      var items = list.map(function(it, i){
+        var k = (it.key != null ? it.key : ('__i' + i));
+        return '<button class="csn-btn ' + (it.variant || '') + '" style="margin-bottom:8px" data-k="' + k + '">' +
+          (it.icon ? it.icon + ' ' : '') + it.label + '</button>';
+      }).join('');
+      var s = new Sheet({
+        title: o.title || '选择操作',
+        body: '<div style="display:flex;flex-direction:column">' + items + '</div>',
+        snaps: o.snaps || [0.52, 1],
+        grabber: true,
+        slideFromPoint: true,
+        actions: []
+      });
+      s.open({ originX: o.originX });
+      s.body.addEventListener('click', function(e){
+        var b = e.target.closest('[data-k]');
+        if(!b) return;
+        var k = b.dataset.k;
+        var it = list.filter(function(x, i){ return String(x.key != null ? x.key : ('__i' + i)) === k; })[0];
+        if(it && it.onClick) it.onClick(s);
+        if(!it || it.close !== false) s.close('pick');
+      });
+      return s;
+    },
+    /* 便捷：信息详情（② 半屏停住 + ⑦ 拖拽扩展）*/
+    detail: function(o){
+      o = o || {};
+      var s = new Sheet({
+        title: o.title || '详情',
+        subtitle: o.subtitle || '',
+        body: o.body || '',
+        snaps: o.snaps || [0.52, 1],
+        grabber: true,
+        footer: false,
+        actions: o.actions || []
+      });
+      s.open({});
+      return s;
+    },
+    closeTop: function(){ if(stack.length) stack[stack.length - 1].close('api'); },
+    isOpen: function(){ return stack.length > 0; },
+    _stack: stack
+  };
+
+  // Esc / 返回键关闭最上层
+  document.addEventListener('keydown', function(e){
+    if(e.key === 'Escape' && stack.length){ stack[stack.length - 1].close('esc'); }
+  });
+  window.addEventListener('popstate', function(){
+    if(stack.length){ stack[stack.length - 1].close('back'); }
+  });
+
+  /* =============================================================
+   * 既有 .modal-card 弹窗的拖拽关闭（⑥ 距离 + 速度双判定）
+   * 手机档「抽屉形态」下，向下拖拽即关闭，快滑不看距离。
+   * ============================================================= */
+  function bindModalDrag(){
+    var MV = 0.45, DR = 0.26;
+    document.addEventListener('touchstart', function(ev){
+      var mask = ev.target.closest && ev.target.closest('.modal-mask.show');
+      if(!mask) return;
+      if(window.innerWidth > 720) return;
+      var card = mask.querySelector('.modal-card') || mask.firstElementChild;
+      if(!card) return;
+      var t0 = ev.touches[0], sy = t0.clientY, ly = sy, lt = performance.now(), v = 0, moved = false;
+      var sc = card.scrollTop > 2;
+      if(sc) return;
+
+      function mv(e2){
+        var p = e2.touches[0];
+        var now = performance.now(), dt = now - lt;
+        if(dt > 0){ v = (p.clientY - ly) / dt; ly = p.clientY; lt = now; }
+        var d = p.clientY - sy;
+        if(d < 0) d = d * 0.22;   // 向上阻尼
+        if(d > 6){ moved = true; card.style.transition = 'none'; }
+        card.style.transform = 'translate3d(0,' + Math.max(d, -40) + 'px,0)';
+        e2.preventDefault();
+      }
+      function up(){
+        document.removeEventListener('touchmove', mv);
+        document.removeEventListener('touchend', up);
+        document.removeEventListener('touchcancel', up);
+        card.style.transition = '';
+        card.style.transform = '';
+        if(!moved) return;
+        var h = card.getBoundingClientRect().height || 1;
+        var d = ly - sy;
+        var fast = Math.abs(v) >= MV;
+        if((fast && d > 12) || d > h * DR){
+          try{ mask.classList.remove('show'); }catch(e){}
+        }
+      }
+      document.addEventListener('touchmove', mv, { passive: false });
+      document.addEventListener('touchend', up);
+      document.addEventListener('touchcancel', up);
+    }, { passive: true });
+  }
+  if(document.readyState === 'loading') document.addEventListener('DOMContentLoaded', bindModalDrag);
+  else bindModalDrag();
+})();
+/*__CC_SHEET_JS_END__*/</script>
 </body>
 </html>

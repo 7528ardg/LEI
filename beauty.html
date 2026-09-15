@@ -750,6 +750,10 @@ button:disabled:active{transform:none;}
   --ux-gold:#F5B800;--ux-danger:#C62828;--ux-warn:#E64A19;
   --ux-ink:#0F2A1F;--ux-ink2:#5A6F65;--ux-border:#E5EDE9;
   --ux-radius-sm:8px;--ux-radius:12px;--ux-radius-lg:16px;
+  /* 嵌入态底部补偿：index 壳层内嵌时由宿主注入实际 TabBar 高度；
+     独立打开时回退 0px，模块自身安全区逻辑照旧（2026-09-16 遮挡修复） */
+  --embed-bottom:0px;
+  --embed-top:0px;
 }
 ::selection{background:rgba(20,132,83,.24);}
 *{scrollbar-width:thin;scrollbar-color:rgba(20,132,83,.35) transparent;}
@@ -764,6 +768,54 @@ button:active:not(:disabled){transform:translateY(1px);}
 @media (prefers-reduced-motion:reduce){
   *,*::before,*::after{animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important;scroll-behavior:auto!important;}
 }
+/* ---- 深色模式：滚动条随主题（浅色令牌在 :root，各模块 dark 规则见下）---- */
+html[data-theme="dark"] *{scrollbar-color:rgba(255,255,255,.22) transparent;}
+html[data-theme="dark"] ::-webkit-scrollbar-thumb{background:rgba(255,255,255,.20);border:2px solid transparent;background-clip:content-box;}
+html[data-theme="dark"] ::selection{background:rgba(31,165,106,.34);}
+
+/* ---- UX Polish v1 · 深色模式兜底层（2026-09-16）----
+   用户反馈：深色模式只有边框在变、美妆与医疗未覆盖、深色下部分文字看不清。
+   本层为「无令牌体系」的模块补最小暗色变量，并统一修高对比度问题。 */
+html[data-theme="dark"]{
+  color-scheme:dark;
+  --bg:#0F1A14;--bg-card:#162420;--bg-elev:#1B2E26;
+  --text:#E8F3EE;--text2:#9CB3A7;--text3:#6E8479;
+  --border:#24402F;--border-strong:#2E5240;
+  --primary-soft:#1A3D2A;--primary-mist:#132C21;
+  --shadow:0 4px 14px rgba(0,0,0,.42);--shadow-lg:0 14px 36px rgba(0,0,0,.55);
+}
+html[data-theme="dark"] body{background:var(--bg);color:var(--text);}
+/* 输入类：深色下浏览器默认白底白字，必须显式覆盖 */
+html[data-theme="dark"] input,
+html[data-theme="dark"] select,
+html[data-theme="dark"] textarea{
+  background:var(--bg-elev);color:var(--text);border-color:var(--border);
+}
+html[data-theme="dark"] input::placeholder,
+html[data-theme="dark"] textarea::placeholder{color:var(--text3);}
+/* 深色下「浅色底 + 浅色字」组合的兜底可读性修复 */
+html[data-theme="dark"] .bg-white,
+html[data-theme="dark"] .bg-gray-50,
+html[data-theme="dark"] .bg-gray-100,
+html[data-theme="dark"] .bg-slate-50,
+html[data-theme="dark"] .bg-slate-100{background:var(--bg-card)!important;}
+html[data-theme="dark"] .text-gray-900,
+html[data-theme="dark"] .text-gray-800,
+html[data-theme="dark"] .text-slate-900,
+html[data-theme="dark"] .text-slate-800,
+html[data-theme="dark"] .text-black{color:var(--text)!important;}
+html[data-theme="dark"] .text-gray-700,
+html[data-theme="dark"] .text-gray-600,
+html[data-theme="dark"] .text-slate-700,
+html[data-theme="dark"] .text-slate-600{color:#C3D6CB!important;}
+html[data-theme="dark"] .text-gray-500,
+html[data-theme="dark"] .text-gray-400,
+html[data-theme="dark"] .text-slate-500,
+html[data-theme="dark"] .text-slate-400{color:var(--text2)!important;}
+html[data-theme="dark"] .border-gray-100,
+html[data-theme="dark"] .border-gray-200,
+html[data-theme="dark"] .border-gray-300,
+html[data-theme="dark"] .border-slate-200{ border-color:var(--border)!important;}
 
 /* beauty：令牌对齐壳层（原翡翠绿系已字面量收拢为春秋绿系） */
 :root{
@@ -772,11 +824,89 @@ button:active:not(:disabled){transform:translateY(1px);}
   --gold:#F5B800;--danger:#C62828;
   --bg:#F5F8F6;--bg-card:#fff;--text:#0F2A1F;--text2:#5A6F65;--border:#E5EDE9;
 }
+/* ---- beauty 深色专项（2026-09-16）----
+   beauty 是 Tailwind 类名驱动（bg-white×181 / text-gray-800×347 / bg-gray-50×45…），
+   没有令牌体系，因此深色必须做「类名级」映射，否则只有边框变深。 */
+html[data-theme="dark"]{
+  --bg:#0E1713;--bg-card:#17231E;--text:#E8F3EE;--text2:#9CB3A7;--border:#25402F;
+  --primary-soft:#17352a;--primary-mist:#12281F;
+}
+html[data-theme="dark"] #app{background:var(--bg);}
+/* 卡片 / 面板：白底一律转深卡 */
+html[data-theme="dark"] .card-shadow,
+html[data-theme="dark"] .bg-white\/95,
+html[data-theme="dark"] .bg-white\/80,
+html[data-theme="dark"] .bg-white\/90,
+html[data-theme="dark"] .bg-white\/70{background:rgba(23,35,30,.96)!important;border-color:var(--border)!important;}
+/* 次级底：gray-50/100 转深一档 */
+html[data-theme="dark"] .bg-gray-50,
+html[data-theme="dark"] .bg-gray-100,
+html[data-theme="dark"] .bg-gray-200{background:#1D2C25!important;}
+/* 正文 / 次要文字：保证深底上可读（浅色下原为 gray-800/700/600/500/400） */
+html[data-theme="dark"] .text-gray-900,
+html[data-theme="dark"] .text-gray-800{color:#E8F3EE!important;}
+html[data-theme="dark"] .text-gray-700{color:#CFE0D6!important;}
+html[data-theme="dark"] .text-gray-600{color:#B4C9BD!important;}
+html[data-theme="dark"] .text-gray-500{color:#93ABA0!important;}
+html[data-theme="dark"] .text-gray-400{color:#7C9489!important;}
+/* 边框 */
+html[data-theme="dark"] .border-gray-100,
+html[data-theme="dark"] .border-gray-200,
+html[data-theme="dark"] .border-gray-300{border-color:var(--border)!important;}
+/* 品牌绿在深底上要提亮一档，否则「墨绿压墨绿」看不清 */
+html[data-theme="dark"] .text-emerald-600,
+html[data-theme="dark"] .text-emerald-700,
+html[data-theme="dark"] .text-emerald-800{color:#3FCB8B!important;}
+html[data-theme="dark"] .text-emerald-500{color:#4FD79A!important;}
+html[data-theme="dark"] .bg-emerald-50,
+html[data-theme="dark"] .bg-emerald-100{background:#17352A!important;}
+html[data-theme="dark"] .border-emerald-100,
+html[data-theme="dark"] .border-emerald-200,
+html[data-theme="dark"] .border-emerald-300,
+html[data-theme="dark"] .border-emerald-400{border-color:#2C5C43!important;}
+/* 语义色（警告/危险/提示）在深底的浅底块同样要压深，否则刺眼且文字发灰 */
+html[data-theme="dark"] .bg-red-50,
+html[data-theme="dark"] .bg-red-100{background:#3A1D1D!important;}
+html[data-theme="dark"] .bg-rose-50{background:#3A1D22!important;}
+html[data-theme="dark"] .bg-amber-50,
+html[data-theme="dark"] .bg-amber-100{background:#33290F!important;}
+html[data-theme="dark"] .bg-orange-50,
+html[data-theme="dark"] .bg-orange-100{background:#3A2513!important;}
+html[data-theme="dark"] .bg-blue-50,
+html[data-theme="dark"] .bg-indigo-50{background:#182B3A!important;}
+html[data-theme="dark"] .text-amber-700,
+html[data-theme="dark"] .text-amber-800{color:#F0C94A!important;}
+html[data-theme="dark"] .text-red-600,
+html[data-theme="dark"] .text-rose-700{color:#F98A8A!important;}
+html[data-theme="dark"] .text-orange-700{color:#F5A76A!important;}
+html[data-theme="dark"] .text-cyan-800{color:#7FD8E8!important;}
+html[data-theme="dark"] .text-green-600{color:#4FD79A!important;}
+/* 选中态卡片 / 渐变按钮在深色下的可读性 */
+html[data-theme="dark"] .selected-product-card{background:linear-gradient(135deg,#16332A 0%,#16332A 100%)!important;}
+html[data-theme="dark"] .selected-product-card .text-gray-800,
+html[data-theme="dark"] .selected-product-card span{color:#E8F3EE!important;}
+/* 顶部 sticky 工具条（原 bg-white/95）与搜索框 */
+html[data-theme="dark"] .sticky.top-\[120px\]{background:rgba(23,35,30,.94)!important;border-color:var(--border)!important;}
+html[data-theme="dark"] #search-input{background:#1D2C25!important;color:var(--text)!important;border-color:var(--border)!important;}
+/* 表格 / 分隔线 */
+html[data-theme="dark"] .divide-gray-100 > * + *,
+html[data-theme="dark"] .divide-gray-200 > * + *{border-color:var(--border)!important;}
 @media (max-width:760px){
   button.px-3\.py-1\.5{min-height:36px;}
   select.px-3\.py-2{min-height:42px;font-size:15px;}
   #search-input{min-height:44px;font-size:15px;}
   button.flex.items-center{min-height:38px;}
+}
+/* ---- 嵌入态底部留白（2026-09-16 遮挡修复）----
+   内联 max-height:calc(100vh - 160px) 在壳层内嵌时按模块自身视口算，
+   与 iframe 实际高度不符，导致列表底边与 iframe 底边之间出现死带。
+   改用 --embed-bottom（宿主注入 TabBar 高度）参与计算。 */
+.main-scroll-container{
+  max-height:calc(100vh - 160px - var(--embed-bottom,0px))!important;
+  padding-bottom:calc(16px + var(--embed-bottom,0px))!important;
+}
+@media (max-width:760px){
+  .main-scroll-container{max-height:calc(100dvh - 150px - var(--embed-bottom,0px))!important;}
 }
 /*__UX_POLISH_END__*/</style>
 </head>
@@ -1864,13 +1994,21 @@ window.DateMatch = (function () {
 { id: 'sou-001', name: '飞行奇遇记·毛绒挂件盲盒', brand: '春秋航空', category: '纪念品', tale: '盲盒的乐趣在于打开那一下——把飞机做成了毛绒，也就把飞行变成了一件可以抱着的东西。', tale: '盲盒的乐趣在于打开那一下——把飞机做成了毛绒，也就把飞行变成了一件可以抱着的东西。', volume: '1盒', origin: '中国·上海', stock: 'in_stock', description: '春秋航空官方IP商城新品「飞行奇遇记」毛绒挂件盲盒，好运登机牌、闪闪飞行窗、酷酷旅行箱、云上奇妙窗四款飞行主题随机掉落。软萌手感，挂在包包、钥匙扣或行李箱上，让可爱的小家伙陪你飞往下一站。', coreBenefits: ['四款飞行主题随机', '软萌治愈手感', '挂包钥匙扣行李箱', '官方IP设计', '拆盒惊喜感'], targetSkinTypes: ['航空爱好者', '亲子旅客', '伴手礼需求', '收藏玩家'], keyIngredients: [{ commonName: '柔软毛绒面料', mechanism: '细腻毛绒手感，亲肤不扎手' }, { commonName: '春秋航空IP形象', mechanism: '官方设计，飞行元素辨识度高' }], unsuitable: [{ type: '3岁以下儿童', reason: '含小挂件，请在成人监护下使用' }], tags: ['纪念品', '春秋航空', '毛绒挂件', '盲盒', '飞行奇遇记', '萌系'], reviewCount: 3280 },
 { id: 'sou-002', name: '春秋航空飞机毛绒玩具', brand: '春秋航空', category: '纪念品', tale: '把飞机做成毛绒，是让小孩第一次记住“我坐过飞机”的方式。', tale: '把飞机做成毛绒，是让小孩第一次记住“我坐过飞机”的方式。', volume: '单只', origin: '中国·上海', stock: 'in_stock', description: '软乎乎胖嘟嘟的飞机造型毛绒玩具，圆润机身加上春秋标志，是小朋友的爱，也是大朋友的解压神器。抱在怀里、摆在床头，飞行元素随时陪伴。', coreBenefits: ['飞机造型萌态', '软萌解压', '春秋标志涂装', '亲子皆宜'], targetSkinTypes: ['航空爱好者', '亲子旅客', '送礼需求'], keyIngredients: [{ commonName: '高弹填充棉', mechanism: '回弹柔软，久抱不塌' }, { commonName: '春秋标志涂装', mechanism: '经典涂装，辨识度高' }], unsuitable: [{ type: '3岁以下儿童', reason: '含填充物与标签，请在成人监护下使用' }], tags: ['纪念品', '春秋航空', '毛绒玩具', '飞机公仔', '亲子'], reviewCount: 2140 },
 { id: 'sou-003', name: '马年“马上起飞”毛绒挂件', brand: '春秋航空', category: '纪念品', tale: '“马上起飞”是个讨口彩的谐音——马年的挂件，图的就是这句吉利话。', tale: '“马上起飞”是个讨口彩的谐音——马年的挂件，图的就是这句吉利话。', volume: '单只', origin: '中国·上海', stock: 'in_stock', description: '春秋航空马年限定周边，马年造型毛绒挂件，谐音好寓意，祝你新的一年事业生活「马上起飞」。挂在包包上，萌趣又讨彩头。', coreBenefits: ['马年限定造型', '吉祥寓意', '软萌可挂', '新年彩头'], targetSkinTypes: ['生肖纪念需求', '航空爱好者', '伴手礼需求'], keyIngredients: [{ commonName: '柔软毛绒面料', mechanism: '细腻手感，轻盈可挂' }, { commonName: '马年生肖设计', mechanism: '限定款设计，寓意吉祥' }], unsuitable: [{ type: '3岁以下儿童', reason: '含小零件，请在成人监护下使用' }], tags: ['纪念品', '春秋航空', '马年限定', '毛绒挂件', '马上起飞', '生肖'], reviewCount: 1560 },
-{ id: 'sou-004', name: '长空万里冰箱贴', brand: '春秋航空', category: '纪念品', tale: '冰箱贴是花钱最少的旅行记忆——贴在门上，每天开冰箱都会看见那趟飞行。', tale: '冰箱贴是花钱最少的旅行记忆——贴在门上，每天开冰箱都会看见那趟飞行。', volume: '单只', origin: '中国·上海', stock: 'in_stock', description: '把春秋航空的航线风景贴在冰箱上，每次打开冰箱都能想起那段美好的旅行记忆。磁吸稳固，装饰家居的同时记录飞行足迹。', coreBenefits: ['航线风景元素', '磁吸稳固', '记录旅行足迹', '家居装饰'], targetSkinTypes: ['航空爱好者', '旅行纪念需求', '伴手礼需求'], keyIngredients: [{ commonName: '强磁铁', mechanism: '磁力稳固，不易脱落' }, { commonName: '航线彩绘元素', mechanism: '春秋航线风景，识别度高' }], unsuitable: [], tags: ['纪念品', '春秋航空', '冰箱贴', '航线', '长空万里'], reviewCount: 890 },
+{ id: 'sou-004', name: '长空万里冰箱贴', brand: '春秋航空', category: '纪念品', tale: '冰箱贴是花钱最少的旅行记忆——六块小贴纸拼成一架飞机，敦煌的飞天就落在自家冰箱门上。', volume: '1套（6块）', origin: '中国·上海', stock: 'in_stock', description: '春秋航空长空万里系列冰箱贴·云端丝路款，巧妙融汇飞机造型与丝路敦煌文化。整款共六块小冰箱贴，代表六种经典敦煌元素，既可独立赏玩，又可拼接成完整飞机，精美礼盒装，是一份独特的航空纪念品。', coreBenefits: ['航线风景元素', '磁吸稳固', '记录旅行足迹', '家居装饰'], targetSkinTypes: ['航空爱好者', '旅行纪念需求', '伴手礼需求'], keyIngredients: [{ commonName: '强磁铁', mechanism: '磁力稳固，不易脱落' }, { commonName: '航线彩绘元素', mechanism: '春秋航线风景，识别度高' }], unsuitable: [], tags: ['纪念品', '春秋航空', '冰箱贴', '航线', '长空万里'], reviewCount: 890 },
 { id: 'sou-005', name: '飞机塔台积木', brand: '春秋航空', category: '纪念品', tale: '塔台是飞机起落时最先看见的那座楼——把机场做成积木，是给小孩的第一堂航空课。', tale: '塔台是飞机起落时最先看见的那座楼——把机场做成积木，是给小孩的第一堂航空课。', volume: '1盒', origin: '中国·上海', stock: 'in_stock', description: '化身空中管制员，亲手拼搭属于自己的飞机塔台。积木块精细规整，拼搭过程沉浸解压，拼好后是书房桌面的精致摆件，也适合亲子一起动手。', coreBenefits: ['塔台造型拼搭', '沉浸解压', '亲子互动', '桌面摆件'], targetSkinTypes: ['航空爱好者', '亲子旅客', '拼搭玩家'], keyIngredients: [{ commonName: 'ABS环保积木', mechanism: '颗粒精细，咬合稳固' }, { commonName: '塔台场景设计', mechanism: '还原机场塔台元素，拼搭有成就感' }], unsuitable: [{ type: '3岁以下儿童', reason: '含小零件，请在成人监护下使用' }], tags: ['纪念品', '春秋航空', '积木', '塔台', '拼搭', '亲子'], reviewCount: 620 },
 { id: 'sou-006', name: '马年限定·午福临门飞机模型', brand: '春秋航空', category: '纪念品', tale: '“午福临门”谐音“五福临门”——马年出的这一版模型，把年份也一起收进了盒子里。', tale: '“午福临门”谐音“五福临门”——马年出的这一版模型，把年份也一起收进了盒子里。', volume: '1:400', origin: '中国·上海', stock: 'in_stock', description: '春秋航空马年限定涂装飞机模型，马年专属机身涂装，寓意马到成功、福气临门。细节精致，机舱彩绘与机身标识清晰，收藏价值高。', coreBenefits: ['马年限定涂装', '精致细节', '收藏价值', '福气寓意'], targetSkinTypes: ['飞友收藏', '生肖纪念需求', '商务馈赠'], keyIngredients: [{ commonName: '合金机身', mechanism: '压铸成型，线条清晰' }, { commonName: '马年限定涂装', mechanism: '官方涂装，限定款设计' }], unsuitable: [{ type: '3岁以下儿童', reason: '含小零件，请在成人监护下使用' }], tags: ['纪念品', '春秋航空', '飞机模型', '马年限定', '午福临门', '收藏'], reviewCount: 1180 },
 { id: 'sou-007', name: '第四代彩绘飞机模型', brand: '春秋航空', category: '纪念品', tale: '彩绘涂装是春秋的一个符号——第四代的那套配色，飞过的人一眼就认得。', tale: '彩绘涂装是春秋的一个符号——第四代的那套配色，飞过的人一眼就认得。', volume: '1:400', origin: '中国·上海', stock: 'in_stock', description: '经典复刻春秋航空第四代彩绘涂装飞机模型，活力色彩细节拉满，机身彩绘还原度高，是航空迷书桌上的情怀之选。', coreBenefits: ['第四代彩绘复刻', '还原度高', '情怀收藏', '细节精致'], targetSkinTypes: ['航空爱好者', '飞友收藏', '客厅书房摆件'], keyIngredients: [{ commonName: '合金机身', mechanism: '压铸成型，漆面细腻' }, { commonName: '第四代彩绘涂装', mechanism: '官方复刻，色彩还原' }], unsuitable: [{ type: '3岁以下儿童', reason: '含小零件，请在成人监护下使用' }], tags: ['纪念品', '春秋航空', '飞机模型', '第四代彩绘', '复刻', '收藏'], reviewCount: 1450 },
 { id: 'sou-008', name: '典藏大飞机模型 1:100', brand: '春秋航空', category: '纪念品', tale: '1:100 是摆件里的大比例——够大，所以机翼和引擎的线条都还原得清楚。', tale: '1:100 是摆件里的大比例——够大，所以机翼和引擎的线条都还原得清楚。', volume: '1:100', origin: '中国·上海', stock: 'in_stock', description: '春秋航空典藏系列1:100大比例飞机模型，超大比例的震撼视觉，机身每一处细节都经过精心打磨，从机翼线条到引擎结构清晰可见，是骨灰级飞友的终极浪漫。', coreBenefits: ['1:100大比例', '细节精心打磨', '视觉震撼', '典藏级做工'], targetSkinTypes: ['骨灰级飞友', '高端收藏', '书房镇宅摆件'], keyIngredients: [{ commonName: '高密度合金', mechanism: '压铸成型，细节精密' }, { commonName: '1:100典藏比例', mechanism: '大比例还原，观赏性高' }], unsuitable: [{ type: '3岁以下儿童', reason: '含小零件，请在成人监护下使用' }], tags: ['纪念品', '春秋航空', '飞机模型', '典藏', '1:100', '大比例'], reviewCount: 780 },
 { id: 'sou-009', name: '云端好梦·颈枕套装', brand: '春秋航空', category: '纪念品', tale: '“云端好梦”是给长途航线起的名字——颈枕这件东西，用得上的时候才知道值。', tale: '“云端好梦”是给长途航线起的名字——颈枕这件东西，用得上的时候才知道值。', volume: '1套', origin: '中国·上海', stock: 'in_stock', description: '春秋航空云端好梦旅行颈枕，柔软支撑贴合颈部曲线，长途飞行也不怕脖子酸，给你头等舱般的睡眠体验。套装收纳轻便，出差旅行随身带上。', coreBenefits: ['颈部支撑塑形', '长途飞行护颈', '轻便收纳', '头等舱睡眠体验'], targetSkinTypes: ['商务出行者', '长途飞行旅客', '颈肩疲劳人群'], keyIngredients: [{ commonName: '记忆棉', mechanism: '贴合颈部曲线，支撑稳定' }, { commonName: '可拆洗枕套', mechanism: '方便清洁，卫生耐用' }], unsuitable: [], tags: ['纪念品', '春秋航空', '颈枕', '云端好梦', '出行装备', '护颈'], reviewCount: 1760 },
 { id: 'sou-010', name: '飞行员墨镜（成人款）', brand: '春秋航空', category: '纪念品', tale: '飞行员墨镜最初是给飞行员挡强光的——后来成了所有人的造型件。', tale: '飞行员墨镜最初是给飞行员挡强光的——后来成了所有人的造型件。', volume: '单副', origin: '中国·上海', stock: 'in_stock', description: '春秋航空机长同款飞行员墨镜，防紫外线同时修饰脸型，戴上它气场十足。镜片透光柔和，适合出行、驾车、旅行多种场景。', coreBenefits: ['防紫外线', '修饰脸型', '机长同款', '多场景适用'], targetSkinTypes: ['时尚出行者', '驾驶通勤', '旅行搭配'], keyIngredients: [{ commonName: '防UV镜片', mechanism: '阻挡紫外线，保护眼睛' }, { commonName: '飞行员镜型', mechanism: '经典廓形，修饰脸型' }], unsuitable: [{ type: '儿童', reason: '请选择儿童专用款并由成人指导佩戴' }], tags: ['纪念品', '春秋航空', '墨镜', '飞行员', '防紫外线', '出行装备'], reviewCount: 940 },
+{ id: 'sou-011', name: '梦想启航飞机积木套装', brand: '春秋航空', category: '纪念品', tale: '一架A320neo加三个机组人仔——积木的乐趣在拼，航空的种子在拼的过程里就种下了。', volume: '1套', origin: '中国·上海', stock: 'in_stock', description: '春秋航空独家玩具套装，包含1架A320neo客机和3个航空机组人仔。航空爱好者收藏优选，亲子互动玩耍好物，拼好后是书桌上的精致摆件。', coreBenefits: ['A320neo+3机组人仔', '春秋独家玩具', '亲子互动拼搭', '收藏展示两宜'], targetSkinTypes: ['亲子旅客', '航空爱好者', '积木玩家', '送礼需求'], keyIngredients: [{ commonName: '高精度积木颗粒', mechanism: '咬合紧密，拼搭顺滑不松脱' }, { commonName: 'A320neo涂装印刷件', mechanism: '第四代涂装印刷清晰，还原度高' }], unsuitable: [{ type: '3岁以下儿童', reason: '含小颗粒，谨防误吞' }], tags: ['纪念品', '春秋航空', '积木', 'A320neo', '亲子', '梦想启航'], reviewCount: 380 },
+{ id: 'sou-012', name: '第四代涂装飞机模型 1:250', brand: '春秋航空', category: '纪念品', tale: '1:250是机模里的入门友好款——16厘米机身，案头一放，飞行记忆就有了落脚点。', volume: '1:250（约16cm）', origin: '中国·上海', stock: 'in_stock', description: '春秋航空第四代新彩绘客机微缩模型，1:250复刻云端客机姿态。16CM小巧机身凝聚航空美学，定格每一段飞行旅程，适合案头陈设、随身纪念与心意赠礼。', coreBenefits: ['1:250标准比例', '16CM小巧机身', '第四代新彩绘涂装', '入门收藏友好价'], targetSkinTypes: ['航空爱好者', '初次收藏者', '伴手礼需求'], keyIngredients: [{ commonName: '合金机身', mechanism: '拿在手里有分量，涂装持久不褪色' }, { commonName: '第四代涂装还原', mechanism: '按真实客机涂装微缩复刻' }], unsuitable: [{ type: '3岁以下儿童', reason: '含细小部件，谨防误吞' }], tags: ['纪念品', '春秋航空', '飞机模型', '1:250', '第四代涂装', '入门款'], reviewCount: 1321 },
+{ id: 'sou-013', name: '第四代新彩绘飞机模型 1:200 经典版', brand: '春秋航空', category: '纪念品', tale: '经典版是给第一次买机模的人准备的——比例、涂装、价格都刚刚好。', volume: '1:200', origin: '中国·上海', stock: 'in_stock', description: '春秋航空第四代新彩绘飞机模型经典版，1:200比例仿真民航客机桌面摆件，珍藏您的难忘飞行记忆。涂装与细节按真实飞机还原，是人气很高的经典款。', coreBenefits: ['1:200人气比例', '经典版涂装', '仿真桌面摆件', '飞行记忆珍藏'], targetSkinTypes: ['航空爱好者', '办公桌摆件需求', '送礼需求'], keyIngredients: [{ commonName: '合金机身+展示支架', mechanism: '稳固展示，细节经得起细看' }, { commonName: '第四代彩绘涂装', mechanism: '活力配色，春秋标志一眼可辨' }], unsuitable: [{ type: '3岁以下儿童', reason: '含细小部件，谨防误吞' }], tags: ['纪念品', '春秋航空', '飞机模型', '1:200', '经典版', '桌面摆件'], reviewCount: 980 },
+{ id: 'sou-014', name: '春航飞机毛绒挂件·萌力随行', brand: '春秋航空', category: '纪念品', tale: '延续初代的治愈造型——收为挂件，展为行囊，萌力随行。', volume: '单只', origin: '中国·上海', stock: 'in_stock', description: '春航飞机毛绒挂件·萌力随行，延续初代治愈造型，收为挂件、展为行囊，陪你每一段云端旅途。软萌手感，挂在包包、钥匙扣或行李箱上都合适。', coreBenefits: ['初代治愈造型', '软萌手感', '挂件/行囊两用', '官方IP设计'], targetSkinTypes: ['年轻旅客', '伴手礼需求', '萌系爱好者'], keyIngredients: [{ commonName: '柔软短毛绒面料', mechanism: '亲肤细腻，久挂不掉绒' }, { commonName: '金属钥匙扣链', mechanism: '承重稳固，开合顺滑' }], unsuitable: [{ type: '3岁以下儿童', reason: '含小挂件，请在成人监护下使用' }], tags: ['纪念品', '春秋航空', '毛绒挂件', '萌力随行', '治愈系'], reviewCount: 49 },
+{ id: 'sou-015', name: 'SPRINGGO旅行防晒帽', brand: '春秋航空', category: '纪念品', tale: 'UPF50+的大帽檐，是为停机坪和海边的日头准备的——卷一卷塞进包里，说走就走。', volume: '单顶', origin: '中国·上海', stock: 'in_stock', description: 'SPRINGGO旅行防晒帽经典米色款，防晒指数UPF50+，14CM大帽檐实现全脸至脖子防护。升级抗皱面料可随意卷折塞入随身包包，附赠防风绳，海边、爬山也能防晒到位。', coreBenefits: ['UPF50+高倍防晒', '14CM大帽檐全脸防护', '抗皱面料随意卷折', '附赠防风绳'], targetSkinTypes: ['夏季出行旅客', '户外游玩需求', '防晒刚需人群'], keyIngredients: [{ commonName: 'UPF50+防晒面料', mechanism: '高倍紫外线防护，清爽不闷' }, { commonName: '抗皱记忆纤维', mechanism: '揉折后快速回弹，无明显折痕' }], unsuitable: [], tags: ['纪念品', '春秋航空', 'SPRINGGO', '防晒帽', '旅行用品', 'UPF50+'], reviewCount: 3566 },
+{ id: 'sou-016', name: 'SPRINGGO登机箱（可带进客舱）', brand: '春秋航空', category: '纪念品', tale: '客舱尺寸是它最硬核的卖点——免托运，落地直接开玩。', volume: '20寸', origin: '中国·上海', stock: 'in_stock', description: 'SPRINGGO春秋航空客舱标准登机箱，尺寸合规免托运直接上机。轻盈又耐造，专为客舱行李架尺寸定制，四款神仙配色可选：米白色清新百搭、碳灰低调质感、牛油果绿元气出片、闺蜜粉甜美少女。', coreBenefits: ['客舱尺寸免托运', '四色可选', '轻盈耐造', '行李架尺寸定制'], targetSkinTypes: ['常旅客', '短途出行', '年轻旅客', '颜值党'], keyIngredients: [{ commonName: '轻量箱体', mechanism: '空箱轻便，装满也不费劲' }, { commonName: '顺滑万向轮', mechanism: '推行静音顺滑，机场赶路不费劲' }], unsuitable: [], tags: ['纪念品', '春秋航空', 'SPRINGGO', '登机箱', '旅行用品', '免托运'], reviewCount: 6695 },
+{ id: 'sou-017', name: 'SPRINGGO自拍杆旅拍专用款', brand: '春秋航空', category: '纪念品', tale: '黄金拉伸加远程蓝牙——一个人旅行，也能拍出两个人的合照感。', volume: '单支', origin: '中国·上海', stock: 'in_stock', description: 'SPRINGGO自拍杆旅拍专用款，黄金拉伸比例、远程蓝牙遥控，稳固防抖，一个人也能拍出大片感。便携收纳不占空间，是已售数万支的人气旅拍单品。', coreBenefits: ['远程蓝牙遥控', '黄金拉伸长度', '稳固防抖', '轻便收纳'], targetSkinTypes: ['旅行摄影爱好者', '独行旅客', 'Vlog博主'], keyIngredients: [{ commonName: '铝合金伸缩杆', mechanism: '轻量化高强度，伸出稳定不晃' }, { commonName: '蓝牙遥控模块', mechanism: '十米内远程快门，自拍不求人' }], unsuitable: [], tags: ['纪念品', '春秋航空', 'SPRINGGO', '自拍杆', '旅拍', '蓝牙遥控'], reviewCount: 26087 },
+{ id: 'sou-018', name: '飞行员防护偏光墨镜（儿童款）', brand: '春秋航空', category: '纪念品', tale: '机长同款的缩小版——小朋友戴上，这趟航班他也是机组成员。', volume: '单副', origin: '中国·上海', stock: 'in_stock', description: '飞行员防护偏光墨镜儿童款，柔韧镜框不压鼻梁，防护偏光镜片过滤眩光保护双眼。飞行员同款造型酷炫可爱，小朋友出行护眼又帅气。', coreBenefits: ['儿童专属尺寸', '柔韧镜框不压鼻梁', '偏光防眩光', '飞行员同款造型'], targetSkinTypes: ['亲子旅客', '儿童护眼需求', '造型搭配需求'], keyIngredients: [{ commonName: 'TR90柔韧镜框', mechanism: '耐摔抗弯折，佩戴轻若无物' }, { commonName: '儿童偏光镜片', mechanism: '过滤反射眩光，视野清晰柔和' }], unsuitable: [{ type: '3岁以下儿童', reason: '镜架尺寸不适配，请选择幼儿专用款' }], tags: ['纪念品', '春秋航空', '儿童墨镜', '偏光', '飞行员同款', '亲子'], reviewCount: 1520 },
 {id: 'kerastase-001', name: '卡诗黑钻钥源洗发水', brand: '卡诗', category: '洗发水', tale: '黑钻系列的灵感来自太平洋深海里的「海源微生奇迹」——在最深最暗的水域里依然能存活的微生物，被卡诗拿来修护最脆弱的发丝：越是受损的头发，越值得被认真对待。', volume: '80ml/250ml/500ml/1000ml', origin: '法国', stock: 'in_stock', description: '卡诗高端洗护线黑钻钥源（Chronologiste）系列洗发水，核心成分为海源微生奇迹精粹（Abyssine）配合玻尿酸与维生素E，专为烫染受损、干枯易断发质设计。透明啫喱质地，泡沫细腻不假滑，清洁同时修护毛鳞片结构，令发丝强韧柔顺、重现丝绸光泽，并带有品牌高定花香型留香。', coreBenefits: ['修护受损发丝', '强韧减少断发', '柔顺有光泽', '温和清洁头皮', '花香持久留香', '抚平毛躁'], targetSkinTypes: ['烫染受损发质', '干枯易断发质', '毛躁打结发质', '经常飞行的商务人士'], keyIngredients: [
             {
                 'commonName': '海源微生奇迹精粹（Abyssine）',
@@ -4668,7 +4806,7 @@ window.DateMatch = (function () {
                 'reason': '含多种草本浸提，敏感者慎饮'
             }
         ], tags: ['露酒', '杏花村', '竹叶青', '42度', '礼赠'], reviewCount: 1000},
-{id: 'spir-003', name: '泸州老窖紫砂大曲87版', brand: '泸州老窖', category: '酒', tale: '1987年泸州名酒节，出口玻璃瓶大曲升级为紫砂陶装，得名87版。它像被时光封进陶里的老友，浓香扑鼻、入口甘冽，把‘浓香鼻祖’的底蕴化作一杯可收藏的礼。', volume: '500ml', origin: '中国', stock: 'in_stock', description: '泸州老窖紫砂大曲87版（时代珍藏）为浓香型白酒，52度、500ml。沿用百年以上老窖池发酵，以糯红高粱为主料、小麦制曲，经紫砂陶瓶陈贮，酒体醇香浓郁、清冽甘爽、回味悠长。限量编号出品，兼具饮用与收藏价值，适合商务宴请、佳节礼赠。常温竖放，适量饮用，未成年人及孕妇禁饮、酒后不开车。', coreBenefits: ['浓香典型', '醇香浓郁', '清冽甘爽', '回味悠长'], targetSkinTypes: ['商务宴请', '白酒收藏者', '浓香型爱好者'], keyIngredients: [
+{id: 'spir-003', name: '泸州老窖紫砂大曲87版', brand: '泸州老窖', category: '酒', tale: '1987年泸州名酒节，出口玻璃瓶大曲升级为紫砂陶装，得名87版。它像被时光封进陶里的老友，浓香扑鼻、入口甘冽，把‘浓香鼻祖’的底蕴化作一杯可收藏的礼。', volume: '500ml', origin: '中国', stock: 'in_stock', description: '泸州老窖紫砂大曲87版（时代珍藏）为浓香型白酒，52度、500ml。沿用百年以上老窖池发酵，以糯红高粱为主料、小麦制曲，经紫砂陶瓶陈贮，酒体醇香浓郁、清冽甘爽、回味悠长。编号出品，兼具饮用与收藏价值，适合商务宴请、佳节礼赠。常温竖放，适量饮用，未成年人及孕妇禁饮、酒后不开车。', coreBenefits: ['浓香典型', '醇香浓郁', '清冽甘爽', '回味悠长'], targetSkinTypes: ['商务宴请', '白酒收藏者', '浓香型爱好者'], keyIngredients: [
             {
                 'commonName': '糯红高粱',
                 'mechanism': '有机原粮基地高粱，赋予酒体醇厚骨架'
@@ -7500,7 +7638,7 @@ productIntrosByCategory: {
                 icon: '📋',
                 color: 'from-blue-500 to-cyan-500',
                 scripts: [
-                    { id: 'iq1', content: '这款是我们品牌的人气产品，核心成分是XX，主要功效是深层修护和抗初老。', tags: ['产品介绍', '专业'] },
+                    { id: 'iq1', content: '这款是我们品牌的人气单品，主推成分是二裂酵母发酵产物，主打深层修护与维稳抗初老，回头客一直很多。', tags: ['产品介绍', '专业'] },
                     { id: 'iq2', content: '我来给您详细介绍一下这款精华的成分表，它的核心成分是二裂酵母，能修护DNA损伤。', tags: ['成分', '专业'] },
                     { id: 'iq3', content: '使用方法很简单，洁面后取2-3滴，均匀涂抹于面部，轻轻按摩至吸收即可。', tags: ['用法', '指导'] },
                     { id: 'iq4', content: '这款和那款的区别在于质地，这款更清爽，适合油性肌肤；那款更滋润，适合干性肌肤。', tags: ['对比', '建议'] },
@@ -7691,7 +7829,7 @@ productIntrosByCategory: {
                     { id: 'informationInquiry_188', content: '您问的这款是琉球酒豪传说，日本冲绳长销二十年的小物，里面是春、秋、紫三种姜黄加草本，主要给常喝酒的朋友做饮酒前后的日常肝脏营养补给。独立小包随身带。您是应酬多，还是去冲绳玩想带点伴手礼？', tags: ["琉球酒豪传说","姜黄","冲绳"], productId: 'hlth-017' },
                     { id: 'informationInquiry_189', content: '您问的这款是青花汾酒30年复兴版，53度清香型白酒。它入口绵甜、落口清爽，带淡淡粮香，瓶身还是青花瓷韵，商务宴请或送礼都挺体面。您平时更偏向清香还是浓香？', tags: ["清香型","青花瓷韵","礼赠"], productId: 'spir-001' },
                     { id: 'informationInquiry_190', content: '这款是杏花村竹叶青青享20版，42度露酒，以汾酒为基加淡竹叶等草本。酒色微黄、温润不烈，餐前开胃或加冰都合适。您平时喝低度酒多吗？', tags: ["露酒","低度","草本"], productId: 'spir-002' },
-                    { id: 'informationInquiry_191', content: '这是泸州老窖紫砂大曲87版，52度浓香型，紫砂陶瓶装、限量编号。开瓶窖香扑鼻、入口甘冽，收藏和宴请都拿得出手。您更看重喝还是藏？', tags: ["浓香型","紫砂陶","限量编号"], productId: 'spir-003' },
+                    { id: 'informationInquiry_191', content: '这是泸州老窖紫砂大曲87版，52度浓香型，紫砂陶瓶装、编号出品。开瓶窖香扑鼻、入口甘冽，收藏和宴请都拿得出手。您更看重喝还是藏？', tags: ["浓香型","紫砂陶","编号出品"], productId: 'spir-003' },
                     { id: 'informationInquiry_192', content: '这款泸州老窖红陶500ml，52度浓香型，红陶瓶喜庆大气。窖香浓郁、入口绵柔回甜，婚宴宴客都体面。您是自家喝还是准备送礼？', tags: ["浓香型","红陶","宴客"], productId: 'spir-004' },
                     { id: 'informationInquiry_193', content: '这是泸州老窖紫砂大曲红陶礼盒，两瓶加酒具，52度浓香。开瓶满室窖香、入口甘冽回甜，自饮宴席或送礼都实在。您平时常喝浓香吗？', tags: ["浓香型","礼盒","酒具"], productId: 'spir-005' },
                     { id: 'informationInquiry_194', content: '这款松井白兰地梅酒，日本鸟取产，14度、700ml。用自家白兰地浸青梅，香气奢华、尾韵醇厚，加冰或苏打都好喝。您平时爱喝梅酒吗？', tags: ["白兰地梅酒","日本鸟取","14度"], productId: 'spir-006' },
@@ -7805,15 +7943,15 @@ productIntrosByCategory: {
                     { id: 'po8', content: '与其买三瓶便宜的没效果，不如投资一瓶真正有用的，您觉得呢？', tags: ['对比', '选择'] },
                     { id: 'po9', content: '您看这个成分表，它的核心成分一克就要好几百，这个价格其实已经很良心了。', tags: ['成本', '说明'] },
                     { id: 'po10', content: '这款产品我们支持14天无理由退换，您完全可以放心试用，不满意全额退款。', tags: ['保障', '安心'] },
-                    { id: 'po11', content: '今天买可以分期免息，分成三期每月只要XX元，完全没有压力。', tags: ['分期', '方案'] },
+                    { id: 'po11', content: '今天买可以分期免息，分成三期付款，每期金额我现场帮您按实际售价算清楚，用起来没有压力。', tags: ['分期', '方案'] },
                     { id: 'po12', content: '选产品要看是否适合自己，一款用对了产品，长期坚持更能看到变化。', tags: ['价值', '对比'] },
-                    { id: 'po13', content: '我帮您算一笔账，这款产品50ml，每次用0.5ml，可以用100天，每天成本才X元。', tags: ['计算', '划算'] },
+                    { id: 'po13', content: '我帮您算一笔账：这瓶50ml，每次用0.5ml，可以稳稳用上100天，摊到每天成本其实很划算。', tags: ['计算', '划算'] },
                     { id: 'po14', content: '我们是通过海关正规渠道入境的跨境正品，清关记录可查，品质有保障。', tags: ['正品', '保障'] },
                     { id: 'po15', content: '这款是特色款，喜欢的话现在入手正合适。', tags: ['收藏', '时机'] },
                     { id: 'po16', content: '您是会员，今天买可以额外享受95折，再加上满减优惠，非常划算。', tags: ['会员', '优惠'] },
                     { id: 'po17', content: '投资自己的皮肤是永远不会亏的事，好的皮肤带来的自信和价值是无法估量的。', tags: ['理念', '价值'] },
                     { id: 'po18', content: '我知道您在意价格，但您更在意的是效果对吧？这款产品10个顾客里有9个回购，说明真的值。', tags: ['效果', '口碑'] },
-                    { id: 'po19', content: '现在买我们还赠送价值XXX元的小样套装，相当于买一送三，特别划算。', tags: ['赠品', '价值'] },
+                    { id: 'po19', content: '现在入手我们还附赠一套同系列小样，让您先试后买，把体验做足，真心不亏。', tags: ['赠品', '价值'] },
                     { id: 'po20', content: '您去别的地方可能更便宜，但我们这里提供的是正品保障+专业售后，这个服务是免费的。', tags: ['服务', '价值'] },
                     { id: 'po21', content: '不用特意等大促，现在就有活动价，而且现在有现货，不用等。', tags: ['时机', '建议'] },
                     { id: 'po22', content: '这款产品人气很高，喜欢的话可以趁本次航班选购。', tags: ['人气', '推荐'] },
@@ -7986,9 +8124,9 @@ productIntrosByCategory: {
                     { id: 'priceObjection_188', content: '这款酒豪传说是冲绳经典，六包装常卖八九十块，一次一小包、能用好几回，比单次买解酒品划算。三种姜黄搭配，应酬前后带一包很方便。您想先拿几包，还是多囤点备着？', tags: ["琉球酒豪传说","姜黄","便携"], productId: 'hlth-017' },
                     { id: 'priceObjection_189', content: '这瓶是汾酒高端青花系列，用的‘清蒸二次清’古法、陶坛陈贮，加上青花瓷瓶身，价位在高端清香里算实在的。机上免税渠道的价格也实在些，喜欢可以带一瓶慢慢品。', tags: ["高端清香","古法","免税价"], productId: 'spir-001' },
                     { id: 'priceObjection_190', content: '它是以汾酒为基的草本露酒，42度好入口，整箱更划算。机上离岛价比市区商超友好，自己小聚或送长辈都合适，不妨带一组。', tags: ["草本露酒","整箱","离岛价"], productId: 'spir-002' },
-                    { id: 'priceObjection_191', content: '87版是泸州老窖的纪念级浓香，老窖池发酵加紫砂陶陈贮，限量编号。这个价位在名酒里算厚道，机上免税还省一笔，送礼自有面子。', tags: ["纪念级","老窖池","免税"], productId: 'spir-003' },
+                    { id: 'priceObjection_191', content: '87版是泸州老窖的纪念级浓香，老窖池发酵加紫砂陶陈贮，编号出品。这个价位在名酒里算厚道，机上免税还省一笔，送礼自有面子。', tags: ["纪念级","老窖池","免税"], productId: 'spir-003' },
                     { id: 'priceObjection_192', content: '红陶装是泸州老窖中高端宴客款，多粮酿造、红陶瓶好看，价位在浓香里挺实在。机上免税价更友好，日常宴客或喜庆场合都合适。', tags: ["多粮浓香","红陶","免税价"], productId: 'spir-004' },
-                    { id: 'priceObjection_193', content: '礼盒带酒具，紫砂陶陈贮、浓香醇正，两瓶下来比单买划算。机上限量礼盒价不错，自己喝体面、送人也大方。', tags: ["礼盒","浓香醇正","划算"], productId: 'spir-005' },
+                    { id: 'priceObjection_193', content: '礼盒带酒具，紫砂陶陈贮、浓香醇正，两瓶下来比单买划算。机上礼盒价不错，自己喝体面、送人也大方。', tags: ["礼盒","浓香醇正","划算"], productId: 'spir-005' },
                     { id: 'priceObjection_194', content: '它是松井酒造获奖梅酒，白兰地打底、果香更奢华，700ml好入口。机上免税价比市区代购友好，女生小聚带一瓶正合适。', tags: ["获奖梅酒","白兰地","免税"], productId: 'spir-006' },
                     { id: 'priceObjection_195', content: '它比普通梅酒多一层威士忌暖意，低度好入口，700ml划算。机上免税和cdf都有货，价格比外面实在，带一瓶回家小酌。', tags: ["威士忌尾韵","低度","cdf有货"], productId: 'spir-007' },
                     { id: 'priceObjection_196', content: '山阴是松井的亲民日威，金奖品质、顺滑易饮，700ml日常价很友好。机上跨境渠道的价格也实在，想入门日威从它开始正合适。', tags: ["亲民日威","金奖","跨境价"], productId: 'spir-008' },
@@ -8080,7 +8218,7 @@ productIntrosByCategory: {
                     { id: 'hh22', content: '我建议您可以先买一个月的量试试，用量刚好，用完觉得好再续。', tags: ['建议', '稳妥'] },
                     { id: 'hh23', content: '您看其他顾客的评价了吗？90%的好评率应该能帮您做决定了吧？', tags: ['数据', '引导'] },
                     { id: 'hh24', content: '有时候最好的决定就是先试一试，试了才知道适不适合自己，对吧？', tags: ['鼓励', '行动'] },
-                    { id: 'hh25', content: '我给您一个专业的建议：您目前的皮肤状况最需要的是XX，这款产品刚好对口。', tags: ['专业', '建议'] },
+                    { id: 'hh25', content: '我给您一个专业建议：先明确您当前的肤质与核心诉求（缺水、暗沉还是松弛），再对照成分挑，这样最不容易踩雷。', tags: ['专业', '建议'] },
                     { id: 'hh26', content: '您不需要现在就做决定，但我建议您今天至少了解清楚，下次来就能直接选了。', tags: ['了解', '铺垫'] },
                     { id: 'hh27', content: '犹豫说明您在乎，在乎说明您会认真对待，我相信您最终会做出正确的选择。', tags: ['肯定', '信任'] },
                 ]
@@ -8662,7 +8800,11 @@ productIntrosByCategory: {
                     { id: 'sm7', content: '飞机模型收藏讲究的就是做工和涂装。我们春秋航空的模型都是合金材质，涂装精细、色彩鲜艳持久。不是那种塑料的玩具，是有收藏价值的航空周边。', tags: ['收藏价值', '涂装精细'] },
                     { id: 'sm8', content: '这款模型送男朋友或老公特别合适，尤其是航空迷。我上次遇到一位旅客，买了三架不同款式的，说要摆满一整个展示柜。', tags: ['送礼推荐', '航空迷'] },
                     { id: 'sm9', content: '您看这个机翼的弧度、尾翼的涂装、甚至机身上的小窗都是精细还原的。合金材质拿在手里有质感，和几十块钱的塑料模型完全不在一个档次。', tags: ['细节还原', '质感对比'] },
-                    { id: 'sm10', content: '春秋航空的飞机模型每款都是特色出品的，很有收藏价值。很多旅客第一次犹豫没买，第二次来就找不到了。', tags: ['特色出品', '收藏'] },
+                    { id: 'sm10', content: '春秋航空的飞机模型每款都是特色出品的，很有收藏价值。很多旅客第一次犹豫没买，第二次来就找不到了。', tags: ['特色出品', '收藏'] },,
+                    { id: 'sm11', content: '如果是第一次收藏机模，建议从1:250的第四代涂装款入手——16厘米机身摆在案头刚刚好，价格也亲民。先入门感受涂装做工，以后再考虑大比例典藏款。', tags: ['入门推荐', '1:250'] },
+                    { id: 'sm12', content: '1:200经典版是我们机模里卖得最好的尺寸之一，涂装和细节都按真实飞机还原，配了展示支架。摆在办公桌上，同事看见了都会问您在哪买的。', tags: ['1:200经典版', '人气款'] },
+                    { id: 'sm13', content: '想送人拿不准尺寸？给您个参考：1:250约16厘米，小巧精致；1:200约19厘米，比例和细节更进一层；1:100典藏版接近40厘米，是骨灰级飞友的镇柜之选。把预算和摆放位置告诉我，我帮您挑。', tags: ['比例选购', '送礼指南'] },
+                    { id: 'sm14', content: '春秋航空的机模系列在自营渠道累计卖出超过45万个，从入门款到典藏版都有。马年生肖款午福临门现在买的人很多，收藏价值和好彩头都有了。', tags: ['销量背书', '午福临门'] }
                 ]
             },
             souvenirTravel: {
@@ -8670,16 +8812,20 @@ productIntrosByCategory: {
                 icon: '🧳',
                 color: 'from-teal-500 to-cyan-500',
                 scripts: [
-                    { id: 'st1', content: '小黄鸭联名颈枕，记忆棉填充，柔软舒适支撑颈椎。萌趣小黄鸭造型，在飞机上用特别吸睛。很多旅客说用了这个，下飞机脖子再也不酸了。', tags: ['小黄鸭', '记忆棉'] },
+                    { id: 'st1', content: 'SPRINGGO颈托旅行枕套装，一套三件：记忆棉颈托、遮光眼罩加收纳袋。颈托贴合颈部曲线，长途飞行小憩不落枕；眼罩遮光助眠，收纳袋卷起来塞包就走。', tags: ['小黄鸭', '记忆棉'] },
                     { id: 'st2', content: '飞行员偏光墨镜，专业TAC偏光镜片，有效过滤眩光，UV400防紫外线。飞行员风格设计时尚帅气，开车、旅行、户外都能戴。', tags: ['偏光墨镜', 'UV400'] },
                     { id: 'st3', content: '儿童款偏光墨镜，专为小朋友设计。柔韧TR90镜框不压鼻梁，UV400防紫外线保护孩子娇嫩的双眼。飞行员造型酷炫可爱，小朋友戴上特别帅。', tags: ['儿童款', 'TR90镜框'] },
                     { id: 'st4', content: '自拍杆旅拍专用款，蓝牙遥控拍照，轻便伸缩设计，360度旋转。旅行自拍不求人，记录每一段精彩旅程。收纳后小巧便携，放包里不占地方。', tags: ['蓝牙遥控', '旅拍'] },
-                    { id: 'st5', content: '景托旅行枕眼罩套装，记忆棉颈枕加遮光眼罩，飞行旅途舒适必备。颈枕有效支撑颈椎，眼罩帮助安睡，出差旅行带着特别实用。', tags: ['旅行套装', '记忆棉颈枕'] },
+                    { id: 'st5', content: '颈托旅行枕眼罩套装，记忆棉颈枕加遮光眼罩，飞行旅途舒适必备。颈枕有效支撑颈椎，眼罩帮助安睡，出差旅行带着特别实用。', tags: ['旅行套装', '记忆棉颈枕'] },
                     { id: 'st6', content: '经常出差的人一定要备一个颈枕。我们这款记忆棉的，慢回弹，用久了也不会塌。枕套还能拆洗，很方便。比机场卖的那些海绵枕舒服多了。', tags: ['出差必备', '可拆洗'] },
                     { id: 'st7', content: '颈枕在飞机上用，关键是支撑力要好。我们这款记忆棉的，会根据您的颈部曲线自动塑形，给颈椎最舒适的支撑。很多旅客用了都说比家里的枕头还舒服。', tags: ['支撑力', '自动塑形'] },
                     { id: 'st8', content: '墨镜偏光效果好不好，一测就知道。您可以透过镜片看看车窗的反光，普通墨镜只能变暗，偏光镜片能把眩光完全过滤掉，视野更清晰。', tags: ['偏光效果', '现场演示'] },
                     { id: 'st9', content: '这套旅行枕眼罩套装是我自己出差必带的。颈枕一戴上就能睡着，眼罩遮光效果特别好。收纳袋也很方便，卷起来塞包里就行。', tags: ['自用推荐', '收纳方便'] },
-                    { id: 'st10', content: '自拍杆带蓝牙遥控器，不用求人帮忙拍照了。伸缩杆最长能到一米多，拍风景、拍合照都够用。而且很轻，女生单手举着也不累。', tags: ['蓝牙遥控', '轻便'] },
+                    { id: 'st10', content: '自拍杆带蓝牙遥控器，不用求人帮忙拍照了。伸缩杆最长能到一米多，拍风景、拍合照都够用。而且很轻，女生单手举着也不累。', tags: ['蓝牙遥控', '轻便'] },,
+                    { id: 'st11', content: 'SPRINGGO旅行防晒帽，UPF50+防晒指数，14厘米大帽檐把脸和脖子都罩住。抗皱面料随便卷，卷起来塞包里不占地方，还附赠防风绳，海边爬山都稳当。', tags: ['防晒帽', 'UPF50+'] },
+                    { id: 'st12', content: 'SPRINGGO登机箱是按客舱行李架尺寸定制的，免托运直接带上飞机，落地就走不用等行李转盘。米白、碳灰、牛油果绿、闺蜜粉四个颜色，您看哪个顺眼？', tags: ['登机箱', '免托运'] },
+                    { id: 'st13', content: '常出差的旅客选碳灰或米白，低调耐脏；年轻人出片就选牛油果绿和闺蜜粉，在机场拍照特别上镜。箱子本身很轻，万向轮拉着也顺滑，赶飞机不费劲。', tags: ['配色建议', '差旅'] },
+                    { id: 'st14', content: '旅行装备一站式配齐：防晒帽、自拍杆、颈枕套装，三样加起来不到一百五，从头防晒到安睡全包了。很多旅客都是一套带走，实用又都是春秋官方出品。', tags: ['组合推荐', '一站配齐'] }
                 ]
             },
             souvenirGift: {
@@ -8696,7 +8842,10 @@ productIntrosByCategory: {
                     { id: 'sg7', content: '伴手礼选什么最头疼？我给您推荐几样：雪花膏送长辈、敷尔佳送闺蜜、剃须刀送老公，每一样都有品质、有面子。而且春秋航空官方出品，外面买不到同款。', tags: ['搭配推荐', '送礼方案'] },
                     { id: 'sg8', content: '上海女人雪花膏的味道特别经典，就是那种老上海的花香，闻着就让人想起小时候妈妈梳妆台上的味道。4罐礼盒装，自己留一罐，其他三罐送人。', tags: ['经典花香', '怀旧'] },
                     { id: 'sg9', content: '敷尔佳修护膜为什么这么受欢迎？因为它是医用级的透明质酸钠修复贴，不是普通面膜。敏感肌、术后修护都能用，口碑特别好。', tags: ['医用级', '口碑好'] },
-                    { id: 'sg10', content: '这个草莓熊书包是迪士尼正版授权的，玫红色特别漂亮，减负护脊设计对小朋友的脊椎好。容量也大，课本文具都能装下。', tags: ['正版授权', '减负护脊'] },
+                    { id: 'sg10', content: '这个草莓熊书包是迪士尼正版授权的，玫红色特别漂亮，减负护脊设计对小朋友的脊椎好。容量也大，课本文具都能装下。', tags: ['正版授权', '减负护脊'] },,
+                    { id: 'sg11', content: '送礼想送得有纪念意义，马年限定的午福临门模型和马上起飞挂件是绝配——一个寓意福气临门，一个祝人马上起飞，长辈小孩都讨喜。', tags: ['马年限定', '送礼组合'] },
+                    { id: 'sg12', content: '盲盒当伴手礼特别合适——好运登机牌、酷酷旅行箱这些飞行主题款随机开，送小孩是惊喜，送同事是话题，拆盒那一下的快乐是现成的。', tags: ['盲盒送礼', '惊喜感'] },
+                    { id: 'sg13', content: '提醒您一下，绿翼商城会员购买这些周边有购物返现，积分还能抵扣。您要是常坐春秋，注册个会员再买，这些好物到手更划算。', tags: ['会员权益', '省钱技巧'] }
                 ]
             },
             souvenirPlush: {
@@ -8709,7 +8858,10 @@ productIntrosByCategory: {
                     { id: 'sp3', content: '毛绒挂件买一个不够送人的，很多旅客都是三五个一起买。挂件小巧精致，送同事、送朋友、送孩子都合适，价格也不贵，特别实惠。', tags: ['多买优惠', '送礼'] },
                     { id: 'sp4', content: '这个毛绒挂件材质安全环保，经过防掉毛处理，颜色是环保印染不易褪色。您可以摸摸看，手感特别柔软，做工也很精细。', tags: ['材质安全', '防掉毛'] },
                     { id: 'sp5', content: '马上起飞挂件寓意特别好，送给出差的朋友，祝他旅途顺利、马上起飞。小马造型萌萌的，收到的人肯定开心。', tags: ['寓意好', '送礼祝福'] },
-                    { id: 'sp6', content: '飞机毛绒挂件是我们春秋航空的标志性纪念品，很多旅客每次坐春秋都会买一个，说集齐不同款式的挂件是他们的旅行仪式感。', tags: ['标志性', '旅行仪式感'] },
+                    { id: 'sp6', content: '飞机毛绒挂件是我们春秋航空的标志性纪念品，很多旅客每次坐春秋都会买一个，说集齐不同款式的挂件是他们的旅行仪式感。', tags: ['标志性', '旅行仪式感'] },,
+                    { id: 'sp7', content: '春航飞机毛绒挂件萌力随行是最新上架的，延续初代的治愈造型，挂在行李箱上一眼就能认出自己的箱子，转盘取行李都快人一步。', tags: ['萌力随行', '新款上架'] },
+                    { id: 'sp8', content: '我们的毛绒类周边累计卖出了两万五千多个，飞机挂件、马上起飞、飞行奇遇记盲盒都是常青款。材质环保印染不易掉毛，送小朋友也放心。', tags: ['销量背书', '材质放心'] },
+                    { id: 'sp9', content: '飞行奇遇记盲盒一端是4盒，配比是三款不同常规款加随机款或隐藏款——能不能开出隐藏款，就看您手气了。很多旅客一次拍一端，和朋友分着拆才有意思。', tags: ['盲盒玩法', '隐藏款'] }
                 ]
             },
             souvenirCreative: {
@@ -8718,13 +8870,31 @@ productIntrosByCategory: {
                 color: 'from-violet-500 to-purple-500',
                 scripts: [
                     { id: 'sc1', content: '长空万里系列冰箱贴，云端丝路主题设计，精美工艺展现丝绸之路与航空的融合。磁吸力强不易脱落，贴冰箱上每次看到都能想起旅行的美好时光。', tags: ['冰箱贴', '云端丝路'] },
-                    { id: 'sc2', content: '春秋航空飞机塔台积木，包含A320NEO飞机模型和塔台场景。拼装过程寓教于乐，亲子互动特别合适。拼好后摆在家里，比买现成的摆件更有成就感。', tags: ['塔台积木', '亲子互动'] },
+                    { id: 'sc2', content: '春秋航空飞机塔台积木，塔台场景精细还原，拼装过程寓教于乐，亲子互动特别合适。拼好后再配上飞机模型一起摆，就是一个停机坪场景，比买现成的摆件更有成就感。', tags: ['塔台积木', '亲子互动'] },
                     { id: 'sc3', content: '机坪特种车系列，含客梯车和牵引车，精细还原机场特种车辆。合金材质，可以搭配飞机模型一起展示，还原机场运行场景。小朋友特别喜欢。', tags: ['特种车', '合金材质'] },
                     { id: 'sc4', content: '冰箱贴是旅行纪念品里最实用的，不占地方、价格实惠、又有纪念意义。长空万里系列设计特别精美，和市面上那种千篇一律的旅游冰箱贴完全不同。', tags: ['实用纪念', '设计精美'] },
                     { id: 'sc5', content: '塔台积木拼起来大概需要2-3个小时，非常适合周末和孩子一起动手。拼装过程中还能给孩子讲讲飞机和机场的知识，寓教于乐。', tags: ['拼装时间', '寓教于乐'] },
                     { id: 'sc6', content: '机坪特种车系列是很多小男孩的最爱。客梯车可以和飞机模型对接，牵引车可以拉着飞机走，还原真实的机场运行场景。合金材质推拉顺滑，做工精致。', tags: ['男孩最爱', '场景还原'] },
                     { id: 'sc7', content: '长空万里系列冰箱贴还有其他款式可以收集，凑齐一套特别有成就感。每到一个地方买一个，冰箱上贴满就是您的旅行地图。', tags: ['系列收藏', '旅行地图'] },
-                    { id: 'sc8', content: '积木和特种车搭配飞机模型一起买，就是一个完整的机场场景。展示效果特别好，摆在书架上特别有档次。整套购买还能一起包邮到家。', tags: ['搭配推荐', '场景组合'] },
+                    { id: 'sc8', content: '积木和特种车搭配飞机模型一起买，就是一个完整的机场场景。展示效果特别好，摆在书架上特别有档次。整套购买还能一起包邮到家。', tags: ['搭配推荐', '场景组合'] },,
+                    { id: 'sc9', content: '梦想启航积木套装里有1架A320neo客机和3个航空机组人仔，是春秋航空的独家玩具。孩子拼完客机再拼塔台，一个完整的机场故事就齐了。', tags: ['梦想启航', 'A320neo'] },
+                    { id: 'sc10', content: '云端丝路冰箱贴是春秋首款冰箱贴，一套六块，六种敦煌元素既能单独贴，又能拼成一架完整的飞机。礼盒装送人也拿得出手。', tags: ['云端丝路', '敦煌元素'] },
+                    { id: 'sc11', content: '积木类周边累计销量两万四千多套，塔台和梦想启航两套拼在一起就是停机坪场景。周末陪孩子拼上两三个小时，比看半天平板有意义多了。', tags: ['积木组合', '亲子陪伴'] }
+                ]
+            },
+            liquorSales: {
+                label: '酒类推荐',
+                icon: '🍶',
+                color: 'from-amber-500 to-orange-600',
+                scripts: [
+                    { id: 'lq1', content: '獭祭三割九分纯米大吟酿，精米步合39%，把米磨掉六成只留芯部，这才有了那股清冽的果香。冰镇到10度左右喝最舒服，配刺身和清蒸鱼特别搭。', tags: ['獭祭', '纯米大吟酿'] },
+                    { id: 'lq2', content: '幸姬酒造特别纯米酒产自佐贺县，用的是山田锦酒米，口感偏辛口、清爽利落。它还是佑德稻荷神社的御神酒，配鲔鱼、鲑鱼、牡蛎这类海鲜，鲜味会格外突出。', tags: ['幸姬酒造', '辛口清酒'] },
+                    { id: 'lq3', content: '奔富BIN389在行内有个外号叫「小葛兰许」——和葛兰许同一个酒窖、同一套工艺，部分酒液还在前一年葛兰许用过的橡木桶里陈年12个月。深邃梅红色，黑加仑和巧克力香气，配牛排是绝配。', tags: ['奔富BIN389', '商务宴请'] },
+                    { id: 'lq4', content: 'CHOYA俏雅梅子酒要认「熟成」两个字：至少静置一年，酸味退了，甜味才圆。加冰、兑苏打水或者兑温水都好喝，餐后小酌一杯特别解腻。', tags: ['梅子酒', '熟成'] },
+                    { id: 'lq5', content: '萨州赤兔马芋烧酒是鹿儿岛出品，用黄金千贯甘薯配白曲酿造，25度。入口柔和带甘薯的甜，回味长。加冰喝清爽、兑热水喝暖身，冬天特别合适。', tags: ['芋烧酒', '鹿儿岛'] },
+                    { id: 'lq6', content: '青花汾酒30年复兴版是清香型53度白酒，走的是杏花村「清蒸二次清」古法，地缸发酵、陶坛陈贮。入口绵甜、落口爽净，瓶身是青花瓷韵，商务宴请或者佳节送礼都拿得出手。', tags: ['青花汾酒', '礼赠'] },
+                    { id: 'lq7', content: '选酒我给您一个思路：先看喝法——冰饮清爽选清酒、烧酒；佐餐配红肉选奔富这类红酒；送礼讲究体面就选青花汾酒这种有包装有故事的。您平时是自饮还是送人？', tags: ['选购引导', '场景匹配'] },
+                    { id: 'lq8', content: '酒类在客舱是免税品，价格比市面专柜有优势，而且是海关正规渠道入境、可查清关记录。您要是送礼，我可以帮您看看有没有配套的礼袋。', tags: ['免税优势', '正品保障'] },
                 ]
             },
         };
@@ -9389,7 +9559,7 @@ productIntrosByCategory: {
                 icon: '🔒',
                 title: '信任疑虑',
                 scenarios: [
-                    { customer: '这个牌子我没听说过，靠谱吗？', response: '这是一个在法国/韩国本土非常受欢迎的小众品牌，他们家专注做XX成分已有XX年历史，在本地药妆店和高端百货都有售。我给您看看用户的真实评价反馈...', tips: '提供品牌背景、第三方认证、用户评价佐证' },
+                    { customer: '这个牌子我没听说过，靠谱吗？', response: '这是一个在法国/韩国本土非常受欢迎的小众品牌，他们家专注做发酵类护肤成分已有几十年历史，在本地药妆店和高端百货都有售。我给您看看用户的真实评价反馈...', tips: '提供品牌背景、第三方认证、用户评价佐证' },
                     { customer: '会不会是假货？', response: '完全理解您的担心。我们的产品全部通过海关正规渠道入境，每瓶都有防伪溯源二维码，您可以当场扫码查验。而且我们是航空公司官方跨境商品，品质有保障。', tips: '强调海关监管、溯源验证、航空官方背书' },
                 ]
             },
@@ -9398,7 +9568,7 @@ productIntrosByCategory: {
                 icon: '💡',
                 title: '效果质疑',
                 scenarios: [
-                    { customer: '用了真的有效果吗？', response: '这个问题特别好。这款产品主打XX成分，临床数据显示连续使用X周后，XX%的用户感受到明显改善。当然，护肤效果因人而异，但我可以根据您的肤质给您一些合理预期...', tips: '引用数据、设定合理预期、提供肤质匹配建议' },
+                    { customer: '用了真的有效果吗？', response: '这个问题特别好。这款产品主打发酵类活性成分，品牌方公布的测试数据显示：连续使用4周后，多数受试者感受到肌肤状态有可见改善。当然，护肤效果因人而异，但我可以根据您的肤质给您一些合理预期...', tips: '引用数据、设定合理预期、提供肤质匹配建议' },
                     { customer: '我以前用过类似的，没什么效果。', response: '非常理解您的感受。护肤效果确实因人而异，关键是找到适合自己肤质的产品。请问您之前用的是哪一款？我可以帮您分析一下可能不匹配的原因...', tips: '共情、分析原因、推荐更匹配的替代品' },
                 ]
             },
@@ -9408,7 +9578,7 @@ productIntrosByCategory: {
                 title: '犹豫拖延',
                 scenarios: [
                     { customer: '我下飞机再买吧。', response: '好的没问题。您可以先加购，不着急决定，落地前下单都可以。', tips: '不强求、保留购买通道' },
-                    { customer: '我想回去查查评价再说。', response: '当然可以，购买前多了解是对的。我给您一个建议：您可以先扫这个二维码看看小红书和微博上真实用户的使用反馈，很多人反馈XX效果特别明显。', tips: '鼓励理性消费、主动提供信息渠道' },
+                    { customer: '我想回去查查评价再说。', response: '当然可以，购买前多了解是对的。我给您一个建议：您可以先扫这个二维码看看小红书和微博上真实用户的使用反馈，很多人反馈保湿和维稳改善特别明显。', tips: '鼓励理性消费、主动提供信息渠道' },
                 ]
             },
             {
@@ -9588,7 +9758,7 @@ productIntrosByCategory: {
                 id: 'souvenir_model_collector',
                 title: '飞机模型收藏爱好者',
                 icon: '✈️',
-                customer: { age: '25-45岁', skinType: '不限', budget: '中高预算', concerns: ['收藏价值', '做工细节', '限量款', '合金材质'] },
+                customer: { age: '25-45岁', skinType: '不限', budget: '中高预算', concerns: ['收藏价值', '做工细节', '稀有款', '合金材质'] },
                 opening: '你好，我看到你们有春秋航空的飞机模型，我是航空模型收藏爱好者，给我介绍一下你们有哪些款？'
             },
             {
@@ -9616,7 +9786,7 @@ productIntrosByCategory: {
                 id: 'souvenir_airline_fan',
                 title: '春秋航空粉丝收藏',
                 icon: '💙',
-                customer: { age: '20-40岁', skinType: '不限', budget: '中高预算', concerns: ['春秋航空周边', '联名款', '限量收藏', '特色设计'] },
+                customer: { age: '20-40岁', skinType: '不限', budget: '中高预算', concerns: ['春秋航空周边', '联名款', '纪念收藏', '特色设计'] },
                 opening: '你好！我是春秋航空的老粉丝了，这次想买点春秋的周边纪念品，有什么特别的推荐吗？'
             },
         ];
@@ -21404,7 +21574,7 @@ productIntrosByCategory: {
             }
         ],
         'ingredients': ['糯红高粱', '小麦'],
-        'advantages': ['浓香鼻祖', '限量编号', '收藏价值'],
+        'advantages': ['浓香鼻祖', '编号出品', '收藏价值'],
         'disadvantages': ['52度偏高', '价格中高端'],
         'complianceNote': '对比聚焦窖池与陶装工艺，客观陈述',
         'updateTime': '2026-09-15'
@@ -29695,7 +29865,7 @@ html += `<div class="mb-6"><div class="flex items-center justify-between mb-3"><
                     const customer = isEditing ? state.customers.find(c => c.id === state.editingCustomerId) : null;
                     const form = isEditing && customer ? {...customer} : state.customerForm;
                     html += `<div class="fixed inset-0 z-[100] flex items-center justify-center p-4" style="background:rgba(0,0,0,0.5);">
-                        <div class="bg-white rounded-2xl shadow-2xl max-w-lg w-full overflow-hidden">
+                        <div class="bg-white rounded-2xl shadow-2xl max-w-lg w-full overflow-hidden" style="max-height:86vh;overflow-y:auto;-webkit-overflow-scrolling:touch;">
                             <div class="bg-gradient-to-r from-emerald-500 to-teal-500 p-4">
                                 <div class="flex items-center justify-between">
                                     <h3 class="text-gray-800 font-bold text-lg">${isEditing?'编辑客户':'新增客户'}</h3>
@@ -29941,7 +30111,7 @@ html += `<div class="mb-6"><div class="flex items-center justify-between mb-3"><
             // Settings Panel
             if (state.showSettingsPanel) {
                 html += `<div class="fixed inset-0 z-[100] flex items-center justify-center p-4" style="background:rgba(0,0,0,0.5);" onclick="if(event.target===this){state.showSettingsPanel=false;render()}">
-                    <div class="bg-white rounded-2xl shadow-2xl max-w-md w-full overflow-hidden">
+                    <div class="bg-white rounded-2xl shadow-2xl max-w-md w-full overflow-hidden" style="max-height:86vh;overflow-y:auto;-webkit-overflow-scrolling:touch;">
                         <div class="bg-gradient-to-r from-gray-700 to-gray-900 p-5">
                             <h2 class="text-white text-xl font-bold">⚙️ 系统设置</h2>
                             <p class="text-gray-300 text-sm mt-1">个性化配置您的使用体验</p>
@@ -29983,13 +30153,16 @@ html += `<div class="mb-6"><div class="flex items-center justify-between mb-3"><
                 </div>`;
             }
 
-            // Tutorial Modal
+            // Tutorial Modal（2026-09-16 APK 修复：限高内滚 + sticky 标题栏常驻X + 空白点按关闭）
             if (state.showTutorial) {
-                html += `<div class="fixed inset-0 z-[100] flex items-center justify-center p-4" style="background:rgba(0,0,0,0.5);">
-                    <div class="bg-white rounded-2xl shadow-2xl max-w-lg w-full overflow-hidden">
-                        <div class="bg-gradient-to-r from-emerald-500 to-green-600 p-5">
-                            <h2 class="text-gray-800 text-xl font-bold">👋 欢迎使用航空跨境美妆话术系统</h2>
-                            <p class="text-gray-800 text-sm mt-1">快速上手指南</p>
+                html += `<div class="fixed inset-0 z-[100] flex items-center justify-center p-4" style="background:rgba(0,0,0,0.5);" onclick="if(event.target===this)closeTutorial()">
+                    <div class="bg-white rounded-2xl shadow-2xl max-w-lg w-full overflow-hidden" style="max-height:86vh;overflow-y:auto;-webkit-overflow-scrolling:touch;">
+                        <div class="bg-gradient-to-r from-emerald-500 to-green-600 p-5 flex items-start justify-between gap-3" style="position:sticky;top:0;z-index:1;">
+                            <div>
+                                <h2 class="text-gray-800 text-xl font-bold">👋 欢迎使用航空跨境美妆话术系统</h2>
+                                <p class="text-gray-800 text-sm mt-1">快速上手指南</p>
+                            </div>
+                            <button onclick="closeTutorial()" class="text-gray-800/80 hover:text-gray-800 text-2xl leading-none px-1" aria-label="关闭">&times;</button>
                         </div>
                         <div class="p-5 space-y-4">
                             <div class="flex gap-3">
@@ -30025,7 +30198,7 @@ html += `<div class="mb-6"><div class="flex items-center justify-between mb-3"><
             if (state.skinQuizStep >= 0) {
                 const q = skinQuizQuestions[state.skinQuizStep];
                 html += `<div class="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4" onclick="if(event.target===this)cancelSkinQuiz()">
-                    <div class="bg-white rounded-2xl shadow-2xl max-w-md w-full overflow-hidden">
+                    <div class="bg-white rounded-2xl shadow-2xl max-w-md w-full overflow-hidden" style="max-height:86vh;overflow-y:auto;-webkit-overflow-scrolling:touch;">
                         <div class="bg-gradient-to-r from-emerald-500 to-emerald-600 p-4">
                             <div class="flex items-center justify-between">
                                 <h3 class="text-gray-800 font-bold text-lg">💆 肤质测试</h3>
@@ -30088,7 +30261,7 @@ html += `<div class="mb-6"><div class="flex items-center justify-between mb-3"><
 
         const closeTutorial = () => {
             state.showTutorial = false;
-            saveState();
+            try { saveState(); } catch (e) { console.warn('saveState 失败，不阻断关闭教程', e); }
             render();
         };
 
@@ -30864,7 +31037,7 @@ html += `<div class="mb-6"><div class="flex items-center justify-between mb-3"><
                         { text: '奶龙联名款好可爱！粉色和蓝色哪个更受欢迎？', emotion: 'happy', personality: ['trendy', 'emotional'] },
                         { text: '这个飞机模型放在家里当摆件挺好看的，但会不会容易落灰？', emotion: 'hesitant', personality: ['cautious'] },
                         { text: '生肖款飞机模型？午福临门寓意不错啊，马年的对吧？', emotion: 'interested', personality: ['emotional'] },
-                        { text: '飞黄腾达那个鸭子涂装好有趣！这个是限量款吗？', emotion: 'happy', personality: ['trendy'] },
+                        { text: '飞黄腾达那个鸭子涂装好有趣！这个是纪念款吗？', emotion: 'happy', personality: ['trendy'] },
                         { text: '塔台积木？这个拼起来难不难？大概有多少块？', emotion: 'interested', personality: ['rational'] },
                         { text: '机坪特种车系列？这个我儿子应该会喜欢，适合几岁的小孩玩？', emotion: 'interested', personality: ['emotional'] },
                         { text: '新彩绘飞机模型跟老款比有什么不同？涂装更精致了吗？', emotion: 'neutral', personality: ['rational'] },
