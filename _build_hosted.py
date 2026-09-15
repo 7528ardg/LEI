@@ -119,6 +119,8 @@ def main():
     # 1) 先构建标准嵌入式产物（在线版 shell 由其改造而来）
     subprocess.check_call([sys.executable, u'_gzip_build.py'], cwd=BASE)
     subprocess.check_call([sys.executable, u'_build_4in1.py'], cwd=BASE)
+    # 1.5) 重建会覆写产物并冲掉 UX 美化块，重挂（幂等）
+    subprocess.check_call([sys.executable, u'_apply_ux_polish.py'], cwd=BASE)
 
     os.makedirs(OUT_DIR, exist_ok=True)
 
@@ -164,8 +166,9 @@ def main():
     md_src = os.path.join(BASE, u'形象IP', u'models')
     md_dst = os.path.join(OUT_DIR, u'形象IP', u'models')
     if os.path.isdir(md_src):
-        _sync_tree(md_src, md_dst,
-                   ignore_files=(u'*_raw.glb', u'lichun-3d.glb', u'lichun-3d-viewer.html'))
+        # 注：lichun-3d.glb / lichun-3d-viewer.html 为早期 3D 试验遗留，文件已不存在（2026-09-15 确认），
+        #     此处不再保留失效忽略项，避免误导后续维护者以为它们还在。
+        _sync_tree(md_src, md_dst, ignore_files=(u'*_raw.glb',))
         # 背景图已全部 base64 内嵌进页面（`_bd_embed.py`），在线版不再需要外部 backdrops 副本
         print(u'  形象IP/backdrops/ 跳过同步（背景图已内嵌，省约 5MB）')
         n_glb = len([f for f in os.listdir(md_src)

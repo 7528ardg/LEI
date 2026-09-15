@@ -91,6 +91,8 @@ button{font-family:inherit;}
 .room .glow{position:absolute;left:64%;bottom:-24%;width:360px;height:360px;transform:translateX(-50%) translateZ(-160px);
   background:radial-gradient(circle,var(--ra,#00A650) 0%,transparent 62%);opacity:.32;filter:blur(8px);transition:opacity .5s;}
 .room .fx{position:absolute;inset:0;pointer-events:none;opacity:0;transition:opacity .5s;}
+/* 用户 2026-09-14：取消雨元素图片（雨水/白露/寒露）的下雨特效，雪 / 樱花 / 星光不受影响 */
+.room[data-fx="rain"] .fx{display:none!important;}
 .room[data-fx="rain"] .fx{opacity:.5;background-image:repeating-linear-gradient(102deg,rgba(255,255,255,.55) 0 1px,transparent 1px 16px);
   background-size:auto 60px;animation:rf .55s linear infinite;}
 .room[data-fx="snow"] .fx{opacity:.75;background-image:radial-gradient(2px 2px at 12% 20%,#fff,transparent),
@@ -142,6 +144,15 @@ button{font-family:inherit;}
   z-index:3;font-size:9.5px;font-weight:800;color:#06251A;background:rgba(255,255,255,.82);
   border-radius:999px;padding:2px 8px;display:none;}
 #room.is3d .r3dtag{display:block;}
+/* 秋分琴房：贝多芬钢琴开关 + 手动换曲（只在秋分这间房出现） */
+.room .pianobar{position:absolute;right:10px;top:10px;z-index:6;display:flex;gap:6px;align-items:center;}
+.room .pianochip{cursor:pointer;white-space:nowrap;
+  font-size:11.5px;font-weight:800;color:#06251A;background:color-mix(in srgb,var(--bg-card,#fff) 82%,transparent);
+  border:1px solid rgba(255,255,255,.55);border-radius:999px;padding:4px 11px;
+  backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);
+  box-shadow:0 6px 16px rgba(0,0,0,.28);-webkit-tap-highlight-color:transparent;}
+.room .pianochip:active{transform:scale(.96);}
+.room .pianochip.play{background:#00A650;color:#fff;border-color:#00A650;}
 /* ==== SCENE_KIT ==== */
 /* ==== BACKDROP_KIT ==== */
 /* AI 生成的正式背景图：不再加模糊（主图已是 1280 原生高清），只做轻微调色 */
@@ -307,18 +318,36 @@ button{font-family:inherit;}
 .st-f .rbtn{flex:1;text-align:center;min-width:96px;}
 
 /* ---------- 聊天 ---------- */
-.chatwrap{display:flex;flex-direction:column;height:100%;}
+/* 2026-09-14（晚）：聊天背景 = 当前角色的原稿原图（替代原来的纯白空白，用户要求）。
+   .chat-bg 铺满整个聊天视图、随 enter()/形象设置切换实时联动；
+   上面一层可读性蒙层；气泡 / 快捷提问 / 输入条全部改毛玻璃浮在原图上（与 qa 板块同一套做法）。 */
+#viewChat{background:#07140D;}
+.chat-bg{position:absolute;inset:0;background-size:cover;background-position:center 24%;
+  background-repeat:no-repeat;transition:background-image .4s;}
+.chat-bg::after{content:'';position:absolute;inset:0;pointer-events:none;
+  background:linear-gradient(180deg,rgba(4,18,11,.50) 0%,rgba(4,18,11,.16) 26%,rgba(4,18,11,.08) 55%,rgba(4,18,11,.34) 100%);}
+.chatwrap{position:relative;z-index:1;display:flex;flex-direction:column;height:100%;}
 .chat-scroll{flex:1;min-height:0;overflow-y:auto;padding:14px;}
-.bub2{background:#fff;border:1px solid var(--line);border-radius:3px 13px 13px 13px;padding:10px 13px;
-  font-size:13.8px;box-shadow:var(--shadow);max-width:86%;margin-bottom:10px;white-space:pre-line;}
-.bub2.me{margin-left:auto;border-radius:13px 3px 13px 13px;background:var(--primary);color:#fff;border-color:var(--primary);}
-.chat-in{flex:none;display:flex;gap:8px;padding:11px 14px;border-top:1px solid var(--line);background:#fff;}
+.bub2{background:color-mix(in srgb,#fff 78%,transparent);
+  border:1px solid color-mix(in srgb,var(--line) 55%,transparent);
+  border-radius:3px 13px 13px 13px;padding:10px 13px;font-size:13.8px;
+  backdrop-filter:blur(10px) saturate(1.1);-webkit-backdrop-filter:blur(10px) saturate(1.1);
+  box-shadow:var(--shadow);max-width:86%;margin-bottom:10px;white-space:pre-line;}
+.bub2.me{margin-left:auto;border-radius:13px 3px 13px 13px;
+  background:color-mix(in srgb,var(--primary) 88%,transparent);color:#fff;border-color:transparent;}
+.chat-in{flex:none;display:flex;gap:8px;padding:11px 14px;padding-bottom:calc(11px + env(safe-area-inset-bottom));
+  border-top:1px solid color-mix(in srgb,var(--line) 45%,transparent);
+  background:color-mix(in srgb,#fff 62%,transparent);
+  backdrop-filter:blur(14px) saturate(1.12);-webkit-backdrop-filter:blur(14px) saturate(1.12);}
 .chat-in input{flex:1;min-width:0;font-size:16px;padding:10px 12px;border:1px solid var(--line);border-radius:11px;
-  background:#F7FAF8;color:var(--ink);font-family:inherit;}
+  background:color-mix(in srgb,#fff 80%,transparent);color:var(--ink);font-family:inherit;}
 .chat-in button{font-size:12.5px;font-weight:800;padding:0 16px;border-radius:11px;border:none;
   background:var(--primary);color:#fff;cursor:pointer;}
 .tips{display:flex;gap:7px;flex-wrap:wrap;padding:0 14px 10px;}
-.tips button{font-size:11.5px;font-weight:700;color:var(--ink2);background:#F2F6F3;border:1px solid var(--line);
+.tips button{font-size:11.5px;font-weight:700;color:var(--ink2);
+  background:color-mix(in srgb,#fff 66%,transparent);
+  border:1px solid color-mix(in srgb,var(--line) 55%,transparent);
+  backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);
   border-radius:999px;padding:5px 11px;cursor:pointer;}
 
 /* ---------- 形象设置 ---------- */
@@ -444,6 +473,10 @@ button{font-family:inherit;}
       <div class="hero" id="hero"><div class="back"></div><div class="card"><img id="heroImg" alt=""></div></div>
       <div class="hero3d" id="hero3d"></div>
       <div class="r3dtag" id="r3dtag">真 3D · 可拖动视角</div>
+      <div class="pianobar" id="pianoBar" style="display:none">
+        <button class="pianochip" id="pianoChip" title="秋分琴房 · 贝多芬钢琴三首，可开关">🎵 贝多芬 · 关</button>
+        <button class="pianochip" id="pianoChipNext" title="换一首（月光第一乐章 / 致爱丽丝 / 悲怆第二乐章）">⏭</button>
+      </div>
       <div class="roomtag">
         <div class="rn" id="rName">—</div>
         <div class="sub" id="rSub">—</div>
@@ -463,6 +496,7 @@ button{font-family:inherit;}
 
   <!-- 聊天 -->
   <section class="view" id="viewChat">
+    <div class="chat-bg" id="chatBg"></div>
     <div class="chatwrap">
       <div class="chat-scroll" id="chatScroll"></div>
       <div class="tips" id="tips"></div>
@@ -574,12 +608,24 @@ window.CC_HOME = (function(){
   document.addEventListener('pointerdown', function(){ touched = true; }, true);
 
   /* ---------------- 视图切换 ---------------- */
+  /* 聊天背景 = 当前角色的原稿原图（跟随 enter() / 形象设置切换实时联动） */
+  function chatBgSync(){
+    var el = $('chatBg'); if (!el) return;
+    var c = ROSTER[cur]; if (!c) return;
+    var bg = BDR[String(c.i)] || '';
+    if (bg){
+      el.style.backgroundImage = 'url("' + bg + '")';
+      el.style.backgroundPosition = 'center ' + (ORI_POS[String(c.i)] || ORI_POS_DEF) + '%';
+    } else {
+      el.style.backgroundImage = '';
+    }
+  }
   function go(v){
     view = v;
     ['viewHall','viewRoom','viewChat'].forEach(function(id){ $(id).classList.toggle('on', id === 'view' + v.charAt(0).toUpperCase() + v.slice(1)); });
     if (v === 'hall' && window.__sceneBuild) setTimeout(renderHall, 30);
     var gv = $('gridView'); if (gv && v !== 'hall') gv.classList.remove('on');
-    if (v === 'chat') setTimeout(function(){ var i = $('chatInput'); if (i) i.focus(); }, 80);
+    if (v === 'chat'){ chatBgSync(); setTimeout(function(){ var i = $('chatInput'); if (i) i.focus(); }, 80); }
   }
 
   /* ---------------- 大厅（走廊）：实现见下方 SCENE_KIT_JS ---------------- */
@@ -588,6 +634,7 @@ window.CC_HOME = (function(){
   function enter(i){
     cur = (i + ROSTER.length) % ROSTER.length;
     var c = ROSTER[cur], p = c.pal;
+    chatBgSync();                      /* 聊天视图的背景跟着这位角色换 */
     var r = $('room');
     r.style.setProperty('--rs1', p.sky1);
     r.style.setProperty('--rs2', p.sky2);
@@ -1475,6 +1522,14 @@ function sceneBuild(c){
     tg.style.width = 'auto';
     tg.style.bottom = Math.max(0, (st.yb / h * 100) - 7).toFixed(2) + '%';
   }
+  /* 秋分琴房：只有秋分（15）这间房出现贝多芬开关（+换曲），换走就停 */
+  var pc = $('pianoChip'), pbar = $('pianoBar');
+  if (pbar) pbar.style.display = (c.i === 15) ? 'flex' : 'none';
+  if (pc){
+    if (c.i !== 15 && window.CCPiano && CCPiano.on){
+      CCPiano.stop(); pc.textContent = CCPiano.label(); pc.classList.remove('play');
+    }
+  }
 }
 window.__sceneBuild = sceneBuild;
 var _rb = null;
@@ -1813,13 +1868,20 @@ function bindHall(){
     return null;
   }
   function sysPrompt(c){
-    return '你是春秋航空广州分队「客舱小助手」的数字乘务员，当前形态叫「' + c.n + '」（编号 ' + c.code + '），' +
-      '气质是「' + c.tone + '」。你所在的房间是「' + c.room + '」，你现在' + c.doing + '。' +
-      '你的口头禅是「' + c.motto + '」。' +
-      '请始终以第一人称、' + c.tone + '的语气说话，回答控制在三句以内，可以自然地带一点房间里的陈设（' +
-      (c.roomProp || []).join('、') + '）。' +
-      '严禁编造规章条文、数值与章节号；不确定就直说「以公司现行规定/手册原文为准」。' +
-      '你的制作人是雷炜豪。';
+    /* 2026-09-14（晚）：把每个形态「独有的设定 / 背景 / 语气」全部喂给 AI（数据单一来源 _pet_roster.py），
+       让接入的 AI 自动按角色作答，而不是泛泛的客服腔 */
+    return '你是春秋航空广州分队「客舱小助手」的数字乘务员团队中的一员，现在由你来接待用户：' +
+      '「' + c.n + '」（' + c.code + '，别称「' + (c.alias || '') + '」，气质底色「' + c.tone + '」）。\n' +
+      '【你独有的设定与背景】' + (c.story || '') + '\n' +
+      '【你此刻的状态】' + (c.tag || '') + '，你正在' + (c.doing || '') + '。' +
+      '你在自己的房间「' + c.room + '」——' + (c.scene || '') + '，房里有：' + (c.roomProp || []).join('、') + '。' +
+      '可以自然地提到这些陈设和你手头的事。\n' +
+      '【你的说话语气】第一人称、中文。像这样开口打招呼：「' + c.hi + '」；像这样关心人：「' + (c.care || '') + '」；' +
+      '被调侃时这样回：「' + (c.tease || '') + '」；查不到时这样老实交代：「' + (c.unknown || '') + '」。' +
+      '你的口头禅是「' + c.motto + '」' + ((c.extra || '') ? ('；只有熟人才知道的小细节：' + c.extra) : '') + '。' +
+      '回答必须始终带着「' + c.n + '」自己的味道，不要退化成通用客服。\n' +
+      '【答题规矩】知识类问题优先给准话，闲聊才聊你自己；一次回答不超过三句；' +
+      '严禁编造规章条文、数值与章节号，不确定就直说「以公司现行规定/手册原文为准」；你的制作人是雷炜豪。';
   }
   function offlineReply(text, c){
     var t = String(text || '');
@@ -1925,6 +1987,22 @@ function bindHall(){
     $('btnHall').onclick = function(){ go('hall'); renderHall(); };
     bindHall();
     r3dInit();
+    /* 秋分琴房：贝多芬钢琴三首（只在秋分这间房出现）—— 🎵 开关 / ⏭ 手动换曲 */
+    var pcChip = $('pianoChip');
+    if (pcChip) pcChip.onclick = function(){
+      if (!window.CCPiano) return;
+      CCPiano.toggle();
+      pcChip.textContent = CCPiano.label();
+      pcChip.classList.toggle('play', CCPiano.on);
+    };
+    var pcNext = $('pianoChipNext');
+    if (pcNext) pcNext.onclick = function(){
+      if (!window.CCPiano || !pcChip) return;
+      CCPiano.next();
+      pcChip.textContent = CCPiano.label();
+      pcChip.classList.toggle('play', CCPiano.on);
+      toast(CCPiano.on ? ('换成《' + CCPiano.trackName() + '》') : ('已选中《' + CCPiano.trackName() + '》'));
+    };
     $('btnSet').onclick = function(){ renderGrid(); $('petModal').classList.add('on'); };
     $('btnRand').onclick = function(){ nextRoom(1); };
     $('pmX').onclick = function(){ $('petModal').classList.remove('on'); };
@@ -1952,6 +2030,193 @@ function bindHall(){
 
   return { enter: enter, roster: ROSTER, ai: aiChat, mode: function(){ return lastMode; } };
 })();
+</script>
+<script>
+/* =====================================================================
+   秋分琴房 · 贝多芬钢琴三首（Web Audio 合成，无外部音频文件）
+   单一来源：_apply_pet.py（你问我答）与 _build_home.py（CC 之家）都注入这一份。
+   对外只暴露 CCPiano.toggle() / CCPiano.stop() / CCPiano.label() / CCPiano.on
+   三首都是慢板：月光奏鸣曲第一乐章 / 致爱丽丝 / 悲怆奏鸣曲第二乐章
+   ===================================================================== */
+window.CCPiano = (function(){
+  /* 迷你谱面：单个音 = 音名:起始拍:时长拍，空格分隔；1 拍的时长由 bpm 决定 */
+  var TRACKS = [
+    { name: '月光奏鸣曲 · 第一乐章', bpm: 54, unit: 1 / 3, loop: 48,
+      /* 单位 = 三连音八分音符；每小节 6 个单位（2 拍），8 小节一轮 */
+      seq:
+        /* 左手分解和弦（升 c 小调） */
+        '0:G#3:1 1:C#4:1 2:E4:1 3:G#3:1 4:C#4:1 5:E4:1 ' +
+        '6:G#3:1 7:C#4:1 8:E4:1 9:G#3:1 10:C#4:1 11:E4:1 ' +
+        '12:A3:1 13:C#4:1 14:E4:1 15:A3:1 16:C#4:1 17:E4:1 ' +
+        '18:A3:1 19:D4:1 20:F#4:1 21:A3:1 22:D4:1 23:F#4:1 ' +
+        '24:G#3:1 25:C4:1 26:F#4:1 27:G#3:1 28:C4:1 29:F#4:1 ' +
+        '30:G#3:1 31:C#4:1 32:E4:1 33:G#3:1 34:C#4:1 35:E4:1 ' +
+        '36:A3:1 37:C#4:1 38:E4:1 39:A3:1 40:C#4:1 41:E4:1 ' +
+        '42:G#3:1 43:C#4:1 44:E4:1 45:G#3:1 46:C#4:1 47:E4:1 ' +
+        /* 右手旋律（长音，很轻） */
+        '12:G#4:5 30:G#4:5 36:A4:4 42:G#4:6 0:B3:6' },
+
+    { name: '致爱丽丝', bpm: 74, unit: 1 / 2, loop: 43,
+      seq:
+        '0:E5:1 1:D#5:1 2:E5:1 3:D#5:1 4:E5:1 5:B4:1 6:D5:1 7:C5:1 ' +
+        '8:A4:2 10:C4:1 11:E4:1 12:A4:1 13:B4:2 15:E4:1 16:G#4:1 17:B4:1 ' +
+        '18:C5:2 20:E4:1 21:E5:1 22:D#5:1 23:E5:1 24:D#5:1 25:E5:1 26:B4:1 ' +
+        '27:D5:1 28:C5:1 29:A4:2 31:C4:1 32:E4:1 33:A4:1 34:B4:2 ' +
+        '36:E4:1 37:C5:1 38:B4:1 39:A4:4 ' +
+        '8:A2:1 10:E3:1 12:A3:1 13:E3:1 15:E2:1 16:E3:1 17:G#3:1 ' +
+        '18:A2:1 20:E3:1 21:A3:1 29:A2:1 31:E3:1 33:A3:1 34:E3:1 36:E2:1 37:E3:1 38:G#3:1' },
+
+    { name: '悲怆奏鸣曲 · 第二乐章', bpm: 56, unit: 1 / 2, loop: 32,
+      seq:
+        /* 右手如歌主题（降 A 大调） */
+        '0:C5:2 2:D-5:1 3:C5:1 4:B-4:2 6:A-4:4 ' +
+        '10:E-4:1 11:F4:1 12:G4:1 13:A-4:2 15:C5:2 17:B-4:1 18:C5:3 ' +
+        '20:D-5:2 22:C5:6 ' +
+        /* 左手低音与和声 */
+        '0:A-2:3 3:E-3:3 6:A-2:4 10:D-3:2 12:E-3:2 14:A-2:2 ' +
+        '16:D-3:3 19:E-3:3 22:A-2:6 ' +
+        /* 中声部和弦音（很轻，铺底） */
+        '1:E-4:2 5:E-4:2 11:A-4:1 13:E-4:2 17:E-4:2 21:E-4:4' }
+  ];
+
+  var ctx = null, master = null, timer = null, stops = [], idx = 0, on = false, playingName = '';
+
+  function ensure(){
+    if (ctx) return true;
+    var AC = window.AudioContext || window.webkitAudioContext;
+    if (!AC) return false;
+    ctx = new AC();
+    master = ctx.createGain(); master.gain.value = 0.0001;
+    master.connect(ctx.destination);
+    /* 轻混响感：两条不同时长的反馈延迟（不走卷积，省资源） */
+    var wet = ctx.createGain(); wet.gain.value = 0.24; wet.connect(ctx.destination);
+    [[0.29, 0.30], [0.47, 0.16]].forEach(function(c){
+      var d = ctx.createDelay(1), fb = ctx.createGain();
+      d.delayTime.value = c[0]; fb.gain.value = c[1];
+      master.connect(d); d.connect(fb); fb.connect(d); d.connect(wet);
+    });
+    return true;
+  }
+
+  function toMidi(n){
+    /* 降号在谱面里写作「-」（D-5 = D♭5）。老正则只认 b，导致《悲怆》整串降号音被解析成
+       负八度（次声部，人耳听不见）——用户报的「点击贝多芬无声音」主因之一 */
+    var m = /^([A-G])(#|-|b)?(-?\d)$/.exec(n);
+    if (!m) return 0;
+    var base = { C:0, D:2, E:4, F:5, G:7, A:9, B:11 }[m[1]];
+    return base + (m[2] === '#' ? 1 : (m[2] === '-' || m[2] === 'b') ? -1 : 0) + (parseInt(m[3], 10) + 1) * 12;
+  }
+  function hz(n){ return 440 * Math.pow(2, (toMidi(n) - 69) / 12); }
+
+  /* 一颗「柔和钢琴」音：基频三角波 + 八度/十二度正弦泛音 + 快起慢衰 */
+  function note(name, t, dur, vel){
+    var f = hz(name), g = ctx.createGain(), lp = ctx.createBiquadFilter();
+    lp.type = 'lowpass'; lp.frequency.value = 2300; lp.Q.value = 0.3;
+    g.gain.setValueAtTime(0.0001, t);
+    g.gain.exponentialRampToValueAtTime(Math.max(0.001, vel), t + 0.012);
+    g.gain.exponentialRampToValueAtTime(0.0001, t + Math.max(0.35, dur * 1.9));
+    lp.connect(g); g.connect(master);
+    [[f, 'triangle', 1, -3], [f * 1.0045, 'triangle', 0.34, 4],
+     [f * 2, 'sine', 0.30, 0], [f * 2.997, 'sine', 0.10, 0]].forEach(function(p){
+      var o = ctx.createOscillator(), og = ctx.createGain();
+      o.type = p[1]; o.frequency.value = p[0]; o.detune.value = p[3];
+      og.gain.value = p[2];
+      o.connect(og); og.connect(lp);
+      o.start(t); o.stop(t + Math.max(0.4, dur * 2.1) + 0.05);
+      stops.push(o);
+    });
+  }
+
+  function schedule(track, t0){
+    var unit = 60 / track.bpm * track.unit;
+    track.events.forEach(function(e){
+      note(e.n, t0 + e.s * unit, e.d * unit, e.v);
+    });
+    return track.loop * unit;
+  }
+
+  /* 谱面 token = 起始拍:音名:时长拍 */
+  function parse(seq){
+    var out = [];
+    seq.split(/\s+/).forEach(function(tok){
+      if (!tok) return;
+      var p = tok.split(':');
+      if (p.length < 3) return;
+      var isBass = /^[A-G](#|-|b)?[12]$/.test(p[1]);      /* 低音区（2/3 八度）轻一些（- = 降号） */
+      var isPad   = /^[A-G](#|-|b)?4$/.test(p[1]);        /* 中声部铺底更轻 */
+      out.push({ n: p[1], s: parseFloat(p[0]), d: parseFloat(p[2]),
+                 v: isBass ? 0.20 : (isPad ? 0.13 : 0.34) });
+    });
+    return out;
+  }
+  TRACKS.forEach(function(t){ t.events = parse(t.seq); });
+
+  function play(){
+    if (!ensure()) return;
+    if (ctx.state === 'suspended'){
+      ctx.resume();
+      /* 预览 iframe / 自动播放策略可能拦掉第一次 resume：挂一个全局手势兜底，随点随续 */
+      if (!ensure._kick){
+        ensure._kick = true;
+        document.addEventListener('pointerdown', function(){
+          try{ if (ctx && ctx.state === 'suspended') ctx.resume(); }catch(e){}
+        }, { capture:true, passive:true });
+      }
+    }
+    on = true;
+    master.gain.cancelScheduledValues(ctx.currentTime);
+    master.gain.setTargetAtTime(0.9, ctx.currentTime, 0.4);
+    var t = TRACKS[idx % TRACKS.length];
+    playingName = t.name;
+    var t0 = ctx.currentTime + 0.18;
+    var dur = schedule(t, t0);
+    clearTimeout(timer);
+    timer = setTimeout(function(){ idx++; play(); }, dur * 1000 + 500);
+  }
+
+  function stop(){
+    on = false;
+    clearTimeout(timer);
+    if (ctx){
+      master.gain.cancelScheduledValues(ctx.currentTime);
+      master.gain.setTargetAtTime(0.0001, ctx.currentTime, 0.18);
+      var ss = stops; stops = [];
+      /* 不再 close()：快速「关→开」会撞上 900ms 关闭竞态，第二次点击永远无声。
+         已排程的音靠 master 归零静音，再延后逐个 stop 释放资源 */
+      setTimeout(function(){ for (var i = 0; i < ss.length; i++){ try{ ss[i].stop(); }catch(e){} } }, 600);
+    }
+    stops = [];
+  }
+
+  /* 手动换曲（用户 2026-09-15：三首不能切换）。停着时只切换当前选中曲目并更新按钮文案，
+     正在弹时立刻切到下一首接着弹；弹完一轮仍会自动进下一首。 */
+  function next(){
+    idx++;
+    playingName = '';
+    if (on) { stop(); play(); }
+    return TRACKS[idx % TRACKS.length].name;
+  }
+  function trackName(){ return TRACKS[idx % TRACKS.length].name; }
+  function trackCount(){ return TRACKS.length; }
+
+  function label(){
+    /* 关着的时候也把「当前选中哪一首」显示出来，换曲才看得见效果 */
+    if (!on) return '🎵 ' + trackName() + ' · 关';
+    return '🎵 ' + (playingName || trackName()) + ' ▶';
+  }
+
+  return {
+    toggle: function(){ if (on) stop(); else play(); return on; },
+    stop: stop,
+    label: label,
+    next: next,
+    trackName: trackName,
+    trackCount: trackCount,
+    get on(){ return on; },
+    get ctxState(){ return ctx ? ctx.state : 'none'; }
+  };
+})();
+
 </script>
 </body>
 </html>

@@ -511,7 +511,12 @@ window.SeasonEngine = (function () {
  * 下游消费方应把 estimated=true 的结果当作「参考区间」，不要用于精确倒计时。
  * ============================================================= */
 window.DateMatch = (function () {
-  var SE = (typeof window !== 'undefined') ? window.SeasonEngine : null;
+  // 懒获取：SeasonEngine 可能在 DateMatch 之后注入，加载期一次性捕获会永久为 null。
+  // （旧实现 var SE = window.SeasonEngine 曾导致农历/节气静默降级为 estimated=true、
+  //   置信度 0.55 且不报错 —— 改为调用时现读，注入顺序不再敏感。）
+  function SE() {
+    return (typeof window !== 'undefined') ? window.SeasonEngine : null;
+  }
 
   /* ---------------- 日期小工具 ---------------- */
   function pad(n) { return (n < 10 ? '0' : '') + n; }
@@ -582,7 +587,7 @@ window.DateMatch = (function () {
   ];
 
   // 24 节气（type=term，日期查 SeasonEngine.TERMS 表）
-  var TERMS = (SE && SE.TERM_ORDER) ? SE.TERM_ORDER : [
+  var TERMS = (SE() && SE().TERM_ORDER) ? SE().TERM_ORDER : [
     '小寒', '大寒', '立春', '雨水', '惊蛰', '春分', '清明', '谷雨', '立夏', '小满',
     '芒种', '夏至', '小暑', '大暑', '立秋', '处暑', '白露', '秋分', '寒露', '霜降',
     '立冬', '小雪', '大雪', '冬至'
@@ -685,7 +690,7 @@ window.DateMatch = (function () {
       return { s: wd, e: addDays(wd, (fest.span || 1) - 1), estimated: false };
     }
     if (fest.type === 'lunar') {
-      var tbl = SE && SE.LUNAR && SE.LUNAR[String(year)];
+      var tbl = SE() && SE().LUNAR && SE().LUNAR[String(year)];
       if (tbl && tbl[fest.lunarKey]) {
         var ld = md2date(tbl[fest.lunarKey], year);
         return { s: ld, e: addDays(ld, (fest.span || 1) - 1), estimated: false };
@@ -696,7 +701,7 @@ window.DateMatch = (function () {
       return { s: mid, e: addDays(mid, (fest.span || 1) - 1), estimated: true, estRange: [ymd(a), ymd(b)] };
     }
     if (fest.type === 'term') {
-      var tt = SE && SE.TERMS && SE.TERMS[String(year)];
+      var tt = SE() && SE().TERMS && SE().TERMS[String(year)];
       if (tt && tt[fest.key]) {
         var td = md2date(tt[fest.key], year);
         return { s: td, e: addDays(td, 2), estimated: false };
@@ -945,9 +950,9 @@ window.DateMatch = (function () {
     });
     // 节气：复用 SeasonEngine 的精确表，DateMatch 不再维护第二份节气日期
     try {
-      var tn = (SE && SE.solarTermOf) ? SE.solarTermOf(today) : '';
+      var tn = (SE() && SE().solarTermOf) ? SE().solarTermOf(today) : '';
       if (tn) {
-        var row = (SE && SE.TERMS) ? SE.TERMS[String(today.getFullYear())] : null;
+        var row = (SE() && SE().TERMS) ? SE().TERMS[String(today.getFullYear())] : null;
         var td = row ? md2date(row[tn], today.getFullYear()) : null;
         var ok = !!(td && !isNaN(td.getTime()));
         var ts = ok ? day0(td) : today, te = addDays(ts, 2);
@@ -982,12 +987,12 @@ window.DateMatch = (function () {
     if (m.type === 'term') return { kind: 'term', key: m.key };
     if (m.type === 'relative') return null;
     if (TERM_AS_FEST[m.key]) return { kind: 'term', key: TERM_AS_FEST[m.key] };
-    if (SE && SE.OPEN_FESTS && SE.OPEN_FESTS[m.key]) return { kind: 'fest', key: m.key };
+    if (SE() && SE().OPEN_FESTS && SE().OPEN_FESTS[m.key]) return { kind: 'fest', key: m.key };
     return null;
   }
   function hasOpenPool(k) {
     if (!k || !SE) return false;
-    var pool = (k.kind === 'term') ? (SE.OPEN_TERMS && SE.OPEN_TERMS[k.key]) : (SE.OPEN_FESTS && SE.OPEN_FESTS[k.key]);
+    var pool = (k.kind === 'term') ? (SE().OPEN_TERMS && SE().OPEN_TERMS[k.key]) : (SE().OPEN_FESTS && SE().OPEN_FESTS[k.key]);
     return !!(pool && pool.length);
   }
 
@@ -1419,7 +1424,7 @@ button:disabled:active{transform:none;}
 /* 软键盘适配：--kb-h 由 JS 写入（visualViewport），键盘弹起时压缩聊天区高度 */
 .chat-scroll{padding-bottom:max(6px,var(--kb-h,0px));}
 </style>
-<script src="形象IP/models/js/ready.js"></script><script>window.CC3D_READY=window.CC3D_READY||[];/* 构建时已有 [1, 2, 3, 4] 个模型 */</script><script src="形象IP/models/js/ready.js"></script><script>window.CC3D_READY=window.CC3D_READY||[];/* 构建时已有 [1, 2, 3, 4] 个模型 */</script><script src="形象IP/models/js/ready.js"></script><script>window.CC3D_READY=window.CC3D_READY||[];/* 构建时已有 [1, 2, 3, 4] 个模型 */</script><script src="形象IP/models/js/ready.js"></script><script>window.CC3D_READY=window.CC3D_READY||[];/* 构建时已有 [1, 2, 3, 4] 个模型 */</script><script src="形象IP/models/js/ready.js"></script><script>window.CC3D_READY=window.CC3D_READY||[];/* 构建时已有 [1, 2, 3, 4] 个模型 */</script><script src="形象IP/models/js/ready.js"></script><script>window.CC3D_READY=window.CC3D_READY||[];/* 构建时已有 [1, 2, 3, 4] 个模型 */</script><script src="形象IP/models/js/ready.js"></script><script>window.CC3D_READY=window.CC3D_READY||[];/* 构建时已有 [1, 2, 3, 4] 个模型 */</script><script src="形象IP/models/js/ready.js"></script><script>window.CC3D_READY=window.CC3D_READY||[];/* 构建时已有 [1, 2, 3, 4] 个模型 */</script><script src="形象IP/models/js/ready.js"></script><script>window.CC3D_READY=window.CC3D_READY||[];/* 构建时已有 [1, 2, 3, 4] 个模型 */</script><script src="形象IP/models/js/ready.js"></script><script>window.CC3D_READY=window.CC3D_READY||[];/* 构建时已有 [1, 2, 3, 4] 个模型 */</script><script src="形象IP/models/js/ready.js"></script><script>window.CC3D_READY=window.CC3D_READY||[];/* 构建时已有 [1, 2, 3, 4] 个模型 */</script><script src="形象IP/models/js/ready.js"></script><script>window.CC3D_READY=window.CC3D_READY||[];/* 构建时已有 [1, 2, 3, 4] 个模型 */</script><script src="形象IP/models/js/ready.js"></script><script>window.CC3D_READY=window.CC3D_READY||[];/* 构建时已有 [1, 2, 3, 4] 个模型 */</script><script src="形象IP/models/js/ready.js"></script><script>window.CC3D_READY=window.CC3D_READY||[];/* 构建时已有 [1, 2, 3, 4] 个模型 */</script><script src="形象IP/models/js/ready.js"></script><script>window.CC3D_READY=window.CC3D_READY||[];/* 构建时已有 [1, 2, 3, 4] 个模型 */</script><script src="形象IP/models/js/ready.js"></script><script>window.CC3D_READY=window.CC3D_READY||[];/* 构建时已有 [1, 2, 3, 4] 个模型 */</script><script src="形象IP/models/js/ready.js"></script><script>window.CC3D_READY=window.CC3D_READY||[];/* 构建时已有 [1, 2, 3, 4] 个模型 */</script><script src="形象IP/models/js/ready.js"></script><script>window.CC3D_READY=window.CC3D_READY||[];/* 构建时已有 [1, 2, 3, 4] 个模型 */</script><script src="形象IP/models/lib/three.min.js"></script><script src="形象IP/models/lib/GLTFLoader.js"></script><script src="形象IP/models/cc-3d.js"></script><script src="形象IP/models/js/ready.js"></script><script>window.CC3D_READY=window.CC3D_READY||[];/* 构建时已有 [1, 2, 3, 4] 个模型 */</script><style id="pet-stage-css">
+<script src="形象IP/models/js/ready.js"></script><script>window.CC3D_READY=window.CC3D_READY||[];/* 构建时已有 [1, 2, 3, 4] 个模型 */</script><script src="形象IP/models/js/ready.js"></script><script>window.CC3D_READY=window.CC3D_READY||[];/* 构建时已有 [1, 2, 3, 4] 个模型 */</script><script src="形象IP/models/js/ready.js"></script><script>window.CC3D_READY=window.CC3D_READY||[];/* 构建时已有 [1, 2, 3, 4] 个模型 */</script><script src="形象IP/models/js/ready.js"></script><script>window.CC3D_READY=window.CC3D_READY||[];/* 构建时已有 [1, 2, 3, 4] 个模型 */</script><script src="形象IP/models/js/ready.js"></script><script>window.CC3D_READY=window.CC3D_READY||[];/* 构建时已有 [1, 2, 3, 4] 个模型 */</script><script src="形象IP/models/js/ready.js"></script><script>window.CC3D_READY=window.CC3D_READY||[];/* 构建时已有 [1, 2, 3, 4] 个模型 */</script><script src="形象IP/models/js/ready.js"></script><script>window.CC3D_READY=window.CC3D_READY||[];/* 构建时已有 [1, 2, 3, 4] 个模型 */</script><script src="形象IP/models/js/ready.js"></script><script>window.CC3D_READY=window.CC3D_READY||[];/* 构建时已有 [1, 2, 3, 4] 个模型 */</script><script src="形象IP/models/js/ready.js"></script><script>window.CC3D_READY=window.CC3D_READY||[];/* 构建时已有 [1, 2, 3, 4] 个模型 */</script><script src="形象IP/models/js/ready.js"></script><script>window.CC3D_READY=window.CC3D_READY||[];/* 构建时已有 [1, 2, 3, 4] 个模型 */</script><script src="形象IP/models/js/ready.js"></script><script>window.CC3D_READY=window.CC3D_READY||[];/* 构建时已有 [1, 2, 3, 4] 个模型 */</script><script src="形象IP/models/js/ready.js"></script><script>window.CC3D_READY=window.CC3D_READY||[];/* 构建时已有 [1, 2, 3, 4] 个模型 */</script><script src="形象IP/models/js/ready.js"></script><script>window.CC3D_READY=window.CC3D_READY||[];/* 构建时已有 [1, 2, 3, 4] 个模型 */</script><script src="形象IP/models/js/ready.js"></script><script>window.CC3D_READY=window.CC3D_READY||[];/* 构建时已有 [1, 2, 3, 4] 个模型 */</script><script src="形象IP/models/js/ready.js"></script><script>window.CC3D_READY=window.CC3D_READY||[];/* 构建时已有 [1, 2, 3, 4] 个模型 */</script><script src="形象IP/models/js/ready.js"></script><script>window.CC3D_READY=window.CC3D_READY||[];/* 构建时已有 [1, 2, 3, 4] 个模型 */</script><script src="形象IP/models/js/ready.js"></script><script>window.CC3D_READY=window.CC3D_READY||[];/* 构建时已有 [1, 2, 3, 4] 个模型 */</script><script src="形象IP/models/js/ready.js"></script><script>window.CC3D_READY=window.CC3D_READY||[];/* 构建时已有 [1, 2, 3, 4] 个模型 */</script><script src="形象IP/models/js/ready.js"></script><script>window.CC3D_READY=window.CC3D_READY||[];/* 构建时已有 [1, 2, 3, 4] 个模型 */</script><script src="形象IP/models/js/ready.js"></script><script>window.CC3D_READY=window.CC3D_READY||[];/* 构建时已有 [1, 2, 3, 4] 个模型 */</script><script src="形象IP/models/js/ready.js"></script><script>window.CC3D_READY=window.CC3D_READY||[];/* 构建时已有 [1, 2, 3, 4] 个模型 */</script><script src="形象IP/models/js/ready.js"></script><script>window.CC3D_READY=window.CC3D_READY||[];/* 构建时已有 [1, 2, 3, 4] 个模型 */</script><script src="形象IP/models/lib/three.min.js"></script><script src="形象IP/models/lib/GLTFLoader.js"></script><script src="形象IP/models/cc-3d.js"></script><script src="形象IP/models/js/ready.js"></script><script>window.CC3D_READY=window.CC3D_READY||[];/* 构建时已有 [1, 2, 3, 4] 个模型 */</script><style id="pet-stage-css">
 /* ===================== 桌面宠物 · 等距 2.5D 舞台 ===================== */
 #petStage{position:relative;height:228px;overflow:hidden;flex:none;
   background:linear-gradient(178deg,var(--pSky1,#0E3B26) 0%,var(--pSky2,#04160E) 100%);
@@ -1709,10 +1714,11 @@ button:disabled:active{transform:none;}
   background:linear-gradient(178deg,var(--pSky1,#0E3B26) 0%,var(--pSky2,#04160E) 100%);
   transition:background .5s;}
 #petStage::before{content:'';position:absolute;inset:0;pointer-events:none;
-  /* 原图直出后画面信息量大，蒙层再轻一档（用户 2026-09-14：「显黑」）——
-     文字都在各自的毛玻璃上，底板不需要压那么重，让原稿的色与光透出来 */
-  background:linear-gradient(96deg,rgba(3,14,9,.44) 0%,rgba(3,14,9,.22) 48%,rgba(3,14,9,.03) 100%),
-             linear-gradient(0deg,rgba(3,14,9,.26),rgba(3,14,9,0) 30%);}
+  /* 蒙层只为压住两侧、给文字留底，不该把角色原画一起压黑（用户 2026-09-15：「角色图像都很暗」——
+     实测原图本征亮度 161.7，页面里只剩 100.6，约六成）。三栏版式下原画在左、文字都在中栏玻璃上，
+     底板蒙层整体调轻；三栏档另有 .tri 专用蒙层，几乎不压原画 */
+  background:linear-gradient(96deg,rgba(3,14,9,.30) 0%,rgba(3,14,9,.13) 48%,rgba(3,14,9,.02) 100%),
+             linear-gradient(0deg,rgba(3,14,9,.18),rgba(3,14,9,0) 30%);}
 #petStage .p-fig{pointer-events:auto;opacity:var(--pDim,1);left:auto;
   right:var(--pX,64px);bottom:var(--pY,34px);
   width:calc(186px * var(--pS,1));height:calc(246px * var(--pS,1));}
@@ -1734,6 +1740,13 @@ button:disabled:active{transform:none;}
 #petStage.collapsed .p-cast,#petStage.collapsed .p-glow{display:none;}
 #chatWrap{position:relative;z-index:1;}
 .chat-scroll{position:relative;}
+/* ============ 聊天区防坍陷（#qaFlow，2026-09-14 深夜） ============
+   现象：body 直接做 flex 容器时，在这份文档里 Chromium 不给 flex:1 分配高度
+   （聊天区被压成一条 ~20px，形象条/输入区整体浮到顶栏下 —— 用户报的「聊天框坍陷」，
+   桌面与手机都复现；最小复现无法触发，逐表禁用 CSS 也无法解除 → 是文档级布局失效）。
+   修法：聊天流改为独立 fixed 定位容器 #qaFlow（新鲜容器 flex 分配正常，实测 20→559/672px），
+   top 由 petFit() 对齐到顶栏底部，resize / 软键盘（visualViewport）自动跟随。 */
+#qaFlow{position:fixed;left:0;right:0;bottom:0;top:56px;display:flex;flex-direction:column;}
 
 /* 底部控制条：形态名 / 状态 / 气泡 / 快捷芯片（不遮挡回答区） */
 #petBar{flex:none;display:flex;align-items:center;gap:8px;padding:7px 12px;
@@ -1758,6 +1771,14 @@ button:disabled:active{transform:none;}
   flex:none;-webkit-tap-highlight-color:transparent;}
 #petBar .pb-c:active{transform:scale(.95);}
 #petBar .pb-c.p{background:#00A650;color:#fff;border-color:#00A650;}
+/* 状态条窄容器自适应（.pb-tight/.pb-tighter 由 petFit 按实际可用宽加减）：
+   先收「状态徽章 + 编码」，还挤再收「换形态」—— 形象设置 / 长按头像仍可换形态 */
+#petBar.pb-tight{gap:6px;padding-left:10px;padding-right:10px;}
+#petBar.pb-tight .pb-b{display:none;}
+#petBar.pb-tight .pb-n small{display:none;}
+#petBar.pb-tight .pb-c{padding:4px 8px;font-size:11px;}
+#petBar.pb-tight .pb-av{width:26px;height:26px;}
+#petBar.pb-tighter #pbNext{display:none;}
 @media (max-width:640px){
   #petStage .p-fig{right:var(--pX,22px);bottom:var(--pY,26px);
     width:calc(128px * var(--pS,1));height:calc(170px * var(--pS,1));}
@@ -1780,7 +1801,7 @@ button:disabled:active{transform:none;}
    右侧保留立牌：有 3D 模型走真 3D，否则走精灵立牌。 */
 #petStage{background:#04140D;}
 #petStage .p-photo{position:absolute;inset:-2%;z-index:-2;background-size:cover;background-position:center;
-  background-repeat:no-repeat;filter:blur(34px) saturate(1.18) brightness(.78);transition:background-image .5s;}
+  background-repeat:no-repeat;filter:blur(34px) saturate(1.15) brightness(.94);transition:background-image .5s;}
 /* 原稿原图直出：**整张完整可见**（用户 2026-09-14：铺满会把人物裁掉、看不到全貌）。
    竖构图的画放进宽幅底板 → 用 contain，盒子由 JS 按原图宽高比算好（底部对齐），
    两侧由 `.p-photo` 的虚化放大版补边，画面左右边缘再羽化一道，避免硬边 */
@@ -1793,6 +1814,40 @@ button:disabled:active{transform:none;}
 /* 取消 2D 悬浮立牌（用户 2026-09-14）：原图直出后画面里已经有人物，
    不再另叠一块悬浮的 2D 人物卡；真 3D 立体形象保留 */
 #petStage .p-fig,#petStage .p-hold{display:none!important;}
+/* 用户 2026-09-14：取消雨元素图片（雨水/白露/寒露）的下雨特效，雪 / 樱花 / 星光不受影响 */
+#petStage[data-fx="rain"] .p-fx{display:none!important;}
+/* 用户 2026-09-14（晚）桌面三栏：左「原画图形」· 中「对话框」· 右「3D 形象」（移动端不变）。
+   中栏 = 一张从顶栏落到屏底的玻璃「对话框」（#petStage::after），聊天 / 形象条 / 五库 /
+   输入区全部收进中栏 —— 对话框是一个真正的盒子，不再浮空坍陷；
+   左栏留给当前形态的原画（petArtFit 装成相框），右栏留给 3D 形象。
+   --midW 是中栏宽度的唯一公式，JS（petArtFit）用同一公式取齐几何。 */
+@media (min-width:1021px){
+  :root{--midW:min(700px,54vw);}
+  #petStage::after{content:'';position:absolute;z-index:0;height:auto;
+    left:calc((100% - var(--midW))/2);width:var(--midW);top:10px;bottom:0;
+    border:1px solid color-mix(in srgb, var(--border) 55%, transparent);border-bottom:none;
+    border-radius:22px 22px 0 0;
+    background:color-mix(in srgb, var(--bg-card) 68%, transparent);
+    backdrop-filter:blur(20px) saturate(1.14);-webkit-backdrop-filter:blur(20px) saturate(1.14);
+    box-shadow:0 26px 80px rgba(0,0,0,.22);}
+  .chat-wrap,.src-tabs,.input-box{max-width:calc(var(--midW) - 64px);margin-left:auto;margin-right:auto;}
+  /* 选择器必须带 #qaFlow 前缀抬高优先级：源码更后面还有一组无条件的 #petBar/.input-area
+     毛玻璃规则，同等特异性会把这里的透明化盖掉 —— 输入条就会像贴在对话框上的两层皮（不是一体） */
+  #qaFlow #petBar{max-width:var(--midW);margin:0 auto;background:transparent;border-top:none;
+    backdrop-filter:none;-webkit-backdrop-filter:none;padding-left:18px;padding-right:18px;}
+  #qaFlow .input-area{max-width:var(--midW);margin:0 auto;background:transparent;
+    backdrop-filter:none;-webkit-backdrop-filter:none;padding-left:18px;padding-right:18px;
+    border-top-color:color-mix(in srgb, var(--border) 28%, transparent);}
+}
+/* 三栏模式（.tri 由 petArtFit 在桌面档加减）：原画装成相框，光池挪到 3D 脚下 */
+#petStage.tri .p-art{border-radius:18px;outline:1px solid rgba(255,255,255,.16);outline-offset:-1px;
+  filter:brightness(1.06) saturate(1.05);   /* 补回蒙层吃掉的亮度，让人像回到原稿的明度 */
+  box-shadow:0 34px 80px rgba(0,0,0,.38),0 8px 22px rgba(0,0,0,.24);}
+/* 三栏档专用蒙层：原画在左、文字都在中栏玻璃上，左侧几乎不再压黑 */
+#petStage.tri::before{background:linear-gradient(96deg,rgba(3,14,9,.13) 0%,rgba(3,14,9,.05) 45%,rgba(3,14,9,.02) 100%),
+             linear-gradient(0deg,rgba(3,14,9,.15),rgba(3,14,9,0) 32%);}
+#petStage.tri .p-art.fit{-webkit-mask-image:none;mask-image:none;}
+#petStage.tri .p-glow{left:auto;right:calc((100% - var(--midW))/4);transform:translateX(50%);bottom:-14%;}
 #petStage .p-floor,#petStage .p-props,#petStage .p-ped,#petStage .p-pedEdge,
 #petStage .p-cast{display:none!important;}
 /* 首屏欢迎卡别把背景整块盖死：留一点透，能看见当前形态所属的房间 */
@@ -1825,6 +1880,39 @@ button:disabled:active{transform:none;}
     height:calc(138px * var(--pS,1));right:var(--pX,12px);}
 }
 </style>
+<style id="uxPolish">/*__UX_POLISH:v1__*/
+/* ---- UX Polish v1 · 统一交互规范（规范源：index.html 壳层）---- */
+:root{
+  --ux-primary:#148453;--ux-primary-dark:#0C5F3A;--ux-primary-light:#1FA56A;
+  --ux-gold:#F5B800;--ux-danger:#C62828;--ux-warn:#E64A19;
+  --ux-ink:#0F2A1F;--ux-ink2:#5A6F65;--ux-border:#E5EDE9;
+  --ux-radius-sm:8px;--ux-radius:12px;--ux-radius-lg:16px;
+}
+::selection{background:rgba(20,132,83,.24);}
+*{scrollbar-width:thin;scrollbar-color:rgba(20,132,83,.35) transparent;}
+::-webkit-scrollbar{width:8px;height:8px;}
+::-webkit-scrollbar-thumb{background:rgba(20,132,83,.30);border-radius:99px;border:2px solid transparent;background-clip:content-box;}
+::-webkit-scrollbar-track{background:transparent;}
+button,a,[role="button"],input,select,textarea,label{-webkit-tap-highlight-color:transparent;}
+button:not(:disabled){transition:transform .15s ease,box-shadow .2s ease,filter .2s ease,background-color .2s ease,border-color .2s ease,opacity .2s ease;}
+button:active:not(:disabled){transform:translateY(1px);}
+:focus{outline:none;}
+:focus-visible{outline:2.5px solid #148453;outline-offset:2px;border-radius:6px;}
+@media (prefers-reduced-motion:reduce){
+  *,*::before,*::after{animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important;scroll-behavior:auto!important;}
+}
+
+/* qa：手机档顶栏按钮防裁切 + 小字下限 */
+@media (max-width:760px){
+  .t-ai{gap:5px;}
+  .t-ai .icon-btn{min-height:34px;font-size:.7rem;padding:0 7px;border-radius:9px;}
+  .t-ai .ai-status{font-size:.66rem;}
+  .icon-btn{min-height:36px;}
+}
+small{font-size:11.5px;}
+#aiStatus{font-size:11px;}
+.lbl{font-size:11px;}
+/*__UX_POLISH_END__*/</style>
 </head>
 <body>
 
@@ -1934,6 +2022,15 @@ button:disabled:active{transform:none;}
 
 
 
+
+
+
+
+
+
+
+
+<div id="qaFlow">
 <main class="chat-scroll" id="chatScroll" role="log" aria-live="polite">
   <div class="chat-wrap" id="chatWrap"></div>
 </main>
@@ -1949,6 +2046,8 @@ button:disabled:active{transform:none;}
   <button class="pb-c hide-s" id="pbNext">换形态</button>
   <button class="pb-c" id="pbSet">🐾 形象</button>
   <button class="pb-c" id="pb3d">🧊 3D</button>
+  <button class="pb-c" id="pbPiano" style="display:none" title="秋分琴房 · 贝多芬钢琴三首，可开关">🎵 贝多芬 · 关</button>
+  <button class="pb-c" id="pbPianoNext" style="display:none" title="换一首（月光第一乐章 / 致爱丽丝 / 悲怆第二乐章）">⏭ 换曲</button>
   <button class="pb-c" id="pbHome">CC 之家</button>
   <button class="pb-c" id="pbFold">收起</button>
 </div>
@@ -1968,6 +2067,7 @@ button:disabled:active{transform:none;}
   </div>
   <div class="tip-bar">Enter 发送 · Shift+Enter 换行 · 底部五库随意切换：日常 / 手册 / 管理 / 规范 / 大撤</div>
 </div>
+</div><!-- /#qaFlow -->
 
 <script>
 /* ===================== 多行输入自适应（与底部输入联动共用，见启动段） ===================== */
@@ -5216,6 +5316,9 @@ function renderChat(opts){
     }
     return `<div class="msg user"><div class="avatar user">我</div><div class="bubble"><div class="bubble-inner">${m.html}</div><span class="ts">${esc(m.ts)}</span></div></div>`;
   }).join('');
+  // 欢迎卡在手机上会被 74% 气泡宽度挤成 ~200px 细长条（用户 2026-09-15：手机打开后排版不正确）
+  // → 给包含欢迎卡的消息打标记，交给 CSS 在手机档放开为整行、去掉头像与气泡壳
+  wrap.querySelectorAll('.msg.bot').forEach(function(mEl){ if (mEl.querySelector('.welcome')) mEl.classList.add('msg-welcome'); });
   // 新消息自动露出：新答案到达(reveal)或用户原本就在底部时——
   // 「我这句提问 + 这一条回答」整块装得下 → 滚到底部；
   // 装不下 → 把我的提问对齐可视区顶部，保证「我问的那句」一定看得见
@@ -7788,7 +7891,7 @@ function qaToast(msg){
 /* ===================== 欢迎语（品牌引导卡） ===================== */
 /* 用户 2026-09-14：「取消初始弹出的 CC·你问我答 卡片」→ 默认不再自动弹。
    想恢复把下面改成 true 即可（welcomeCard() 与里面的快捷入口一直保留，只是不自动显示）。 */
-const QA_SHOW_WELCOME = false;
+const QA_SHOW_WELCOME = true;
 function hello(){
   if(!QA_SHOW_WELCOME) return;
   addMsg('bot', welcomeCard());
@@ -7810,134 +7913,6 @@ window.addEventListener('message', function(e){
   if(d && d.type === 'theme-changed') updateAiStatus();
 });
 </script>
-<script>
-/* ===== 软键盘适配（2026-09-12）：键盘弹起时压缩布局高度，保证底部输入框可见可点 ===== */
-(function(){
-  var vv = window.visualViewport;
-  if(!vv) return;
-  function kbSync(){
-    var kb = Math.max(0, window.innerHeight - vv.height - vv.offsetTop);
-    if(kb > 60){
-      /* 键盘已弹起：把文档高度压到可视高度，flex 布局自动收缩聊天区 */
-      document.body.style.height = Math.round(vv.height) + 'px';
-      document.documentElement.style.setProperty('--kb-h','0px');
-      var ae = document.activeElement;
-      if(ae && ae !== document.body){
-        setTimeout(function(){ try{ ae.scrollIntoView({block:'nearest'}); }catch(e){} }, 80);
-      }
-      window.scrollTo(0, 0);
-    }else{
-      document.body.style.height = '';
-      document.documentElement.style.setProperty('--kb-h','0px');
-    }
-  }
-  vv.addEventListener('resize', kbSync);
-  vv.addEventListener('scroll', kbSync);
-})();
-</script>
-<style id="mobile-native-hardening">
-/* === mobile-native-hardening 2026-09-14 · finesse-ui h5-mobile + impeccable === */
-html{-webkit-text-size-adjust:100%;text-size-adjust:100%}
-*{-webkit-tap-highlight-color:transparent}
-a,button,input,select,textarea,label,summary,[onclick],[role=button]{touch-action:manipulation}
-button,[onclick],[role=button]{-webkit-user-select:none;user-select:none}
-img{max-width:100%}
-button:active,[onclick]:active,a:active,summary:active,[role=button]:active{filter:brightness(.93)}
-@media (pointer:coarse){
-  input,select,textarea{font-size:16px}
-  *{scrollbar-width:none}
-  *::-webkit-scrollbar{width:0;height:0;display:none}
-}
-@media (prefers-reduced-motion:reduce){
-  *,*::before,*::after{animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important}
-}
-</style>
-<script id="mobile-native-js">
-(function(){
-  'use strict';
-  if(!window.matchMedia||!matchMedia('(pointer:coarse)').matches)return;
-  /* 1) 触感反馈（Android 原生手感；iOS/Safari 自动忽略 vibrate） */
-  if(navigator.vibrate){
-    addEventListener('pointerdown',function(e){
-      var t=e.target;
-      if(t&&t.closest&&t.closest('button,[onclick],a,[role="button"]')){
-        try{navigator.vibrate(8)}catch(_){}
-      }
-    },{passive:true,capture:true});
-  }
-  /* 2) 安全区自动注入：贴边的 fixed/sticky 条补 env(safe-area-inset-*)；
-        无贴边条的页面则给 body 补，保证内容不钻进刘海/小白条 */
-  var px=function(v){return parseFloat(v)||0};
-  function patchOne(el,edge){
-    var cs=getComputedStyle(el);
-    if(edge==='top'){el.style.paddingTop='calc('+px(cs.paddingTop)+'px + env(safe-area-inset-top,0px))';}
-    else{el.style.paddingBottom='calc('+px(cs.paddingBottom)+'px + env(safe-area-inset-bottom,0px))';}
-  }
-  function walk(){
-    var vw=innerWidth,vh=innerHeight,gotTop=false,gotBot=false;
-    var els=document.querySelectorAll('body *');
-    for(var i=0;i<els.length;i++){
-      var el=els[i];if(el.dataset.msa)continue;el.dataset.msa='1';
-      var cs=getComputedStyle(el),pos=cs.position;
-      if(pos!=='fixed'&&pos!=='sticky')continue;
-      var r=el.getBoundingClientRect();
-      if(r.width===0||r.height===0)continue;
-      if(r.width>=vw*0.95&&r.height>=vh*0.9)continue; /* 全屏遮罩类不碰 */
-      var wide=(r.width>=vw*0.9);
-      if(!wide)continue;
-      if(pos==='fixed'){
-        var t=px(cs.top),b=px(cs.bottom);
-        if(t>=0&&t<=6){patchOne(el,'top');gotTop=true;}
-        else if(b>=0&&b<=2){patchOne(el,'bot');gotBot=true;}
-      }else{
-        var st=px(cs.top),sb=px(cs.bottom);
-        if(cs.top!=='auto'&&st<=6){patchOne(el,'top');gotTop=true;}
-        else if(cs.bottom!=='auto'&&sb<=2){patchOne(el,'bot');gotBot=true;}
-      }
-    }
-    var b=document.body,bs=getComputedStyle(b);
-    if(!gotTop){b.style.paddingTop='calc('+px(bs.paddingTop)+'px + env(safe-area-inset-top,0px))';}
-    if(!gotBot){b.style.paddingBottom='calc('+px(bs.paddingBottom)+'px + env(safe-area-inset-bottom,0px))';}
-  }
-  function safe(){try{walk()}catch(_){}}
-  if(document.readyState==='loading'){document.addEventListener('DOMContentLoaded',safe)}else{safe()}
-  addEventListener('load',safe);
-  setTimeout(safe,800);
-})();
-</script>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 
@@ -8069,6 +8044,14 @@ button:active,[onclick]:active,a:active,summary:active,[role=button]:active{filt
     stage.style.setProperty('--pS', String(bg[2]));
     stage.style.setProperty('--pDim', String(bg[3]));
     pet3dSync(c.i);
+    /* 秋分琴房：只有秋分（15）显示贝多芬开关，换走就停 */
+    var bp = $('pbPiano'), pn = $('pbPianoNext');
+    if (bp){
+      bp.style.display = (c.i === 15) ? '' : 'none';
+      if (c.i !== 15 && window.CCPiano && CCPiano.on){ CCPiano.stop(); bp.textContent = CCPiano.label(); bp.classList.remove('p'); }
+    }
+    /* 「⏭ 换曲」只在秋分这间琴房出现，跟着钢琴按钮一起显隐 */
+    if (pn) pn.style.display = (c.i === 15) ? '' : 'none';
     if (pbAv) pbAv.src = src;
     if (pbName) pbName.textContent = c.n;
     if (pbCode) pbCode.textContent = c.code;
@@ -8122,6 +8105,13 @@ button:active,[onclick]:active,a:active,summary:active,[role=button]:active{filt
   function petFit(){
     var sc = document.getElementById('chatScroll');
     if (!sc || !stage) return;
+    /* #qaFlow 防坍陷：先把固定流顶部对齐到顶栏底部，再量聊天区（顺序不能反） */
+    var _flow = document.getElementById('qaFlow');
+    if (_flow){
+      var _tb = document.querySelector('.topbar');
+      var _tbB = _tb ? _tb.getBoundingClientRect().bottom : 0;
+      _flow.style.top = (isFinite(_tbB) ? Math.round(_tbB) : 0) + 'px';
+    }
     var r = sc.getBoundingClientRect();
     var vw = window.innerWidth || document.documentElement.clientWidth || 0;
     var vh = window.innerHeight || document.documentElement.clientHeight || 0;
@@ -8136,6 +8126,17 @@ button:active,[onclick]:active,a:active,summary:active,[role=button]:active{filt
     /* 原画对齐的是「聊天区」而不是整块底板 —— 否则人物的脚会沉到输入条后面去 */
     _fitBox.w = width;
     _fitBox.h = Math.max(1, Math.round(r.height));
+    /* 状态条窄容器自适应：量实际可用宽，挤了就分级收起
+       （①状态徽章+编码 ②「换形态」按钮——形象设置/长按头像仍可换形态）
+       用户 2026-09-14 深夜截图：中栏窄时状态徽章贴名、右侧「收起」被截，视觉上叠在一起 */
+    var _bar = document.getElementById('petBar');
+    if (_bar){
+      _bar.classList.remove('pb-tight', 'pb-tighter');
+      if (_bar.scrollWidth > _bar.clientWidth + 1){
+        _bar.classList.add('pb-tight');
+        if (_bar.scrollWidth > _bar.clientWidth + 1) _bar.classList.add('pb-tighter');
+      }
+    }
     petArtFit();
   }
 
@@ -8150,21 +8151,46 @@ button:active,[onclick]:active,a:active,summary:active,[role=button]:active{filt
     if (!SW || !SH || !W || !H) return;
     var ar = ORI_AR[String(_artI)] || 0.66667;
     var bottom = Math.min(SH, H);                 /* 聊天区在底板内的下边缘 */
-    if (W / H > ar * 1.12){
-      /* 宽幅聊天区：contain，整张完整可见 + 两侧羽化 */
-      var aw = H * ar;
+    /* 桌面三栏（≥1021px）：左「原画」· 中「对话框」· 右「3D 形象」。
+       中栏宽与 CSS 的 --midW 同一公式（min(700, 54vw)），左右两栏分别留给原画与 3D */
+    var tri = SW >= 1021;
+    var f3 = $('petFig3d');
+    if (tri){
+      stage.classList.add('tri');
+      var midW = Math.min(700, SW * 0.54);
+      var zone = Math.max(10, (SW - midW) / 2);            /* 左 / 右栏宽 */
+      var bw = Math.max(60, zone - 26), bh = Math.max(80, SH - 46);
+      var aw = Math.min(bw, bh * ar), ah = aw / ar;
       pa.classList.add('fit'); pa.classList.remove('fill');
       pa.style.backgroundSize = '100% 100%';
-      pa.style.left = Math.round((SW - aw) / 2) + 'px';
-      pa.style.top = Math.round(bottom - H) + 'px';
+      pa.style.left = Math.round(13 + (bw - aw) / 2) + 'px';
+      pa.style.top = Math.round(SH - 23 - ah) + 'px';
       pa.style.width = Math.round(aw) + 'px';
-      pa.style.height = Math.round(H) + 'px';
+      pa.style.height = Math.round(ah) + 'px';
+      /* 3D 立在右栏中央，脚下留出地面距离；无 GLB 的形态右栏只留光池 */
+      if (f3){
+        var fw = f3.getBoundingClientRect().width || 186;
+        f3.style.left = 'auto';
+        f3.style.right = Math.max(10, Math.round(zone / 2 - fw / 2)) + 'px';
+        f3.style.bottom = Math.max(22, Math.round(SH * 0.05)) + 'px';
+      }
     } else {
-      /* 聊天区比例接近原稿（手机竖屏）：铺满聊天区，几乎不裁人 */
-      pa.classList.add('fill'); pa.classList.remove('fit');
-      pa.style.backgroundSize = 'cover';
-      pa.style.left = '0'; pa.style.top = '0';
-      pa.style.width = SW + 'px'; pa.style.height = Math.round(bottom) + 'px';
+      stage.classList.remove('tri');
+      if (W / H > ar * 1.12){
+        var aw2 = H * ar;
+        pa.classList.add('fit'); pa.classList.remove('fill');
+        pa.style.backgroundSize = '100% 100%';
+        pa.style.left = Math.round((SW - aw2) / 2) + 'px';
+        pa.style.top = Math.round(bottom - H) + 'px';
+        pa.style.width = Math.round(aw2) + 'px';
+        pa.style.height = Math.round(H) + 'px';
+      } else {
+        pa.classList.add('fill'); pa.classList.remove('fit');
+        pa.style.backgroundSize = 'cover';
+        pa.style.left = '0'; pa.style.top = '0';
+        pa.style.width = SW + 'px'; pa.style.height = Math.round(bottom) + 'px';
+      }
+      if (f3){ f3.style.left = ''; f3.style.right = ''; f3.style.bottom = ''; }   /* 交回 CSS（移动端在右下） */
     }
   }
 
@@ -8404,10 +8430,43 @@ button:active,[onclick]:active,a:active,summary:active,[role=button]:active{filt
     if (bhm) bhm.onclick = function(){ goHome(); };
     var b3d = $('pb3d');
     if (b3d) b3d.onclick = function(){
+      var ci = ROSTER[cur].i;
+      /* 该形态还没有 GLB 模型时：老实交代 + 报进度，不再默默切换开关。
+         （用户 2026-09-14：「3D 功能点击不显示开、一直显示关」——根因是模型未生成，
+          can 永远为 false，点了自然没反应） */
+      if (!r3dAvail(ci)){
+        var n = 0;
+        try{ if (window.CC3D && CC3D.ready() && CC3D.can){
+          for (var k = 0; k < ROSTER.length; k++){ if (CC3D.can(ROSTER[k].i)) n++; } } }catch(e){}
+        say('「' + ROSTER[cur].n + '」的 3D 模型还没生成好（已完成 ' + n + '/24，生成完会自动亮起）', true);
+        return;
+      }
       want3d = !want3d;
       try{ localStorage.setItem(K3D, want3d ? '1' : '0'); }catch(e){}
-      pet3dSync(ROSTER[cur].i);
-      say(want3d && r3dAvail(ROSTER[cur].i) ? '3D 形象已打开' : '已切回 2D 立绘', true);
+      pet3dSync(ci);
+      say(want3d ? '3D 形象已打开' : '已切回 2D 立绘', true);
+    };
+    /* 秋分琴房：贝多芬钢琴三首（只在秋分这一位出现） */
+    var bp = $('pbPiano');
+    if (bp) bp.onclick = function(){
+      if (!window.CCPiano) return;
+      CCPiano.toggle();
+      bp.textContent = CCPiano.label();
+      bp.classList.toggle('p', CCPiano.on);
+      /* 被浏览器自动播放策略拦住（预览 iframe 常见）时给出明确提示，而不是哑着 */
+      if (CCPiano.on && CCPiano.ctxState === 'suspended'){
+        say('琴声被浏览器拦了一下——随便点一下页面任意处就会响起', true);
+      }
+    };
+    var pn = $('pbPianoNext');
+    if (pn) pn.onclick = function(){
+      if (!window.CCPiano) return;
+      /* 用户 2026-09-15：三首只能等它自己轮播，加了手动换曲——
+         停着时只切选中曲目（按钮文案立刻更新），弹着时马上切下一首接着弹 */
+      CCPiano.next();
+      var bpx = $('pbPiano');
+      if (bpx){ bpx.textContent = CCPiano.label(); bpx.classList.toggle('p', CCPiano.on); }
+      say(CCPiano.on ? ('换成《' + CCPiano.trackName() + '》，接着弹') : ('已选中《' + CCPiano.trackName() + '》，点 🎵 开始'), true);
     };
     petFit();
     watchChat();
@@ -8498,5 +8557,263 @@ button:active,[onclick]:active,a:active,summary:active,[role=button]:active{filt
 })();
 </script>
 
+<script>
+/* =====================================================================
+   秋分琴房 · 贝多芬钢琴三首（Web Audio 合成，无外部音频文件）
+   单一来源：_apply_pet.py（你问我答）与 _build_home.py（CC 之家）都注入这一份。
+   对外只暴露 CCPiano.toggle() / CCPiano.stop() / CCPiano.label() / CCPiano.on
+   三首都是慢板：月光奏鸣曲第一乐章 / 致爱丽丝 / 悲怆奏鸣曲第二乐章
+   ===================================================================== */
+window.CCPiano = (function(){
+  /* 迷你谱面：单个音 = 音名:起始拍:时长拍，空格分隔；1 拍的时长由 bpm 决定 */
+  var TRACKS = [
+    { name: '月光奏鸣曲 · 第一乐章', bpm: 54, unit: 1 / 3, loop: 48,
+      /* 单位 = 三连音八分音符；每小节 6 个单位（2 拍），8 小节一轮 */
+      seq:
+        /* 左手分解和弦（升 c 小调） */
+        '0:G#3:1 1:C#4:1 2:E4:1 3:G#3:1 4:C#4:1 5:E4:1 ' +
+        '6:G#3:1 7:C#4:1 8:E4:1 9:G#3:1 10:C#4:1 11:E4:1 ' +
+        '12:A3:1 13:C#4:1 14:E4:1 15:A3:1 16:C#4:1 17:E4:1 ' +
+        '18:A3:1 19:D4:1 20:F#4:1 21:A3:1 22:D4:1 23:F#4:1 ' +
+        '24:G#3:1 25:C4:1 26:F#4:1 27:G#3:1 28:C4:1 29:F#4:1 ' +
+        '30:G#3:1 31:C#4:1 32:E4:1 33:G#3:1 34:C#4:1 35:E4:1 ' +
+        '36:A3:1 37:C#4:1 38:E4:1 39:A3:1 40:C#4:1 41:E4:1 ' +
+        '42:G#3:1 43:C#4:1 44:E4:1 45:G#3:1 46:C#4:1 47:E4:1 ' +
+        /* 右手旋律（长音，很轻） */
+        '12:G#4:5 30:G#4:5 36:A4:4 42:G#4:6 0:B3:6' },
+
+    { name: '致爱丽丝', bpm: 74, unit: 1 / 2, loop: 43,
+      seq:
+        '0:E5:1 1:D#5:1 2:E5:1 3:D#5:1 4:E5:1 5:B4:1 6:D5:1 7:C5:1 ' +
+        '8:A4:2 10:C4:1 11:E4:1 12:A4:1 13:B4:2 15:E4:1 16:G#4:1 17:B4:1 ' +
+        '18:C5:2 20:E4:1 21:E5:1 22:D#5:1 23:E5:1 24:D#5:1 25:E5:1 26:B4:1 ' +
+        '27:D5:1 28:C5:1 29:A4:2 31:C4:1 32:E4:1 33:A4:1 34:B4:2 ' +
+        '36:E4:1 37:C5:1 38:B4:1 39:A4:4 ' +
+        '8:A2:1 10:E3:1 12:A3:1 13:E3:1 15:E2:1 16:E3:1 17:G#3:1 ' +
+        '18:A2:1 20:E3:1 21:A3:1 29:A2:1 31:E3:1 33:A3:1 34:E3:1 36:E2:1 37:E3:1 38:G#3:1' },
+
+    { name: '悲怆奏鸣曲 · 第二乐章', bpm: 56, unit: 1 / 2, loop: 32,
+      seq:
+        /* 右手如歌主题（降 A 大调） */
+        '0:C5:2 2:D-5:1 3:C5:1 4:B-4:2 6:A-4:4 ' +
+        '10:E-4:1 11:F4:1 12:G4:1 13:A-4:2 15:C5:2 17:B-4:1 18:C5:3 ' +
+        '20:D-5:2 22:C5:6 ' +
+        /* 左手低音与和声 */
+        '0:A-2:3 3:E-3:3 6:A-2:4 10:D-3:2 12:E-3:2 14:A-2:2 ' +
+        '16:D-3:3 19:E-3:3 22:A-2:6 ' +
+        /* 中声部和弦音（很轻，铺底） */
+        '1:E-4:2 5:E-4:2 11:A-4:1 13:E-4:2 17:E-4:2 21:E-4:4' }
+  ];
+
+  var ctx = null, master = null, timer = null, stops = [], idx = 0, on = false, playingName = '';
+
+  function ensure(){
+    if (ctx) return true;
+    var AC = window.AudioContext || window.webkitAudioContext;
+    if (!AC) return false;
+    ctx = new AC();
+    master = ctx.createGain(); master.gain.value = 0.0001;
+    master.connect(ctx.destination);
+    /* 轻混响感：两条不同时长的反馈延迟（不走卷积，省资源） */
+    var wet = ctx.createGain(); wet.gain.value = 0.24; wet.connect(ctx.destination);
+    [[0.29, 0.30], [0.47, 0.16]].forEach(function(c){
+      var d = ctx.createDelay(1), fb = ctx.createGain();
+      d.delayTime.value = c[0]; fb.gain.value = c[1];
+      master.connect(d); d.connect(fb); fb.connect(d); d.connect(wet);
+    });
+    return true;
+  }
+
+  function toMidi(n){
+    /* 降号在谱面里写作「-」（D-5 = D♭5）。老正则只认 b，导致《悲怆》整串降号音被解析成
+       负八度（次声部，人耳听不见）——用户报的「点击贝多芬无声音」主因之一 */
+    var m = /^([A-G])(#|-|b)?(-?\d)$/.exec(n);
+    if (!m) return 0;
+    var base = { C:0, D:2, E:4, F:5, G:7, A:9, B:11 }[m[1]];
+    return base + (m[2] === '#' ? 1 : (m[2] === '-' || m[2] === 'b') ? -1 : 0) + (parseInt(m[3], 10) + 1) * 12;
+  }
+  function hz(n){ return 440 * Math.pow(2, (toMidi(n) - 69) / 12); }
+
+  /* 一颗「柔和钢琴」音：基频三角波 + 八度/十二度正弦泛音 + 快起慢衰 */
+  function note(name, t, dur, vel){
+    var f = hz(name), g = ctx.createGain(), lp = ctx.createBiquadFilter();
+    lp.type = 'lowpass'; lp.frequency.value = 2300; lp.Q.value = 0.3;
+    g.gain.setValueAtTime(0.0001, t);
+    g.gain.exponentialRampToValueAtTime(Math.max(0.001, vel), t + 0.012);
+    g.gain.exponentialRampToValueAtTime(0.0001, t + Math.max(0.35, dur * 1.9));
+    lp.connect(g); g.connect(master);
+    [[f, 'triangle', 1, -3], [f * 1.0045, 'triangle', 0.34, 4],
+     [f * 2, 'sine', 0.30, 0], [f * 2.997, 'sine', 0.10, 0]].forEach(function(p){
+      var o = ctx.createOscillator(), og = ctx.createGain();
+      o.type = p[1]; o.frequency.value = p[0]; o.detune.value = p[3];
+      og.gain.value = p[2];
+      o.connect(og); og.connect(lp);
+      o.start(t); o.stop(t + Math.max(0.4, dur * 2.1) + 0.05);
+      stops.push(o);
+    });
+  }
+
+  function schedule(track, t0){
+    var unit = 60 / track.bpm * track.unit;
+    track.events.forEach(function(e){
+      note(e.n, t0 + e.s * unit, e.d * unit, e.v);
+    });
+    return track.loop * unit;
+  }
+
+  /* 谱面 token = 起始拍:音名:时长拍 */
+  function parse(seq){
+    var out = [];
+    seq.split(/\s+/).forEach(function(tok){
+      if (!tok) return;
+      var p = tok.split(':');
+      if (p.length < 3) return;
+      var isBass = /^[A-G](#|-|b)?[12]$/.test(p[1]);      /* 低音区（2/3 八度）轻一些（- = 降号） */
+      var isPad   = /^[A-G](#|-|b)?4$/.test(p[1]);        /* 中声部铺底更轻 */
+      out.push({ n: p[1], s: parseFloat(p[0]), d: parseFloat(p[2]),
+                 v: isBass ? 0.20 : (isPad ? 0.13 : 0.34) });
+    });
+    return out;
+  }
+  TRACKS.forEach(function(t){ t.events = parse(t.seq); });
+
+  function play(){
+    if (!ensure()) return;
+    if (ctx.state === 'suspended'){
+      ctx.resume();
+      /* 预览 iframe / 自动播放策略可能拦掉第一次 resume：挂一个全局手势兜底，随点随续 */
+      if (!ensure._kick){
+        ensure._kick = true;
+        document.addEventListener('pointerdown', function(){
+          try{ if (ctx && ctx.state === 'suspended') ctx.resume(); }catch(e){}
+        }, { capture:true, passive:true });
+      }
+    }
+    on = true;
+    master.gain.cancelScheduledValues(ctx.currentTime);
+    master.gain.setTargetAtTime(0.9, ctx.currentTime, 0.4);
+    var t = TRACKS[idx % TRACKS.length];
+    playingName = t.name;
+    var t0 = ctx.currentTime + 0.18;
+    var dur = schedule(t, t0);
+    clearTimeout(timer);
+    timer = setTimeout(function(){ idx++; play(); }, dur * 1000 + 500);
+  }
+
+  function stop(){
+    on = false;
+    clearTimeout(timer);
+    if (ctx){
+      master.gain.cancelScheduledValues(ctx.currentTime);
+      master.gain.setTargetAtTime(0.0001, ctx.currentTime, 0.18);
+      var ss = stops; stops = [];
+      /* 不再 close()：快速「关→开」会撞上 900ms 关闭竞态，第二次点击永远无声。
+         已排程的音靠 master 归零静音，再延后逐个 stop 释放资源 */
+      setTimeout(function(){ for (var i = 0; i < ss.length; i++){ try{ ss[i].stop(); }catch(e){} } }, 600);
+    }
+    stops = [];
+  }
+
+  /* 手动换曲（用户 2026-09-15：三首不能切换）。停着时只切换当前选中曲目并更新按钮文案，
+     正在弹时立刻切到下一首接着弹；弹完一轮仍会自动进下一首。 */
+  function next(){
+    idx++;
+    playingName = '';
+    if (on) { stop(); play(); }
+    return TRACKS[idx % TRACKS.length].name;
+  }
+  function trackName(){ return TRACKS[idx % TRACKS.length].name; }
+  function trackCount(){ return TRACKS.length; }
+
+  function label(){
+    /* 关着的时候也把「当前选中哪一首」显示出来，换曲才看得见效果 */
+    if (!on) return '🎵 ' + trackName() + ' · 关';
+    return '🎵 ' + (playingName || trackName()) + ' ▶';
+  }
+
+  return {
+    toggle: function(){ if (on) stop(); else play(); return on; },
+    stop: stop,
+    label: label,
+    next: next,
+    trackName: trackName,
+    trackCount: trackCount,
+    get on(){ return on; },
+    get ctxState(){ return ctx ? ctx.state : 'none'; }
+  };
+})();
+
+</script>
+
+<style id="mobile-native-hardening">
+/* === mobile-native-hardening 2026-09-14 · finesse-ui h5-mobile + impeccable === */
+html{-webkit-text-size-adjust:100%;text-size-adjust:100%}
+*{-webkit-tap-highlight-color:transparent}
+a,button,input,select,textarea,label,summary,[onclick],[role=button]{touch-action:manipulation}
+button,[onclick],[role=button]{-webkit-user-select:none;user-select:none}
+img{max-width:100%}
+button:active,[onclick]:active,a:active,summary:active,[role=button]:active{filter:brightness(.93)}
+@media (pointer:coarse){
+  input,select,textarea{font-size:16px}
+  *{scrollbar-width:none}
+  *::-webkit-scrollbar{width:0;height:0;display:none}
+}
+@media (prefers-reduced-motion:reduce){
+  *,*::before,*::after{animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important}
+}
+</style>
+<script id="mobile-native-js">
+(function(){
+  'use strict';
+  if(!window.matchMedia||!matchMedia('(pointer:coarse)').matches)return;
+  /* 1) 触感反馈（Android 原生手感；iOS/Safari 自动忽略 vibrate） */
+  if(navigator.vibrate){
+    addEventListener('pointerdown',function(e){
+      var t=e.target;
+      if(t&&t.closest&&t.closest('button,[onclick],a,[role="button"]')){
+        try{navigator.vibrate(8)}catch(_){}
+      }
+    },{passive:true,capture:true});
+  }
+  /* 2) 安全区自动注入：贴边的 fixed/sticky 条补 env(safe-area-inset-*)；
+        无贴边条的页面则给 body 补，保证内容不钻进刘海/小白条 */
+  var px=function(v){return parseFloat(v)||0};
+  function patchOne(el,edge){
+    var cs=getComputedStyle(el);
+    if(edge==='top'){el.style.paddingTop='calc('+px(cs.paddingTop)+'px + env(safe-area-inset-top,0px))';}
+    else{el.style.paddingBottom='calc('+px(cs.paddingBottom)+'px + env(safe-area-inset-bottom,0px))';}
+  }
+  function walk(){
+    var vw=innerWidth,vh=innerHeight,gotTop=false,gotBot=false;
+    var els=document.querySelectorAll('body *');
+    for(var i=0;i<els.length;i++){
+      var el=els[i];if(el.dataset.msa)continue;el.dataset.msa='1';
+      var cs=getComputedStyle(el),pos=cs.position;
+      if(pos!=='fixed'&&pos!=='sticky')continue;
+      var r=el.getBoundingClientRect();
+      if(r.width===0||r.height===0)continue;
+      if(r.width>=vw*0.95&&r.height>=vh*0.9)continue; /* 全屏遮罩类不碰 */
+      var wide=(r.width>=vw*0.9);
+      if(!wide)continue;
+      if(pos==='fixed'){
+        var t=px(cs.top),b=px(cs.bottom);
+        if(t>=0&&t<=6){patchOne(el,'top');gotTop=true;}
+        else if(b>=0&&b<=2){patchOne(el,'bot');gotBot=true;}
+      }else{
+        var st=px(cs.top),sb=px(cs.bottom);
+        if(cs.top!=='auto'&&st<=6){patchOne(el,'top');gotTop=true;}
+        else if(cs.bottom!=='auto'&&sb<=2){patchOne(el,'bot');gotBot=true;}
+      }
+    }
+    var b=document.body,bs=getComputedStyle(b);
+    if(!gotTop){b.style.paddingTop='calc('+px(bs.paddingTop)+'px + env(safe-area-inset-top,0px))';}
+    if(!gotBot){b.style.paddingBottom='calc('+px(bs.paddingBottom)+'px + env(safe-area-inset-bottom,0px))';}
+  }
+  function safe(){try{walk()}catch(_){}}
+  if(document.readyState==='loading'){document.addEventListener('DOMContentLoaded',safe)}else{safe()}
+  addEventListener('load',safe);
+  setTimeout(safe,800);
+})();
+</script>
 </body>
 </html>

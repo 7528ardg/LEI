@@ -89,6 +89,35 @@ textarea.ri{resize:vertical;line-height:1.6}
 .rp-btn.ghost{background:var(--primary-soft);color:var(--primary);border:1px solid var(--primary-light)}
 .rp-btn.danger{background:var(--danger-soft);color:var(--danger)}
 </style>
+<style id="uxPolish">/*__UX_POLISH:v1__*/
+/* ---- UX Polish v1 · 统一交互规范（规范源：index.html 壳层）---- */
+:root{
+  --ux-primary:#148453;--ux-primary-dark:#0C5F3A;--ux-primary-light:#1FA56A;
+  --ux-gold:#F5B800;--ux-danger:#C62828;--ux-warn:#E64A19;
+  --ux-ink:#0F2A1F;--ux-ink2:#5A6F65;--ux-border:#E5EDE9;
+  --ux-radius-sm:8px;--ux-radius:12px;--ux-radius-lg:16px;
+}
+::selection{background:rgba(20,132,83,.24);}
+*{scrollbar-width:thin;scrollbar-color:rgba(20,132,83,.35) transparent;}
+::-webkit-scrollbar{width:8px;height:8px;}
+::-webkit-scrollbar-thumb{background:rgba(20,132,83,.30);border-radius:99px;border:2px solid transparent;background-clip:content-box;}
+::-webkit-scrollbar-track{background:transparent;}
+button,a,[role="button"],input,select,textarea,label{-webkit-tap-highlight-color:transparent;}
+button:not(:disabled){transition:transform .15s ease,box-shadow .2s ease,filter .2s ease,background-color .2s ease,border-color .2s ease,opacity .2s ease;}
+button:active:not(:disabled){transform:translateY(1px);}
+:focus{outline:none;}
+:focus-visible{outline:2.5px solid #148453;outline-offset:2px;border-radius:6px;}
+@media (prefers-reduced-motion:reduce){
+  *,*::before,*::after{animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important;scroll-behavior:auto!important;}
+}
+
+/* report：手机档触控目标 */
+@media (max-width:760px){
+  .m-tab{min-height:40px;}
+  input#kw{min-height:42px;font-size:15px;}
+  select.ri,input.ri{min-height:42px;font-size:15px;}
+}
+/*__UX_POLISH_END__*/</style>
 </head>
 <body>
 <div class="top">

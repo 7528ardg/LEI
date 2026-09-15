@@ -39,9 +39,9 @@ body{font-family:var(--font-sans);background:var(--bg);color:var(--text);min-hei
 .logo-wrap svg{width:36px;height:36px;}
 .brand-name{font-size:1.05rem;font-weight:800;color:var(--primary);white-space:nowrap;letter-spacing:-.3px;}
 .brand-sub{font-size:.66rem;color:var(--primary);font-weight:500;margin-left:2px;padding:2px 8px;border-radius:6px;background:var(--primary-soft);}
-.module-tabs{display:flex;align-items:center;gap:6px;flex:1;min-width:0;overflow-x:auto;scrollbar-width:none;padding:4px;}
+.module-tabs{display:flex;align-items:center;gap:6px;flex:1;min-width:0;overflow-x:auto;scrollbar-width:none;padding:4px;scroll-snap-type:x proximity;}
 .module-tabs::-webkit-scrollbar{display:none;}
-.mod-tab{padding:8px 16px;border-radius:10px;border:none;background:transparent;cursor:pointer;font-size:.86rem;font-weight:600;color:var(--text2);display:flex;align-items:center;gap:6px;white-space:nowrap;transition:all .2s;font-family:var(--font-sans);}
+.mod-tab{padding:8px 16px;border-radius:10px;border:none;background:transparent;cursor:pointer;font-size:.86rem;font-weight:600;color:var(--text2);display:flex;align-items:center;gap:6px;white-space:nowrap;transition:all .2s;font-family:var(--font-sans);;scroll-snap-align:start;min-height:38px;}
 .mod-tab:hover{background:var(--primary-mist);color:var(--primary);}
 .mod-tab.active{background:var(--grad-primary);color:#fff;box-shadow:var(--shadow);}
 .actions{display:flex;align-items:center;gap:10px;flex-shrink:0;}
@@ -482,7 +482,12 @@ window.SeasonEngine = (function () {
  * 下游消费方应把 estimated=true 的结果当作「参考区间」，不要用于精确倒计时。
  * ============================================================= */
 window.DateMatch = (function () {
-  var SE = (typeof window !== 'undefined') ? window.SeasonEngine : null;
+  // 懒获取：SeasonEngine 可能在 DateMatch 之后注入，加载期一次性捕获会永久为 null。
+  // （旧实现 var SE = window.SeasonEngine 曾导致农历/节气静默降级为 estimated=true、
+  //   置信度 0.55 且不报错 —— 改为调用时现读，注入顺序不再敏感。）
+  function SE() {
+    return (typeof window !== 'undefined') ? window.SeasonEngine : null;
+  }
 
   /* ---------------- 日期小工具 ---------------- */
   function pad(n) { return (n < 10 ? '0' : '') + n; }
@@ -553,7 +558,7 @@ window.DateMatch = (function () {
   ];
 
   // 24 节气（type=term，日期查 SeasonEngine.TERMS 表）
-  var TERMS = (SE && SE.TERM_ORDER) ? SE.TERM_ORDER : [
+  var TERMS = (SE() && SE().TERM_ORDER) ? SE().TERM_ORDER : [
     '小寒', '大寒', '立春', '雨水', '惊蛰', '春分', '清明', '谷雨', '立夏', '小满',
     '芒种', '夏至', '小暑', '大暑', '立秋', '处暑', '白露', '秋分', '寒露', '霜降',
     '立冬', '小雪', '大雪', '冬至'
@@ -656,7 +661,7 @@ window.DateMatch = (function () {
       return { s: wd, e: addDays(wd, (fest.span || 1) - 1), estimated: false };
     }
     if (fest.type === 'lunar') {
-      var tbl = SE && SE.LUNAR && SE.LUNAR[String(year)];
+      var tbl = SE() && SE().LUNAR && SE().LUNAR[String(year)];
       if (tbl && tbl[fest.lunarKey]) {
         var ld = md2date(tbl[fest.lunarKey], year);
         return { s: ld, e: addDays(ld, (fest.span || 1) - 1), estimated: false };
@@ -667,7 +672,7 @@ window.DateMatch = (function () {
       return { s: mid, e: addDays(mid, (fest.span || 1) - 1), estimated: true, estRange: [ymd(a), ymd(b)] };
     }
     if (fest.type === 'term') {
-      var tt = SE && SE.TERMS && SE.TERMS[String(year)];
+      var tt = SE() && SE().TERMS && SE().TERMS[String(year)];
       if (tt && tt[fest.key]) {
         var td = md2date(tt[fest.key], year);
         return { s: td, e: addDays(td, 2), estimated: false };
@@ -916,9 +921,9 @@ window.DateMatch = (function () {
     });
     // 节气：复用 SeasonEngine 的精确表，DateMatch 不再维护第二份节气日期
     try {
-      var tn = (SE && SE.solarTermOf) ? SE.solarTermOf(today) : '';
+      var tn = (SE() && SE().solarTermOf) ? SE().solarTermOf(today) : '';
       if (tn) {
-        var row = (SE && SE.TERMS) ? SE.TERMS[String(today.getFullYear())] : null;
+        var row = (SE() && SE().TERMS) ? SE().TERMS[String(today.getFullYear())] : null;
         var td = row ? md2date(row[tn], today.getFullYear()) : null;
         var ok = !!(td && !isNaN(td.getTime()));
         var ts = ok ? day0(td) : today, te = addDays(ts, 2);
@@ -953,12 +958,12 @@ window.DateMatch = (function () {
     if (m.type === 'term') return { kind: 'term', key: m.key };
     if (m.type === 'relative') return null;
     if (TERM_AS_FEST[m.key]) return { kind: 'term', key: TERM_AS_FEST[m.key] };
-    if (SE && SE.OPEN_FESTS && SE.OPEN_FESTS[m.key]) return { kind: 'fest', key: m.key };
+    if (SE() && SE().OPEN_FESTS && SE().OPEN_FESTS[m.key]) return { kind: 'fest', key: m.key };
     return null;
   }
   function hasOpenPool(k) {
     if (!k || !SE) return false;
-    var pool = (k.kind === 'term') ? (SE.OPEN_TERMS && SE.OPEN_TERMS[k.key]) : (SE.OPEN_FESTS && SE.OPEN_FESTS[k.key]);
+    var pool = (k.kind === 'term') ? (SE().OPEN_TERMS && SE().OPEN_TERMS[k.key]) : (SE().OPEN_FESTS && SE().OPEN_FESTS[k.key]);
     return !!(pool && pool.length);
   }
 

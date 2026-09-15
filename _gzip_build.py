@@ -63,9 +63,9 @@ body{font-family:var(--font-sans);background:var(--bg);color:var(--text);min-hei
 .logo-wrap svg{width:36px;height:36px;}
 .brand-name{font-size:1.05rem;font-weight:800;color:var(--primary);white-space:nowrap;letter-spacing:-.3px;}
 .brand-sub{font-size:.66rem;color:var(--primary);font-weight:500;margin-left:2px;padding:2px 8px;border-radius:6px;background:var(--primary-soft);}
-.module-tabs{display:flex;align-items:center;gap:6px;flex:1;min-width:0;overflow-x:auto;scrollbar-width:none;padding:4px;}
+.module-tabs{display:flex;align-items:center;gap:6px;flex:1;min-width:0;overflow-x:auto;scrollbar-width:none;padding:4px;scroll-snap-type:x proximity;}
 .module-tabs::-webkit-scrollbar{display:none;}
-.mod-tab{padding:8px 16px;border-radius:10px;border:none;background:transparent;cursor:pointer;font-size:.86rem;font-weight:600;color:var(--text2);display:flex;align-items:center;gap:6px;white-space:nowrap;transition:all .2s;font-family:var(--font-sans);}
+.mod-tab{padding:8px 16px;border-radius:10px;border:none;background:transparent;cursor:pointer;font-size:.86rem;font-weight:600;color:var(--text2);display:flex;align-items:center;gap:6px;white-space:nowrap;transition:all .2s;font-family:var(--font-sans);scroll-snap-align:start;min-height:38px;}
 .mod-tab:hover{background:var(--primary-mist);color:var(--primary);}
 .mod-tab.active{background:var(--grad-primary);color:#fff;box-shadow:var(--shadow);}
 .actions{display:flex;align-items:center;gap:10px;flex-shrink:0;}
@@ -1503,7 +1503,8 @@ def build():
         t = t.replace(ph, b64)
         print('{}: raw {:.2f}MB -> gz {:.2f}MB'.format(key, len(raw)/1048576.0, len(gz)/1048576.0))
     for out in OUTS:
-        with io.open(out, 'w', encoding='utf-8') as f:
+        # newline=''：禁用通用换行转换，避免 Windows 下把产物里的 \n 改写成 \r\n
+        with io.open(out, 'w', encoding='utf-8', newline='') as f:
             f.write(t)
         print('写出', out, '{:.2f}MB'.format(os.path.getsize(out)/1048576.0))
 

@@ -28,6 +28,7 @@ BUILD_STEPS = [
     (u'构建 kb-admin(库管理)', u'python _build_kbadmin.py'),
     (u'构建 spring(9模块单文件)', u'python _gzip_build.py'),
     (u'构建 4合1(10模块离线版)', u'python _build_4in1.py'),
+    (u'UX 美化注入(幂等,构建后补挂产物)', u'python _apply_ux_polish.py'),
 ]
 
 # M1-M3 逻辑验证套件（Node 先行、Python 收尾）
@@ -38,14 +39,16 @@ VERIFY_SCRIPTS = [
     u'node _verify_packs_m14.js',  # 备份内容层隔离 14
     u'node _verify_packs_m15.js',  # 产物内嵌特征 40
     u'node _verify_packs_m2.js',   # 在线更新 27
-    u'node _verify_date_match.js',  # 日期匹配引擎回归（节日/农历/通用节点/相对时间/跨年/表外估算）
-    u'node _verify_date_match.js',         # 日期匹配引擎（节日词/修饰语/相对时间/跨年/农历策略）
+    u'node _verify_date_match.js',  # 日期匹配引擎回归（节日词/修饰语/农历/通用节点/相对时间/跨年/表外估算）
+    u'node _verify_se_lazy.js',     # SeasonEngine 懒获取回归（反序注入不再静默降级农历/节气）
     u'node _verify_fest_hookup.js',        # 节日识别 → 话术挂载 端到端
     u'node _verify_script_gen.js 20260829',  # 话术生成引擎回归（6类x12套组合 × 品类匹配审计）
     u'node _verify_full_script.js 20260829', # 全话术链路回归（随机24套×3次：开场→落地前下单 结构/语义/违禁词/品牌重复/句级重复）
     u'node _verify_ai_price.js',   # 竞品分析 AI 更新价格（JSON 解析/覆盖层/预设与自定义应用）
     u'node _verify_qa_wakeup.js',   # 你问我答跨板块唤醒（33 用例：日常/手册/大撤/医疗/绩效/事件报告/病假）
     u'python _verify_packs_m3.py', # 发布管线 19
+    u'python _verify_assets.py',   # 形象IP 素材完整性（母版/抠图/精灵/原稿_clean 覆盖/模型登记）
+    u'python _apply_ux_polish.py --check',  # UX 美化标记块在位（14 个模块/模板）
 ]
 
 # 全量语法检查覆盖：全部模块源 + 三外壳/产物（排除 .tmp_ 调试文件）
