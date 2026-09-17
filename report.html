@@ -164,10 +164,17 @@ html[data-theme="dark"] .border-gray-300,
 html[data-theme="dark"] .border-slate-200{ border-color:var(--border)!important;}
 
 /* report：手机档触控目标 */
+/* report 响应式专项（2026-09-17 审计）：320 档 tab 行溢出改紧凑内滚；
+   表单 14~15px 触发 iOS 聚焦缩放，统一抬到 16px（含 768 平板档）。 */
 @media (max-width:760px){
-  .m-tab{min-height:40px;}
-  input#kw{min-height:42px;font-size:15px;}
-  select.ri,input.ri{min-height:42px;font-size:15px;}
+  .m-tab{min-height:40px;padding:6px 10px;font-size:.76rem;}
+  input#kw{min-height:42px;font-size:16px!important;}
+  select.ri,input.ri{min-height:42px;font-size:16px!important;}
+}
+@media (max-width:900px){
+  input#kw,select.ri,input.ri{font-size:16px!important;}
+  select,textarea,
+  input[type="text"],input[type="date"],input[type="time"]{font-size:16px!important;}
 }
 /*__UX_POLISH_END__*/</style>
 </head>

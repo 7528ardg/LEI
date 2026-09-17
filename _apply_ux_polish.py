@@ -150,6 +150,18 @@ html[data-theme="dark"] .dc-card{background:#162420;border-color:#1E3A2C;color:#
   /* ⑤ 输入框占位文字单行显示：手机档两行折行会被 1 行高的输入框拦腰截断，观感差 */
   .ti::placeholder{white-space:nowrap;overflow:hidden;}
 }
+
+/* ---- qa 响应式专项（2026-09-17 审计）----
+   形象条按钮 pb-c 实测 25px 高、欢迎词 chips 25px 高、五库切换 src-tab 31px 高，
+   触控目标过小；输入框 15px 会触发 iOS 聚焦缩放（含 768 平板档）。 */
+@media (max-width:900px){
+  #qaInput{font-size:16px!important;}
+}
+@media (max-width:760px){
+  #petBar .pb-c{min-height:34px;padding:6px 10px;font-size:12px;}
+  .w-chip{min-height:34px;padding:5px 12px;}
+  .src-tab{min-height:36px;}
+}
 """
 
 BEAUTY = COMMON + DARK_COMMON + """
@@ -228,11 +240,35 @@ html[data-theme="dark"] #search-input{background:#1D2C25!important;color:var(--t
 html[data-theme="dark"] .divide-gray-100 > * + *,
 html[data-theme="dark"] .divide-gray-200 > * + *{border-color:var(--border)!important;}
 @media (max-width:760px){
-  button.px-3\\.py-1\\.5{min-height:36px;}
-  select.px-3\\.py-2{min-height:42px;font-size:15px;}
-  #search-input{min-height:44px;font-size:15px;}
+  button.px-3.py-1\\.5{min-height:36px;}
+  select.px-3.py-2{min-height:42px;font-size:16px!important;}
+  #search-input{min-height:44px;font-size:16px!important;}
   button.flex.items-center{min-height:38px;}
 }
+/* ---- beauty 响应式专项（2026-09-17 审计）----
+   筛选 chips（护眼/护肝/营养包等）实测 24px 高、弹窗关闭 × 18px 宽、✓全选 28px，
+   触控目标过小；表单 12~13px 触发 iOS 聚焦缩放。
+   注意：类选择器多类组合不转义（.px-2.py-1），仅 class 名自带点号时转义（.py-1\\.5）。 */
+@media (max-width:760px){
+  button.px-2.py-1{min-height:34px;padding-top:5px;padding-bottom:5px;}
+  button.px-2.py-0\\.5{min-height:34px;padding-top:5px;padding-bottom:5px;}
+  button.p-1\\.5{min-width:34px;min-height:34px;justify-content:center;}
+  button[aria-label="关闭"]{min-width:40px;min-height:40px;font-size:1.35rem;}
+  select,textarea,
+  input[type="text"],input[type="search"]{font-size:16px!important;}
+}
+@media (max-width:900px){
+  select.px-3.py-2{font-size:16px!important;}
+  #search-input{font-size:16px!important;}
+}
+/* Tailwind 渐变工具类在本模块静态构建中未生成（教程弹窗标题条等渲染为白底），
+   按品牌绿系兜底，同时把渐变上的 gray-800 深字统一为白字保证对比度。 */
+.bg-gradient-to-r.from-emerald-500{background-image:linear-gradient(90deg,#1FA56A,#148453)!important;}
+.bg-gradient-to-r.from-emerald-600{background-image:linear-gradient(90deg,#148453,#0C5F3A)!important;}
+.bg-gradient-to-r.from-emerald-500.text-gray-800,
+.bg-gradient-to-r.from-emerald-500 .text-gray-800,
+.bg-gradient-to-r.from-emerald-600.text-gray-800,
+.bg-gradient-to-r.from-emerald-600 .text-gray-800{color:#fff!important;}
 /* ---- 嵌入态底部留白（2026-09-16 遮挡修复）----
    内联 max-height:calc(100vh - 160px) 在壳层内嵌时按模块自身视口算，
    与 iframe 实际高度不符，导致列表底边与 iframe 底边之间出现死带。
@@ -259,33 +295,63 @@ QUIZ = COMMON + DARK_COMMON + """
 }
 .qt-meta{font-size:12px;}
 .qt-tag{font-size:12px;}
+
+/* quiz 响应式专项（2026-09-17 审计）：汉堡按钮实测 20px 宽、开始训练 33px 高，
+   触控目标过小；360px 窄屏用户胶囊再收窄防溢出。 */
+@media (max-width:700px){
+  .hamburger{min-width:44px;}
+}
+@media (max-width:760px){
+  .dgb-action{min-height:44px;}
+}
+@media (max-width:360px){
+  .topbar .user-chip{max-width:96px;padding:5px 8px 5px 5px;}
+}
 """
 
 MANUAL = COMMON + DARK_COMMON + """
 /* manual：小字下限 + 手机档触控目标 */
 small{font-size:12px;}
 .f-label,#f-cat-cnt{font-size:11.5px;}
+/* manual 响应式专项（2026-09-17 审计）：收藏星标 21x25 触控过小；
+   tab 行 320/375 档溢出改紧凑内滚；表单 15/12px 触发 iOS 缩放。 */
 @media (max-width:760px){
-  .m-tab{min-height:40px;}
+  .m-tab{min-height:40px;padding:8px 10px;font-size:.78rem;}
   .chip{min-height:34px;}
-  input#kw{min-height:42px;font-size:15px;}
+  input#kw{min-height:42px;font-size:16px!important;}
+  #sortSel{min-height:42px;font-size:16px!important;}
+  .fav{min-width:34px;min-height:34px;font-size:15px;}
+  .expand{min-height:36px;padding:6px 10px;}
+}
+@media (max-width:900px){
+  input#kw,#sortSel{font-size:16px!important;}
 }
 """
 
 REPORT = COMMON + DARK_COMMON + """
 /* report：手机档触控目标 */
+/* report 响应式专项（2026-09-17 审计）：320 档 tab 行溢出改紧凑内滚；
+   表单 14~15px 触发 iOS 聚焦缩放，统一抬到 16px（含 768 平板档）。 */
 @media (max-width:760px){
-  .m-tab{min-height:40px;}
-  input#kw{min-height:42px;font-size:15px;}
-  select.ri,input.ri{min-height:42px;font-size:15px;}
+  .m-tab{min-height:40px;padding:6px 10px;font-size:.76rem;}
+  input#kw{min-height:42px;font-size:16px!important;}
+  select.ri,input.ri{min-height:42px;font-size:16px!important;}
+}
+@media (max-width:900px){
+  input#kw,select.ri,input.ri{font-size:16px!important;}
+  select,textarea,
+  input[type="text"],input[type="date"],input[type="time"]{font-size:16px!important;}
 }
 """
 
 MEDICAL = COMMON + DARK_COMMON + """
 /* medical：手机档基础触控目标 */
+/* medical 响应式专项（2026-09-17 审计）：320/375 档 tab 行溢出改紧凑内滚，
+   表单字号统一 16px 防 iOS 聚焦缩放。 */
 @media (max-width:760px){
   button{min-height:36px;}
-  input,select{min-height:42px;font-size:15px;}
+  input,select{min-height:42px;font-size:16px;}
+  .m-tab{min-height:40px;padding:8px 10px;font-size:12.5px;}
 }
 /* ---- medical 深色专项（2026-09-16）----
    medical 为纯十六进制写死的语义类体系（body #f6f8fa / .card #fff / .sec-title #111827…），
@@ -340,10 +406,13 @@ PERF = COMMON + DARK_COMMON + """
 .btn-outline-primary{--bs-btn-color:#148453;--bs-btn-border-color:#148453;--bs-btn-hover-bg:#148453;--bs-btn-hover-border-color:#148453;--bs-btn-active-bg:#148453;--bs-btn-active-border-color:#148453;}
 .brand-subtitle{font-size:11px;}
 svg text{font-size:10.5px;}
+@media (max-width:900px){
+  .form-select,.form-control{min-height:42px;font-size:16px!important;}
+  #loginUsername,#loginPassword{min-height:46px;font-size:16px!important;}
+}
 @media (max-width:760px){
-  .form-select,.form-control{min-height:42px;font-size:15px;}
-  #loginUsername,#loginPassword{min-height:46px;}
   .navbar-toggler{min-width:46px;min-height:46px;}
+  .password-toggle{min-width:40px;min-height:40px;}
 }
 /* ---- performance 深色专项（2026-09-16）----
    该模块是 Bootstrap 5：原生暗色靠 data-bs-theme="dark"（自带 163 条规则），
@@ -553,6 +622,85 @@ html[data-theme="dark"] .lv-mid,
 html[data-theme="dark"] .risk-mid{color:#FFB95E!important;}
 html[data-theme="dark"] .lv-low,
 html[data-theme="dark"] .risk-low{color:#5FE0A6!important;}
+
+/* ---- risk-lite 响应式专项（2026-09-17 审计：手机/平板页面级横向溢出 272~349px）----
+   根因①：顶栏右侧操作组（刷新/黑白切换/简报/天气…）不换行，把布局视口撑到 669px；
+   根因②：file:// 协议横幅长文案不换行；根因③：小按钮/冲突弹窗越界。 */
+@media (max-width:1024px){
+  .topbar{flex-wrap:wrap;height:auto;min-height:var(--topbar-h,52px);row-gap:4px;padding-top:6px;padding-bottom:6px;}
+  .topbar .right{flex-wrap:wrap;row-gap:6px;justify-content:flex-end;}
+  .weather-update-panel{max-width:min(92vw,360px);}
+}
+@media (max-width:900px){
+  #fileProtocolBanner{padding:8px 12px!important;font-size:12px!important;}
+  #fileProtocolBanner span{white-space:normal!important;overflow-wrap:anywhere!important;}
+  #fileProtocolBanner button{margin-left:8px!important;margin-top:4px;}
+  #weatherFreqSelect,#routeBaseSelect,#mapRouteSelect,
+  #settingsBriefingTime,#settingsFeishuUserId{font-size:16px!important;}
+  select,textarea,
+  input[type="text"],input[type="time"]{font-size:16px!important;}
+}
+@media (max-width:760px){
+  .sched-check-modal{width:min(92vw,560px)!important;max-width:92vw!important;}
+  /* 关闭钮/翻页钮/无类名小按钮统一抬触控目标（审计实测 12~32px 难点准） */
+  .btn-close{min-width:38px;min-height:38px;font-size:18px;}
+  .btn{min-width:38px;min-height:36px;}
+  button{min-height:36px;}
+  .drawer .head .btn-toggle{min-width:38px;min-height:38px;}
+  .icon-btn{min-width:40px;min-height:40px;}
+  .leaflet-control-zoom a{width:34px!important;height:34px!important;line-height:30px!important;font-size:18px;}
+}
+"""
+
+DAILY = COMMON + DARK_COMMON + """
+/* daily：快捷标签/品类按钮触控目标（2026-09-17 响应式审计：23~28px 高难点准） */
+@media (max-width:760px){
+  .tag{min-height:36px;padding:6px 12px;font-size:.78rem;}
+  .cat{min-height:36px;}
+}
+"""
+
+ISSUES = COMMON + DARK_COMMON + """
+/* issues：表单字号下限（2026-09-17 审计：14px 会触发 iOS 聚焦缩放；含 768 平板档） */
+@media (max-width:900px){
+  #issLoc,#issMsg{font-size:16px!important;}
+  select,textarea,input{font-size:16px!important;}
+}
+"""
+
+KBADMIN = COMMON + DARK_COMMON + """
+/* kb-admin：tab/工具按钮触控 + 下拉字号（2026-09-17 响应式审计；含 768 平板档） */
+@media (max-width:900px){
+  select{min-height:42px;font-size:16px!important;}
+  #targetLib{font-size:16px!important;}
+}
+@media (max-width:760px){
+  .kb-tab{min-height:40px;padding:8px 10px;}
+  .tbtn{min-height:38px;}
+}
+"""
+
+# 壳层顶栏（index / spring-assistant / 离线完整版 共用 chrome）
+SHELL = """
+/* ---- 壳层顶栏响应式收纳（2026-09-17 响应式审计）----
+   768 档 actions 溢出 +114px：先收节日/节气 chip；320 档 +47px：再收时钟；
+   触屏设备补齐 40px+ 触控目标（bk-btn/theme-btn/mega-btn/mod-tab）。 */
+@media (max-width:960px){
+  .actions .sys-clock .sc-tag{display:none;}
+}
+@media (max-width:760px){
+  .actions .net-status{display:none;}
+  .actions{gap:7px;}
+}
+@media (max-width:480px){
+  .actions .sys-clock{display:none;}
+}
+@media (pointer:coarse){
+  .bk-btn{min-width:40px;min-height:40px;}
+  .theme-btn{min-width:42px;min-height:42px;}
+  #megaBtn{min-width:42px;min-height:42px;}
+  .mod-tab{min-height:44px;}
+}
 """
 
 # beauty 品牌色收拢映射（Tailwind 翡翠绿 -> 春秋绿系，字面量替换）
@@ -571,15 +719,17 @@ TARGETS = {
     'quiz.html': QUIZ,
     'manual.html': MANUAL,
     'report.html': REPORT,
-    'issues.html': COMMON + DARK_COMMON,
+    'issues.html': ISSUES,
     'medical.html': MEDICAL,
     'performance.html': PERF,
     'risk-lite.html': RISK,
-    'spring-assistant.html': COMMON + DARK_COMMON,
-    'daily.template.html': COMMON + DARK_COMMON,
-    'kb-admin.template.html': COMMON + DARK_COMMON,
-    'daily.html': COMMON + DARK_COMMON,
-    'kb-admin.html': COMMON + DARK_COMMON,
+    'index.html': SHELL,
+    'spring-assistant.html': COMMON + DARK_COMMON + SHELL,
+    '客舱小助手（离线完整版）.html': COMMON + DARK_COMMON + SHELL,
+    'daily.template.html': DAILY,
+    'kb-admin.template.html': KBADMIN,
+    'daily.html': DAILY,
+    'kb-admin.html': KBADMIN,
     # cc-home.html 刻意跳过：桌面三栏为 2026-09-14 手调定稿，不在本轮范围
 }
 

@@ -155,9 +155,12 @@ html[data-theme="dark"] .border-gray-300,
 html[data-theme="dark"] .border-slate-200{ border-color:var(--border)!important;}
 
 /* medical：手机档基础触控目标 */
+/* medical 响应式专项（2026-09-17 审计）：320/375 档 tab 行溢出改紧凑内滚，
+   表单字号统一 16px 防 iOS 聚焦缩放。 */
 @media (max-width:760px){
   button{min-height:36px;}
-  input,select{min-height:42px;font-size:15px;}
+  input,select{min-height:42px;font-size:16px;}
+  .m-tab{min-height:40px;padding:8px 10px;font-size:12.5px;}
 }
 /* ---- medical 深色专项（2026-09-16）----
    medical 为纯十六进制写死的语义类体系（body #f6f8fa / .card #fff / .sec-title #111827…），

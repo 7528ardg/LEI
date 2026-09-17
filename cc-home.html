@@ -1970,6 +1970,96 @@ function bindHall(){
     sc.innerHTML = '';
     memLoad(i).forEach(function(m){ pushBub(m.r === 'user' ? 'me' : 'bot', m.t); });
   }
+  /* ---------------- 实时天气（2026-09-16 · Open-Meteo 免 Key） ----------------
+     24 位角色都能答天气：识别天气提问 → 抽城市（默认角色家乡，再退广州）→
+     geocoding + forecast 拉实时数据（缓存 20 分钟，断网回落最近一次成功数据）。
+     在线：数据注入 system prompt，GLM 按各角色自己的口吻播报；
+     离线/断网：WXH.offline 用角色口吻模板播报兜底。 */
+  var WXH = (function(){
+    var CK = 'cc_wx_cache_v1', TTL = 20 * 60 * 1000;
+    var WMO = {0:['晴','☀️'],1:['基本晴','🌤️'],2:['多云','⛅'],3:['阴','☁️'],45:['有雾','🌫️'],48:['雾凇','🌫️'],51:['毛毛雨','🌦️'],53:['毛毛雨','🌦️'],55:['浓毛毛雨','🌧️'],56:['冻毛毛雨','🌧️'],57:['冻毛毛雨','🌧️'],61:['小雨','🌦️'],63:['中雨','🌧️'],65:['大雨','🌧️'],66:['冻雨','🌧️'],67:['冻雨','🌧️'],71:['小雪','🌨️'],73:['中雪','❄️'],75:['大雪','❄️'],77:['米雪','🌨️'],80:['阵雨','🌦️'],81:['阵雨','🌧️'],82:['强阵雨','⛈️'],85:['阵雪','🌨️'],86:['阵雪','❄️'],95:['雷阵雨','⛈️'],96:['雷阵雨·伴冰雹','⛈️'],99:['雷阵雨·大冰雹','⛈️']};
+    var SNOW = [71,73,75,77,85,86];
+    function wmo(c){ return WMO[c] || ['未知天气','🌡️']; }
+    function isQuery(t){
+      t = String(t || '').trim();
+      if (!/(天气|气温|温度|下雨|降雨|降水|风速|风力|风大|热不热|冷不冷|多少度|几度)/.test(t)) return false;
+      /* 规章/处置/注意类问法（"雷雨天气怎么处置""下雨天注意什么"）不是查实时天气，照常走 AI 知识链路 */
+      if (/(怎么办|怎么处理|怎么处置|怎么应对|怎么操作|怎么预防|怎么规定|如何处置|如何应对|如何处理|如何操作|预防|处置|规定|要求|标准|条例|手册|颠簸|除冰|防冰|影响|防范|防护|注意什么|注意哪些|注意事项)/.test(t)) return false;
+      return true;
+    }
+    function extractCity(t){
+      var m = String(t || '').match(/([\u4e00-\u9fa5]{1,8}?)(?:市)?(?:的)?(?:天气|气温|温度|降雨|下雨|降水|风速|风力|热不热|冷不冷|多少度|几度)/);
+      if (!m) return null;
+      var s = m[1];
+      var PRE = ['帮我查一下','帮我查查','帮我看看','我想知道','我想查','我要查','我想问','我想看看','我要看看','我要问','查一下','麻烦','请问','帮我','查查','看看','看下','问一下','问下','给我','说下','说说','我','先','再','还有','查','看','问','请'];
+      var hit = true;
+      while (hit){ hit = false; for (var i = 0; i < PRE.length; i++){ if (s.indexOf(PRE[i]) === 0){ s = s.slice(PRE[i].length); hit = true; break; } } }
+      s = s.replace(/(今天|明天|后天|现在|当前|此刻|实时|外面|当地|航班|机场|公司|你们|我们|这里|那边)/g, '');
+      s = s.replace(/(?:是不是|有没有|是否|的|会|要|还|在)+$/, '');
+      if (s.length >= 2 && !/^(今天|明天|后天|现在|当前|天气|气温|温度|晴|阴|雨|风|外面|这里|那边|航班|公司)$/.test(s)) return s;
+      return null;
+    }
+    function homeCity(home){
+      var s = String(home || '').replace(/^(中国|华南|华北|华东|西南|东北|西北)/, '')
+        .replace(/^(广东|广西|湖南|湖北|河南|河北|山东|山西|江苏|浙江|安徽|福建|江西|四川|贵州|云南|陕西|甘肃|青海|海南|台湾|辽宁|吉林|黑龙江)/, '');
+      return s.length >= 2 ? s : '广州';
+    }
+    function readCache(city){
+      try{
+        var d = (JSON.parse(localStorage.getItem(CK) || '{}') || {})[city];
+        if (d && Date.now() - d.ts < TTL) return d;
+        if (d) { d.stale = true; return d; }   /* 过期也留着：断网兜底 */
+      }catch(e){}
+      return null;
+    }
+    function writeCache(city, d){
+      try{ var all = JSON.parse(localStorage.getItem(CK) || '{}') || {}; all[city] = d; localStorage.setItem(CK, JSON.stringify(all)); }catch(e){}
+    }
+    async function fetchWx(city){
+      var cached = readCache(city);
+      if (cached && !cached.stale) return cached;
+      try{
+        var g = await fetch('https://geocoding-api.open-meteo.com/v1/search?name=' + encodeURIComponent(city) + '&count=1&language=zh&format=json').then(function(r){ return r.json(); });
+        var hit = g && g.results && g.results[0];
+        if (!hit) throw new Error('没找到城市「' + city + '」');
+        var u = 'https://api.open-meteo.com/v1/forecast?latitude=' + hit.latitude + '&longitude=' + hit.longitude +
+          '&current=temperature_2m,apparent_temperature,relative_humidity_2m,weather_code,wind_speed_10m' +
+          '&daily=weather_code,temperature_2m_max,temperature_2m_min,precipitation_probability_max&timezone=auto&forecast_days=2';
+        var d = await fetch(u).then(function(r){ if (!r.ok) throw new Error('HTTP ' + r.status); return r.json(); });
+        if (!d || !d.current || !d.daily) throw new Error('天气数据为空');
+        var out = {
+          city: hit.name, ts: Date.now(),
+          cur: { temp: d.current.temperature_2m, app: d.current.apparent_temperature, hum: d.current.relative_humidity_2m, code: d.current.weather_code, wind: d.current.wind_speed_10m, time: d.current.time },
+          t0: { code: d.daily.weather_code[0], max: d.daily.temperature_2m_max[0], min: d.daily.temperature_2m_min[0], pop: d.daily.precipitation_probability_max[0] },
+          t1: { code: d.daily.weather_code[1], max: d.daily.temperature_2m_max[1], min: d.daily.temperature_2m_min[1], pop: d.daily.precipitation_probability_max[1] }
+        };
+        writeCache(hit.name, out);
+        return out;
+      }catch(e){
+        if (cached) return cached;   /* 断网/接口异常：回落缓存 */
+        throw e;
+      }
+    }
+    /* 给 GLM 的一句话数据摘要（播报规矩在调用方拼） */
+    function brief(w){
+      return w.city + '此刻' + wmo(w.cur.code)[0] + '，气温 ' + w.cur.temp + '°C（体感 ' + w.cur.app + '°C），湿度 ' + w.cur.hum + '%，风速 ' + w.cur.wind + ' km/h；今天 ' + w.t0.min + '~' + w.t0.max + '°C 降水概率 ' + w.t0.pop + '%，明天 ' + w.t1.min + '~' + w.t1.max + '°C 降水概率 ' + w.t1.pop + '%。' + (w.stale ? '（注：这是最近一次联网的缓存数据）' : '');
+    }
+    function tipOf(w){
+      var t = [];
+      if (w.cur.code >= 51 || w.t0.pop >= 50) t.push('记得带伞');
+      if (SNOW.indexOf(w.cur.code) >= 0 || SNOW.indexOf(w.t0.code) >= 0) t.push('雪天路滑注意保暖');
+      if (w.cur.wind >= 30) t.push('风大，外场注意安全');
+      if (w.t0.max >= 32) t.push('白天较热注意补水');
+      if (w.t0.min <= 5) t.push('早晚偏冷多穿一层');
+      if (!t.length) t.push('天气不错，适合飞行');
+      return t.join('，');
+    }
+    /* 离线/AI 挂了的兜底播报：真实数据 + 角色口吻 */
+    function offline(w, c){
+      return '（瞄了眼实时云图）' + w.city + '现在' + wmo(w.cur.code)[0] + '，' + Math.round(w.cur.temp) + '°C，体感 ' + Math.round(w.cur.app) + '°C；今天 ' + Math.round(w.t0.min) + '~' + Math.round(w.t0.max) + '°C，降水概率 ' + w.t0.pop + '%。' + tipOf(w) + (w.stale ? '（这是离线缓存的数据哦）' : '') + '\n' + (c ? c.motto : '');
+    }
+    return { isQuery: isQuery, extractCity: extractCity, homeCity: homeCity, fetch: fetchWx, brief: brief, offline: offline };
+  })();
   async function send(text){
     var c = ROSTER[cur];
     if (!text) return;
@@ -1984,6 +2074,18 @@ function bindHall(){
       return { role: m.r === 'user' ? 'user' : 'assistant', content: m.t };
     });
     hist = [{ role:'system', content: sysPrompt(c) }].concat(hist);
+    /* 【实时天气（2026-09-16）】天气提问 → Open-Meteo 免 Key 实时数据：
+       在线时把数据拼进 system prompt，24 位角色各自用自己的口吻播报；
+       离线 / AI 挂了 → WXH.offline 用角色口吻的模板播报兜底。 */
+    var wxr = null;
+    if (WXH.isQuery(text)){
+      try{ wxr = await WXH.fetch(WXH.extractCity(text) || WXH.homeCity(c.home)); }catch(e){ wxr = null; }
+      if (wxr){
+        hist = [{ role:'system', content: sysPrompt(c) +
+          '\n\n【实时天气数据（Open-Meteo，此刻真实数据）】用户正在问天气，数据：' + WXH.brief(wxr) +
+          '\n【播报规矩】用「' + c.n + '」的口吻把这些数据自然地播报给用户（2~3 句）；所有温度、风速、湿度、概率数值必须逐字来自上方数据，不得编造或新增数值；可以结合你房间里的陈设或手头的事调侃一句。' }].concat(hist);
+      }
+    }
     if (!navigator.onLine){ setNet('offline'); }
     else {
       var r0 = await aiChat(hist);
@@ -1994,14 +2096,14 @@ function bindHall(){
         return;
       }
     }
-    var off = offlineReply(text, c);
+    var off = (wxr ? WXH.offline(wxr, c) : null) || offlineReply(text, c);
     thinking.textContent = off;
     memPush(cur, 'bot', off);
     setNet('offline');
   }
   function renderTips(){
     var c = ROSTER[cur];
-    $('tips').innerHTML = ['你好', '你在忙什么', '这是哪儿', '你的制作人是谁', '有几套知识库', '你多大年纪', '你是哪里人']
+    $('tips').innerHTML = ['你好', '你在忙什么', '今天天气怎么样', '这是哪儿', '你的制作人是谁', '有几套知识库', '你多大年纪', '你是哪里人']
       .map(function(q){ return '<button data-q="' + esc(q) + '">' + esc(q) + '</button>'; }).join('') +
       '<button class="mem-clear" data-q="__clear__">🗑 清空记忆</button>';
     $('tips').onclick = function(e){ var b = e.target.closest ? e.target.closest('button') : null; if (!b) return;

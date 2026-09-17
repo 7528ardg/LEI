@@ -32462,10 +32462,13 @@ html[data-theme="dark"] .border-slate-200{ border-color:var(--border)!important;
 .btn-outline-primary{--bs-btn-color:#148453;--bs-btn-border-color:#148453;--bs-btn-hover-bg:#148453;--bs-btn-hover-border-color:#148453;--bs-btn-active-bg:#148453;--bs-btn-active-border-color:#148453;}
 .brand-subtitle{font-size:11px;}
 svg text{font-size:10.5px;}
+@media (max-width:900px){
+  .form-select,.form-control{min-height:42px;font-size:16px!important;}
+  #loginUsername,#loginPassword{min-height:46px;font-size:16px!important;}
+}
 @media (max-width:760px){
-  .form-select,.form-control{min-height:42px;font-size:15px;}
-  #loginUsername,#loginPassword{min-height:46px;}
   .navbar-toggler{min-width:46px;min-height:46px;}
+  .password-toggle{min-width:40px;min-height:40px;}
 }
 /* ---- performance 深色专项（2026-09-16）----
    该模块是 Bootstrap 5：原生暗色靠 data-bs-theme="dark"（自带 163 条规则），

@@ -481,6 +481,16 @@ html[data-theme="dark"] .border-gray-100,
 html[data-theme="dark"] .border-gray-200,
 html[data-theme="dark"] .border-gray-300,
 html[data-theme="dark"] .border-slate-200{ border-color:var(--border)!important;}
+
+/* kb-admin：tab/工具按钮触控 + 下拉字号（2026-09-17 响应式审计；含 768 平板档） */
+@media (max-width:900px){
+  select{min-height:42px;font-size:16px!important;}
+  #targetLib{font-size:16px!important;}
+}
+@media (max-width:760px){
+  .kb-tab{min-height:40px;padding:8px 10px;}
+  .tbtn{min-height:38px;}
+}
 /*__UX_POLISH_END__*/</style>
 </head>
 <body>

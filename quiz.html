@@ -2395,6 +2395,18 @@ html[data-theme="dark"] .border-slate-200{ border-color:var(--border)!important;
 }
 .qt-meta{font-size:12px;}
 .qt-tag{font-size:12px;}
+
+/* quiz 响应式专项（2026-09-17 审计）：汉堡按钮实测 20px 宽、开始训练 33px 高，
+   触控目标过小；360px 窄屏用户胶囊再收窄防溢出。 */
+@media (max-width:700px){
+  .hamburger{min-width:44px;}
+}
+@media (max-width:760px){
+  .dgb-action{min-height:44px;}
+}
+@media (max-width:360px){
+  .topbar .user-chip{max-width:96px;padding:5px 8px 5px 5px;}
+}
 /*__UX_POLISH_END__*/</style>
 </head>
 <body>

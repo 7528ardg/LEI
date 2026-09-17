@@ -25,6 +25,7 @@ BUILD_STEPS = [
     (u'同步时节引擎(单一来源)', u'python _sync_season.py --check'),
     (u'同步日期匹配引擎(单一来源)', u'python _sync_date_match.py --check'),
     (u'同步大撤专项(2源)', u'python _sync_dache.py --check'),
+    (u'注入导航升级(#1/#3/#4/#5/#9,幂等)', u'python _apply_nav_20260917.py'),
     (u'同步壳层弹窗引擎(index→两模板)', u'python _sync_shell_js.py'),
     (u'构建 kb-admin(库管理)', u'python _build_kbadmin.py'),
     (u'构建 spring(9模块单文件)', u'python _gzip_build.py'),
@@ -53,6 +54,7 @@ VERIFY_SCRIPTS = [
     u'python _verify_packs_m3.py', # 发布管线 19
     u'python _verify_assets.py',   # 形象IP 素材完整性（母版/抠图/精灵/原稿_clean 覆盖/模型登记）
     u'node _verify_ccsheet_static.js',  # 十种弹窗交互引擎静态守护（index/两模板：CCSheet/动效层/--embed-bottom/深色打通/更多面板走引擎）
+    u'node _verify_nav_20260917.js',  # 导航升级守护（三壳一致/12模块元数据/深跳桥/限高内滚+关闭三路径）
     u'python _apply_ux_polish.py --check',  # UX 美化标记块在位（14 个模块/模板）
 ]
 

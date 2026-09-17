@@ -2031,6 +2031,18 @@ html[data-theme="dark"] .dc-card{background:#162420;border-color:#1E3A2C;color:#
   /* ⑤ 输入框占位文字单行显示：手机档两行折行会被 1 行高的输入框拦腰截断，观感差 */
   .ti::placeholder{white-space:nowrap;overflow:hidden;}
 }
+
+/* ---- qa 响应式专项（2026-09-17 审计）----
+   形象条按钮 pb-c 实测 25px 高、欢迎词 chips 25px 高、五库切换 src-tab 31px 高，
+   触控目标过小；输入框 15px 会触发 iOS 聚焦缩放（含 768 平板档）。 */
+@media (max-width:900px){
+  #qaInput{font-size:16px!important;}
+}
+@media (max-width:760px){
+  #petBar .pb-c{min-height:34px;padding:6px 10px;font-size:12px;}
+  .w-chip{min-height:34px;padding:5px 12px;}
+  .src-tab{min-height:36px;}
+}
 /*__UX_POLISH_END__*/</style>
 </head>
 <body>
@@ -6996,6 +7008,100 @@ function qaIsEmotionalTalk(text){
   return false;
 }
 
+/* ================= 实时天气（2026-09-16 · Open-Meteo 免 Key）=================
+   赋予「你问我答」实时天气播报能力：
+   · 识别天气提问（排除规章/处置类问法，"雷雨天气怎么处置"仍走知识库）；
+   · 从问句抽城市（默认广州=分队基地），Open-Meteo geocoding + forecast 拉实时数据；
+   · localStorage 缓存 20 分钟；断网回落最近一次成功数据（卡片标注"离线缓存"）；
+   · 回复为结构化卡片，AI 在线时再追加一句 CC 口吻播报。 */
+const WX = (function(){
+  const CK = 'cc_wx_cache_v1', TTL = 20 * 60 * 1000;
+  const WMO = {0:['晴','☀️'],1:['基本晴','🌤️'],2:['多云','⛅'],3:['阴','☁️'],45:['有雾','🌫️'],48:['雾凇','🌫️'],51:['毛毛雨','🌦️'],53:['毛毛雨','🌦️'],55:['浓毛毛雨','🌧️'],56:['冻毛毛雨','🌧️'],57:['冻毛毛雨','🌧️'],61:['小雨','🌦️'],63:['中雨','🌧️'],65:['大雨','🌧️'],66:['冻雨','🌧️'],67:['冻雨','🌧️'],71:['小雪','🌨️'],73:['中雪','❄️'],75:['大雪','❄️'],77:['米雪','🌨️'],80:['阵雨','🌦️'],81:['阵雨','🌧️'],82:['强阵雨','⛈️'],85:['阵雪','🌨️'],86:['阵雪','❄️'],95:['雷阵雨','⛈️'],96:['雷阵雨·伴冰雹','⛈️'],99:['雷阵雨·大冰雹','⛈️']};
+  const SNOW = [71,73,75,77,85,86];
+  const isQuery = t => {
+    t = String(t || '').trim();
+    if (!/(天气|气温|温度|下雨|降雨|降水|风速|风力|风大|热不热|冷不冷|多少度|几度)/.test(t)) return false;
+    /* 规章/处置/注意类问法不是查实时天气，交回知识库（"客舱温度标准""雷雨天气怎么处置""下雨天注意什么"） */
+    if (/(怎么办|怎么处理|怎么处置|怎么应对|怎么操作|怎么预防|怎么规定|如何处置|如何应对|如何处理|如何操作|预防|处置|规定|要求|标准|条例|手册|颠簸|除冰|防冰|影响|防范|防护|注意什么|注意哪些|注意事项)/.test(t)) return false;
+    return true;
+  };
+  const extractCity = t => {
+    const m = String(t || '').match(/([\u4e00-\u9fa5]{1,8}?)(?:市)?(?:的)?(?:天气|气温|温度|降雨|下雨|降水|风速|风力|热不热|冷不冷|多少度|几度)/);
+    if (!m) return null;
+    let s = m[1];
+    const PRE = ['帮我查一下','帮我查查','帮我看看','我想知道','我想查','我要查','我想问','我想看看','我要看看','我要问','查一下','麻烦','请问','帮我','查查','看看','看下','问一下','问下','给我','说下','说说','我','先','再','还有','查','看','问','请'];
+    let hit = true;
+    while (hit){ hit = false; for (const w of PRE){ if (s.startsWith(w)){ s = s.slice(w.length); hit = true; break; } } }
+    s = s.replace(/(今天|明天|后天|现在|当前|此刻|实时|外面|当地|航班|机场|公司|你们|我们|这里|那边)/g, '');
+    s = s.replace(/(?:是不是|有没有|是否|的|会|要|还|在)+$/, '');
+    if (s.length >= 2 && !/^(今天|明天|后天|现在|当前|天气|气温|温度|晴|阴|雨|风|外面|这里|那边|航班|公司)$/.test(s)) return s;
+    return null;
+  };
+  const readCache = city => {
+    try{
+      const d = (JSON.parse(localStorage.getItem(CK) || '{}') || {})[city];
+      if (d && Date.now() - d.ts < TTL) return d;
+      if (d) return Object.assign({ stale: true }, d);   /* 过期也留着：断网兜底 */
+    }catch(e){}
+    return null;
+  };
+  const writeCache = (city, d) => {
+    try{ const all = JSON.parse(localStorage.getItem(CK) || '{}') || {}; all[city] = d; localStorage.setItem(CK, JSON.stringify(all)); }catch(e){}
+  };
+  async function fetchWx(city){
+    const cached = readCache(city);
+    if (cached && !cached.stale) return cached;
+    try{
+      const g = await fetch('https://geocoding-api.open-meteo.com/v1/search?name=' + encodeURIComponent(city) + '&count=1&language=zh&format=json').then(r => r.json());
+      const hit = g && g.results && g.results[0];
+      if (!hit) throw new Error('没找到城市「' + city + '」');
+      const u = 'https://api.open-meteo.com/v1/forecast?latitude=' + hit.latitude + '&longitude=' + hit.longitude +
+        '&current=temperature_2m,apparent_temperature,relative_humidity_2m,weather_code,wind_speed_10m' +
+        '&daily=weather_code,temperature_2m_max,temperature_2m_min,precipitation_probability_max&timezone=auto&forecast_days=2';
+      const d = await fetch(u).then(r => { if (!r.ok) throw new Error('HTTP ' + r.status); return r.json(); });
+      if (!d || !d.current || !d.daily) throw new Error('天气数据为空');
+      const out = {
+        city: hit.name, ts: Date.now(),
+        cur: { temp: d.current.temperature_2m, app: d.current.apparent_temperature, hum: d.current.relative_humidity_2m, code: d.current.weather_code, wind: d.current.wind_speed_10m, time: d.current.time },
+        t0: { code: d.daily.weather_code[0], max: d.daily.temperature_2m_max[0], min: d.daily.temperature_2m_min[0], pop: d.daily.precipitation_probability_max[0] },
+        t1: { code: d.daily.weather_code[1], max: d.daily.temperature_2m_max[1], min: d.daily.temperature_2m_min[1], pop: d.daily.precipitation_probability_max[1] }
+      };
+      writeCache(hit.name, out);
+      return out;
+    }catch(e){
+      if (cached) return cached;   /* 断网/接口异常：回落缓存 */
+      throw e;
+    }
+  }
+  const tipOf = w => {
+    const t = [];
+    if (w.cur.code >= 51 || w.t0.pop >= 50) t.push('☔ 记得带伞，航班准点也可能受影响');
+    if (SNOW.indexOf(w.cur.code) >= 0 || SNOW.indexOf(w.t0.code) >= 0) t.push('❄️ 雪天路滑，通勤注意保暖防滑');
+    if (w.cur.wind >= 30) t.push('💨 风比较大，外场作业和行李推车注意安全');
+    if (w.t0.max >= 32) t.push('🥵 白天较热，注意补水防晒');
+    if (w.t0.min <= 5) t.push('🧣 早晚偏冷，航前多穿一层');
+    if (!t.length) t.push('✅ 天气不错，适合飞行的好日子');
+    return t.join('<br>');
+  };
+  const card = w => {
+    const cw = WMO[w.cur.code] || ['未知','🌡️'], t0 = WMO[w.t0.code] || ['—','🌡️'], t1 = WMO[w.t1.code] || ['—','🌡️'];
+    return '<div class="kbox">🌤️ <b>' + esc(w.city) + ' · 实时天气</b>' + (w.stale ? ' <span style="opacity:.55;font-size:.72rem">（离线缓存）</span>' : '') + '<br>' +
+      '<div style="display:flex;align-items:center;gap:14px;margin:8px 0">' +
+      '<div style="font-size:2rem;line-height:1">' + cw[1] + '</div>' +
+      '<div><span style="font-size:1.7rem;font-weight:700">' + Math.round(w.cur.temp) + '°C</span>' +
+      '<span style="opacity:.65;font-size:.8rem">（体感 ' + Math.round(w.cur.app) + '°C）</span><br>' +
+      '<span style="font-size:.85rem">' + cw[0] + ' · ' + esc(String(w.cur.time || '').slice(11,16)) + ' 更新</span></div></div>' +
+      '<div style="display:grid;grid-template-columns:1fr 1fr;gap:4px 14px;font-size:.83rem;color:var(--text2)">' +
+      '<span>💨 风 ' + w.cur.wind + ' km/h</span><span>💧 湿度 ' + w.cur.hum + '%</span>' +
+      '<span>📍 今天 ' + t0[0] + ' ' + Math.round(w.t0.min) + '~' + Math.round(w.t0.max) + '°C</span>' +
+      '<span>☔ 降水概率 ' + w.t0.pop + '%</span>' +
+      '<span>🌇 明天 ' + t1[0] + ' ' + Math.round(w.t1.min) + '~' + Math.round(w.t1.max) + '°C</span>' +
+      '<span>☔ 明天降水 ' + w.t1.pop + '%</span></div>' +
+      '<div style="margin-top:8px;font-size:.83rem">' + tipOf(w) + '</div></div>';
+  };
+  return { isQuery, extractCity, fetch: fetchWx, card };
+})();
+
 async function process(text){
   // AI 回复风格快捷切换命令：/风格 班组 · /风格 正式 · /风格 精简 · /风格 热情（不检索知识库）
   const styleHit = text.trim().match(/^\/风格\s*(\S+)/);
@@ -7028,6 +7134,28 @@ async function process(text){
         addMsg('bot', `<div class="kbox">🚨 大撤专项暂未收录"${esc(kw)}"相关内容。<br>当前覆盖：${esc(cats)}<br>试试：<button class="w-chip" onclick="ask('大撤整体流程')">大撤整体流程</button> <button class="w-chip" onclick="ask('三人灭火小组怎么分工')">三人灭火小组</button> <button class="w-chip" onclick="ask('氧气瓶操作')">氧气瓶操作</button> <button class="w-chip" onclick="ask('滑梯救生筏')">滑梯救生筏</button></div>`);
         return;
       }
+    }
+  }
+  // 【实时天气（2026-09-16 · Open-Meteo 免 Key）】天气提问优先于知识库检索：
+  // 结构化卡片作答（缓存 20 分钟，断网回落缓存）；AI 在线时追加一句 CC 口吻播报。
+  // 规章/处置类问法（"雷雨天气怎么处置"）在 WX.isQuery 已排除，仍走知识库。
+  if (WX.isQuery(text)){
+    await typing(''); clearTyping();
+    const wxCity = WX.extractCity(text) || '广州';
+    try{
+      const w = await WX.fetch(wxCity);
+      addMsg('bot', WX.card(w), { answer:true, q:text });
+      if (SpringAI.isEnabled()){
+        try{
+          const sys = AI_STYLES[currentAiStyle()] + '\n\n【当前语境】用户刚查了「' + wxCity + '」的实时天气（Open-Meteo 实时数据，JSON 见用户消息）。请用你 CC 的俏皮口吻补一句播报或出行提醒：不超过两句话；所有温度、风速、湿度、概率数值必须逐字来自数据，不要新增数值，也不要把数据整段复读一遍。';
+          const resp = await SpringAI.chatLLM([{ role:'system', content: sys }, { role:'user', content: '用户提问：' + text + '\n实时数据：' + JSON.stringify(w) }], { temperature:0.85, maxTokens:160 });
+          if (resp && !/budget|api\s*key|quota|1305|访问量过大/i.test(resp)) addMsg('bot', '<div class="pet-say">✈️ ' + esc(resp.split('\n')[0]) + '</div>', { answer:true, q:text });
+        }catch(e2){ /* 卡片已作答，AI 点缀失败静默 */ }
+      }
+      return;
+    }catch(e){
+      addMsg('bot', '🌧️ 天气服务暂时连不上（' + esc(String(e.message || e)) + '）。实时天气需要联网查询，稍后再试；或者先问我手册和航班知识～');
+      return;
     }
   }
   // 【增强】培训练习意图（章节+数量 在线测试）

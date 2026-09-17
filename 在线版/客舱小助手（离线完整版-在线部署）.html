@@ -148,6 +148,62 @@ body{font-family:var(--font-sans);background:var(--bg);color:var(--text);min-hei
 .pf-field label{display:block;font-size:.78rem;color:var(--text2);margin-bottom:6px;font-weight:600;}
 .pf-field input[type=text]{width:100%;padding:10px 12px;border-radius:10px;border:1px solid var(--border);background:var(--bg);color:var(--text);font-size:.9rem;outline:none;box-sizing:border-box;font-family:var(--font-sans);}
 .pf-field input[type=text]:focus{border-color:var(--primary);box-shadow:0 0 0 3px var(--primary-soft);}
+
+/*__NAV_DESIGN_20260917_CSS__BEGIN —— 导航升级（源 index.html，勿直接改产物）*/
+/* --- #1 悬浮吸顶：顶栏浮岛化（圆角悬浮卡片，始终吸顶） --- */
+.topbar{top:10px;left:12px;right:12px;border:1px solid var(--border);border-radius:18px;box-shadow:0 6px 24px rgba(15,42,31,.08);transition:background .3s,box-shadow .3s,height .28s cubic-bezier(.32,.72,.34,1),top .28s cubic-bezier(.32,.72,.34,1),left .28s,right .28s;}
+html[data-theme="dark"] .topbar{box-shadow:0 8px 26px rgba(0,0,0,.5);}
+.sys-area{top:calc(var(--topbar-h) + 16px);}
+/* --- #9 滚动收缩：模块内容下滑后顶栏收紧变实色，回到顶部还原 --- */
+html.nav-scrolled .topbar{top:6px;height:48px;border-radius:14px;box-shadow:0 12px 30px rgba(15,42,31,.18);}
+html[data-theme="dark"] .nav-scrolled .topbar{box-shadow:0 12px 30px rgba(0,0,0,.55);}
+html.nav-scrolled .brand-sub,html.nav-scrolled .cr-root,html.nav-scrolled .cr-sep-first{display:none;}
+html.nav-scrolled .net-status,html.nav-scrolled .sys-clock{padding:3px 8px;font-size:.7rem;}
+/* --- #3 面包屑：客舱小助手 › 模块 › 子页（仅宽屏展示，避免挤压页签） --- */
+.shell-crumb{display:none;align-items:center;flex-shrink:0;padding:7px 12px;border-radius:12px;background:var(--primary-mist);border:1px solid var(--border);font-size:.78rem;color:var(--text2);white-space:nowrap;max-width:30vw;overflow:hidden;transition:opacity .2s;}
+@media(min-width:1101px){.shell-crumb{display:flex;}}
+@media(min-width:1101px){.brand-sub{display:none;}}
+.shell-crumb .cr-item{font-weight:700;overflow:hidden;text-overflow:ellipsis;}
+.shell-crumb .cr-item.link{cursor:pointer;color:var(--primary);}
+.shell-crumb .cr-item.link:hover{text-decoration:underline;}
+.shell-crumb .cr-mod{color:var(--text);}
+.shell-crumb .cr-sep{color:var(--text3);margin:0 6px;flex-shrink:0;}
+.shell-crumb .cr-sub{color:var(--gold);font-weight:700;}
+/* --- #4 二级下拉：模块页签 hover 弹出简介 + 快捷子入口（桌面精确指针） --- */
+.nav-drop{position:fixed;z-index:180;width:300px;max-height:min(70vh,460px);overflow-y:auto;-webkit-overflow-scrolling:touch;background:var(--bg-card);border:1px solid var(--border);border-radius:16px;box-shadow:0 18px 48px rgba(15,42,31,.18);padding:14px;opacity:0;transform:translateY(-6px);pointer-events:none;transition:opacity .18s ease,transform .18s ease;}
+.nav-drop.show{opacity:1;transform:translateY(0);pointer-events:auto;}
+.nav-drop .nd-name{font-weight:800;color:var(--text);font-size:.92rem;display:flex;align-items:center;gap:8px;}
+.nav-drop .nd-desc{font-size:.74rem;color:var(--text2);line-height:1.65;margin:7px 0 9px;}
+.nav-drop .nd-sub{display:flex;align-items:center;gap:7px;width:100%;padding:7px 10px;border-radius:10px;border:none;background:transparent;cursor:pointer;font-size:.78rem;font-weight:600;color:var(--text);font-family:var(--font-sans);transition:background .15s,color .15s;text-align:left;}
+.nav-drop .nd-sub:hover{background:var(--primary-mist);color:var(--primary);}
+/* --- #5 巨型菜单：「⊞ 全部应用」分组多列面板（桌面点击展开） --- */
+.mega-btn{display:none;align-items:center;justify-content:center;width:36px;height:36px;border-radius:12px;border:1px solid var(--border);background:var(--bg);cursor:pointer;color:var(--text2);flex-shrink:0;transition:all .2s;font-family:var(--font-sans);}
+.mega-btn:hover{border-color:var(--primary);color:var(--primary);background:var(--primary-soft);transform:scale(1.06);}
+@media(min-width:721px){.mega-btn{display:flex;}}
+@media(max-width:720px){.topbar{left:6px;right:6px;top:6px;border-radius:14px;}.sys-area{top:calc(var(--topbar-h) + 10px);}}
+.mega-mask{position:fixed;inset:0;background:rgba(9,20,15,.44);z-index:150;opacity:0;pointer-events:none;transition:opacity .25s;-webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px);}
+.mega-mask.show{opacity:1;pointer-events:auto;}
+html[data-theme="dark"] .mega-mask{background:rgba(0,0,0,.62);}
+.mega-panel{position:fixed;z-index:160;top:calc(var(--topbar-h) + 26px);left:50%;transform:translate(-50%,-12px) scale(.985);width:min(920px,94vw);max-height:min(78vh,640px);overflow-y:auto;-webkit-overflow-scrolling:touch;background:var(--bg-card);border:1px solid var(--border);border-radius:20px;box-shadow:0 24px 64px rgba(15,42,31,.22);padding:16px 18px 6px;opacity:0;visibility:hidden;pointer-events:none;transition:opacity .2s ease,transform .2s ease,visibility 0s linear .2s;}
+.mega-panel.show{opacity:1;visibility:visible;pointer-events:auto;transform:translate(-50%,0) scale(1);transition:opacity .22s ease,transform .3s cubic-bezier(.22,1.28,.36,1);}
+html[data-theme="dark"] .mega-panel{box-shadow:0 24px 64px rgba(0,0,0,.55);}
+.mega-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;}
+.mega-title{font-size:1rem;font-weight:800;color:var(--text);}
+.mega-group-label{font-size:.72rem;font-weight:800;color:var(--text3);letter-spacing:1px;margin:12px 4px 8px;display:flex;align-items:center;gap:8px;}
+.mega-group-label::after{content:'';flex:1;height:1px;background:var(--border);}
+.mega-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;}
+@media(max-width:1100px){.mega-grid{grid-template-columns:repeat(2,1fr);}}
+.mega-card{display:flex;flex-direction:column;gap:5px;padding:12px;border:1px solid var(--border);border-radius:14px;background:var(--bg);cursor:pointer;transition:all .18s;text-align:left;font-family:var(--font-sans);}
+.mega-card:hover{border-color:var(--primary);background:var(--primary-mist);transform:translateY(-2px);box-shadow:var(--shadow);}
+.mega-card.active{border-color:var(--primary);background:var(--primary-soft);}
+.mega-card .mc-top{display:flex;align-items:center;gap:8px;font-weight:800;color:var(--text);font-size:.9rem;}
+.mega-card .mc-ic{font-size:1.2rem;line-height:1;}
+.mega-card .mc-desc{font-size:.72rem;color:var(--text2);line-height:1.55;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;}
+.mega-subs{display:flex;flex-wrap:wrap;gap:4px;margin-top:3px;}
+.mega-sub{font-size:.68rem;padding:3px 9px;border-radius:8px;background:var(--primary-soft);color:var(--primary);border:none;cursor:pointer;font-weight:700;font-family:var(--font-sans);transition:all .15s;}
+.mega-sub:hover{background:var(--grad-primary);color:#fff;}
+.mega-foot{padding:12px 4px 8px;display:flex;justify-content:center;}
+/*__NAV_DESIGN_20260917_CSS__END*/
 </style>
 <script>
 /* 客舱小助手数据包引擎（_sync_packs.py 自动注入；改 docs/_packs_engine.js 后重跑 python _sync_packs.py） */
@@ -474,6 +530,100 @@ button:disabled:active{transform:none;}
   .mod-tab.active:hover{background:var(--grad-primary);color:#fff;}
 }
 </style>
+<style id="uxPolish">/*__UX_POLISH:v1__*/
+/* ---- UX Polish v1 · 统一交互规范（规范源：index.html 壳层）---- */
+:root{
+  --ux-primary:#148453;--ux-primary-dark:#0C5F3A;--ux-primary-light:#1FA56A;
+  --ux-gold:#F5B800;--ux-danger:#C62828;--ux-warn:#E64A19;
+  --ux-ink:#0F2A1F;--ux-ink2:#5A6F65;--ux-border:#E5EDE9;
+  --ux-radius-sm:8px;--ux-radius:12px;--ux-radius-lg:16px;
+  /* 嵌入态底部补偿：index 壳层内嵌时由宿主注入实际 TabBar 高度；
+     独立打开时回退 0px，模块自身安全区逻辑照旧（2026-09-16 遮挡修复） */
+  --embed-bottom:0px;
+  --embed-top:0px;
+}
+::selection{background:rgba(20,132,83,.24);}
+*{scrollbar-width:thin;scrollbar-color:rgba(20,132,83,.35) transparent;}
+::-webkit-scrollbar{width:8px;height:8px;}
+::-webkit-scrollbar-thumb{background:rgba(20,132,83,.30);border-radius:99px;border:2px solid transparent;background-clip:content-box;}
+::-webkit-scrollbar-track{background:transparent;}
+button,a,[role="button"],input,select,textarea,label{-webkit-tap-highlight-color:transparent;}
+button:not(:disabled){transition:transform .15s ease,box-shadow .2s ease,filter .2s ease,background-color .2s ease,border-color .2s ease,opacity .2s ease;}
+button:active:not(:disabled){transform:translateY(1px);}
+:focus{outline:none;}
+:focus-visible{outline:2.5px solid #148453;outline-offset:2px;border-radius:6px;}
+@media (prefers-reduced-motion:reduce){
+  *,*::before,*::after{animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important;scroll-behavior:auto!important;}
+}
+/* ---- 深色模式：滚动条随主题（浅色令牌在 :root，各模块 dark 规则见下）---- */
+html[data-theme="dark"] *{scrollbar-color:rgba(255,255,255,.22) transparent;}
+html[data-theme="dark"] ::-webkit-scrollbar-thumb{background:rgba(255,255,255,.20);border:2px solid transparent;background-clip:content-box;}
+html[data-theme="dark"] ::selection{background:rgba(31,165,106,.34);}
+
+/* ---- UX Polish v1 · 深色模式兜底层（2026-09-16）----
+   用户反馈：深色模式只有边框在变、美妆与医疗未覆盖、深色下部分文字看不清。
+   本层为「无令牌体系」的模块补最小暗色变量，并统一修高对比度问题。 */
+html[data-theme="dark"]{
+  color-scheme:dark;
+  --bg:#0F1A14;--bg-card:#162420;--bg-elev:#1B2E26;
+  --text:#E8F3EE;--text2:#9CB3A7;--text3:#6E8479;
+  --border:#24402F;--border-strong:#2E5240;
+  --primary-soft:#1A3D2A;--primary-mist:#132C21;
+  --shadow:0 4px 14px rgba(0,0,0,.42);--shadow-lg:0 14px 36px rgba(0,0,0,.55);
+}
+html[data-theme="dark"] body{background:var(--bg);color:var(--text);}
+/* 输入类：深色下浏览器默认白底白字，必须显式覆盖 */
+html[data-theme="dark"] input,
+html[data-theme="dark"] select,
+html[data-theme="dark"] textarea{
+  background:var(--bg-elev);color:var(--text);border-color:var(--border);
+}
+html[data-theme="dark"] input::placeholder,
+html[data-theme="dark"] textarea::placeholder{color:var(--text3);}
+/* 深色下「浅色底 + 浅色字」组合的兜底可读性修复 */
+html[data-theme="dark"] .bg-white,
+html[data-theme="dark"] .bg-gray-50,
+html[data-theme="dark"] .bg-gray-100,
+html[data-theme="dark"] .bg-slate-50,
+html[data-theme="dark"] .bg-slate-100{background:var(--bg-card)!important;}
+html[data-theme="dark"] .text-gray-900,
+html[data-theme="dark"] .text-gray-800,
+html[data-theme="dark"] .text-slate-900,
+html[data-theme="dark"] .text-slate-800,
+html[data-theme="dark"] .text-black{color:var(--text)!important;}
+html[data-theme="dark"] .text-gray-700,
+html[data-theme="dark"] .text-gray-600,
+html[data-theme="dark"] .text-slate-700,
+html[data-theme="dark"] .text-slate-600{color:#C3D6CB!important;}
+html[data-theme="dark"] .text-gray-500,
+html[data-theme="dark"] .text-gray-400,
+html[data-theme="dark"] .text-slate-500,
+html[data-theme="dark"] .text-slate-400{color:var(--text2)!important;}
+html[data-theme="dark"] .border-gray-100,
+html[data-theme="dark"] .border-gray-200,
+html[data-theme="dark"] .border-gray-300,
+html[data-theme="dark"] .border-slate-200{ border-color:var(--border)!important;}
+
+/* ---- 壳层顶栏响应式收纳（2026-09-17 响应式审计）----
+   768 档 actions 溢出 +114px：先收节日/节气 chip；320 档 +47px：再收时钟；
+   触屏设备补齐 40px+ 触控目标（bk-btn/theme-btn/mega-btn/mod-tab）。 */
+@media (max-width:960px){
+  .actions .sys-clock .sc-tag{display:none;}
+}
+@media (max-width:760px){
+  .actions .net-status{display:none;}
+  .actions{gap:7px;}
+}
+@media (max-width:480px){
+  .actions .sys-clock{display:none;}
+}
+@media (pointer:coarse){
+  .bk-btn{min-width:40px;min-height:40px;}
+  .theme-btn{min-width:42px;min-height:42px;}
+  #megaBtn{min-width:42px;min-height:42px;}
+  .mod-tab{min-height:44px;}
+}
+/*__UX_POLISH_END__*/</style>
 </head>
 <body>
 
@@ -492,6 +642,9 @@ button:disabled:active{transform:none;}
     </div>
   </div>
 
+  
+  
+  <nav class="shell-crumb" id="shellCrumb" aria-label="当前位置"><span class="cr-item cr-root link" onclick="switchModule('home')" title="回到 CC 之家">客舱小助手</span><span class="cr-sep cr-sep-first">›</span><span class="cr-item cr-mod" id="crumbMod">你问我答</span><span class="cr-sep" id="crumbSep2" style="display:none">›</span><span class="cr-item cr-sub" id="crumbSub" style="display:none"></span></nav>
   <nav class="module-tabs" id="moduleTabs">
     <button class="mod-tab" data-mod="home" onclick="switchModule('home')">🏠 CC 之家</button>
     <button class="mod-tab active" data-mod="qa" onclick="switchModule('qa')">💬 你问我答</button>
@@ -508,7 +661,10 @@ button:disabled:active{transform:none;}
   </nav>
 
   <div class="actions">
-    <div class="net-status" id="netStatus"><span class="net-dot"></span><span id="netText">在线</span></div>
+<button class="mega-btn" id="megaBtn" onclick="toggleMegaMenu(event)" title="全部应用（巨型菜单）" aria-haspopup="true" aria-expanded="false"><svg width="15" height="15" viewBox="0 0 15 15" fill="currentColor" aria-hidden="true"><rect x="0" y="0" width="6.4" height="6.4" rx="1.6"/><rect x="8.6" y="0" width="6.4" height="6.4" rx="1.6"/><rect x="0" y="8.6" width="6.4" height="6.4" rx="1.6"/><rect x="8.6" y="8.6" width="6.4" height="6.4" rx="1.6"/></svg></button>
+    
+    
+        <div class="net-status" id="netStatus"><span class="net-dot"></span><span id="netText">在线</span></div>
     <button class="bk-btn" id="packsBadge" style="display:none" onclick="openPacksModal()" title="有新的数据包可安装">📦<span>新数据包</span></button>
     <button class="bk-btn" onclick="openBackupModal()" title="数据备份 / 恢复">💾<span>备份</span></button>
     <button class="theme-btn" id="themeBtn" onclick="cycleTheme()" title="切换主题">☀️</button>
@@ -2604,6 +2760,316 @@ try{
   window.addEventListener('resize', function(){ refreshEmbedVars(); });
   window.addEventListener('orientationchange', function(){ setTimeout(refreshEmbedVars, 260); });
 }catch(e){}
+</script>
+
+<script>
+/*__NAV_DESIGN_20260917_JS__BEGIN —— 导航升级（源 index.html，勿直接改产物）*/
+(function(){
+'use strict';
+if(window.__CC_NAV_DESIGN__) return; window.__CC_NAV_DESIGN__ = true;
+
+/* ---- 12 模块元数据（#5 巨型菜单 / #4 二级下拉共用；subs 为可深跳子入口） ---- */
+var MODS = {
+  home:        {name:'CC 之家',   icon:'🏠', group:'乘务服务', desc:'24 位角色乘务员房间、互动对话与钢琴角。', subs:[]},
+  qa:          {name:'你问我答',  icon:'💬', group:'乘务服务', desc:'知识库问答：跨库强证据、联想记忆与 AI 兜底。', subs:[]},
+  quiz:        {name:'培训考核',  icon:'📚', group:'训练成长', desc:'题库练习、模拟考核与错题回顾。', subs:[]},
+  performance: {name:'绩效管理',  icon:'📊', group:'训练成长', desc:'个人与分队绩效视图。', subs:[]},
+  beauty:      {name:'美妆话术',  icon:'💄', group:'训练成长', desc:'跨境美妆产品库与销售话术工作台。', subs:[
+                 {k:'browse',label:'产品浏览'},{k:'recommend',label:'需求推荐'},{k:'skin',label:'肤质筛选'},{k:'compare',label:'同品比拼'},
+                 {k:'script',label:'话术生成'},{k:'scriptLib',label:'话术库管理'},{k:'aiChat',label:'AI 对话练习'},
+                 {k:'competitor',label:'竞品分析'},{k:'customer',label:'客户管理'},{k:'favorites',label:'我的收藏'}]},
+  risk:        {name:'风险预警',  icon:'⚠️', group:'运营管理', desc:'总部—分队—板块三级风险驾驶舱。', subs:[]},
+  medical:     {name:'医疗急救',  icon:'🚑', group:'乘务服务', desc:'机上医疗事件处置速查。', subs:[]},
+  daily:       {name:'日常问题',  icon:'❓', group:'乘务服务', desc:'销售·配送·病假·体检·电子发票速查。', subs:[]},
+  manual:      {name:'手册奖惩',  icon:'📕', group:'运营管理', desc:'《客舱服务部管理手册》奖惩条款速查。', subs:[
+                 {k:'query',label:'扣分查询'},{k:'scores',label:'分数说明'},{k:'promo',label:'晋级降级'},{k:'fav',label:'我的收藏'}]},
+  report:      {name:'事件报告',  icon:'🗂', group:'运营管理', desc:'机上事件结构化上报。', subs:[]},
+  kbadmin:     {name:'库管理',    icon:'📇', group:'运营管理', desc:'知识库 / 商品库维护与数据包中心。', subs:[]},
+  issues:      {name:'问题反馈',  icon:'🐞', group:'运营管理', desc:'向开发者反馈问题与建议。', subs:[]}
+};
+var GROUPS = ['乘务服务','训练成长','运营管理'];
+
+function curMod(){ var m=''; try{ m = currentMod; }catch(e){ try{ m = window.currentMod; }catch(e2){} } return m||''; }
+
+/* ---------- #3 面包屑 ---------- */
+function setCrumbSub(text){
+  var el = document.getElementById('crumbSub');
+  var sep = document.getElementById('crumbSep2');
+  if(!el) return;
+  if(text){ el.textContent = text; el.style.display = ''; if(sep) sep.style.display = ''; }
+  else { el.textContent = ''; el.style.display = 'none'; if(sep) sep.style.display = 'none'; }
+}
+function syncCrumb(modId){
+  var el = document.getElementById('crumbMod');
+  if(!el) return;
+  var m = MODS[modId];
+  el.textContent = m ? (m.icon + ' ' + m.name) : modId;
+  setCrumbSub('');   /* 子页由 navJumpTo 延迟补写（等页签观察者微任务结束后） */
+}
+function subLabel(modId, view){
+  var m = MODS[modId]; if(!m) return '';
+  for(var i=0;i<m.subs.length;i++){ if(m.subs[i].k === view) return m.subs[i].label; }
+  return '';
+}
+/* 模块切换 → 面包屑与收缩态同步（MutationObserver 监听页签 active 变化，不动壳层原函数） */
+function watchTabs(){
+  var tabs = document.getElementById('moduleTabs');
+  if(!tabs || !window.MutationObserver) { setTimeout(syncInit, 600); return; }
+  var mo = new MutationObserver(function(){
+    var act = document.querySelector('.mod-tab.active');
+    if(act) syncCrumb(act.getAttribute('data-mod')||'');
+  });
+  mo.observe(tabs, {attributes:true, attributeFilter:['class'], subtree:true});
+  syncInit();
+}
+function syncInit(){
+  var act = document.querySelector('.mod-tab.active');
+  if(act) syncCrumb(act.getAttribute('data-mod')||'');
+  setTimeout(function(){ /* 模块切换后滚动位置恢复完毕再校准收缩态 */
+    var sc = activeScrollY();
+    document.documentElement.classList.toggle('nav-scrolled', sc > 64);
+  }, 380);
+}
+
+/* ---------- #4 二级下拉（桌面精确指针设备） ---------- */
+var dropEl = null, dropHideTimer = null, dropShowTimer = null;
+function hoverCapable(){
+  try{ return window.matchMedia('(hover: hover) and (pointer: fine)').matches && window.innerWidth > 1100; }
+  catch(e){ return false; }
+}
+function buildDrop(){
+  if(dropEl) return dropEl;
+  dropEl = document.createElement('div');
+  dropEl.className = 'nav-drop'; dropEl.id = 'navDrop';
+  dropEl.addEventListener('mouseenter', function(){ if(dropHideTimer){ clearTimeout(dropHideTimer); dropHideTimer = null; } });
+  dropEl.addEventListener('mouseleave', scheduleDropHide);
+  /* 子入口点击 → 深跳（事件委托；必须在 buildDrop 内绑定——dropEl 首次 hover 才存在） */
+  dropEl.addEventListener('click', function(ev){
+    var b = ev.target.closest ? ev.target.closest('.nd-sub') : null;
+    if(!b) return;
+    var mod = b.getAttribute('data-mod'), view = b.getAttribute('data-view');
+    dropEl.classList.remove('show');
+    if(view) navJumpTo(mod, view); else { try{ switchModule(mod); }catch(e){} }
+  });
+  document.body.appendChild(dropEl);
+  return dropEl;
+}
+function showDropFor(tab){
+  var id = tab.getAttribute('data-mod')||''; var m = MODS[id];
+  if(!m) return;
+  var d = buildDrop();
+  var h = '<div class="nd-name">' + m.icon + ' ' + m.name + '</div>';
+  h += '<div class="nd-desc">' + m.desc + '</div>';
+  if(m.subs && m.subs.length){
+    for(var i=0;i<m.subs.length;i++){
+      h += '<button class="nd-sub" data-mod="' + id + '" data-view="' + m.subs[i].k + '">' + m.subs[i].label + '<span style="margin-left:auto;opacity:.55">›</span></button>';
+    }
+  } else {
+    h += '<button class="nd-sub" data-mod="' + id + '" data-view="">进入模块<span style="margin-left:auto;opacity:.55">›</span></button>';
+  }
+  d.innerHTML = h;
+  var r = tab.getBoundingClientRect();
+  var left = Math.min(r.left, window.innerWidth - 316);
+  d.style.left = Math.max(12, left) + 'px';
+  d.style.top = (r.bottom + 10) + 'px';
+  d.classList.add('show');
+}
+function scheduleDropHide(){
+  if(dropHideTimer) clearTimeout(dropHideTimer);
+  dropHideTimer = setTimeout(function(){ if(dropEl) dropEl.classList.remove('show'); }, 240);
+}
+function bindDrops(){
+  if(!hoverCapable()) return;
+  var tabs = document.querySelectorAll('.mod-tab');
+  for(var i=0;i<tabs.length;i++){
+    (function(t){
+      t.addEventListener('mouseenter', function(){
+        if(dropShowTimer) clearTimeout(dropShowTimer);
+        dropShowTimer = setTimeout(function(){ showDropFor(t); }, 90);
+      });
+      t.addEventListener('mouseleave', function(){
+        if(dropShowTimer){ clearTimeout(dropShowTimer); dropShowTimer = null; }
+        scheduleDropHide();
+      });
+    })(tabs[i]);
+  }
+  document.addEventListener('click', function(ev){
+    if(dropEl && dropEl.classList.contains('show')){
+      var inDrop = false;
+      try{ inDrop = dropEl.contains(ev.target) || ev.target.closest && ev.target.closest('.mod-tab') !== null; }catch(e){}
+      if(!inDrop) dropEl.classList.remove('show');
+    }
+  });
+}
+
+/* ---------- #5 巨型菜单 ---------- */
+var megaMask = null, megaPanel = null;
+function buildMega(){
+  if(megaPanel) return megaPanel;
+  megaMask = document.createElement('div');
+  megaMask.className = 'mega-mask'; megaMask.id = 'megaMask';
+  megaMask.addEventListener('click', closeMegaMenu);
+  megaPanel = document.createElement('div');
+  megaPanel.className = 'mega-panel'; megaPanel.id = 'megaPanel';
+  megaPanel.setAttribute('role', 'dialog'); megaPanel.setAttribute('aria-label', '全部应用');
+  var cm = curMod();
+  var h = '<div class="mega-head"><div class="mega-title">⊞ 全部应用 · ' + GROUPS.length + ' 大组 ' + Object.keys(MODS).length + ' 个模块</div>';
+  h += '<button class="modal-x" id="megaCloseX" title="关闭" aria-label="关闭">✕</button></div>';
+  for(var g=0; g<GROUPS.length; g++){
+    var grp = GROUPS[g];
+    h += '<div class="mega-group-label">' + grp + '</div><div class="mega-grid">';
+    for(var id in MODS){
+      var m = MODS[id]; if(m.group !== grp) continue;
+      h += '<div class="mega-card' + (id === cm ? ' active' : '') + '" data-mod="' + id + '">';
+      h += '<div class="mc-top"><span class="mc-ic">' + m.icon + '</span>' + m.name + '</div>';
+      h += '<div class="mc-desc">' + m.desc + '</div>';
+      if(m.subs && m.subs.length){
+        h += '<div class="mega-subs">';
+        for(var i=0;i<m.subs.length;i++){
+          h += '<button class="mega-sub" data-mod="' + id + '" data-view="' + m.subs[i].k + '">' + m.subs[i].label + '</button>';
+        }
+        h += '</div>';
+      }
+      h += '</div>';
+    }
+    h += '</div>';
+  }
+  h += '<div class="mega-foot"><button class="m-btn ghost" id="megaCloseFoot" style="max-width:220px">收起面板</button></div>';
+  megaPanel.innerHTML = h;
+  document.body.appendChild(megaMask);
+  document.body.appendChild(megaPanel);
+  /* 关闭三路径：标题栏 ✕ + 遮罩点按 + 底部「收起面板」（另支持 Esc） */
+  var x = document.getElementById('megaCloseX'); if(x) x.addEventListener('click', closeMegaMenu);
+  var ft = document.getElementById('megaCloseFoot'); if(ft) ft.addEventListener('click', closeMegaMenu);
+  megaPanel.addEventListener('click', function(ev){
+    if(ev.target.closest){
+      var sub = ev.target.closest('.mega-sub');
+      if(sub){ ev.stopPropagation(); closeMegaMenu(); navJumpTo(sub.getAttribute('data-mod'), sub.getAttribute('data-view')); return; }
+      var card = ev.target.closest('.mega-card');
+      if(card){ closeMegaMenu(); var id = card.getAttribute('data-mod'); try{ switchModule(id); }catch(e){} }
+    }
+  });
+  return megaPanel;
+}
+function openMegaMenu(){
+  buildMega();
+  var cm = curMod();
+  var cards = megaPanel.querySelectorAll('.mega-card');
+  for(var i=0;i<cards.length;i++){ cards[i].classList.toggle('active', cards[i].getAttribute('data-mod') === cm); }
+  if(dropEl) dropEl.classList.remove('show');
+  megaMask.classList.add('show');
+  megaPanel.classList.add('show');
+  var btn = document.getElementById('megaBtn'); if(btn) btn.setAttribute('aria-expanded','true');
+}
+function closeMegaMenu(){
+  if(megaMask) megaMask.classList.remove('show');
+  if(megaPanel) megaPanel.classList.remove('show');
+  var btn = document.getElementById('megaBtn'); if(btn) btn.setAttribute('aria-expanded','false');
+}
+function toggleMegaMenu(ev){
+  if(ev && ev.stopPropagation) ev.stopPropagation();
+  if(megaPanel && megaPanel.classList.contains('show')) closeMegaMenu(); else openMegaMenu();
+}
+window.toggleMegaMenu = toggleMegaMenu;
+window.closeMegaMenu = closeMegaMenu;
+
+/* ---------- 深跳：切换模块并向 iframe 内模块发 cc:nav-jump ---------- */
+function navJumpTo(mod, view){
+  try{ switchModule(mod); }catch(e){ return; }
+  var label = subLabel(mod, view) || view;
+  /* 子页补写两次：立即 + 80ms 后（页签 MutationObserver 微任务会先清一次，之后补回） */
+  setCrumbSub(label);
+  setTimeout(function(){
+    try{
+      var act = document.querySelector('.mod-tab.active');
+      if(act && act.getAttribute('data-mod') === mod) setCrumbSub(label);
+    }catch(e){}
+  }, 80);
+  var tries = 0;
+  (function fire(){
+    tries++;
+    var f = null; try{ f = document.getElementById('frame-' + mod); }catch(e){}
+    if(f && f.contentWindow){
+      try{ f.contentWindow.postMessage({type:'cc:nav-jump', view:view, mod:mod}, '*'); }catch(e){}
+      if(tries < 3) setTimeout(fire, 500);   /* 模块脚本可能晚就绪，补发 */
+    } else if(tries < 20){ setTimeout(fire, 400); }
+  })();
+}
+
+/* ---------- 模块子页上报通道（保留：模块可 postMessage {type:'cc:crumb', mod, text}） ---------- */
+window.addEventListener('message', function(e){
+  try{
+    var d = e.data || {};
+    if(d.type === 'cc:crumb' && typeof d.text === 'string' && d.text){
+      var act = document.querySelector('.mod-tab.active');
+      if(act && (!d.mod || d.mod === act.getAttribute('data-mod'))) setCrumbSub(d.text);
+    }
+  }catch(err){}
+});
+
+/* ---------- #9 滚动收缩：绑定活动模块 iframe 滚动（同源，含 .main-scroll-container） ---------- */
+function activeScrollY(){
+  try{
+    var act = document.querySelector('.sys-wrap.active'); if(!act) return 0;
+    var f = act.querySelector('.sys-frame'); if(!f) return 0;
+    var y = 0;
+    try{ y = f.contentWindow ? (f.contentWindow.pageYOffset || 0) : 0; }catch(e){}
+    try{
+      var doc = f.contentDocument;
+      if(doc){
+        var sc = doc.querySelector('.main-scroll-container');
+        if(sc && sc.scrollTop) y = sc.scrollTop;
+      }
+    }catch(e){}
+    return y;
+  }catch(e){ return 0; }
+}
+function bindFrameScrolls(){
+  setInterval(function(){
+    var act = document.querySelector('.sys-wrap.active'); if(!act) return;
+    var f = act.querySelector('.sys-frame'); if(!f || !f.contentWindow) return;
+    if(f.__navScrollBound) return;
+    f.__navScrollBound = true;
+    var w = f.contentWindow;
+    var onScroll = function(){
+      try{
+        var y = w.pageYOffset || 0;
+        var doc = null; try{ doc = f.contentDocument; }catch(e){}
+        if(doc){
+          var sc = doc.querySelector('.main-scroll-container');
+          if(sc && sc.scrollTop) y = sc.scrollTop;
+        }
+        if(y > 64) document.documentElement.classList.add('nav-scrolled');
+        else if(y < 12) document.documentElement.classList.remove('nav-scrolled');
+      }catch(e){}
+    };
+    try{ w.addEventListener('scroll', onScroll, {passive:true}); }catch(e){}
+    /* scroll 事件不冒泡：容器滚动模块必须直接绑 .main-scroll-container */
+    try{
+      var doc = f.contentDocument;
+      if(doc){
+        var sc = doc.querySelector('.main-scroll-container');
+        if(sc) sc.addEventListener('scroll', onScroll, {passive:true});
+      }
+    }catch(e){}
+  }, 900);
+}
+
+/* ---------- Esc 统一关闭 ---------- */
+document.addEventListener('keydown', function(e){
+  if(e && (e.key === 'Escape' || e.keyCode === 27)){ closeMegaMenu(); if(dropEl) dropEl.classList.remove('show'); }
+});
+window.addEventListener('resize', function(){ if(dropEl) dropEl.classList.remove('show'); });
+
+function init(){
+  watchTabs();
+  bindDrops();
+  bindFrameScrolls();
+}
+if(document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init);
+else init();
+})();
+/*__NAV_DESIGN_20260917_JS__END*/
 </script>
 </body>
 </html>

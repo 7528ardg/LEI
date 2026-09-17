@@ -199,10 +199,18 @@ html[data-theme="dark"] .border-slate-200{ border-color:var(--border)!important;
 /* manual：小字下限 + 手机档触控目标 */
 small{font-size:12px;}
 .f-label,#f-cat-cnt{font-size:11.5px;}
+/* manual 响应式专项（2026-09-17 审计）：收藏星标 21x25 触控过小；
+   tab 行 320/375 档溢出改紧凑内滚；表单 15/12px 触发 iOS 缩放。 */
 @media (max-width:760px){
-  .m-tab{min-height:40px;}
+  .m-tab{min-height:40px;padding:8px 10px;font-size:.78rem;}
   .chip{min-height:34px;}
-  input#kw{min-height:42px;font-size:15px;}
+  input#kw{min-height:42px;font-size:16px!important;}
+  #sortSel{min-height:42px;font-size:16px!important;}
+  .fav{min-width:34px;min-height:34px;font-size:15px;}
+  .expand{min-height:36px;padding:6px 10px;}
+}
+@media (max-width:900px){
+  input#kw,#sortSel{font-size:16px!important;}
 }
 /*__UX_POLISH_END__*/</style>
 </head>
@@ -803,6 +811,20 @@ button:active,[onclick]:active,a:active,summary:active,[role=button]:active{filt
   if(document.readyState==='loading'){document.addEventListener('DOMContentLoaded',safe)}else{safe()}
   addEventListener('load',safe);
   setTimeout(safe,800);
+})();
+</script>
+<script>/*__NAV_BRIDGE_20260917__ 深跳桥：壳层 postMessage(cc:nav-jump) → 切换手册视图（幂等）*/
+(function(){
+  if(window.__ccNavBridge) return; window.__ccNavBridge = true;
+  window.ccGoView = function(v){
+    try{
+      var btn = document.querySelector('.m-tab[data-v="' + String(v||'') + '"]');
+      if(btn) btn.click();
+    }catch(e){}
+  };
+  window.addEventListener('message', function(e){
+    try{ var d = e.data||{}; if(d.type === 'cc:nav-jump' && d.view){ window.ccGoView(d.view); } }catch(err){}
+  });
 })();
 </script>
 </body>

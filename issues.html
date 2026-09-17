@@ -155,6 +155,12 @@ html[data-theme="dark"] .border-gray-100,
 html[data-theme="dark"] .border-gray-200,
 html[data-theme="dark"] .border-gray-300,
 html[data-theme="dark"] .border-slate-200{ border-color:var(--border)!important;}
+
+/* issues：表单字号下限（2026-09-17 审计：14px 会触发 iOS 聚焦缩放；含 768 平板档） */
+@media (max-width:900px){
+  #issLoc,#issMsg{font-size:16px!important;}
+  select,textarea,input{font-size:16px!important;}
+}
 /*__UX_POLISH_END__*/</style>
 </head>
 <body>

@@ -1307,6 +1307,34 @@ html[data-theme="dark"] .lv-mid,
 html[data-theme="dark"] .risk-mid{color:#FFB95E!important;}
 html[data-theme="dark"] .lv-low,
 html[data-theme="dark"] .risk-low{color:#5FE0A6!important;}
+
+/* ---- risk-lite 响应式专项（2026-09-17 审计：手机/平板页面级横向溢出 272~349px）----
+   根因①：顶栏右侧操作组（刷新/黑白切换/简报/天气…）不换行，把布局视口撑到 669px；
+   根因②：file:// 协议横幅长文案不换行；根因③：小按钮/冲突弹窗越界。 */
+@media (max-width:1024px){
+  .topbar{flex-wrap:wrap;height:auto;min-height:var(--topbar-h,52px);row-gap:4px;padding-top:6px;padding-bottom:6px;}
+  .topbar .right{flex-wrap:wrap;row-gap:6px;justify-content:flex-end;}
+  .weather-update-panel{max-width:min(92vw,360px);}
+}
+@media (max-width:900px){
+  #fileProtocolBanner{padding:8px 12px!important;font-size:12px!important;}
+  #fileProtocolBanner span{white-space:normal!important;overflow-wrap:anywhere!important;}
+  #fileProtocolBanner button{margin-left:8px!important;margin-top:4px;}
+  #weatherFreqSelect,#routeBaseSelect,#mapRouteSelect,
+  #settingsBriefingTime,#settingsFeishuUserId{font-size:16px!important;}
+  select,textarea,
+  input[type="text"],input[type="time"]{font-size:16px!important;}
+}
+@media (max-width:760px){
+  .sched-check-modal{width:min(92vw,560px)!important;max-width:92vw!important;}
+  /* 关闭钮/翻页钮/无类名小按钮统一抬触控目标（审计实测 12~32px 难点准） */
+  .btn-close{min-width:38px;min-height:38px;font-size:18px;}
+  .btn{min-width:38px;min-height:36px;}
+  button{min-height:36px;}
+  .drawer .head .btn-toggle{min-width:38px;min-height:38px;}
+  .icon-btn{min-width:40px;min-height:40px;}
+  .leaflet-control-zoom a{width:34px!important;height:34px!important;line-height:30px!important;font-size:18px;}
+}
 /*__UX_POLISH_END__*/</style>
 </head>
 <body>
