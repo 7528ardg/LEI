@@ -940,6 +940,7 @@ async function _loadModule(id){
 
 /* ===================== 模块切换（懒加载 + 缓存 + 解压） ===================== */
 let currentMod = null;
+const _loadBusy = {};
 const _modScroll = {};
 
 /* ===== 内嵌模式样式：隐藏各模块自带的顶栏/侧栏，避免"双导航栏" =====
@@ -1044,6 +1045,10 @@ function switchModule(id){
   wrap.classList.add('active');
 
   if(!_frames[id]){
+    // 防重入：同一模块加载中再次触发直接忽略，避免对同一 iframe 并发 document.write
+    // 造成全局重复声明（如 quiz 模块的 const sampleQuestions）或内容串写
+    if(_loadBusy[id]) return;
+    _loadBusy[id] = true;
     const loader = document.getElementById('loader-'+id);
     const frame = document.getElementById('frame-'+id);
     _loadModule(id).then(function(html){
@@ -1056,7 +1061,7 @@ function switchModule(id){
       if(loader) loader.querySelector('.sl-text').textContent = _IS_FILE
         ? '加载失败：请把 mods 文件夹与本页放在同一目录'
         : '加载失败，请刷新重试';
-    });
+    }).then(function(){ _loadBusy[id] = false; });
   } else if(_modScroll[id] != null){
     const frame = _frames[id];
     requestAnimationFrame(function(){
