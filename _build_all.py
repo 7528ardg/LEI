@@ -25,6 +25,12 @@ BUILD_STEPS = [
     (u'同步时节引擎(单一来源)', u'python _sync_season.py --check'),
     (u'同步日期匹配引擎(单一来源)', u'python _sync_date_match.py --check'),
     (u'同步大撤专项(2源)', u'python _sync_dache.py --check'),
+    (u'同步CBT练习场景数据(quiz单一来源)', u'python _sync_cbt.py'),
+    (u'培训考核题库 = 原题库 + CBT练习独立分类(幂等)', u'python _apply_cbt_bank_20260918.py'),
+    (u'注入CBT分区/CBT答题板块(幂等)', u'python _apply_cbt_scene_20260918.py'),
+    (u'扩展成就系统(CBT题库,幂等)', u'python _apply_cbt_achv_20260918.py'),
+    (u'你问我答·接入CBT题库资源库(幂等)', u'python _sync_qa_cbt.py'),
+    (u'你问我答·天气意图误吞手册问法修复', u'python _apply_qa_weather_guard_20260918.py'),
     (u'注入导航升级(#1/#3/#4/#5/#9,幂等)', u'python _apply_nav_20260917.py'),
     (u'同步壳层弹窗引擎(index→两模板)', u'python _sync_shell_js.py'),
     (u'构建 kb-admin(库管理)', u'python _build_kbadmin.py'),
@@ -56,6 +62,12 @@ VERIFY_SCRIPTS = [
     u'node _verify_ccsheet_static.js',  # 十种弹窗交互引擎静态守护（index/两模板：CCSheet/动效层/--embed-bottom/深色打通/更多面板走引擎）
     u'node _verify_nav_20260917.js',  # 导航升级守护（三壳一致/12模块元数据/深跳桥/限高内滚+关闭三路径）
     u'python _apply_ux_polish.py --check',  # UX 美化标记块在位（14 个模块/模板）
+    u'python _sync_cbt.py --check',         # CBT 练习场景数据 = docs/_cbt_kb.js 单一来源
+    u'python _apply_cbt_bank_20260918.py --check',   # 培训考核题库 = 原题库 2181 + CBT练习 785（独立分类）
+    u'python _apply_cbt_scene_20260918.py --check',  # 培训考核 CBT练习分区 + 大撤应急 CBT 答题板块
+    u'python _apply_cbt_achv_20260918.py --check',   # CBT 题库专项成就（15 枚）
+    u'python _sync_qa_cbt.py --check',               # 你问我答 CBT题库 资源库 = docs/_kb_cbt_new.js
+    u'python _apply_qa_weather_guard_20260918.py --check',  # 天气意图不误吞手册/题库问法
 ]
 
 # 全量语法检查覆盖：全部模块源 + 三外壳/产物（排除 .tmp_ 调试文件）

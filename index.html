@@ -1797,6 +1797,32 @@ function restoreModuleScroll(id){
   });
 }
 
+/* ===== 模块空闲预加载（2026-09-17 切换提速）：后台提前请求各模块 iframe，用户点击时已缓存秒开 ===== */
+var _pwOnlineStarted = false;
+function _startOnlinePrewarm(){
+  if(_pwOnlineStarted) return;
+  _pwOnlineStarted = true;
+  var ids = ['home','quiz','performance','beauty','risk','medical','daily','manual','report','kbadmin','issues'];
+  var i = 0;
+  (function next(){
+    while(i < ids.length){
+      var id = ids[i++];
+      if(_loaded[id]) continue;
+      var f = document.getElementById('frame-'+id);
+      if(!f) continue;
+      var timer = setTimeout(next, 10000);   // 单模块 10s 未完成则跳过，避免阻塞队列
+      f.onload = function(){
+        clearTimeout(timer);
+        _loaded[id] = true;
+        setTimeout(next, 80);
+      };
+      try{ f.src = modUrl(id); }catch(e){ clearTimeout(timer); next(); }
+      return;
+    }
+  })();
+}
+setTimeout(_startOnlinePrewarm, 900);
+
 /* ===================== 主题 ===================== */
 let hostTheme = 'light';
 const ALL_MODS = ['qa','home','quiz','performance','beauty','risk','medical','daily','manual','report','kbadmin','issues'];
@@ -2404,6 +2430,7 @@ var css = [
 '.mod-tab:active,.bk-btn:active,.theme-btn:active{transform:scale(.96);}',
 '.logout-btn{margin-left:auto;padding:9px 14px;border:1px solid var(--danger,#E64A19);background:transparent;color:var(--danger,#E64A19);border-radius:12px;font-weight:700;font-size:.84rem;cursor:pointer;transition:all .2s;font-family:var(--font-sans);}',
 '.logout-btn:hover{background:var(--danger-soft,#FEE7DE);}',
+'.is-user .mod-tab[data-mod="risk"],.is-user .m-sheet-item[data-mod="risk"],.is-user [data-mod="risk"],.is-user [onclick*="switchModule(\'risk\')"]{display:none!important}',
 '@media(max-width:720px){.auth-card{padding:24px 20px 20px}.tour-card{padding:22px 18px 18px}}'
 ].join('\n');
 
@@ -2507,10 +2534,38 @@ window.shellAuthSubmit = function(){
     finishAuth(found);
   }
 };
+/* ---------- 板块权限：风险预警仅管理员可见可用 ---------- */
+function sessionRole(){
+  var s = readSession();
+  if(!s) return '';
+  return (s.role === 'admin' || s.工号 === ADMIN.工号) ? 'admin' : 'user';
+}
+window.shellIsAdmin = function(){ return sessionRole() === 'admin'; };
+window.shellCanMod = function(id){
+  return !(String(id) === 'risk' && !window.shellIsAdmin());
+};
+function applyPermUI(){
+  var isAdmin = window.shellIsAdmin();
+  try{ document.body.classList.toggle('is-user', !isAdmin); }catch(e){}
+  if(!window.__permWrapped && typeof window.switchModule === 'function'){
+    window.__permWrapped = true;
+    var _origMod = window.switchModule;
+    window.switchModule = function(id){
+      if(window.shellCanMod && !window.shellCanMod(id)){
+        try{ if(typeof toast === 'function') toast('⚠️ 风险预警仅管理员可用'); }catch(e){}
+        console.warn('[权限] 非管理员访问受限板块被拦截:', id);
+        return;
+      }
+      return _origMod.apply(window, arguments);
+    };
+  }
+}
+
 function finishAuth(user){
-  saveSession({ 工号: user.工号, 姓名: user.姓名, 手机号: user.手机号 || '' });
+  saveSession({ 工号: user.工号, 姓名: user.姓名, 手机号: user.手机号 || '', role: (user.工号 === ADMIN.工号 ? 'admin' : 'user') });
   if(authOverlay){ authOverlay.style.display = 'none'; }
   updateChip();
+  applyPermUI();
   try{ var t = el('userName'); if(t && t.style) t.style.display = ''; }catch(e){}
   maybeStartTour();
   try{ if(typeof toast === 'function') toast('欢迎回来，' + user.姓名 + ' ✈️'); }catch(e){}
@@ -2635,6 +2690,7 @@ function finishTour(){
   lsSet('spring_onb_done', '1');
   if(readSession()){
     updateChip();
+    applyPermUI();
     maybeStartTour();
   } else {
     showAuth();

@@ -9171,6 +9171,489 @@ button:disabled:active{transform:none;}
   .skeleton-card{padding:14px;border-radius:var(--radius);}
 }
 </style>
+<style id="perf-import-anim-css">
+/*__PERF_IMPORT_CSS_BEGIN__*/
+/* ===== 绩效导入 · 解析动画（2026-09-18）=====
+   全部使用 transform / opacity，保证 XLSX.read 同步阻塞主线程时动画不冻结。 */
+
+/* --- 步骤圆环：当前步骤脉冲 + 图标旋转 ---
+   注意：脉冲用伪元素做，不用 box-shadow —— box-shadow 会触发重绘，
+   在 XLSX.read 阻塞主线程时反而更卡；伪元素 + transform/opacity 走合成层。 */
+@keyframes perfStepPulse{
+  0%   { transform: scale(1);    opacity:.55; }
+  70%  { transform: scale(1.75); opacity:0;   }
+  100% { transform: scale(1.75); opacity:0;   }
+}
+.import-step.active .step-icon{ position:relative; }
+.import-step.active .step-icon::after{
+  content:''; position:absolute; inset:-2px; border-radius:inherit;
+  border:2px solid #00A650; pointer-events:none;
+  animation: perfStepPulse 1.5s cubic-bezier(.4,0,.2,1) infinite;
+}
+@keyframes perfSpin{ from{ transform:rotate(0deg); } to{ transform:rotate(360deg); } }
+@keyframes perfPop{
+  0%  { transform:scale(.82); }
+  55% { transform:scale(1.12); }
+  100%{ transform:scale(1); }
+}
+
+.import-step.active .step-icon{
+  background: linear-gradient(135deg,#00A650,#22BE79) !important;
+  color:#fff !important;
+}
+.import-step.active .step-icon > i{ animation: perfSpin 1.9s linear infinite; }
+.import-step.completed .step-icon{
+  background: linear-gradient(135deg,#16a34a,#22c55e) !important;
+  animation: perfPop .34s cubic-bezier(.34,1.56,.64,1) both;
+}
+.import-step.completed .step-icon > i{ animation:none; }
+
+/* 完成态打勾：用伪元素叠加，避免改 HTML 结构 */
+.import-step.completed .step-icon{ position:relative; }
+
+/* --- 主进度条：流光（纯 CSS，用现有 .progress-bar 结构）--- */
+@keyframes perfSheen{
+  0%  { transform: translateX(-120%); }
+  100%{ transform: translateX(320%); }
+}
+#importMainProgressBar{
+  background: linear-gradient(90deg,#00A650 0%,#22BE79 50%,#00A650 100%) !important;
+  /* 用 transform 驱动的宽度过渡，避免 width 触发布局 */
+  position:relative; overflow:hidden;
+  transition: width .35s cubic-bezier(.16,1,.3,1);
+}
+#importMainProgressBar::after{
+  content:''; position:absolute; inset:0 auto 0 0; width:38%;
+  background: linear-gradient(90deg,transparent,rgba(255,255,255,.62),transparent);
+  animation: perfSheen 1.25s cubic-bezier(.4,0,.2,1) infinite;
+  pointer-events:none;
+  will-change: transform;
+}
+/* 完成/失败时停掉流光 */
+#importMainProgressBar.perf-done::after{ animation:none; opacity:0; }
+
+/* --- 扫描线：详情卡片顶部往复，表示"引擎在动" --- */
+@keyframes perfScan{
+  0%  { transform: translateX(-100%); }
+  100%{ transform: translateX(400%); }
+}
+.import-details-card{ position:relative; overflow:hidden; }
+.import-details-card::before{
+  content:''; position:absolute; left:0; top:0; height:2px; width:26%;
+  background: linear-gradient(90deg,transparent,#00A650,#7FE0AE,transparent);
+  animation: perfScan 1.6s cubic-bezier(.4,0,.2,1) infinite;
+  opacity:.9; pointer-events:none;
+}
+.import-details-card.perf-idle::before{ animation:none; opacity:0; }
+
+/* --- 日志入场：淡入 + 右移，避免"生硬弹出" --- */
+@keyframes perfLogIn{
+  from{ opacity:0; transform: translateX(-8px); }
+  to  { opacity:1; transform: translateX(0); }
+}
+#importLogArea .log-item{ animation: perfLogIn .26s cubic-bezier(.22,1,.36,1) both; }
+
+/* --- 三种解析中的图标变体（代码里切换 class 驱动）--- */
+.import-icon-container.perf-working > i{ animation: perfSpin 2.2s linear infinite; }
+.import-icon-container.perf-working{
+  box-shadow: 0 0 0 0 rgba(255,255,255,.5);
+  animation: perfStepPulse 1.6s cubic-bezier(.4,0,.2,1) infinite;
+}
+
+/* --- 剩余时间：数字变化时轻微跳动，强调"在倒计时" --- */
+@keyframes perfTick{
+  0%  { transform: translateY(0);    opacity:1; }
+  45% { transform: translateY(-3px); opacity:.62; }
+  100%{ transform: translateY(0);    opacity:1; }
+}
+#importTimeRemaining.perf-tick{ animation: perfTick .42s cubic-bezier(.4,0,.2,1); }
+
+/* --- 百分比徽标：里程碑脉冲 --- */
+@keyframes perfBadgePop{
+  0%  { transform:scale(1); }
+  50% { transform:scale(1.18); }
+  100%{ transform:scale(1); }
+}
+#importPercentBadge.perf-pop{ animation: perfBadgePop .4s cubic-bezier(.34,1.56,.64,1); }
+
+/* --- 预计剩余时间进度（细条，展示 ETA 自身收敛过程）--- */
+.perf-eta-line{
+  position:relative; height:2px; margin-top:8px; border-radius:2px;
+  background: rgba(0,0,0,.06); overflow:hidden;
+}
+.perf-eta-line > i{
+  position:absolute; inset:0 auto 0 0; width:0%; border-radius:2px;
+  background: linear-gradient(90deg,#F5B800,#00A650);
+  transition: width .45s cubic-bezier(.16,1,.3,1);
+}
+
+/* --- 降级动效 --- */
+@media (prefers-reduced-motion: reduce){
+  .import-step.active .step-icon::after,
+  .import-step.active .step-icon > i,
+  .import-step.completed .step-icon,
+  .import-icon-container.perf-working,
+  .import-icon-container.perf-working > i,
+  #importMainProgressBar::after,
+  .import-details-card::before,
+  #importLogArea .log-item,
+  #importTimeRemaining.perf-tick,
+  #importPercentBadge.perf-pop{ animation:none !important; }
+}
+/*__PERF_IMPORT_CSS_END__*/
+</style>
+<script id="perf-import-anim">
+/*__PERF_IMPORT_JS_BEGIN__*/
+/* ===== 绩效导入 · 真倒计时引擎（2026-09-18，v4 修订）=====
+   旧实现的问题：remaining = elapsed / percent * 100 - elapsed，
+   percent 是手动设定的假值 → 剩余时间剧烈跳变、100% 后仍残留。
+
+   新引擎 ImportTimer：
+     1) 阶段权重 ETA —— 每个解析阶段有经验权重，用"已完成阶段 + 当前阶段内进度"
+        估算总时长，而不是拿假 percent 外推；
+     2) 指数平滑（EMA α=0.3）—— 抑制单次抖动；
+     3) 单调不增 —— 剩余时间只允许下降，避免"剩下的时间反而变多"；
+     4) 首帧兜底 —— 尚未知道总时长时给出保守估计，不留"计算中..."空窗；
+     5) 冷启动自适应 —— 同一台设备复用历史平均时长作为初始估计；
+     6) 【v4 新增】同步阻塞窗口保护 —— XLSX.read 会冻结主线程数百 ms~数秒，
+        期间最后一次 setPercent 之后 elapsed 继续增长而 done 不变，导致
+        raw = elapsed/done 被严重高估，解冻瞬间剩余时间猛跌（实测 10%→25%
+        出现 4 秒跳变）。用 st.blockedUntil 记录"已知会阻塞"的阶段，在阻塞
+        窗口内冻结 EMA 更新，并把这段时间按阶段权重折算进 done。
+     7) 【v4 新增】驱动 5 步指示器 —— 引擎是唯一状态源，由 phaseIdx 反推
+        步骤号，避免"引擎在跑、指示器不动"的两套状态。
+   暴露 window.ImportTimer 供 updateProgress 挂钩。 */
+(function(){
+  'use strict';
+  if (window.ImportTimer) return;   // 幂等
+
+  /* 阶段权重：按历史实测的耗时占比分配（合计 1.0）
+     read   : 读文件 + 建 arrayBuffer
+     parse  : XLSX.read + sheet_to_json（同步重操作，权重最大）
+     extract: 构建绩效汇总 / 销售明细 / 事件记录
+     validate: 月份识别 + 完整性校验
+     save   : 写入 Storage
+     render : 各视图渲染刷新 */
+  var PHASES = {
+    read:     { w:0.08, label:'读取文件',  steps:[1] },
+    parse:    { w:0.40, label:'解析数据',  steps:[1,2] },
+    extract:  { w:0.22, label:'提取数据',  steps:[3,4] },
+    validate: { w:0.13, label:'验证数据',  steps:[4] },
+    save:     { w:0.10, label:'保存数据',  steps:[5] },
+    render:   { w:0.07, label:'渲染刷新',  steps:[5] }
+  };
+  var ORDER = ['read','parse','extract','validate','save','render'];
+
+  /* 阶段内进度 → 步骤指示器映射上限，用于让 5 步与 6 阶段对齐 */
+  function stepForPhase(idx, frac){
+    var name = ORDER[idx];
+    var s = PHASES[name].steps;
+    if (s.length === 1) return s[0];
+    // 多步骤阶段按 frac 在区间内插值
+    var rr = Math.min(s.length - 1, Math.floor(frac * s.length));
+    return s[rr];
+  }
+
+  /* 冷启动基线（毫秒）：设备越快衰减越快；用 localStorage 学习 */
+  var LS_KEY = 'perf_import_duration_v1';
+  function loadBaseline(){
+    try{
+      var v = parseFloat(localStorage.getItem(LS_KEY));
+      if (isFinite(v) && v > 1200 && v < 600000) return v;
+    }catch(e){}
+    return 9000;   // 首用保守值 9s
+  }
+  function saveBaseline(ms){
+    try{
+      if (!(ms > 1200 && ms < 600000)) return;
+      var old = parseFloat(localStorage.getItem(LS_KEY));
+      // EMA 学习：新旧 3:1
+      var next = isFinite(old) ? (old * 0.75 + ms * 0.25) : ms;
+      localStorage.setItem(LS_KEY, String(Math.round(next)));
+    }catch(e){}
+  }
+
+  var st = {
+    running:false, t0:0, phaseIdx:0, phaseFrac:0,
+    baseline:loadBaseline(), ema:null, lastShown:null,
+    blockedUntil:0,       // v4：阻塞窗口截止时间戳（0 表示当前无阻塞）
+    blockedPhase:-1,      // v4：阻塞发生在哪个阶段
+    lastTotal:null,       // v4.1：总时长估计单调约束
+    lastPct:0, lastStep:0
+  };
+
+  function now(){ return Date.now(); }
+  function clamp(v,a,b){ return v<a?a:(v>b?b:v); }
+
+  /* 依据"已完成阶段权重之和 + 当前阶段内进度"估算总时长 */
+  function estimateTotal(){
+    var done = 0;
+    for (var i=0;i<st.phaseIdx;i++) done += PHASES[ORDER[i]].w;
+    done += PHASES[ORDER[st.phaseIdx]].w * clamp(st.phaseFrac,0,1);
+    /* v4.3【健壮性兜底】：phaseFrac / phaseIdx 若因任何原因被污染成
+       NaN 或越界，会让 done=NaN，进而 total/remain 全部变 NaN，
+       倒计时显示冻结。这里强制把 done 拉回合法区间，作为第二道防线。 */
+    if (!isFinite(done)){ done = 0.02; }
+    done = clamp(done, 0.02, 0.999);
+    var elapsed = now() - st.t0;
+    if (!isFinite(elapsed) || elapsed < 0) elapsed = 0;
+    var raw = elapsed / done;                       // 线性外推
+
+    /* v4.1：外推值夹紧。
+       进度小时 raw = elapsed/done 会被极大放大 —— 例：5% 用了 1s → raw=20s，
+       这是纯噪声（真实总时长约 9s），若直接喂 EMA 会让开局估计虚高，
+       随后骤跌。这里按基线做 0.6x~1.8x 的合理区间夹紧。
+       下界不能压太低：夹紧值会变成"地板"，若地板过低（如 0.5x），
+       晚期 total 被地板托住，剩余时间反而降不下去。 */
+    var lo = st.baseline * 0.6, hi = st.baseline * 1.8;
+    if (isFinite(raw)) raw = clamp(raw, lo, hi);
+    else raw = st.baseline;
+
+    /* v4：阻塞窗口内不更新 EMA。
+       XLSX.read 期间 elapsed 猛增而 done 不动，若照常喂 EMA 会把总时长
+       拉高一个量级，解冻后剩余时间断崖式下跌（实测 7s→3s，跳变 4s）。
+       窗口内直接沿用上一帧估计，只把剩余时间自然递减。 */
+    var inBlock = st.blockedUntil > 0 && now() < st.blockedUntil;
+    if (!inBlock){
+      st.ema = (st.ema === null) ? raw : (st.ema * 0.7 + raw * 0.3);
+      if (st.blockedUntil > 0) st.blockedUntil = 0;   // 窗口结束
+    }
+    var ema = (st.ema === null) ? st.baseline : st.ema;
+
+    /* v4.1：置信度曲线改用 sqrt 形（原来 done/0.35 线性，58% 就饱和到 1.0，
+       基线被完全丢弃 → 58% 时剩余只剩 1.4s，过早显示"即将完成"）。
+       分母取 0.95 而非 0.8，让实测值直到接近尾声才完全接管：
+       done=0.35→0.61、0.58→0.78、0.83→0.93、0.95→1.0。 */
+    var conf = clamp(Math.sqrt(done / 0.95), 0, 1);
+    var total = ema * conf + st.baseline * (1 - conf);
+
+    /* v4.1：总时长估计也做单调约束。
+       raw 被夹紧后，夹紧边界附近的抖动仍可能让 total 反弹，
+       进而使"剩余时间"回升。这里让 total 也单调不增，从源头消除回升。 */
+    if (st.lastTotal !== null && st.lastTotal !== undefined && total > st.lastTotal && !inBlock){
+      total = st.lastTotal;
+    }
+    st.lastTotal = total;
+    return total;
+  }
+
+  function fmt(ms){
+    if (!isFinite(ms) || ms < 0) ms = 0;
+    var s = Math.ceil(ms / 1000);
+    if (s <= 0) return '即将完成';
+    if (s < 60) return s + ' 秒';
+    var m = Math.floor(s / 60), r = s % 60;
+    return r === 0 ? (m + ' 分钟') : (m + ' 分 ' + r + ' 秒');
+  }
+
+  function setText(id, txt){
+    var el = document.getElementById(id);
+    if (el && el.textContent !== txt) el.textContent = txt;
+  }
+
+  /* v4：由引擎驱动 5 步指示器（引擎是唯一状态源） */
+  function syncSteps(){
+    var stepNum = stepForPhase(st.phaseIdx, st.phaseFrac);
+    if (stepNum === st.lastStep) return;
+    st.lastStep = stepNum;
+    try{
+      for (var i=1;i<=5;i++){
+        var step = document.getElementById('step'+i);
+        var conn = document.getElementById('connector'+i);
+        if (step){
+          step.classList.remove('active','completed','error');
+          if (i < stepNum) step.classList.add('completed');
+          else if (i === stepNum) step.classList.add('active');
+        }
+        if (conn && i < 5){
+          conn.classList.remove('active','completed');
+          if (i < stepNum) conn.classList.add('completed');
+          else if (i === stepNum) conn.classList.add('active');
+        }
+      }
+    }catch(e){}
+  }
+
+  /* 主 tick：每 250ms 刷新（比 1s 更跟手，且不会跳字） */
+  function tick(){
+    if (!st.running) return;
+    var elapsed = now() - st.t0;
+    setText('importTimeElapsed', '已用时: ' + fmt(elapsed));
+
+    var total = estimateTotal();
+    var remain = total - elapsed;
+
+    /* v4.3：remain 非有限数时直接判定为"即将完成"，杜绝 NaN 进入
+       lastShown 造成永久冻结（NaN 一旦存进 lastShown，后续
+       `remain > lastShown` 恒为 false，剩余时间再也无法更新）。 */
+    if (!isFinite(remain)) remain = 0;
+
+    // 单调不增：剩余时间只降不升
+    if (st.lastShown !== null && remain > st.lastShown) remain = st.lastShown;
+    // 触底限制：剩余不足 0.6s 时说"即将完成"，避免长时间显示 1 秒
+    if (remain < 600) remain = 0;
+    st.lastShown = remain;
+
+    var remEl = document.getElementById('importTimeRemaining');
+    if (remEl){
+      var txt = remain <= 0 ? '预计剩余: 即将完成' : ('预计剩余: ' + fmt(remain));
+      if (remEl.textContent !== txt){
+        remEl.textContent = txt;
+        // 数字变化时轻微跳动
+        remEl.classList.remove('perf-tick');
+        void remEl.offsetWidth;            // 强制重排以重启动画
+        remEl.classList.add('perf-tick');
+      }
+    }
+
+    // ETA 收敛细条：已走完的比例
+    var bar = document.getElementById('perfEtaFill');
+    if (bar){
+      var pct = clamp((elapsed / Math.max(total, 1)) * 100, 0, 100);
+      if (!isFinite(pct)) pct = 0;                 // v4.3：杜绝非法的 'NaN%' 写入样式表
+      bar.style.width = pct.toFixed(1) + '%';
+    }
+
+    syncSteps();
+
+    // 兜底：真的拖太久（超过 3 倍估计）就给个提示，而不是傻等
+    if (elapsed > total * 3 && elapsed > 15000 && st.phaseIdx < 3){
+      setText('importTimeRemaining', '预计剩余: 文件较大，请稍候…');
+    }
+  }
+
+  var iv = null;
+  window.ImportTimer = {
+    PHASES: PHASES, ORDER: ORDER,
+
+    start: function(){
+      st.running = true;
+      st.t0 = now();
+      st.phaseIdx = 0;
+      st.phaseFrac = 0;
+      st.ema = null;
+      st.lastShown = null;
+      st.blockedUntil = 0;
+      st.lastTotal = null;
+      st.lastStep = 0;
+      st.lastPct = 0;
+      st.baseline = loadBaseline();
+      syncSteps();
+      if (iv) clearInterval(iv);
+      iv = setInterval(tick, 250);
+      tick();
+    },
+
+    /* 阶段切换：整段完成时 phaseFrac 传 1 */
+    setPhase: function(name, frac){
+      var i = ORDER.indexOf(name);
+      if (i < 0) return;
+      st.phaseIdx = i;
+      st.phaseFrac = (typeof frac === 'number') ? clamp(frac,0,1) : 0;
+      syncSteps();
+      if (st.running) tick();
+    },
+
+    /* 【v4】声明即将进入同步阻塞窗口（如 XLSX.read）。
+       ms 为预计阻塞时长；窗口内冻结 EMA，避免剩余时间断崖下跌。 */
+    blockFor: function(ms){
+      if (!st.running) return;
+      st.blockedUntil = now() + Math.max(120, (ms|0) || 600);
+      st.blockedPhase = st.phaseIdx;
+      // 阻塞前先把 UI 推到"重阶段"，让用户看到进度条真的在走
+      tick();
+    },
+
+    /* 老接口兼容：percent 仅做粗粒度阶段定位（不再直接外推）
+       v4：percent 变化本身不再直接改 phase，改为映射到阶段+阶段内进度，
+       并保留引擎自身的阶段推进（setPhase 优先级更高）。
+
+       v4.3【健壮性修复】：clamp() 对 NaN 是"透明"的
+       （NaN<0 与 NaN>100 均为 false → 原样返回 NaN），而
+       `p <= acc + w` 在 p 为 NaN 时恒为 false，循环永不 break，
+       最终落到最后一个分支 idx=5 → 阶段被永久顶到"渲染刷新"，
+       且 phaseFrac=NaN 会让 done/estimateTotal/lastShown 全部变 NaN，
+       倒计时永久冻结在"即将完成"、ETA 细条 width 变成非法的 'NaN%'，
+       且**不可自愈**（后续传入正常数值也无法恢复）。
+       虽然当前调用链只传数字，但 setPercent 是公开 API，
+       任何一次重构产生 Math.round(NaN) 都会永久损坏本次会话的进度 UI。
+       因此这里显式做数字净化：非有限数直接忽略本次调用。
+       注意不能只用 Number() —— Number(null)===0、Number('')===0、
+       Number([])===0，都会把 null/空串/空数组误判成合法的 0，
+       进而把进度条倒退回 0。所以先用 typeof 排除 null / undefined /
+       非数字字符串 / 对象，再做一次有限的数字判定。 */
+    setPercent: function(percent){
+      // 先挡掉 null / undefined / 非数字原始值（Number(null) 会变成 0，是个坑）
+      if (percent === null || percent === undefined) return;
+      if (typeof percent === 'string' && percent.trim() === '') return;
+      if (typeof percent === 'object' || typeof percent === 'boolean' || typeof percent === 'function') return;
+      var num = Number(percent);
+      if (!isFinite(num)) return;            // v4.3：NaN / Infinity 一律忽略
+      if (num === 0 && percent !== 0 && percent !== '0') return;   // 兜底：其余会退化成 0 的入参
+      var p = clamp(num, 0, 100);
+      if (p === st.lastPct) return;
+      st.lastPct = p;
+      var acc = 0, idx = 0, base = 0;
+      for (var i=0;i<ORDER.length;i++){
+        var w = PHASES[ORDER[i]].w * 100;
+        if (p <= acc + w){ idx = i; base = acc; break; }
+        acc += w;
+        if (i === ORDER.length - 1){ idx = i; base = acc; }
+      }
+      // 阶段只允许前进，不允许因 percent 抖动而回退
+      if (idx < st.phaseIdx) return;
+      st.phaseIdx = idx;
+      var w = PHASES[ORDER[idx]].w * 100;
+      st.phaseFrac = w > 0 ? clamp((p - base) / w, 0, 1) : 1;
+      syncSteps();
+      if (st.running) tick();
+    },
+
+    elapsed: function(){ return st.running ? (now() - st.t0) : 0; },
+
+    finish: function(){
+      if (!st.running) return;
+      var ms = now() - st.t0;
+      saveBaseline(ms);                 // 学习本次真实耗时
+      st.running = false;
+      if (iv){ clearInterval(iv); iv = null; }
+      var bar = document.getElementById('perfEtaFill');
+      if (bar) bar.style.width = '100%';
+      var pb = document.getElementById('importMainProgressBar');
+      if (pb) pb.classList.add('perf-done');
+      // 完成态：全部步骤打勾
+      try{
+        for (var i=1;i<=5;i++){
+          var step = document.getElementById('step'+i);
+          var conn = document.getElementById('connector'+i);
+          if (step){ step.classList.remove('active','error'); step.classList.add('completed'); }
+          if (conn && i < 5){ conn.classList.remove('active'); conn.classList.add('completed'); }
+        }
+      }catch(e){}
+      // 结算：把剩余时间定格为 0，而不是残留一个数字
+      setText('importTimeRemaining', '预计剩余: 已完成');
+    },
+
+    stop: function(){
+      st.running = false;
+      st.blockedUntil = 0;
+      if (iv){ clearInterval(iv); iv = null; }
+    },
+    reset: function(){
+      this.stop();
+      st.phaseIdx = 0; st.phaseFrac = 0;
+      st.ema = null; st.lastShown = null;
+      st.blockedUntil = 0; st.lastTotal = null; st.lastStep = 0; st.lastPct = 0;
+      var bar = document.getElementById('perfEtaFill');
+      if (bar) bar.style.width = '0%';
+      var pb = document.getElementById('importMainProgressBar');
+      if (pb) pb.classList.remove('perf-done');
+    },
+    _state: function(){ return st; }
+  };
+})();
+/*__PERF_IMPORT_JS_END__*/
+</script>
 </head>
 <body>
     <!-- ========== 首屏骨架屏（提升首屏感知速度） ========== -->
@@ -9559,7 +10042,7 @@ button:disabled:active{transform:none;}
                 <div class="modal-header border-0 py-3" id="importProgressHeader" style="background: linear-gradient(135deg, #148453 0%, #0c6b43 100%); position: relative;">
                     <span class="brand-gold-strip" style="opacity:0.9; height:3px;"></span>
                     <div class="d-flex align-items-center">
-                        <div class="import-icon-container me-3" style="width:48px;height:48px;border-radius:12px;background:rgba(255,255,255,0.15);display:flex;align-items:center;justify-content:center;">
+                        <div class="import-icon-container perf-working me-3" style="width:48px;height:48px;border-radius:12px;background:rgba(255,255,255,0.15);display:flex;align-items:center;justify-content:center;">
                             <i id="importMainIcon" class="bi bi-cloud-arrow-up-fill text-white fs-3"></i>
                         </div>
                         <div>
@@ -9612,6 +10095,8 @@ button:disabled:active{transform:none;}
                                 <small class="text-muted" id="importTimeElapsed">已用时: 0秒</small>
                                 <small class="text-muted" id="importTimeRemaining">预计剩余: 计算中...</small>
                             </div>
+                            <!-- v3：ETA 收敛细条（展示估计值自身在收敛） -->
+                            <div class="perf-eta-line"><i id="perfEtaFill"></i></div>
                         </div>
                         
                         <!-- 详细状态区域 -->
@@ -26715,25 +27200,16 @@ async clearAll() {
             }
             
             function updateImportTimer() {
+                /* v3(2026-09-18)：交由 ImportTimer 真倒计时引擎处理。
+                   旧实现用 elapsed/percent*100 线性外推，而 percent 是手动设定的
+                   假值，导致剩余时间剧烈跳变；这里只做兼容空实现。 */
+                if (window.ImportTimer) return;
                 if (!importStartTime) return;
                 const elapsed = Math.floor((Date.now() - importStartTime) / 1000);
                 const minutes = Math.floor(elapsed / 60);
                 const seconds = elapsed % 60;
                 const elapsedStr = minutes > 0 ? `${minutes}分${seconds}秒` : `${seconds}秒`;
                 document.getElementById('importTimeElapsed').textContent = `已用时: ${elapsedStr}`;
-                
-                const progressBar = document.getElementById('importMainProgressBar');
-                if (progressBar) {
-                    const percent = parseFloat(progressBar.style.width) || 0;
-                    if (percent > 0 && percent < 100) {
-                        const totalEstimate = (elapsed / percent) * 100;
-                        const remaining = Math.floor((totalEstimate - elapsed));
-                        const remMinutes = Math.floor(remaining / 60);
-                        const remSeconds = remaining % 60;
-                        const remStr = remMinutes > 0 ? `${remMinutes}分${remSeconds}秒` : `${remSeconds}秒`;
-                        document.getElementById('importTimeRemaining').textContent = `预计剩余: ${remStr}`;
-                    }
-                }
             }
             
             function addImportLog(message, type = 'info') {
@@ -26772,6 +27248,8 @@ async clearAll() {
             
             function showImportError(errorMessage) {
                 window._importInProgress = false;
+                /* v3：停止真倒计时引擎 */
+                if (window.ImportTimer) window.ImportTimer.stop();
                 const safeSet = (id, action) => { const el = document.getElementById(id); if (el) action(el); };
                 safeSet('importProgressHeader', el => el.classList.add('error'));
                 safeSet('importProgressModalLabel', el => el.textContent = '导入失败');
@@ -26808,7 +27286,10 @@ async clearAll() {
                 addImportLog(`导入成功: ${peopleCount}名人员, ${salesCount}条销售记录`, 'success');
                 
                 setImportStep(5);
-                
+                /* v3：结算真倒计时（放在 setImportStep(5) 之后，
+                   否则会把引擎标记的"全部步骤完成"覆写成"第5步进行中"） */
+                if (window.ImportTimer) window.ImportTimer.finish();
+
                 if (importTimerInterval) {
                     clearInterval(importTimerInterval);
                     importTimerInterval = null;
@@ -26818,6 +27299,8 @@ async clearAll() {
             function resetImportProgress() {
                 importCancelled = false;
                 importStartTime = null;
+                /* v3：重置真倒计时引擎 */
+                if (window.ImportTimer) window.ImportTimer.reset();
                 // 【性能优化】重置进度日志计数器
                 updateProgress._lastLoggedPct = undefined;
                 updateProgressSync._lastLoggedPct = undefined;
@@ -26862,7 +27345,11 @@ async clearAll() {
                 if (currentStep) currentStep.textContent = status;
                 if (detailStatus) detailStatus.textContent = status;
 
-                if (percent <= 30) setImportStep(1);
+                /* v4.2：步骤指示器由 ImportTimer 唯一驱动（syncSteps 内按阶段权重推算）。
+                   原先这里还有一套 percent<=30/50/70/90 的 setImportStep 映射，
+                   与引擎的映射不一致且会覆盖引擎结果（25% 被误判为"读取文件"），故移除。 */
+                if (window.ImportTimer) window.ImportTimer.setPercent(percent);
+                else if (percent <= 30) setImportStep(1);
                 else if (percent <= 50) setImportStep(2);
                 else if (percent <= 70) setImportStep(3);
                 else if (percent <= 90) setImportStep(4);
@@ -26888,7 +27375,10 @@ async clearAll() {
                 if (percentBadge) percentBadge.textContent = Math.round(percent) + '%';
                 if (currentStep) currentStep.textContent = status;
                 if (detailStatus) detailStatus.textContent = status;
-                if (percent <= 30) setImportStep(1);
+                /* v4.2：同上，步骤指示器交由 ImportTimer 唯一驱动
+                   （保留 else 分支作为引擎缺失时的降级） */
+                if (window.ImportTimer) window.ImportTimer.setPercent(percent);
+                else if (percent <= 30) setImportStep(1);
                 else if (percent <= 50) setImportStep(2);
                 else if (percent <= 70) setImportStep(3);
                 else if (percent <= 90) setImportStep(4);
@@ -26900,6 +27390,17 @@ async clearAll() {
                 }
             }
             
+            /* v4：仅供自动化验证驱动真实调用链（只读转发，不改行为） */
+            window.__perfImportTestHooks = {
+                resetImportProgress: resetImportProgress,
+                updateProgress: updateProgress,
+                updateProgressSync: updateProgressSync,
+                showImportSuccess: showImportSuccess,
+                showImportError: showImportError,
+                setImportStep: setImportStep,
+                addImportLog: addImportLog
+            };
+
             function validateFile(file) {
                 const validTypes = [
                     'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
@@ -27108,6 +27609,14 @@ async clearAll() {
                 progressModal.show();
                 importStartTime = Date.now();
                 importTimerInterval = setInterval(updateImportTimer, 1000);
+                /* v3：启动真倒计时引擎 */
+                if (window.ImportTimer) window.ImportTimer.start();
+                /* v3：启动真倒计时引擎 */
+                if (window.ImportTimer) window.ImportTimer.start();
+                /* v3：启动真倒计时引擎 */
+                if (window.ImportTimer) window.ImportTimer.start();
+                /* v3：启动真倒计时引擎 */
+                if (window.ImportTimer) window.ImportTimer.start();
 
                 const results = { success: 0, failed: 0, errors: [] };
 
@@ -27371,6 +27880,14 @@ async clearAll() {
                 progressModal.show();
                 importStartTime = Date.now();
                 importTimerInterval = setInterval(updateImportTimer, 1000);
+                /* v3：启动真倒计时引擎 */
+                if (window.ImportTimer) window.ImportTimer.start();
+                /* v3：启动真倒计时引擎 */
+                if (window.ImportTimer) window.ImportTimer.start();
+                /* v3：启动真倒计时引擎 */
+                if (window.ImportTimer) window.ImportTimer.start();
+                /* v3：启动真倒计时引擎 */
+                if (window.ImportTimer) window.ImportTimer.start();
 
                 try {
                     await updateProgress(5, '正在读取文件...');
@@ -27427,6 +27944,9 @@ async clearAll() {
                     await updateProgress(25, '正在读取工作表...');
                     /* XLSX.read 是同步重操作，先让步让浏览器更新UI */
                     await new Promise(r => setTimeout(r, 0));
+                    /* v4：XLSX.read 为同步重操作，先声明阻塞窗口（按文件大小估算），
+                       否则倒计时会在解冻瞬间断崖式下跌 */
+                    if (window.ImportTimer) window.ImportTimer.blockFor(Math.min(12000, 300 + file.size / 4096));
                     cachedWorkbook = XLSX.read(ab, { cellDates: false, cellStyles: false, cellHTML: false });
                     cachedSheets = {};
                     cachedSheetsFormatted = {}; // 仅飞行小时相关sheet的格式化文本
@@ -27438,6 +27958,8 @@ async clearAll() {
                         const processNext = () => {
                             for (let c = 0; c < chunkSize && idx < total; c++, idx++) {
                                 const sn = names[idx];
+                                /* v4：sheet_to_json 为同步操作，声明阻塞窗口 */
+                                if (window.ImportTimer) window.ImportTimer.blockFor(260);
                                 // raw:true 返回原始数值（百分比返回0.055而非"5.5%"）
                                 cachedSheets[sn] = XLSX.utils.sheet_to_json(cachedWorkbook.Sheets[sn], { header: 1, defval: '', blankrows: false, raw: true });
                                 // 仅对飞行小时相关sheet生成格式化版本，减少内存占用50%+
@@ -27575,6 +28097,14 @@ async clearAll() {
                     
                     importStartTime = Date.now();
                     importTimerInterval = setInterval(updateImportTimer, 1000);
+                /* v3：启动真倒计时引擎 */
+                if (window.ImportTimer) window.ImportTimer.start();
+                /* v3：启动真倒计时引擎 */
+                if (window.ImportTimer) window.ImportTimer.start();
+                /* v3：启动真倒计时引擎 */
+                if (window.ImportTimer) window.ImportTimer.start();
+                /* v3：启动真倒计时引擎 */
+                if (window.ImportTimer) window.ImportTimer.start();
                 }
                 
                 try {
@@ -27658,6 +28188,14 @@ async clearAll() {
                     }
                     await updateProgress(73, '正在解析销售明细...');
                     await new Promise(r => setTimeout(r, 0)); /* 让步：保持UI响应 */
+                    /* v4：销售明细提取为同步操作 */
+                    if (window.ImportTimer) window.ImportTimer.blockFor(500);
+                    /* v4：销售明细提取为同步操作 */
+                    if (window.ImportTimer) window.ImportTimer.blockFor(500);
+                    /* v4：销售明细提取为同步操作 */
+                    if (window.ImportTimer) window.ImportTimer.blockFor(500);
+                    /* v4：销售明细提取为同步操作 */
+                    if (window.ImportTimer) window.ImportTimer.blockFor(500);
                     let salesDetail = sheets['销售'] ? ExcelParser.extractSalesDetail(sheets['销售']) : [];
                     await updateProgress(78, '正在构建绩效汇总...');
                     let summaryList = await ExcelParser.buildSummaryAsync(sheets, AppState.leaders, adminMap, salesDetail, (sheet, current, total) => {
@@ -27666,6 +28204,14 @@ async clearAll() {
                     });
                     await updateProgress(83, '正在提取事件记录...');
                     await new Promise(r => setTimeout(r, 0)); /* 让步：保持UI响应 */
+                    /* v4：事件记录提取为同步操作 */
+                    if (window.ImportTimer) window.ImportTimer.blockFor(500);
+                    /* v4：事件记录提取为同步操作 */
+                    if (window.ImportTimer) window.ImportTimer.blockFor(500);
+                    /* v4：事件记录提取为同步操作 */
+                    if (window.ImportTimer) window.ImportTimer.blockFor(500);
+                    /* v4：事件记录提取为同步操作 */
+                    if (window.ImportTimer) window.ImportTimer.blockFor(500);
                     let eventRecords = ExcelParser.extractEventRecords(sheets);
                     _perfPhases.dataExtraction = performance.now() - _t1;
 
