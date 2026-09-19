@@ -2784,7 +2784,6 @@ function openMoreSheet(){
   if(!sh) return;
   sh.classList.add('show'); mk.classList.add('show');
 }
-var _moreSheetInst = null;
 function closeMoreSheet(){
   if(_moreSheetInst){ try{ _moreSheetInst.close('api'); }catch(e){} _moreSheetInst = null; }
   const sh = document.getElementById('mSheet'), mk = document.getElementById('mSheetMask');
