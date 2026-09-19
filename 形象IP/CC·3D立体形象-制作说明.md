@@ -1,7 +1,7 @@
 # CC·3D 立体形象 — 制作说明
 
 > 春秋航空 · 客舱小助手｜24 节气形态 CC 真 3D 模型制作全记录
-> 状态：**21/24 已完成**（cc01–cc21），3 个排队中，本文档随进度更新
+> 状态：**✅ 24/24 全部完成**（cc01–cc24，2026-09-19 收官），已执行 `_finalize_3d.py` 收尾
 
 ---
 
@@ -9,7 +9,7 @@
 
 | 产物 | 路径 | 说明 |
 |---|---|---|
-| 3D 模型 | `形象IP/models/ccNN.glb` | 每个约 0.44–0.68 MB（已压缩） |
+| 3D 模型 | `形象IP/models/ccNN.glb` | 24 个齐全，每个约 0.23–0.77 MB（已压缩） |
 | 预览图 | `形象IP/models/ccNN-preview.png` | 服务端渲染的转台预览 |
 | 前端清单 | `_pet_models.json` | qa / cc-home 3D 层读取的模型索引 |
 | 任务状态 | `_3d_jobs.json` | 断点续跑依据（done / pending） |
@@ -45,7 +45,7 @@ echo -n "<token>" | python _3d_worker.py --reset --slots 2 --max-minutes 400
 
 - qa / cc-home 形象条：**有 GLB 的形态**点击可开关 3D 展示；**无模型的形态**点击会提示「模型还没生成好（x/24）」，不误触；
 - 3D 层由 base64 包装内嵌加载，无外部网络依赖，file:// 直开可用；
-- 24 个全部完成后运行 `python _finalize_3d.py` 收尾：重建 qa.html / cc-home.html 3D 层 → `_build_all.py`（16 文件语法 + 全套回归）→ `_build_hosted.py`（在线版同步 models）→ `_check_needles.py`（21/21）。
+- 24 个 **已于 2026-09-19 全部完成后执行** `python _finalize_3d.py` 收尾：重建 qa.html / cc-home.html 3D 层 → `_build_all.py`（16 文件语法 + 全套回归）→ `_build_hosted.py`（在线版同步 models，24 个 GLB 已进 `在线版/形象IP/models/`）→ `_check_needles.py`（23 项检查 0 fail）；全部 exit=0。
 
 ## 五、进度台账
 
@@ -56,7 +56,7 @@ echo -n "<token>" | python _3d_worker.py --reset --slots 2 --max-minutes 400
 | 3（返工+新） | 2026-09-16 | cc07、cc08、cc09 返工重做 + cc10、cc11 新增 | **11/24** |
 | 4 | 2026-09-17 | cc12–cc16 | **16/24** |
 | 5 | 2026-09-18 | cc17–cc21 | **21/24** |
-| 待续 | 2026-09-19 | cc22–cc24（3 个，收尾批次） | → 24/24 |
+| 6（收官） | 2026-09-19 | cc22–cc24 | **✅ 24/24** |
 
 ### 批次 3 明细（2026-09-16 10:10–10:49）
 
@@ -87,5 +87,15 @@ echo -n "<token>" | python _3d_worker.py --reset --slots 2 --max-minutes 400
 - 提交 5 次（17→21，用满当日配额），**5/5 全部成功，真失败 0**，全程 31 分钟；
 - 成品体积：cc17 0.53 MB、cc18 0.40 MB、cc19 0.47 MB（原始 12.7）、cc20 0.50 MB（原始 15.0）、cc21 0.49 MB（原始 13.8）——压缩率稳定在 3% 左右；
 - 撞到 daily 5/5 上限后工作器干净退出，cc22–cc24 共 3 个保持 pending；
-- **仅剩最后一轮**：次日加 `--reset` 续跑 cc22–cc24，跑完即为 24/24，随后必须运行 `python _finalize_3d.py` 收尾（重建 3D 层 + `_build_all.py` + `_build_hosted.py` + `_check_needles.py` 应为 21/21）。
+- 剩余最后一轮：次日加 `--reset` 续跑 cc22–cc24，跑完即 24/24 并触发 `_finalize_3d.py` 收尾。
+
+### 批次 6 明细（2026-09-19 10:13–10:36，收官）
+
+- 提交 3 次（22→24，未用满当日 5 次配额），**3/3 全部成功，真失败 0**，全程 22 分钟；
+- 成品体积：cc22 0.48 MB（原始 15.0）、cc23 0.23 MB（原始 11.1）、cc24 0.74 MB（原始 17.4，本项目最大立绘 1486×1981）——压缩率稳定在 3% 左右；
+- 24/24 全部完成，`_3d_jobs.json` 无 pending，工作器自动干净退出（日志末行「结束：24 完成 / 0 失败 / 0 排队」）；
+- **已执行收尾 `_finalize_3d.py`**（exit=0，27 秒）：`_glb_pack.py` 打包 base64 包装（24 个全就绪）→ `_build_home.py`（cc-home.html 7.35 MB，3D 层 24/24 已注入）→ `_apply_pet.py`（qa 形象条 24/24）→ `_build_all.py`（16 文件语法 + 回归，exit=0）→ `_build_hosted.py`（在线版，exit=0）→ `_check_needles.py`（23 项检查 **0 fail**，在线版 `形象IP/models/cc*.glb` 24 个资产校验通过）；
+- 至此 24 节气形态 CC 全部具备真 3D 立体形象，前端「有模型的形态可开关 3D」逻辑对全部 24 个形态生效。
+
+> 2026-09-19 由自动化工作器生成并更新 · 3D 形象制作收官
 
