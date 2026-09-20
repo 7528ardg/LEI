@@ -21,9 +21,13 @@ for (const f of ['index.html', '_gzip_build.py', '_build_4in1.py']) {
   const s = fs.readFileSync(f, 'utf8');
   check(f + ' 含 checkPacksUpdate', s.indexOf('function checkPacksUpdate') >= 0);
   check(f + ' 含 PACKS_MANIFEST_URL', s.indexOf('PACKS_MANIFEST_URL') >= 0);
-  check(f + ' 含 packsBadge 按钮', s.indexOf('id="packsBadge"') >= 0);
-  check(f + ' 含 packsModal', s.indexOf('id="packsModal"') >= 0);
-  check(f + ' 启动调用 checkPacksUpdate', s.indexOf('checkPacksUpdate();') >= 0);
+  /* 2026-09-19 断言反转（产品决定）：数据包顶栏入口与弹窗已按用户要求删除；
+     引擎保留（kbadmin 数据包中心 + 本脚本 vm 段），壳层不再轮询 manifest。 */
+  check(f + ' 已移除 packsBadge 按钮', s.indexOf('id="packsBadge"') < 0);
+  check(f + ' 已移除 packsModal', s.indexOf('id="packsModal"') < 0);
+  check(f + ' checkPacksUpdate 函数保留（kbadmin/单测复用）', s.indexOf('function checkPacksUpdate') >= 0);
+  check(f + ' 已停用开机 manifest 轮询', s.indexOf('数据包更新提示整体下线') >= 0);
+  check(f + ' 顶栏收敛三个板块（keep 白名单）', (s.match(/class="mod-tab[^"]* keep"/g) || []).length >= 3);
 }
 
 /* ---------- 2. vm 执行 M2 逻辑 ---------- */
@@ -103,8 +107,8 @@ sandbox.fetch = async (url) => {
   vm.runInContext('checkPacksUpdate()', sandbox);
   await new Promise(r => setImmediate(r));  // 冲刷 vm/host 微任务链，等待 .then 回调完成
   await new Promise(r => setImmediate(r));
-  check('checkPacksUpdate 填充待装列表（host 侧可见）', Array.isArray(sandbox.packsUpdateReady) && sandbox.packsUpdateReady.length === 2, 'len=' + (sandbox.packsUpdateReady || []).length);
-  check('顶栏徽标显示', badgeStub.style.display === '' && badgeStub.querySelector('span').textContent === '新数据包(2)');
+  check('待装列表填充（host 侧可见）', Array.isArray(sandbox.packsUpdateReady) && sandbox.packsUpdateReady.length === 2, 'len=' + (sandbox.packsUpdateReady || []).length);
+  check('徽标函数渲染（DOM 存在时）', badgeStub.style.display === '' && badgeStub.querySelector('span').textContent === '新数据包(2)');
   console.log('INFO  待装列表: ' + (sandbox.packsUpdateReady || []).map(p => p.packId + '@v' + p.version).join(', '));
 
   // 下载-安装落库（等价执行：与 installPacksUpdates 一致的 installPack('url') 语义）

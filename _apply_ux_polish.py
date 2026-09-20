@@ -131,7 +131,7 @@ html[data-theme="dark"] .dc-card{background:#162420;border-color:#1E3A2C;color:#
   #chatWrap .msg.msg-welcome .bubble{background:transparent;border-color:transparent;box-shadow:none;padding:0;
     backdrop-filter:none;-webkit-backdrop-filter:none;}
   #chatWrap .msg.msg-welcome .ts{display:none;}
-  /* ② 顶栏：AI 状态徽章收进「AI设置」——手机上一行放不下，还会把 360px 窄屏横向挤爆被裁 */
+  /* ② 顶栏：状态徽章与设置入口在窄屏收起文案（手机一行放不下，360px 会被横向挤爆裁掉） */
   .topbar{padding:7px 10px;gap:8px;}
   .topbar .ai-status{display:none;}
   .t-ai{gap:4px;}
@@ -151,16 +151,27 @@ html[data-theme="dark"] .dc-card{background:#162420;border-color:#1E3A2C;color:#
   .ti::placeholder{white-space:nowrap;overflow:hidden;}
 }
 
-/* ---- qa 响应式专项（2026-09-17 审计）----
+/* ---- qa 响应式专项（2026-09-17 审计 / 2026-09-19 触摸达标）----
    形象条按钮 pb-c 实测 25px 高、欢迎词 chips 25px 高、五库切换 src-tab 31px 高，
-   触控目标过小；输入框 15px 会触发 iOS 聚焦缩放（含 768 平板档）。 */
+   触控目标过小；输入框 15px 会触发 iOS 聚焦缩放（含 768 平板档）。
+   2026-09-19：三处补到 44px（WCAG 2.5.8 目标尺寸下限），避免移动端误触/漏点。
+   2026-09-19 设计审核 P0-B：原条件只有 max-width:760px，导致 761–1020 平板档
+   仍是 25/31px（实测平板 10 项不达标）。改挂 pointer:coarse —— 语义上正是「触摸设备」，
+   同时覆盖手机与平板；带鼠标的桌面仍走 fine 分支保持紧凑密度。 */
 @media (max-width:900px){
   #qaInput{font-size:16px!important;}
 }
-@media (max-width:760px){
-  #petBar .pb-c{min-height:34px;padding:6px 10px;font-size:12px;}
-  .w-chip{min-height:34px;padding:5px 12px;}
-  .src-tab{min-height:36px;}
+@media (max-width:760px), (pointer:coarse){
+  #petBar .pb-c{min-height:44px;padding:8px 12px;font-size:12px;}
+  .w-chip{min-height:44px;padding:9px 14px;}
+  .src-tab{min-height:44px;}
+}
+/* 同批：qa 模块头动作键 32px、欢迎卡关闭 25px、快问行芯片 30px 也不达标 */
+@media (pointer:coarse){
+  .icon-btn{min-height:44px;padding:8px 12px;}
+  .sx{min-width:44px;min-height:44px;}
+  .qq-x{min-width:44px;min-height:44px;}
+  .qq-c{min-height:44px;padding:8px 12px;}
 }
 """
 
@@ -696,9 +707,11 @@ SHELL = """
   .actions .sys-clock{display:none;}
 }
 @media (pointer:coarse){
-  .bk-btn{min-width:40px;min-height:40px;}
-  .theme-btn{min-width:42px;min-height:42px;}
-  #megaBtn{min-width:42px;min-height:42px;}
+  /* 2026-09-19 设计审核 P0-B：原 40/42px 低于 44px 触摸底线，统一到 44px。
+     非触摸端仍由壳层基础样式控制（视觉更紧凑），此处只兜触摸设备。 */
+  .bk-btn{min-width:44px;min-height:44px;}
+  .theme-btn{min-width:44px;min-height:44px;}
+  #megaBtn{min-width:44px;min-height:44px;}
   .mod-tab{min-height:44px;}
 }
 """

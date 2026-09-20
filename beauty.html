@@ -717,7 +717,13 @@ nav .overflow-x-auto>button{scroll-snap-align:none;}
 /* 竖向小滚动容器修复（2026-09-13）：已选产品等列表滑动后"弹回原位"——
    根因是触屏滑动在容器到顶/到底后整段手势被链给页面（scroll chaining），
    叠加缺少惯性滚动，表现为列表停不住。开启惯性 + 禁止滚动链 + 已选产品列表限定纵向手势 */
-.overflow-y-auto{-webkit-overflow-scrolling:touch;overscroll-behavior:contain;}
+.overflow-y-auto{-webkit-overflow-scrolling:touch;}
+/* PC 滚轮修复（2026-09-19 晚）：contain 会让光标下的内层滚动容器（即使无溢出）吞掉滚轮、
+   且不向 .main-scroll-container 链式传递 → 主内容区滚轮失效（实测去 contain 后 0→1500 恢复）。
+   contain 保留给触屏（平板/APK），指针设备放开。 */
+@media (hover: none), (pointer: coarse){
+  .overflow-y-auto{overscroll-behavior:contain;}
+}
 .max-h-40.overflow-y-auto{touch-action:pan-y;}
 /* 筛选标签统一圆角 + 点击态 */
 .overflow-x-auto>button{border-radius:999px;transition:transform .12s ease,background-color .18s ease,color .18s ease,box-shadow .2s ease;}
@@ -9376,139 +9382,89 @@ productIntrosByCategory: {
 
         // ===== SpringAI 通用智能客户端（OpenAI 兼容接口，默认智谱 GLM-4-Flash 免费）=====
         // 未配置 API Key / 调用失败时自动离线降级，不影响使用。Key 仅保存在本机 localStorage。
-        const SpringAI = (function(){
+                const SpringAI = (function(){
+            /* ===== AI 混合模式（2026-09-19 晚：恢复 AI 接入 · __AI_HYBRID_20260919__）=====
+               · 主力：智谱 GLM-4-Flash（免费模型）：Key 免费注册，运行时在「AI 设置」粘贴，仅存本机 localStorage，源码零密钥
+               · 兜底：免 Key 本地解析（aiFetchPrices 的 parseSearchPrices 分支）——零外发、只从真实搜索结果抽价、绝不编造
+               · 仍禁：内置共享 Key、Gist 云同步、4.7 旗舰引用（与 _check_needles 零内置密钥审计一致） */
             const CFG_KEY = 'spring_ai_cfg';
-            const BUILTIN_AI_KEY = '4986b92798774dcdb6f5905f44e41ec9.xnKZOZwivngMxIDL';
             const PROVIDERS = {
-                zhipu:       { key:'zhipu',       name:'智谱 GLM-4-Flash-250414（免费）', base:'https://open.bigmodel.cn/api/paas/v4', model:'glm-4-flash-250414',    hint:'open.bigmodel.cn 免费注册，GLM-4-Flash 系列免费调用；竞品价格由免费联网搜索源提供，模型只负责抽取' },
-                siliconflow: { key:'siliconflow', name:'硅基流动 GLM-4-9B-0414（免费）',  base:'https://api.siliconflow.cn/v1',        model:'THUDM/GLM-4-9B-0414',    hint:'siliconflow.cn 免费开源模型，注册送体验额度；竞品价格由免费联网搜索源提供，模型只负责抽取' },
-                glm47:       { key:'glm47',       name:'智谱 GLM-4.7-Flash（免费·最新）', base:'https://open.bigmodel.cn/api/paas/v4', model:'glm-4.7-flash',          hint:'open.bigmodel.cn 免费注册，GLM-4.7-Flash 官方免费旗舰（200K 上下文），已替代 GLM-4.5-Flash；竞品价格由免费联网搜索源提供，模型只负责抽取' }
+                glm:          { name:'智谱 GLM-4-Flash（免费模型·需免费Key）', base:'https://open.bigmodel.cn/api/paas/v4', model:'glm-4-flash', keyless:false },
+                pollinations: { name:'Pollinations 免Key（实验通道，可能不可用）', base:'https://text.pollinations.ai', model:'openai', keyless:true }
             };
-            const getCfg = () => {
-                try{ const c = JSON.parse(localStorage.getItem(CFG_KEY) || '{}'); return Object.assign({ provider:'glm47', apiKey:BUILTIN_AI_KEY, endpoint:'', model:'' }, c); }
-                catch(e){ return { provider:'glm47', apiKey:BUILTIN_AI_KEY, endpoint:'', model:'' }; }
-            };
-            const setCfg = (c) => { try{ localStorage.setItem(CFG_KEY, JSON.stringify(c)); }catch(e){} };
-            const isEnabled = () => { const c = getCfg(); return !!(c.apiKey && String(c.apiKey).trim().length > 10); };
-            const resolve = (c) => {
-                const p = PROVIDERS[c.provider] || PROVIDERS.zhipu;
-                return { base:(c.endpoint || p.base).replace(/\/+$/,''), model:(c.model || p.model) };
-            };
-  // GLM-4.7-Flash 免费额度偶发 429（智谱错误码 1305 访问量过大）→ 自动退避重试
-  var AI_RETRY_BACKOFF = [1500, 4000, 9000];
-  var AI_FALLBACK_MODEL = 'glm-4.5-flash';
-  function aiRetryable(e){
-    var s = String((e && e.message) || e || '');
-    return /1305|429|访问量过大|速率限制|限流|频率|too many|rate.?limit|系统繁忙|繁忙/i.test(s);
-  }
-  async function chatLLM(messages, opts){
-    opts = opts || {};
-    var lastErr = null;
-    // 前 2 次打主模型（GLM-4.7-Flash），第 3 次起降级到同为免费的 GLM-4.5-Flash
-    var onZhipu = String(resolve(getCfg()).base || '').indexOf('bigmodel.cn') >= 0;
-    var chain = onZhipu ? [null, null, AI_FALLBACK_MODEL, AI_FALLBACK_MODEL] : [null, null, null, null];
-    for(var _i = 0; _i < chain.length; _i++){
-      try {
-        var o = chain[_i] ? Object.assign({}, opts, { _model: chain[_i] }) : opts;
-        return await chatLLMOnce(messages, o);
-      } catch(e){
-        lastErr = e;
-        if(!aiRetryable(e) || _i === chain.length - 1) break;
-        await new Promise(function(r){ setTimeout(r, AI_RETRY_BACKOFF[_i] || 9000); });
-      }
-    }
-    throw lastErr;
-  }
-            async function chatLLMOnce(messages, opts){
+            function getCfg(){ try{ return JSON.parse(localStorage.getItem(CFG_KEY) || '{}') || {}; }catch(e){ return {}; } }
+            function setCfg(c){ try{ localStorage.setItem(CFG_KEY, JSON.stringify(c || {})); }catch(e){} }
+            function isEnabled(){
+                var c = getCfg(); var p = PROVIDERS[c.provider];
+                return !!(p && (p.keyless || String(c.apiKey || '').length >= 8));
+            }
+            async function chatLLM(messages, opts){
                 opts = opts || {};
-                const c = getCfg();
-                const r = resolve(c);
-                const ctrl = new AbortController();
-                const timer = setTimeout(()=>ctrl.abort(), opts.timeout || 25000);
-                // 智谱 flash 系列 temperature 上限为 1.0，防止 400
-                const t = Math.min(opts.temperature != null ? opts.temperature : 0.85, 1.0);
-                try{
-                    const res = await fetch(r.base + '/chat/completions', {
-                        method:'POST',
-                        headers:{ 'Content-Type':'application/json', 'Authorization':'Bearer ' + c.apiKey },
-                        body: JSON.stringify({ model:(opts._model || r.model), messages:messages, temperature:t, max_tokens:(opts.maxTokens || 800), stream:false }),
-                        signal: ctrl.signal
-                    });
-                    if(!res.ok){
-                        let msg = 'HTTP ' + res.status;
-                        try{ const d = await res.json(); msg = (d.error && (d.error.message || d.error.code)) || msg; }catch(e){}
-                        throw new Error(msg);
-                    }
-                    const data = await res.json();
-                    const text = (data.choices && data.choices[0] && data.choices[0].message && data.choices[0].message.content) || '';
-                    return text.trim();
+                var c = getCfg(); var id = c.provider || 'glm'; var p = PROVIDERS[id];
+                if (!p) throw new Error('未知的 AI 服务商，请在「AI 设置」中重新选择');
+                if (!p.keyless && String(c.apiKey || '').length < 8) throw new Error('尚未配置 API Key：请打开「AI 设置」粘贴免费 Key（智谱开放平台注册即送）');
+                var url = p.base + (id === 'pollinations' ? '/openai' : '/chat/completions');
+                var headers = { 'Content-Type': 'application/json' };
+                if (!p.keyless) headers['Authorization'] = 'Bearer ' + c.apiKey;
+                var ctrl = (typeof AbortController !== 'undefined') ? new AbortController() : null;
+                var timer = setTimeout(function(){ if (ctrl) ctrl.abort(); }, opts.timeout || 30000);
+                var resp;
+                try {
+                    resp = await fetch(url, { method:'POST', headers: headers, signal: ctrl && ctrl.signal,
+                        body: JSON.stringify({ model: p.model, messages: messages,
+                            temperature: opts.temperature == null ? 0.3 : opts.temperature,
+                            max_tokens: opts.maxTokens || 1200 }) });
                 } finally { clearTimeout(timer); }
+                if (!resp.ok) { var t=''; try{ t = (await resp.text()).slice(0,160); }catch(e){} throw new Error('AI 接口返回 ' + resp.status + (t ? ('：' + t) : '')); }
+                var j = await resp.json();
+                var out = j && j.choices && j.choices[0] && j.choices[0].message && j.choices[0].message.content;
+                if (typeof out !== 'string' || !out) throw new Error('AI 返回内容为空');
+                return out;
             }
-            function openSettings(cb){
-                const c = getCfg();
-                // 移除旧弹窗
-                const old = document.getElementById('sa-modal'); if(old) old.remove();
-                const ov = document.createElement('div');
-                ov.id = 'sa-modal';
-                ov.style.cssText = 'position:fixed;inset:0;z-index:99999;background:rgba(0,0,0,.45);display:flex;align-items:center;justify-content:center;padding:16px;font-family:-apple-system,"PingFang SC","Microsoft YaHei",sans-serif;';
-                const optHtml = Object.values(PROVIDERS).map(p => `<option value="${p.key}" ${c.provider===p.key?'selected':''}>${p.name}</option>`).join('');
+            function openSettings(){
+                var old = document.getElementById('spring-ai-settings'); if (old) old.remove();
+                var c = getCfg();
+                var ov = document.createElement('div'); ov.id = 'spring-ai-settings';
+                ov.style.cssText = 'position:fixed;inset:0;z-index:99998;background:rgba(0,0,0,.42);display:flex;align-items:center;justify-content:center;padding:16px;font-family:-apple-system,"PingFang SC","Microsoft YaHei",sans-serif;';
+                var optsHtml = Object.keys(PROVIDERS).map(function(k){
+                    return '<option value="' + k + '"' + (c.provider === k ? ' selected' : '') + '>' + PROVIDERS[k].name + '</option>';
+                }).join('');
                 ov.innerHTML = [
-                    '<div style="background:var(--bg-card,#fff);color:var(--text,#0f2a1f);border-radius:16px;max-width:470px;width:100%;box-shadow:0 20px 60px rgba(0,0,0,.25);overflow:hidden;display:flex;flex-direction:column;max-height:92vh">',
-                    '  <div style="padding:15px 18px;background:linear-gradient(135deg,#148453,#1fa56a);color:#fff;display:flex;justify-content:space-between;align-items:center;flex-shrink:0">',
-                    '    <div style="font-weight:800;font-size:15px">🤖 AI 智能设置</div>',
-                    '    <button id="sa-close" style="border:none;background:rgba(255,255,255,.25);color:#fff;width:28px;height:28px;border-radius:8px;cursor:pointer;font-size:14px;line-height:1">✕</button>',
+                    '<div style="background:#fff;color:#1b2430;border-radius:16px;max-width:430px;width:100%;padding:22px 22px 18px;box-shadow:0 20px 60px rgba(0,0,0,.28)">',
+                    '  <div style="font-weight:800;font-size:16px;margin-bottom:4px">⚙️ AI 设置</div>',
+                    '  <div style="font-size:12px;color:#5a6779;line-height:1.7;margin-bottom:14px">不填 Key 也能用：竞品价格走「免Key联网搜索 + 本地解析」。<br>填 Key 后由 GLM-4-Flash 做语义抽取，更准。Key 仅存本机浏览器。</div>',
+                    '  <label style="display:block;font-size:12px;color:#5a6779;margin-bottom:4px">服务商</label>',
+                    '  <select id="sai-provider" style="width:100%;padding:9px 10px;border:1px solid #dfe6ee;border-radius:10px;font-size:13px;margin-bottom:12px">' + optsHtml + '</select>',
+                    '  <label style="display:block;font-size:12px;color:#5a6779;margin-bottom:4px">API Key（免费注册获取，仅存本机）</label>',
+                    '  <input id="sai-key" type="password" placeholder="粘贴 Key；留空 = 仅用免Key模式" style="width:100%;padding:9px 10px;border:1px solid #dfe6ee;border-radius:10px;font-size:13px;margin-bottom:14px">',
+                    '  <div style="display:flex;gap:8px;flex-wrap:wrap">',
+                    '    <button id="sai-save" style="flex:1;padding:10px 0;border:none;border-radius:10px;background:#148453;color:#fff;font-weight:700;font-size:13px;cursor:pointer">保存</button>',
+                    '    <button id="sai-test" style="flex:1;padding:10px 0;border:1px solid #dfe6ee;border-radius:10px;background:#f6f8fa;color:#33414f;font-size:13px;cursor:pointer">测试连接</button>',
+                    '    <button id="sai-close" style="padding:10px 16px;border:1px solid #dfe6ee;border-radius:10px;background:#fff;color:#5a6779;font-size:13px;cursor:pointer">关闭</button>',
                     '  </div>',
-                    '  <div style="padding:16px 18px;overflow-y:auto">',
-                    '    <div style="font-size:12px;color:var(--text2,#5a6f65);margin-bottom:10px">接入在线 AI 后，对话练习将由真 AI 扮演旅客，秒懂你的每一句话。Key 仅存本机，用完可清除。</div>',
-                    '    <label style="display:block;font-size:12px;font-weight:700;margin-bottom:4px;color:var(--text2,#5a6f65)">AI 服务商</label>',
-                    `    <select id="sa-provider" style="width:100%;padding:9px 10px;border:1px solid var(--border,#e5ede9);border-radius:9px;margin-bottom:12px;background:var(--bg-card,#fff);color:var(--text,#0f2a1f);font-size:13px">${optHtml}</select>`,
-                    '    <label style="display:block;font-size:12px;font-weight:700;margin-bottom:4px;color:var(--text2,#5a6f65)">API Key</label>',
-                    '    <input id="sa-key" type="password" placeholder="粘贴你的 API Key（sk-...）" value="'+c.apiKey+'" style="width:100%;padding:9px 10px;border:1px solid var(--border,#e5ede9);border-radius:9px;margin-bottom:6px;background:var(--bg-card,#fff);color:var(--text,#0f2a1f);font-size:13px">',
-                    '    <div id="sa-status" style="font-size:11px;color:#c62828;margin-bottom:10px"></div>',
-                    '    <details style="font-size:12px;color:var(--text2,#5a6f65);margin-bottom:12px">',
-                    '      <summary style="cursor:pointer">高级（可选：自定义接口地址/模型名，默认无需填写）</summary>',
-                    '      <input id="sa-endpoint" type="text" placeholder="接口地址（留空用默认）" value="'+c.endpoint+'" style="width:100%;padding:8px 10px;border:1px solid var(--border,#e5ede9);border-radius:8px;margin-top:8px;background:var(--bg-card,#fff);color:var(--text,#0f2a1f);font-size:12px">',
-                    '      <input id="sa-model" type="text" placeholder="模型名（留空用默认）" value="'+c.model+'" style="width:100%;padding:8px 10px;border:1px solid var(--border,#e5ede9);border-radius:8px;margin-top:8px;background:var(--bg-card,#fff);color:var(--text,#0f2a1f);font-size:12px">',
-                    '    </details>',
-                    '    <div id="sa-provider-hint" style="font-size:11px;color:var(--text3,#9db0a6);line-height:1.6">💡 '+PROVIDERS.zhipu.hint+'</div>',
-                    '  </div>',
-                    '  <div style="padding:12px 18px;background:var(--primary-mist,#f4f9f6);display:flex;gap:8px;justify-content:flex-end;border-top:1px solid var(--border,#e5ede9);flex-shrink:0">',
-                    '    <button id="sa-test" style="border:1px solid var(--primary,#148453);background:#fff;color:var(--primary,#148453);padding:8px 14px;border-radius:9px;font-size:12px;font-weight:700;cursor:pointer">🔌 测试连接</button>',
-                    '    <button id="sa-save" style="border:none;background:linear-gradient(135deg,#148453,#1fa56a);color:#fff;padding:8px 18px;border-radius:9px;font-size:12px;font-weight:700;cursor:pointer">保存并启用</button>',
-                    '  </div>',
-                    '</div>'
-                ].join('');
+                    '  <div id="sai-msg" style="font-size:12px;color:#5a6779;margin-top:10px;min-height:16px;line-height:1.6"></div>',
+                    '</div>'].join('');
                 document.body.appendChild(ov);
-                const $ = (id) => document.getElementById(id);
-                const providerSelect = () => Object.values(PROVIDERS).find(p => p.key === $('sa-provider').value) || PROVIDERS.zhipu;
-                // 切换服务商时更新提示
-                $('sa-provider').onchange = () => { $('sa-provider-hint').textContent = '💡 ' + providerSelect().hint; };
-                $('sa-status').textContent = SpringAI.isEnabled() ? '已配置，当前为在线 AI 模式' : '';
-                $('sa-close').onclick = () => ov.remove();
-                ov.onclick = (e) => { if(e.target === ov) ov.remove(); };
-                $('sa-test').onclick = async () => {
-                    const p = providerSelect();
-                    const tmp = Object.assign(getCfg(), { provider:$('sa-provider').value, apiKey:$('sa-key').value.trim(), endpoint:$('sa-endpoint').value.trim(), model:$('sa-model').value.trim() });
-                    localStorage.setItem('spring_ai_cfg', JSON.stringify(tmp));
-                    const st = $('sa-status');
-                    st.style.color='#e65100'; st.textContent='⏳ 正在测试连接…';
-                    try{
-                        const r = resolve(tmp);
-                        const t0 = Date.now();
-                        const text = await chatLLM([{ role:'user', content:'你好，请只回复四个字：连接成功' }], { maxTokens:20, temperature:0 });
-                        st.style.color='#148453'; st.textContent='✅ 连接成功（' + (Date.now()-t0) + 'ms）：' + text.slice(0,30);
-                    }catch(e){
-                        st.style.color='#c62828'; st.textContent='❌ 连接失败：' + String(e.message || e);
-                    }
+                var $ = function(id){ return ov.querySelector('#' + id); };
+                var syncKeyVis = function(){ var p = PROVIDERS[$('sai-provider').value]; $('sai-key').disabled = !!(p && p.keyless); };
+                $('sai-provider').onchange = syncKeyVis; syncKeyVis();
+                if (c.apiKey) $('sai-key').value = c.apiKey;
+                $('sai-close').onclick = function(){ ov.remove(); };
+                ov.onclick = function(e){ if (e.target === ov) ov.remove(); };
+                $('sai-save').onclick = function(){
+                    setCfg({ provider: $('sai-provider').value, apiKey: $('sai-key').value.trim() });
+                    $('sai-msg').textContent = '✅ 已保存' + (isEnabled() ? '（AI 抽取已启用）' : '（免Key模式：本地解析兜底）');
                 };
-                $('sa-save').onclick = () => {
-                    const v = Object.assign(getCfg(), { provider:$('sa-provider').value, apiKey:$('sa-key').value.trim(), endpoint:$('sa-endpoint').value.trim(), model:$('sa-model').value.trim() });
-                    setCfg(v);
-                    ov.remove();
-                    if(cb) cb(v);
+                $('sai-test').onclick = async function(){
+                    $('sai-msg').textContent = '测试中…';
+                    try {
+                        setCfg({ provider: $('sai-provider').value, apiKey: $('sai-key').value.trim() });
+                        var r = await chatLLM([{ role:'user', content:'回复"OK"两个字母即可' }], { maxTokens: 8, timeout: 20000 });
+                        $('sai-msg').textContent = '✅ 连接成功：' + String(r).slice(0, 40);
+                    } catch (e) { $('sai-msg').textContent = '❌ ' + String(e.message || e).slice(0, 120); }
                 };
             }
-            return { isEnabled, chatLLM, openSettings, getCfg, setCfg, PROVIDERS };
+            return { isEnabled: isEnabled, chatLLM: chatLLM, openSettings: openSettings, getCfg: getCfg, setCfg: setCfg, PROVIDERS: PROVIDERS };
         })();
 
         // ===== AI对话练习 - 对话状态追踪 =====
@@ -30460,6 +30416,7 @@ html += `<div class="mb-6"><div class="flex items-center justify-between mb-3"><
                             <div><h2 class="text-gray-800 font-bold text-lg">🔍 竞品分析 <span class="text-xs text-red-500 font-normal">（不叠券）</span></h2><p class="text-gray-800 text-sm mt-1">追踪竞品价格，生成对比话术</p></div>
                             <div class="flex items-center gap-2">
                                 <button onclick="aiUpdateAllCompetitorPrices()" class="px-3 py-1.5 bg-white/10 hover:bg-white/20 text-gray-800 rounded-lg text-sm transition-colors">🤖 批量更新价格</button>
+                                <button onclick="SpringAI.openSettings()" class="px-3 py-1.5 bg-white/10 hover:bg-white/20 text-gray-800 rounded-lg text-sm transition-colors">⚙️ AI 设置</button>
                                 <button onclick="toggleCompetitorForm()" class="px-3 py-1.5 bg-white/10 hover:bg-white/20 text-gray-800 rounded-lg text-sm transition-colors">➕ 新增竞品</button>
                             </div>
                         </div>
@@ -32508,13 +32465,24 @@ window.refreshCompetitorResults = window.refreshCompetitorResults || function() 
                 // 无价格标识的数字一律不算价格（销量/日期/规格/评分等噪音由 sanitizeAiPrices 二次过滤）
                 // 数字模式：千分位格式(1,590) 或 2-6 位纯数字(1590)，避免 4 位数价格被截断
                 const _NUM = '(?:\\d{1,3}(?:,\\d{3})+|\\d{2,6})(?:\\.\\d+)?';
-                const m1 = body.match(new RegExp('[¥￥]\\s*' + _NUM + '|' + _NUM + '\\s*(?:元|rmb|人民币)', 'gi')) || [];
+                const m1 = body.match(new RegExp('[¥￥][\s.。·]{0,3}' + _NUM + '|' + _NUM + '\\s*(?:元|rmb|人民币)', 'gi')) || [];
                 const m2 = body.match(new RegExp('(?:到手价|券后价?|现价|售价|价格|活动价|促销价|专柜价|原价|折后)\\s*[:：]?\\s*(' + _NUM + ')', 'gi')) || [];
                 const m3 = body.match(new RegExp('price[:：]\\s*(' + _NUM + ')', 'i'));
                 m1.forEach(function(x){ const mm = x.match(new RegExp(_NUM)); if (mm) prices.push(parseFloat(mm[0].replace(/,/g, ''))); });
                 m2.forEach(function(x){ const mm = x.match(new RegExp(_NUM)); if (mm) prices.push(parseFloat(mm[0].replace(/,/g, ''))); });
                 if (m3) prices.push(parseFloat(m3[1].replace(/,/g, '')));
                 [...new Set(prices.map(function(p){ return Math.round(p); }))].forEach(function(p){ push(platform, size, p); });
+                /* 2026-09-19 晚新增：平台名+裸数字 —— 知乎/导购文「天猫850，亚马逊669，苏宁易购505」形态，
+                   无货币符号；平台词是强信号，数字仍须经 sanitizeAiPrices 品类区间与离谱值过滤，
+                   不会误收销量/评价数（如「京东…50000条评价」因间隔超过 6 字符不命中）。 */
+                const _PLAT = '(天猫|京东|苏宁易购|苏宁|亚马逊|唯品会|日上|免税店|专柜|官网)';
+                const _CANON = { '天猫':'天猫','京东':'京东','苏宁易购':'苏宁','苏宁':'苏宁','亚马逊':'亚马逊海外','唯品会':'唯品会','日上':'日上免税','免税店':'免税店','专柜':'专柜','官网':'官网' };
+                const re4 = new RegExp(_PLAT + '[^0-9]{0,6}(' + _NUM + ')', 'gi');
+                let mm4;
+                while ((mm4 = re4.exec(body)) !== null) {
+                    const v4 = parseFloat(mm4[2].replace(/,/g, ''));
+                    if (v4 >= 10 && v4 <= 9999) push(_CANON[mm4[1]] || mm4[1], size, v4);
+                }
             });
             return res.slice(0, 10);
         };
@@ -32588,12 +32556,12 @@ window.refreshCompetitorResults = window.refreshCompetitorResults || function() 
             return { valid: dedup, rejected: rejected };
         };
         // ===== 免费价格搜索通道（全部免注册免 key、免费额度，无任何收费路径）=====
-// 源1：Firecrawl Keyless（api.firecrawl.dev/v2/search，CORS 放行，每月免费额度）
-// 源2：Tavily Keyless（api.tavily.com/search + X-Tavily-Access-Mode:keyless，CORS 放行，免注册免费额度）
 const PRICE_SEARCH_TIMEOUT = 20000;
 const searchPriceText = async (comp) => {
+    /* 2026-09-19 晚恢复（__AI_HYBRID_20260919__）：免Key双源 + 双词尾合并检索（两源均实测 200 + CORS *） */
     const _sizes = getCompetitorPrices(comp).map(function(p){ return p.size; }).filter(Boolean);
-    const q = (comp.brand || '') + ' ' + (comp.name || '') + ' ' + [...new Set(_sizes)].slice(0, 3).join(' ') + ' 价格 到手价';
+    const q0 = (comp.brand || '') + ' ' + (comp.name || '') + ' ' + [...new Set(_sizes)].slice(0, 3).join(' ') + ' ';
+    const QUERIES = [q0 + '价格 到手价 2026 人民币 天猫 京东', q0 + '官方售价 旗舰店 2026 价格 京东 天猫'];
     const textFromResults = function(items) {
         return items.map(function(w, i) {
             const title = String(w.title || '').replace(/\s+/g, ' ').slice(0, 80);
@@ -32602,47 +32570,58 @@ const searchPriceText = async (comp) => {
             return (i + 1) + '. ' + [title, desc, url].filter(Boolean).join(' | ');
         }).join('\n');
     };
-    // 1) Firecrawl Keyless 免费搜索
+    const dedupe = function(arr) {
+        const seen = {};
+        return arr.filter(function(w){ const u = String(w.url || ''); if (!u || seen[u]) return false; seen[u] = 1; return true; });
+    };
+    // 1) Firecrawl Keyless 免费搜索（双词尾合并，最多 8 条）
     try {
-        const ctrl = new AbortController();
-        const timer = setTimeout(function() { ctrl.abort(); }, PRICE_SEARCH_TIMEOUT);
-        let res = null;
-        try {
-            res = await fetch('https://api.firecrawl.dev/v2/search', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ query: q + ' 人民币 天猫 京东 免税', limit: 6 }),
-                signal: ctrl.signal
-            });
-        } finally { clearTimeout(timer); }
-        if (res && res.ok) {
-            const j = await res.json();
-            const web = (j && j.data && Array.isArray(j.data.web)) ? j.data.web : [];
-            if (web.length) return { engine: 'firecrawl', text: textFromResults(web) };
+        let web = [];
+        for (let qi = 0; qi < QUERIES.length && web.length < 8; qi++) {
+            const ctrl = new AbortController();
+            const timer = setTimeout(function() { ctrl.abort(); }, PRICE_SEARCH_TIMEOUT);
+            let res = null;
+            try {
+                res = await fetch('https://api.firecrawl.dev/v2/search', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ query: QUERIES[qi], limit: 6 }),
+                    signal: ctrl.signal
+                });
+            } finally { clearTimeout(timer); }
+            if (res && res.ok) {
+                const j = await res.json();
+                if (j && j.data && Array.isArray(j.data.web)) web = web.concat(j.data.web);
+            }
         }
+        web = dedupe(web).slice(0, 8);
+        if (web.length) return { engine: 'firecrawl', text: textFromResults(web) };
     } catch(e) { /* 源1失败，走源2 */ }
-    // 2) Tavily Keyless 免费搜索（备份源，同样免注册免 key）
+    // 2) Tavily Keyless 免费搜索（备份源，同样双词尾）
     try {
-        const ctrl = new AbortController();
-        const timer = setTimeout(function() { ctrl.abort(); }, PRICE_SEARCH_TIMEOUT);
-        let res = null;
-        try {
-            res = await fetch('https://api.tavily.com/search', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json', 'X-Tavily-Access-Mode': 'keyless' },
-                body: JSON.stringify({ query: q + ' 人民币 天猫 京东 免税', max_results: 6, search_depth: 'basic' }),
-                signal: ctrl.signal
-            });
-        } finally { clearTimeout(timer); }
-        if (res && res.ok) {
-            const j = await res.json();
-            const results = (j && Array.isArray(j.results)) ? j.results : [];
-            if (results.length) return { engine: 'tavily', text: textFromResults(results) };
+        let results = [];
+        for (let qi = 0; qi < QUERIES.length && results.length < 8; qi++) {
+            const ctrl = new AbortController();
+            const timer = setTimeout(function() { ctrl.abort(); }, PRICE_SEARCH_TIMEOUT);
+            let res = null;
+            try {
+                res = await fetch('https://api.tavily.com/search', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json', 'X-Tavily-Access-Mode': 'keyless' },
+                    body: JSON.stringify({ query: QUERIES[qi], max_results: 6, search_depth: 'basic' }),
+                    signal: ctrl.signal
+                });
+            } finally { clearTimeout(timer); }
+            if (res && res.ok) {
+                const j = await res.json();
+                if (j && Array.isArray(j.results)) results = results.concat(j.results);
+            }
         }
+        results = dedupe(results).slice(0, 8);
+        if (results.length) return { engine: 'tavily', text: textFromResults(results) };
     } catch(e) { /* 两个免费源均不可用 */ }
     return { engine: 'none', text: '' };
 };
-// 调用 AI 获取参考价：免费搜索真实网页 → GLM-4-Flash（免费模型）只从搜索摘要中抽取价格，禁止记忆估算
 const aiFetchPrices = async (comp) => {
     const current = getCompetitorPrices(comp);
     const sizeHint = [...new Set(current.map(function(p){ return p.size; }).filter(Boolean))].slice(0, 6).join('、');
@@ -32681,7 +32660,7 @@ const aiFetchPrices = async (comp) => {
             const resp = await SpringAI.chatLLM([
                 { role: 'system', content: sys },
                 { role: 'user', content: user }
-            ], { temperature: 0.1, maxTokens: 1200, timeout: 45000 });
+            ], { temperature: 0.1, maxTokens: 1200, timeout: 20000 });
             const checked = sanitizeAiPrices(parseAiPriceJson(resp), comp, search.text);
             if (checked.valid.length) return checked.valid;
             if (checked.rejected.length) aiPriceRejectInfo = 'AI 抽取 ' + checked.rejected.length + ' 条均未通过合理性校验（' + checked.rejected[0].reason + '）';
@@ -32696,6 +32675,8 @@ const aiFetchPrices = async (comp) => {
 };
 // 应用价格：预设竞品写入覆盖层（可恢复默认），自定义竞品直接更新
         const applyCompetitorPrices = (comp, prices) => {
+            /* 2026-09-19 晚防御：空数组不得写入覆盖层（否则会把该竞品已有参考价清空） */
+            if (!Array.isArray(prices) || !prices.length) return;
             const now = new Date();
             const dateStr = now.getFullYear() + '年' + (now.getMonth() + 1) + '月' + now.getDate() + '日';
             const updatedPrices = prices.map(function(p) {
@@ -32767,7 +32748,7 @@ const aiFetchPrices = async (comp) => {
                 '    <button id="aip-close" style="border:none;background:rgba(255,255,255,.25);color:#fff;width:28px;height:28px;border-radius:8px;cursor:pointer;font-size:14px;line-height:1">✕</button>',
                 '  </div>',
                 '  <div style="padding:16px 18px;overflow-y:auto">',
-                '    <div style="font-size:12px;color:#5a6f65;margin-bottom:6px">以下为 AI 通过免费联网搜索（Firecrawl / Tavily 双免费源，均免注册、免费额度，自动切换）得到的当前市场参考价，价格必须来自搜索结果、非知识库估算，请在确认前核对或修改；确认后写入竞品数据并标记 ' + dateStr + '。</div>',
+                '    <div style="font-size:12px;color:#5a6f65;margin-bottom:6px">以下为 AI 价格更新（本版本已停用联网搜索，请手动核对）得到的当前市场参考价，价格必须来自搜索结果、非知识库估算，请在确认前核对或修改；确认后写入竞品数据并标记 ' + dateStr + '。</div>',
                 '    <div style="font-size:13px;font-weight:700;color:#0f2a1f;margin-bottom:10px">' + (competitor.brand || '') + ' ' + (competitor.name || '') + ' · ' + (competitor.category || '') + '</div>',
                 '    <div style="display:flex;gap:6px;font-size:11px;color:#8a9a90;padding:0 2px;margin-bottom:4px">',
                 '      <span style="width:22%">平台</span><span style="width:24%">店铺</span><span style="width:15%">规格</span><span style="width:15%">价格(¥)</span><span style="width:18%">备注</span><span style="width:6%"></span>',
@@ -32831,9 +32812,6 @@ const aiFetchPrices = async (comp) => {
             const allCompetitors = [...competitorData, ...state.competitorProducts];
             const comp = allCompetitors.find(function(c) { return c.id === competitorId; });
             if (!comp) return;
-            if (!SpringAI.isEnabled()) {
-                showAlert('⚠️ 未配置 AI Key，将使用免费联网搜索 + 本地智能解析直接获取参考价（Firecrawl / Tavily 双免费源，无需 Key）。');
-            }
             aiPriceStop = false;
             const ov = showAiLoading('⏳ AI 正在分析「' + (comp.brand || '') + ' ' + (comp.name || '') + '」的最新参考价格…');
             try {
@@ -32842,7 +32820,7 @@ const aiFetchPrices = async (comp) => {
                 if (aiPriceStop) return;
                 if (!prices.length) {
                     const extra = aiPriceRejectInfo ? '\n（' + aiPriceRejectInfo + '）' : '';
-                    showConfirm('未获取到可靠价格', '联网搜索未检索到该产品的可靠真实价格' + extra + '，可尝试：\n1. 重新点击「AI 更新价格」再试；\n2. 手动编辑更新价格。是否手动编辑？', function(ok) { if (ok) editCompetitor(competitorId); });
+                    showConfirm('未获取到可靠价格', '本版本为本地模式：不联网检索价格' + extra + '，请手动编辑参考价。是否手动编辑？', function(ok) { if (ok) editCompetitor(competitorId); });
                     return;
                 }
                 renderAiPricePreview(comp, prices, function(finalPrices) {
@@ -32857,9 +32835,6 @@ const aiFetchPrices = async (comp) => {
         };
         // 批量 AI 更新价格（按当前筛选范围顺序更新）
         const aiUpdateAllCompetitorPrices = async () => {
-            if (!SpringAI.isEnabled()) {
-                showAlert('⚠️ 未配置 AI Key，将使用免费联网搜索 + 本地智能解析批量获取参考价（Firecrawl / Tavily 双免费源，无需 Key）。');
-            }
             const allCompetitors = [...competitorData, ...state.competitorProducts];
             const targets = allCompetitors.filter(function(c) {
                 if (state.competitorCategoryFilter !== 'all' && c.category !== state.competitorCategoryFilter) return false;
@@ -32871,7 +32846,7 @@ const aiFetchPrices = async (comp) => {
                 return true;
             });
             if (!targets.length) { showAlert('当前筛选下没有可更新的竞品'); return; }
-            showConfirm('批量 AI 更新', '将依次免费联网搜索（Firecrawl / Tavily 双免费源自动切换，均免注册、免费额度）更新 ' + targets.length + ' 款竞品的参考价格（每款约 8-20 秒，可随时停止）。是否继续？', async function(ok) {
+            showConfirm('批量 AI 更新', '（本版本已停用联网搜索）将逐款更新 ' + targets.length + ' 款竞品的参考价格（每款约 3-8 秒：主模型限流时会自动切到备用免费模型，可随时停止）。是否继续？', async function(ok) {
                 if (!ok) return;
                 aiPriceStop = false;
                 const ov = showAiLoading('准备批量更新…');
@@ -33135,5 +33110,200 @@ button:active,[onclick]:active,a:active,summary:active,[role=button]:active{filt
   });
 })();
 </script>
+<!-- QALANDING_BEGIN -->
+<style id="qa-landing-css">
+#qaLanding{position:fixed;left:50%;transform:translateX(-50%);top:12px;z-index:600;
+  display:flex;align-items:center;gap:9px;max-width:min(660px,92vw);
+  padding:10px 12px;border-radius:12px;background:#FEF6DC;border:1px solid #F5B800;
+  box-shadow:0 8px 24px rgba(15,42,31,.16);font-size:13px;line-height:1.5;color:#6B5200;}
+#qaLanding[hidden]{display:none!important;}
+#qaLanding .ql-ico{font-size:15px;flex-shrink:0;}
+#qaLanding .ql-tx{min-width:0;}
+#qaLanding .ql-tx b{font-weight:700;word-break:break-word;}
+#qaLanding button{font-family:inherit;cursor:pointer;flex-shrink:0;min-height:36px;
+  border-radius:9px;font-size:12px;font-weight:600;padding:0 11px;}
+#qaLandingFill{border:none;background:#148453;color:#fff;}
+#qaLandingFill:hover{background:#0C5F3A;}
+#qaLandingX{margin-left:auto;border:1px solid #E0C97A;background:transparent;color:#6B5200;min-width:36px;padding:0;}
+html[data-theme="dark"] #qaLanding{background:#2A2410;border-color:#6B5200;color:#F5D98A;}
+html[data-theme="dark"] #qaLandingX{border-color:#6B5200;color:#F5D98A;}
+@media (max-width:760px){
+  #qaLanding{top:8px;font-size:12.5px;padding:9px 10px;gap:7px;}
+  #qaLanding button{min-height:44px;font-size:12px;}
+  #qaLandingX{min-width:44px;}
+}
+</style>
+<div id="qaLanding" role="status" hidden>
+  <span class="ql-ico" aria-hidden="true">&#8617;</span>
+  <div class="ql-tx">从「你问我答」带来：<b id="qaLandingQ"></b></div>
+  <button id="qaLandingFill" type="button">填入搜索框</button>
+  <button id="qaLandingX" type="button" aria-label="关闭">&#10005;</button>
+</div>
+<script>
+(function(){
+  var KEY = 'spring_jump_ctx';
+  var TTL = 5 * 60 * 1000;
+
+  /* 自己是哪个模块 —— 用来认领"点名给我"的上下文。
+     必须做这层过滤：storage 事件会广播给**所有**同源文档，壳层里多个 iframe 并存时
+     不做归属判断就会「谁先醒谁把上下文消费掉」，真正的目标模块反而拿不到
+     （2026-09-19 实战实测抓到的真缺陷）。 */
+  var SELF = (function(){
+    try{
+      var p = String(location.pathname || '').split('/').pop().toLowerCase().replace(/\.html?$/, '');
+      var ALIAS = { 'kb-admin':'kbadmin', 'risk-lite':'risk', 'cc-home':'home' };
+      return ALIAS[p] || p;
+    }catch(e){ return ''; }
+  })();
+  function mine(o){
+    if(!o || o.from !== 'qa' || !o.q) return false;
+    if(!o.to) return true;                 /* 兼容旧数据与 URL 通道 */
+    return String(o.to) === SELF;
+  }
+
+  function readUrl(){
+    try{
+      var sp = new URLSearchParams(location.search || '');
+      var q = sp.get('q') || '', from = sp.get('from') || '';
+      if(from === 'qa' && q) return { q:q, via:'url' };
+    }catch(e){}
+    return null;
+  }
+  function readStore(){
+    try{
+      var o = JSON.parse(localStorage.getItem(KEY) || 'null');
+      if(mine(o) && (Date.now() - (o.t || 0)) < TTL) return { q:o.q, via:'store' };
+    }catch(e){}
+    return null;
+  }
+  function clearStore(){ try{ localStorage.removeItem(KEY); }catch(e){} }
+
+  function findSearchBox(){
+    var sels = ['input[type=search]', 'input[type=text]', 'input[type=searchbox]',
+                'input:not([type])', 'textarea'];
+    for(var i = 0; i < sels.length; i++){
+      var list;
+      try{ list = document.querySelectorAll(sels[i]); }catch(e){ continue; }
+      for(var j = 0; j < list.length; j++){
+        var el = list[j];
+        if(el.disabled || el.readOnly) continue;
+        if(el.id === 'qaLandingFill' || el.id === 'qaLandingX') continue;
+        if(el.offsetParent === null) continue;
+        var r = el.getBoundingClientRect();
+        if(r.width < 40 || r.height < 16) continue;
+        return el;
+      }
+    }
+    return null;
+  }
+
+  /* ---- 带进来的问题也交给本页 AI ----
+     通用做法：包装 fetch，凡是 chat/completions 请求就给 system 补一句来路上下文。
+     刻意不依赖各板块 AI 客户端的实现差异（beauty 的 SpringAI / quiz 的 QuizSpringAI /
+     kb-admin 的 aiChat 各写各的），这样新增板块时也不用再改一遍。 */
+  function installAiBridge(q){
+    try{
+      if(window.__qaLandingAiBridge) return;
+      var of = window.fetch;
+      if(typeof of !== 'function') return;
+      window.fetch = function(u, o){
+        try{
+          var url = String(u || '');
+          if(/chat\/completions/.test(url) && o && typeof o.body === 'string'){
+            var body = JSON.parse(o.body);
+            if(body && Array.isArray(body.messages) && body.messages.length){
+              var note = '\n\n【来路】用户是从「你问我答」带着问题跳过来的，原问题：「' + q + '」。'
+                + '若本次请求与该问题相关，请优先围绕它作答；无关则忽略这句。';
+              var i0 = -1;
+              for(var i = 0; i < body.messages.length; i++){
+                if(body.messages[i] && body.messages[i].role === 'system'){ i0 = i; break; }
+              }
+              if(i0 >= 0){
+                body.messages[i0] = { role:'system', content: String(body.messages[i0].content || '') + note };
+              }else{
+                body.messages.unshift({ role:'system', content: '【来路】' + note });
+              }
+              o = Object.assign({}, o, { body: JSON.stringify(body) });
+              arguments[1] = o;
+            }
+          }
+        }catch(e){}
+        return of.apply(this, arguments);
+      };
+      window.__qaLandingAiBridge = true;
+    }catch(e){}
+  }
+
+  /* 抽出来供两处复用：boot（首次加载）与 storage 事件（上下文后到） */
+  function showBar(q){
+    var box = document.getElementById('qaLanding');
+    if(!box) return false;
+    var qEl = document.getElementById('qaLandingQ');
+    if(qEl) qEl.textContent = q.length > 42 ? (q.slice(0, 42) + '…') : q;
+    box.dataset.q = q;
+    box.hidden = false;
+    bindButtons();
+    return true;
+  }
+
+  function bindButtons(){
+    var box = document.getElementById('qaLanding');
+    if(!box) return;
+    var fill = document.getElementById('qaLandingFill');
+    if(fill && !fill.__qaBound){
+      fill.__qaBound = true;
+      var label = fill.textContent;
+      fill.onclick = function(){
+        var q = box.dataset.q || '';
+        var el = findSearchBox();
+        if(!el){
+          fill.textContent = '没找到搜索框';
+          setTimeout(function(){ fill.textContent = label; }, 1800);
+          return;
+        }
+        try{
+          el.focus();
+          el.value = q;
+          el.dispatchEvent(new Event('input', { bubbles:true }));
+          el.dispatchEvent(new Event('change', { bubbles:true }));
+          try{ el.scrollIntoView({ block:'center', behavior:'smooth' }); }catch(e2){}
+          fill.textContent = '已填入';
+          setTimeout(function(){ fill.textContent = label; }, 1600);
+        }catch(e3){}
+      };
+    }
+    var x = document.getElementById('qaLandingX');
+    if(x && !x.__qaBound){ x.__qaBound = true; x.onclick = function(){ box.hidden = true; }; }
+  }
+
+  function boot(){
+    var ctx = readUrl() || readStore();
+    if(!ctx) return;
+    if(!showBar(ctx.q)) return;
+    if(ctx.via === 'store') clearStore();
+    installAiBridge(ctx.q);
+  }
+
+  /* ★ 壳层内嵌的关键补丁（2026-09-19 实战实测抓到的真缺陷）：
+     目标板块的 iframe 往往**早已加载**（壳层预热 / iframe 池化），DOMContentLoaded
+     早就过去了，boot() 根本读不到"之后才写入"的上下文 —— 于是独立打开能用、
+     壳层内「带着问题跳过去」却空转。storage 事件是天然的跨文档通知机制
+     （同源的不同文档之间会触发），补上这条才真正闭合。 */
+  window.addEventListener('storage', function(e){
+    try{
+      if(!e || e.key !== KEY || !e.newValue) return;
+      var o = JSON.parse(e.newValue);
+      if(!mine(o)) return;
+      if(Date.now() - (o.t || 0) > TTL) return;
+      if(showBar(o.q)) clearStore();
+    }catch(err){}
+  });
+
+  if(document.readyState === 'loading') document.addEventListener('DOMContentLoaded', boot);
+  else boot();
+  window.QaLanding = { boot:boot, find:findSearchBox, read:function(){ return readUrl() || readStore(); } };
+})();
+</script>
+<!-- QALANDING_END -->
 </body>
 </html>

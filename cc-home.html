@@ -336,11 +336,13 @@ button{font-family:inherit;}
   background:linear-gradient(180deg,rgba(4,18,11,.50) 0%,rgba(4,18,11,.16) 26%,rgba(4,18,11,.08) 55%,rgba(4,18,11,.34) 100%);}
 .chatwrap{position:relative;z-index:1;display:flex;flex-direction:column;height:100%;}
 .chat-scroll{flex:1;min-height:0;overflow-y:auto;padding:14px;}
+/* 2026-09-19（用户：聊天泡过长）—— 原来块级气泡宽度 auto 会一律撑到 max-width:86%，
+   短消息也拖成大长条；改 width:fit-content 让气泡跟随文字长度收缩（仍受 86% 封顶换行）。 */
 .bub2{background:color-mix(in srgb,#fff 78%,transparent);
   border:1px solid color-mix(in srgb,var(--line) 55%,transparent);
   border-radius:3px 13px 13px 13px;padding:10px 13px;font-size:13.8px;
   backdrop-filter:blur(10px) saturate(1.1);-webkit-backdrop-filter:blur(10px) saturate(1.1);
-  box-shadow:var(--shadow);max-width:86%;margin-bottom:10px;white-space:pre-line;}
+  box-shadow:var(--shadow);width:fit-content;max-width:86%;margin-bottom:10px;white-space:pre-line;}
 .bub2.me{margin-left:auto;border-radius:13px 3px 13px 13px;
   background:color-mix(in srgb,var(--primary) 88%,transparent);color:#fff;border-color:transparent;}
 .chat-in{flex:none;display:flex;gap:8px;padding:11px 14px;padding-bottom:calc(11px + env(safe-area-inset-bottom));
@@ -592,7 +594,7 @@ window.CC_HOME = (function(){
      不再叠一块悬浮的 2D 人物卡。需要恢复改成 true 即可 */
   var SHOW_HERO2D = false;
   var INTER = [{"k": "I01", "t": "交接班", "kind": "合作", "who": [1, 22], "lines": [[1, "（立春把手里那叠问题单拍在餐车上）第 12 排的交给你了。"], [22, "又是满客？"], [1, "满客。而且今天有个小朋友一直在问「飞机为什么不会掉下来」。"], [22, "那你怎么答的？"], [1, "我说：因为它跟手册一样，一个字都不敢错。"], [0, "（两个人同时笑了一下，然后各自推着车走了）"]]}, {"k": "I02", "t": "下午茶之争", "kind": "拌嘴", "who": [2, 3], "lines": [[2, "这块千层是我的。"], [3, "它放在我这边的桌上。"], [2, "桌子是共用的。"], [3, "那就是我先看到的。"], [2, "……好，一人一半。"], [3, "（切得非常整齐）二十层。"], [2, "你切得比背手册还认真。"]]}, {"k": "I03", "t": "拽人起床", "kind": "打闹", "who": [4, 18], "lines": [[18, "第 47 条还差一段。你起来帮我念一遍。"], [4, "不起。"], [18, "（掀毯子）"], [4, "毯子还我——"], [18, "念完就还你。"], [4, "……「问过的问题不能再问第二遍」。念完了，毯子。"], [18, "（把毯子盖回去，还顺手塞了个档案盒）"], [4, "你这个人啊。"]]}, {"k": "I04", "t": "谁先睡", "kind": "拌嘴", "who": [4, 10], "lines": [[10, "三点了，你还不睡？"], [4, "打完这关就睡。"], [10, "你昨天也说这句。"], [4, "昨天那关比较难。"], [10, "（把篝火拨旺了一点）那你陪我到天亮吧。"], [4, "成交。反正我不用早起。"], [10, "我也不用。我是数字的。"], [0, "（两个人都不肯先动）"]]}, {"k": "I05", "t": "淋雨比赛", "kind": "打闹", "who": [5, 14], "lines": [[5, "看谁先跑回廊桥，输的擦设备。"], [14, "我撑伞的。"], [5, "那更该你输——你作弊。"], [14, "（把伞收了）这样公平吗？"], [5, "……你疯了。快跑！"], [0, "（两个人在水洼里踩得满脸是水，最后谁也没赢）"]]}, {"k": "I06", "t": "谁的运动更累", "kind": "比试", "who": [8, 17], "lines": [[8, "下坡靠的是重心，不是腿。"], [17, "那你来打一局网球试试。"], [8, "打不动。但下坡一小时，我腿抖一天。"], [17, "我打完七局还能接着答问题。"], [8, "那是因为你不用喘。"], [17, "……说不过你。"], [8, "（把护目镜推上额头）认输吧。"]]}, {"k": "I07", "t": "琴声与花", "kind": "互助", "who": [13, 15], "lines": [[15, "（弹到一半停下）音不准了。"], [13, "是因为风。花信风一过，琴就跟着走调。"], [15, "那我等风停。"], [13, "风停花就落了。"], [15, "那我现在弹。"], [13, "（花瓣落了一肩）好听。"], [0, "（琴声和落花一起，停了很久都没散）"]]}, {"k": "I08", "t": "吵不吵", "kind": "拌嘴", "who": [7, 15], "lines": [[7, "你能不能别在阅览室隔壁弹琴？"], [15, "那间是琴房，本来就是给我弹的。"], [7, "我要看清章节号。"], [15, "你把门关上。"], [7, "关上还是听得见。"], [15, "（停了）……那我改弹慢的。"], [7, "……这个可以。这个能背书。"]]}, {"k": "I09", "t": "晴天派和雨天派", "kind": "拌嘴", "who": [14, 19], "lines": [[19, "下雨有什么好的，湿。"], [14, "晴天有什么好的，晒。"], [19, "晒完身上是暖的。"], [14, "淋完脑子是清的。"], [19, "那你去淋吧，我在沙里躺着。"], [14, "（把伞往对方那边倾了倾）……行，各得其所。"]]}, {"k": "I10", "t": "冬与夏", "kind": "比试", "who": [16, 20], "lines": [[16, "我这边在下雪。"], [20, "我这边在等浪。"], [16, "披肩去年就很薄了，一直没换。"], [20, "板子去年就磕了角，一直没补。"], [16, "……我们俩都没把「换」这件事当回事。"], [20, "（笑）因为都忙着飞。"]]}, {"k": "I11", "t": "试吃与上餐", "kind": "合作", "who": [12, 22], "lines": [[12, "新口味，你先尝。"], [22, "上给客人的东西，我得先知道是什么味道。"], [12, "（递过去一勺）抹茶配柚子。"], [22, "……这个可以。第 12 排会喜欢。"], [12, "那就定这个。"], [22, "（拿出小本记了一句）配餐：抹茶柚子，收。"]]}, {"k": "I12", "t": "灯还是警示线", "kind": "拌嘴", "who": [6, 24], "lines": [[6, "（踩着梯子往行李架上挂彩灯）"], [24, "下来。这是应急通道。"], [6, "节日呀。"], [24, "彩灯不影响撤离。梯子影响。"], [6, "（叹气，把梯子挪开半米）这样行了吗。"], [24, "行。（停了一下）灯留着。"], [6, "诶？"], [24, "好看。但不能挂在高过头部的位置。"]]}, {"k": "I13", "t": "赶与等", "kind": "拌嘴", "who": [9, 11], "lines": [[9, "你怎么还在这儿？"], [11, "航班延误。"], [9, "延误你就等？我二十分钟前就该上车了。"], [11, "那你上啊。"], [9, "……我在等你收拾。"], [11, "（把笔记本合上）好了，走吧。"], [9, "（一把拎起她的包）动作快点。"], [11, "你这才叫动作快。"]]}, {"k": "I14", "t": "谁更悠闲", "kind": "打闹", "who": [13, 23], "lines": [[13, "你不是在池边泡着吗？"], [23, "你也不是在扫花瓣吗？"], [13, "我扫完了。"], [23, "我泡完了。"], [13, "那我们现在都在闲着。"], [23, "（把一杯冰饮递过去）那就都别起来。"], [13, "……好啊。"], [0, "（两把躺椅同时放平）"]]}, {"k": "I15", "t": "枕头大战", "kind": "打闹", "who": [4, 10, 18], "lines": [[4, "（枕头飞出去，砸在航志的档案盒上）……啊。"], [18, "这是我第 47 条的底稿。"], [10, "（憋笑）我可以作证，是风。"], [18, "宿舍里哪来的风。"], [4, "（又飞出去一个，砸在篝火上）"], [10, "……这下有风了。"], [18, "（把两个枕头都收走）睡觉。都睡觉。"], [0, "（三个人最后在毯子里挤成一团，笔记撒了一地）"]]}, {"k": "I16", "t": "抢蛋糕", "kind": "打闹", "who": [2, 3, 17], "lines": [[17, "等一下，这块切得不对。"], [3, "怎么不对。"], [17, "你那块比我这块多两层。"], [2, "因为我先拿的。"], [17, "（伸手去换）"], [3, "（把两块都端走）重新切。"], [2, "你切我也吃不到啊。"], [17, "（已经开始吃了）现在我吃到了。"], [0, "（最后谁也没吃上完整的千层）"]]}, {"k": "I17", "t": "谁更冷", "kind": "拌嘴", "who": [5, 8], "lines": [[8, "零下十二度，我还能站着擦板子。"], [5, "我这边才五度，但我全身在滴水。"], [8, "干冷和湿冷不一样。"], [5, "对，湿冷会钻进领子里。"], [8, "（停了一下）那你为什么还要站在机坪上。"], [5, "因为设备在那儿。"], [8, "……行。这条我认输。"]]}, {"k": "I18", "t": "走调的合唱", "kind": "合作", "who": [1, 21, 9], "lines": [[21, "21 号登机口，开始登机——"], [1, "（跟着一起念）——请出示登机牌。"], [9, "你们俩能不能别一起喊。"], [21, "为什么？"], [9, "因为会有人真的以为开始登机了，然后跑过来。"], [1, "……今天已经跑过来三个了。"], [21, "那我们把台词改一改。"], [9, "（叹气）我改行不行。"], [0, "（三个人最后真的把那句话改顺了）"]]}];
-  var OKB = [{"q": "你是谁", "a": "我是 CC 的数字乘务员团队——目前有 24 个形态，每个形态守着一间自己的房间。常驻「你问我答」的是「廊桥」。", "help": "形态总览"}, {"q": "这里是什么地方", "a": "这里是「CC 之家」——24 个形态各自的房间。点任意一扇门可以进去看看她在忙什么，也能让两个形态串门、拌嘴、打闹。", "help": "CC 之家"}, {"q": "有几套知识库", "a": "五套：日常库、客舱乘务员手册 01.10、客舱服务部管理手册 01.14、客舱服务规范 00.07、大撤专项。", "help": "知识库"}, {"q": "离线能用吗", "a": "能。房间、互动、形态话术、五库检索都在本地，断网照常。断网时只有「自由闲聊」会降级。", "help": "离线"}];
+  var OKB = [{"q": "你是谁", "a": "我是 CC 的数字乘务员团队——目前有 24 个形态，每个形态守着一间自己的房间。常驻「你问我答」的是「立春」。", "help": "形态总览"}, {"q": "这里是什么地方", "a": "这里是「CC 之家」——24 个形态各自的房间。点任意一扇门可以进去看看她在忙什么，也能让两个形态串门、拌嘴、打闹。", "help": "CC 之家"}, {"q": "有几套知识库", "a": "五套：日常库、客舱乘务员手册 01.10、客舱服务部管理手册 01.14、客舱服务规范 00.07、大撤专项。", "help": "知识库"}, {"q": "离线能用吗", "a": "能。房间、互动、形态话术、五库检索都在本地，断网照常。断网时只有「自由闲聊」会降级。", "help": "离线"}];
   var KEY = 'spring_cc_home_form';
   var K3D = 'spring_cc_home_3d';
   var cur = 0, view = 'hall', lastMode = 'offline';
@@ -1836,10 +1838,37 @@ function bindHall(){
      2026-09-15：撤掉免 Key 的 Pollinations 公共端点——公共池额度经常爆，
      实测会把 "The API key used for this request has reached its budget…"
      当正文原样塞进气泡。现在默认直连内置智谱 GLM（与「你问我答」同一把内置 Key，免配置）；
-     本机保存过 AI 设置（spring_ai_cfg）时优先用用户自己的 Key / 模型 / 端点。
+     2026-09-19 起为本地模式：不再读取任何密钥、不调用任何外部模型。
      注意：本文件是 cc-home.html 的生成器，改这里才会进产物（直接改 cc-home.html 会被重建冲掉）。 */
-  var BUILTIN_AI = { apiKey: '4986b92798774dcdb6f5905f44e41ec9.xnKZOZwivngMxIDL', base: 'https://open.bigmodel.cn/api/paas/v4' };
-  var GLM_MODELS = ['glm-4.7-flash', 'glm-4-flash-250414', 'glm-4.5-flash'];
+  /* 2026-09-19 本地模式（彻底无密钥）：不再内置任何 Key、不调用外部模型，也不读取任何密钥。 */
+  /* 2026-09-19 本地模式（彻底无密钥）：不再内置任何 Key、不调用外部模型，也不读取任何密钥。 */
+  /* 2026-09-19 本地模式（彻底无密钥）：不再内置任何 Key、不调用外部模型，也不读取任何密钥。 */
+  /* 2026-09-19 本地模式（彻底无密钥）：不再内置任何 Key、不调用外部模型，也不读取任何密钥。 */
+  /* 2026-09-19 本地模式（彻底无密钥）：不再内置任何 Key、不调用外部模型，也不读取任何密钥。 */
+  /* 2026-09-19 本地模式（彻底无密钥）：不再内置任何 Key、不调用外部模型，也不读取任何密钥。 */
+  /* 2026-09-19 本地模式（彻底无密钥）：不再内置任何 Key、不调用外部模型，也不读取任何密钥。 */
+  /* 2026-09-19 本地模式（彻底无密钥）：不再内置任何 Key、不调用外部模型，也不读取任何密钥。 */
+  /* 2026-09-19 本地模式（彻底无密钥）：不再内置任何 Key、不调用外部模型，也不读取任何密钥。 */
+  /* 2026-09-19 本地模式（彻底无密钥）：不再内置任何 Key、不调用外部模型，也不读取任何密钥。 */
+  /* 2026-09-19 本地模式（彻底无密钥）：不再内置任何 Key、不调用外部模型，也不读取任何密钥。 */
+  /* 2026-09-19 本地模式（彻底无密钥）：不再内置任何 Key、不调用外部模型，也不读取任何密钥。 */
+  /* 2026-09-19 本地模式（彻底无密钥）：不再内置任何 Key、不调用外部模型，也不读取任何密钥。 */
+  var BUILTIN_AI = { apiKey: '', base: '' };
+  var GLM_MODELS = [];   // 本地模式：不调用任何外部模型
+  /* 本地模式：不再从 localStorage 读取任何密钥（历史配置键一并废弃） */
+  function findCfg(){ return null; }
+  function findCfg(){ return null; }
+  function findCfg(){ return null; }
+  function findCfg(){ return null; }
+  function findCfg(){ return null; }
+  function findCfg(){ return null; }
+  function findCfg(){ return null; }
+  function findCfg(){ return null; }
+  function findCfg(){ return null; }
+  function findCfg(){ return null; }
+  function findCfg(){ return null; }
+  function findCfg(){ return null; }
+  function findCfg(){ return null; }
   function findCfg(){
     try{
       for (var i = 0; i < localStorage.length; i++){
@@ -1857,44 +1886,10 @@ function bindHall(){
   function looksLikeApiError(t){
     return /budget|raise the key|api\s*key|quota|unauthorized|invalid.*key|欠费|额度|鉴权失败|访问量过大|1305/i.test(String(t || ''));
   }
-  async function post(url, body, headers, timeout){
-    var ctl = new AbortController();
-    var t = setTimeout(function(){ ctl.abort(); }, timeout || 25000);
-    try{
-      var r = await fetch(url, { method:'POST', headers: headers || {'Content-Type':'application/json'},
-        body: JSON.stringify(body), signal: ctl.signal });
-      if (!r.ok) throw new Error('HTTP ' + r.status);
-      var d = await r.json();
-      var txt = (d && d.choices && d.choices[0] && d.choices[0].message && d.choices[0].message.content) || d.response || '';
-      if (!txt || !String(txt).trim()) throw new Error('空回复');
-      return String(txt).trim();
-    } finally { clearTimeout(t); }
-  }
-  async function glmOnce(base, key, model, messages){
-    try{
-      lastMode = 'glm';
-      return await post(base + '/chat/completions',
-        { model: model, messages: messages, temperature: 0.85, max_tokens: 500 },
-        { 'Content-Type':'application/json', 'Authorization':'Bearer ' + key });
-    }catch(e){ return null; }
-  }
-  async function aiChat(messages){
-    var o = findCfg();
-    var base = BUILTIN_AI.base, key = BUILTIN_AI.apiKey;
-    if (o && o.apiKey){
-      key = String(o.apiKey).trim();
-      base = String(o.endpoint || BUILTIN_AI.base).replace(/\/+$/, '');
-    }
-    var models = [];
-    if (o && o.model) models.push(String(o.model));
-    GLM_MODELS.forEach(function(m){ if (models.indexOf(m) < 0) models.push(m); });
-    for (var i = 0; i < models.length; i++){
-      var r = await glmOnce(base, key, models[i], messages);
-      if (r && !looksLikeApiError(r)){ lastMode = 'glm'; return r; }
-    }
-    lastMode = 'offline';
-    return null;
-  }
+  /* 本地模式（2026-09-19）：不调用任何外部模型（源码零密钥、运行时零外发）。
+     调用方按 lastMode === 'offline' 回落到本地预置内容。 */
+  async function aiChat(messages){ lastMode = 'offline'; return null; }
+
   function sysPrompt(c){
     /* 2026-09-14（晚）：把每个形态「独有的设定 / 背景 / 语气」全部喂给 AI（数据单一来源 _pet_roster.py），
        让接入的 AI 自动按角色作答，而不是泛泛的客服腔 */
@@ -1925,7 +1920,7 @@ function bindHall(){
     if (/忙|做什么|干嘛/.test(t)) return '我' + c.doing + '。' + c.motto;
     if (/房间|家|哪儿/.test(t)) return '这是「' + c.room + '」，陈设是：' + (c.roomProp || []).join('、') + '。';
     if (/制作人|谁做/.test(t)) return c.maker;
-    return '（离线值守中）我' + c.doing + '，手头五套手册都在。你要查具体条目，去「你问我答」问「廊桥」，那边检索更全。\n' + c.extra;
+    return '（离线值守中）我' + c.doing + '，手头五套手册都在。你要查具体条目，去「你问我答」问「立春」，那边检索更全。\n' + c.extra;
   }
   function pushBub(role, text){
     var d = document.createElement('div');

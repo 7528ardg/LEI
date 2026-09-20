@@ -180,10 +180,10 @@ html.nav-scrolled .topbar{top:6px;height:48px;border-radius:14px;box-shadow:0 12
 html[data-theme="dark"] .nav-scrolled .topbar{box-shadow:0 12px 30px rgba(0,0,0,.55);}
 html.nav-scrolled .brand-sub,html.nav-scrolled .cr-root,html.nav-scrolled .cr-sep-first{display:none;}
 html.nav-scrolled .net-status,html.nav-scrolled .sys-clock{padding:3px 8px;font-size:.7rem;}
-/* --- #3 面包屑：客舱小助手 › 模块 › 子页（仅宽屏展示，避免挤压页签） --- */
-.shell-crumb{display:none;align-items:center;flex-shrink:0;padding:7px 12px;border-radius:12px;background:var(--primary-mist);border:1px solid var(--border);font-size:.78rem;color:var(--text2);white-space:nowrap;max-width:30vw;overflow:hidden;transition:opacity .2s;}
+/* --- #3 面包屑：安静的位置指示（无底框、窄上限；仅宽屏展示） ---
+   2026-09-19：顶栏只剩 3 个板块，当前板块若在顶栏可见则面包屑纯属重复 → 由 syncCrumb 隐藏 */
+.shell-crumb{display:none;align-items:center;flex-shrink:0;padding:7px 6px;font-size:.78rem;color:var(--text2);white-space:nowrap;max-width:22vw;overflow:hidden;transition:opacity .2s;}
 @media(min-width:1101px){.shell-crumb{display:flex;}}
-@media(min-width:1101px){.brand-sub{display:none;}}
 .shell-crumb .cr-item{font-weight:700;overflow:hidden;text-overflow:ellipsis;}
 .shell-crumb .cr-item.link{cursor:pointer;color:var(--primary);}
 .shell-crumb .cr-item.link:hover{text-decoration:underline;}
@@ -225,6 +225,70 @@ html[data-theme="dark"] .mega-panel{box-shadow:0 24px 64px rgba(0,0,0,.55);}
 .mega-sub:hover{background:var(--grad-primary);color:#fff;}
 .mega-foot{padding:12px 4px 8px;display:flex;justify-content:center;}
 /*__NAV_DESIGN_20260917_CSS__END*/
+
+/*__SHELL_SYNC_20260919_CSS__BEGIN —— 顶栏收敛 3 板块 + 右侧三层重排（源 index.html，勿直接改产物）*/
+/* 2026-09-19 设计审核 P0-A/P0-B 修复：
+   · 对比度：.sc-date / .uc-role / .uc-caret 原用 --text3(#B5C2BC)，实测对白仅 1.84:1（远低于 AA 4.5:1）。
+     --text3 是全局令牌、别处还在用，故只在这三个选择器上改判，不动令牌。
+     改用 --text2：浅色 #5A6F65 → 5.39:1；深色 #8FA89C → 6.31:1，两模式均达标。
+   · 字号：三者最小 9.6px（.uc-role），低于可读下限，提到 11px / 12px。
+   · 触控：顶栏方钮与页签原 36px / 38px，低于 44px 触摸底线，统一到 44px
+     （顶栏高 60px，44px 控件放得下，无需改 --topbar-h，也不会挤到内容区）。 */
+.module-tabs .mod-tab{display:none!important;}
+.module-tabs .mod-tab.keep{display:flex!important;}
+/* 触控底线：页签行 46px，44px 页签放得下（原 38px） */
+.mod-tab{min-height:44px;}
+.actions{display:flex;align-items:center;gap:6px;flex-shrink:0;}
+.actions .act-sep{width:1px;height:22px;background:var(--border);margin:0 6px;flex-shrink:0;}
+.actions .mega-btn,.actions .bk-btn,.actions .theme-btn{height:44px;border-radius:12px;border:1px solid var(--border);background:transparent;color:var(--text2);flex-shrink:0;
+  transition:border-color .18s cubic-bezier(.23,1,.32,1),color .18s cubic-bezier(.23,1,.32,1),background-color .18s cubic-bezier(.23,1,.32,1);}
+.actions .bk-btn{padding:0 12px;display:inline-flex;align-items:center;gap:6px;font-size:.78rem;font-weight:700;font-family:var(--font-sans);cursor:pointer;}
+.actions .theme-btn{width:44px;font-size:1rem;display:inline-flex;align-items:center;justify-content:center;cursor:pointer;}
+.actions .mega-btn:hover,.actions .bk-btn:hover,.actions .theme-btn:hover{border-color:var(--primary);color:var(--primary);background:var(--primary-mist);}
+.actions .mega-btn:active,.actions .bk-btn:active,.actions .theme-btn:active{transform:scale(.97);}
+.actions .sys-clock{display:inline-flex;flex-direction:column;align-items:flex-end;justify-content:center;gap:0;padding:0 4px;border:none;background:transparent;line-height:1.15;white-space:nowrap;}
+.actions .sys-clock .sc-time{font-size:.86rem;font-weight:800;color:var(--text);font-variant-numeric:tabular-nums;letter-spacing:.02em;}
+.actions .sys-clock .sc-row{display:flex;align-items:center;gap:6px;}
+.actions .sys-clock .sc-date{font-size:.6875rem;font-weight:600;color:var(--text2);}   /* 10.6px → 11px；对比度 1.84 → 5.39:1 */
+.actions .sys-clock .sc-tag{font-size:.6875rem;font-weight:700;color:#8A6A00;background:transparent;padding:0;border-radius:0;}  /* 10.2px → 11px */
+.actions .sys-clock .sc-tag.none{color:var(--text2);}
+html[data-theme="dark"] .actions .sys-clock .sc-tag{color:#E3C56A;}
+.actions .net-status{display:inline-flex;align-items:center;gap:5px;height:44px;padding:0 8px;border:none;background:transparent;color:var(--text2);font-size:.72rem;font-weight:600;}
+.actions .net-status .net-dot{width:7px;height:7px;border-radius:50%;background:var(--primary);box-shadow:0 0 0 3px rgba(20,132,83,.14);}
+.actions .net-status.offline{color:var(--danger);background:transparent;}
+.actions .net-status.offline .net-dot{background:var(--danger);box-shadow:0 0 0 3px rgba(230,74,25,.16);}
+.actions .user-chip{display:flex;align-items:center;gap:8px;min-height:44px;padding:3px 10px 3px 3px;border-radius:999px;background:var(--primary-soft);border:1px solid transparent;cursor:pointer;
+  transition:background-color .18s cubic-bezier(.23,1,.32,1),border-color .18s cubic-bezier(.23,1,.32,1);}
+.actions .user-chip:hover{background:var(--primary-mist);border-color:var(--primary);}
+.actions .user-chip .avatar{width:34px;height:34px;border-radius:50%;background:var(--grad-primary);display:flex;align-items:center;justify-content:center;color:#fff;font-size:.8rem;font-weight:800;flex-shrink:0;}
+.actions .user-chip .uc-tx{display:flex;flex-direction:column;line-height:1.2;}
+.actions .user-chip #userName{font-size:.78rem;font-weight:800;color:var(--primary-dark,#0C5F3A);}
+.actions .user-chip .uc-role{font-size:.75rem;font-weight:700;color:var(--text2);letter-spacing:.03em;}  /* 9.6px → 12px；对比度 1.84 → 5.39:1 */
+.actions .user-chip .uc-caret{color:var(--text2);font-size:.8rem;margin-left:2px;}                      /* 对比度 1.84 → 5.39:1 */
+html[data-theme="dark"] .actions .user-chip{background:#1A3D2A;}
+html[data-theme="dark"] .actions .user-chip #userName{color:#8FD3B0;}
+@media(max-width:1100px){.actions .user-chip .uc-role,.actions .user-chip .uc-caret{display:none;}}
+@media(max-width:960px){.actions .sys-clock .sc-date{display:none;}.actions .bk-btn .act-tx{display:none;}.actions .bk-btn{padding:0 10px;}}
+@media(max-width:820px){.actions .net-status #netText{display:none;}.actions .net-status{padding:0 6px;}}
+@media(max-width:720px){.actions .sys-clock .sc-row{display:none;}.actions .act-sep{display:none;}}
+/* --- 宽屏铺满：空间足够时展示全部板块（由壳层 JS fitNavTabs 实测后加 .nav-all） ---
+   实测不可行用纯媒体查询：12 个页签 × 中文字宽 + 右侧状态区 ≈ 1600px 起，故用 JS 实测更稳。 */
+.module-tabs.nav-all .mod-tab{display:flex!important;}
+.module-tabs.nav-all .mod-tab.keep{display:flex!important;}
+/* --- 导航「全部应用」入口（其余 9 板块的统一入口，跟随页签排布） --- */
+.nav-more-btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;height:44px;padding:0 12px;margin-left:2px;flex-shrink:0;
+  border:1px dashed var(--border);border-radius:12px;background:transparent;color:var(--text2);font-size:.8rem;font-weight:700;font-family:var(--font-sans);cursor:pointer;
+  transition:border-color .18s cubic-bezier(.23,1,.32,1),color .18s cubic-bezier(.23,1,.32,1),background-color .18s cubic-bezier(.23,1,.32,1);}
+.nav-more-btn:hover{border-style:solid;border-color:var(--primary);color:var(--primary);background:var(--primary-mist);}
+.nav-more-btn:active{transform:scale(.97);}
+.nav-more-btn[aria-expanded="true"]{border-style:solid;border-color:var(--primary);background:var(--grad-primary);color:#fff;}
+.nav-more-btn:focus-visible{outline:2px solid var(--primary);outline-offset:2px;}
+@media(max-width:1100px){.nav-more-btn .amb-tx{display:none;}.nav-more-btn{padding:0 10px;}}
+/* --- 底部「更多」面板：分组小标题 + 与巨型菜单同源的 12 板块 --- */
+.m-sheet h4 .ms-sub{font-size:.66rem;font-weight:600;color:var(--text3);margin-left:auto;margin-right:8px;}
+.m-sheet-sec{grid-column:1/-1;font-size:.68rem;font-weight:800;color:var(--text3);letter-spacing:.06em;margin:8px 2px 2px;}
+.m-sheet-sec:first-child{margin-top:0;}
+/*__SHELL_SYNC_20260919_CSS__END*/
 </style>
 <script>
 /* 客舱小助手数据包引擎（_sync_packs.py 自动注入；改 docs/_packs_engine.js 后重跑 python _sync_packs.py） */
@@ -551,8 +615,36 @@ button:disabled:active{transform:none;}
   .mod-tab.active:hover{background:var(--grad-primary);color:#fff;}
 }
 </style>
+<!--__A11Y_20260919__BEGIN__-->
+<style id="a11y20260919">
+/* 2026-09-19 设计审核 P0-C：屏幕阅读器专用工具类 + 跳到主内容 */
+.a11y-sr{position:absolute!important;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap;border:0;}
+.skip-link{position:absolute;left:8px;top:-64px;z-index:9999;background:var(--primary,#148453);color:#fff;padding:10px 16px;border-radius:0 0 10px 10px;font-size:.875rem;font-weight:700;font-family:var(--font-sans,sans-serif);text-decoration:none;transition:top .18s cubic-bezier(.23,1,.32,1);}
+.skip-link:focus{top:0;outline:2px solid #fff;outline-offset:-4px;}
+@media (prefers-reduced-motion:reduce){.skip-link{transition:none;}}
+</style>
+<!--__A11Y_20260919__END__-->
 </head>
 <body>
+<!--__A11Y_20260919__BEGIN__-->
+<a class="skip-link" href="#sysArea">跳到主要内容</a>
+<h1 class="a11y-sr">客舱小助手 · 客舱服务一线工具融合平台</h1>
+<!--__A11Y_20260919__END__-->
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 <div class="livery-stripe"></div>
 
@@ -571,38 +663,53 @@ button:disabled:active{transform:none;}
 
   
   
-  <nav class="shell-crumb" id="shellCrumb" aria-label="当前位置"><span class="cr-item cr-root link" onclick="switchModule('home')" title="回到 CC 之家">客舱小助手</span><span class="cr-sep cr-sep-first">›</span><span class="cr-item cr-mod" id="crumbMod">你问我答</span><span class="cr-sep" id="crumbSep2" style="display:none">›</span><span class="cr-item cr-sub" id="crumbSub" style="display:none"></span></nav>
-  <nav class="module-tabs" id="moduleTabs">
+  <nav class="shell-crumb" id="shellCrumb" aria-label="当前位置"><span class="cr-item cr-mod" id="crumbMod">你问我答</span><span class="cr-sep" id="crumbSep2" style="display:none">›</span><span class="cr-item cr-sub" id="crumbSub" style="display:none"></span></nav>
+  <nav class="module-tabs" id="moduleTabs" data-page-node-id="BsxJNHUQnwWWkzX8mQ7PdA">
+    <button class="mod-tab active keep" data-mod="qa" onclick="switchModule('qa')" data-page-node-id="ThWuLHNdXekrpR8s6aKg4k">💬 你问我答</button>
+    <button class="mod-tab keep" data-mod="quiz" onclick="switchModule('quiz')" data-page-node-id="AfTAaJatoJoPJYGMUFg51D">📚 培训考核</button>
+    <button class="mod-tab keep" data-mod="performance" onclick="switchModule('performance')" data-page-node-id="cTO8HrxlLuSrzd9nDy4qrp">📊 绩效管理</button>
+    <button class="mod-tab keep" data-mod="beauty" onclick="switchModule('beauty')" data-page-node-id="maSEZIZaLq7esXXJABvoUv">💄 美妆话术</button>
+    <button class="mod-tab keep" data-mod="daily" onclick="switchModule('daily')" data-page-node-id="0ZQKCzL3CGxL5gcbwW8vpU">❓ 日常问题</button>
+    <button class="mod-tab keep" data-mod="manual" onclick="switchModule('manual')" data-page-node-id="16VCdRNReCMYPnJQ1m9LZd">📕 手册奖惩</button>
     <button class="mod-tab" data-mod="home" onclick="switchModule('home')">🏠 CC 之家</button>
-    <button class="mod-tab active" data-mod="qa" onclick="switchModule('qa')">💬 你问我答</button>
-    <button class="mod-tab" data-mod="quiz" onclick="switchModule('quiz')">📚 培训考核</button>
-    <button class="mod-tab" data-mod="performance" onclick="switchModule('performance')">📊 绩效管理</button>
-    <button class="mod-tab" data-mod="beauty" onclick="switchModule('beauty')">💄 美妆话术</button>
-    <button class="mod-tab" data-mod="medical" onclick="switchModule('medical')">🚑 医疗急救</button>
-    <button class="mod-tab" data-mod="risk" onclick="switchModule('risk')">⚠️ 风险预警</button>
-    <button class="mod-tab" data-mod="daily" onclick="switchModule('daily')">❓ 日常问题</button>
-    <button class="mod-tab" data-mod="manual" onclick="switchModule('manual')">📕 手册奖惩</button>
-    <button class="mod-tab" data-mod="report" onclick="switchModule('report')">🗂 事件报告</button>
-    <button class="mod-tab" data-mod="kbadmin" onclick="switchModule('kbadmin')">📇 库管理</button>
+    <button class="mod-tab" data-mod="medical" onclick="switchModule('medical')" data-page-node-id="YKyirJlt3f6LRF1fmROJfP">🚑 医疗急救</button>
+    <button class="mod-tab" data-mod="risk" onclick="switchModule('risk')" data-page-node-id="zBc8alWHgO1Jtz1ynUv3Nd">⚠️ 风险预警</button>
+    <button class="mod-tab" data-mod="report" onclick="switchModule('report')" data-page-node-id="zuRGGdaicD84fn0TQmDPKC">🗂 事件报告</button>
+    <button class="mod-tab" data-mod="kbadmin" onclick="switchModule('kbadmin')" data-page-node-id="tx5VFathdAJZK2NlztrCsA">📇 库管理</button>
     <button class="mod-tab" data-mod="issues" onclick="switchModule('issues')">🐞 问题反馈</button>
-  </nav>
+  
+    <!-- 2026-09-19：其余 9 个板块的统一入口。放在页签之后（它属于导航，不是右侧工具），
+         宽屏带文字「全部应用」，窄屏只留图标；点击展开分组面板（12 板块 + 子入口深跳）。 -->
+    <button class="nav-more-btn" id="megaBtn" onclick="toggleMegaMenu(event)" title="工具区 · 其余 6 个板块（医疗急救 / 风险预警 / 事件报告 / 库管理 / CC 之家 / 问题反馈）" aria-haspopup="true" aria-expanded="false" aria-label="工具区"><svg width="15" height="15" viewBox="0 0 15 15" fill="currentColor" aria-hidden="true"><rect x="0" y="0" width="6.4" height="6.4" rx="1.6"/><rect x="8.6" y="0" width="6.4" height="6.4" rx="1.6"/><rect x="0" y="8.6" width="6.4" height="6.4" rx="1.6"/><rect x="8.6" y="8.6" width="6.4" height="6.4" rx="1.6"/></svg><span class="amb-tx">全部应用</span></button></nav>
 
-  <div class="actions">
-<button class="mega-btn" id="megaBtn" onclick="toggleMegaMenu(event)" title="全部应用（巨型菜单）" aria-haspopup="true" aria-expanded="false"><svg width="15" height="15" viewBox="0 0 15 15" fill="currentColor" aria-hidden="true"><rect x="0" y="0" width="6.4" height="6.4" rx="1.6"/><rect x="8.6" y="0" width="6.4" height="6.4" rx="1.6"/><rect x="0" y="8.6" width="6.4" height="6.4" rx="1.6"/><rect x="8.6" y="8.6" width="6.4" height="6.4" rx="1.6"/></svg></button>
-    
-    
-        <div class="net-status" id="netStatus"><span class="net-dot"></span><span id="netText">在线</span></div>
-    <button class="bk-btn" id="packsBadge" style="display:none" onclick="openPacksModal()" title="有新的数据包可安装">📦<span>新数据包</span></button>
-    <button class="bk-btn" onclick="openBackupModal()" title="数据备份 / 恢复">💾<span>备份</span></button>
-    <button class="theme-btn" id="themeBtn" onclick="cycleTheme()" title="切换主题">☀️</button>
-    <div class="user-chip" id="userChip" onclick="openProfileModal()" title="点击编辑姓名 / 头像">
-      <div class="avatar"><div id="avatarLetter">乘</div><img id="avatarImg" alt="" style="display:none"></div>
-      <span id="userName">乘务员</span>
+  <div class="actions" data-page-node-id="xvsfdyRVOsuES5oDEHTAxU">
+    <!-- 2026-09-19：右侧工具组不再放 ⊞（避免与页签行的「全部应用」重复入口），
+         工具区入口统一由页签行的 nav-more-btn 承担 -->
+        <!-- 2026-09-19 右侧重排：操作层（⊞ / 备份 / 主题）｜信息层（时间·日期·节日 / 在线）｜身份层（头像+姓名+角色）
+     数据包入口（📦）已按用户要求删除；功能引擎保留但不再有顶栏入口。 -->
+    <button class="bk-btn" onclick="openBackupModal()" title="数据备份 / 恢复" data-page-node-id="yJEzRlHehPesFrCYNcuR2w">💾<span class="act-tx" data-page-node-id="D8dPr7NsCFVzN5sv77yABH">备份</span></button>
+    <button class="theme-btn" id="themeBtn" onclick="cycleTheme()" title="切换主题" data-page-node-id="nKFuYQoLJzNJX7tUXNbM92">☀️</button>
+    <span class="act-sep" aria-hidden="true"></span>
+    <div class="sys-clock" id="sysClock" title="跟随本机系统时间；自动匹配今日节气/节假日" data-page-node-id="YcWUcjjvl8tXBH9OHVEJmv"><span class="sc-time" id="scTime" data-page-node-id="QIGEHR28sZNyYPC6CXIxDB">--:--</span><span class="sc-row" data-page-node-id="YcWUcjjvl8tXBH9OHVEJmw"><span class="sc-date" id="scDate" data-page-node-id="KvFc3yOf1fd3eZ4Z6E1mCb"></span><span class="sc-tag none" id="scTag" data-page-node-id="riZ1tAMXHe3AbUojpRyaeC"></span></span></div>
+    <div class="net-status" id="netStatus" data-page-node-id="vkrxK1uBwhkYGKD0uhiCmp"><span class="net-dot" data-page-node-id="tCVfoaLMzGGyADvUivJb33"></span><span id="netText" data-page-node-id="bTFVLcLuAOrQnh9aLGPNvP">在线</span></div>
+    <span class="act-sep" aria-hidden="true"></span>
+    <div class="user-chip" id="userChip" onclick="openProfileModal()" title="点击编辑姓名 / 头像" data-page-node-id="Ur7gOsSYWSPqAs1rVeKZdU">
+      <div class="avatar" data-page-node-id="55JJfKYQLvolbLuBnShvLA"><div id="avatarLetter" data-page-node-id="d9A7oxFJVUcBBdYXREsfH7">乘</div><img id="avatarImg" alt="" style="display:none" data-page-node-id="QUb2UZh2NTAzjpTGTVYi1C"></div>
+      <div class="uc-tx">
+        <span id="userName" data-page-node-id="kapg4qXiKzfZXEKqnDjuMq">乘务员</span>
+        <span class="uc-role" id="userRole"></span>
+      </div>
+      <span class="uc-caret" aria-hidden="true">›</span>
     </div>
+    <script>/* 身份层兜底（2026-09-19）：不依赖各壳的增强脚本，独立读会话填角色。
+       放在 actions 块内 → 随壳层同步补丁一起进两份内嵌 TEMPLATE，三个壳行为一致。 */
+    (function(){try{var s=JSON.parse(localStorage.getItem('cabin_session_v1')||'null');var r=document.getElementById('userRole');
+      if(r&&s)r.textContent=(s.role==='admin'||s.工号==='028981')?'管理员':'乘务员';}catch(e){}})();
+    </script>
   </div>
 </header>
 
-<main class="sys-area" id="sysArea">
+<main class="sys-area" id="sysArea" tabindex="-1">
   <div class="sys-wrap" id="wrap-qa">
     <div class="sys-loader" id="loader-qa"><div class="sys-spinner"></div><div class="sl-text">正在进入 你问我答 …</div></div>
     <iframe class="sys-frame" id="frame-qa"></iframe>
@@ -610,7 +717,6 @@ button:disabled:active{transform:none;}
   <div class="sys-wrap" id="wrap-home">
     <div class="sys-loader" id="loader-home"><div class="sys-spinner"></div><div class="sl-text">正在进入 CC 之家 …</div></div>
     <iframe class="sys-frame" id="frame-home"></iframe>
-  </div>
   </div>
   <div class="sys-wrap active" id="wrap-quiz">
     <div class="sys-loader" id="loader-quiz"><div class="sys-spinner"></div><div class="sl-text">正在进入 培训考核 …</div></div>
@@ -658,7 +764,6 @@ button:disabled:active{transform:none;}
 
 <!-- ===== 手机端底部 TabBar（APP 式主导航） ===== -->
 <nav class="m-tabbar" id="mTabbar" aria-label="底部导航">
-  <button class="m-tab" data-mod="home" onclick="mGo('home')"><span class="mi">🏠</span>之家</button>
   <button class="m-tab" data-mod="qa" onclick="mGo('qa')"><span class="mi">💬</span>问答</button>
   <button class="m-tab" data-mod="quiz" onclick="mGo('quiz')"><span class="mi">📚</span>培训</button>
   <button class="m-tab" data-mod="performance" onclick="mGo('performance')"><span class="mi">📊</span>绩效</button>
@@ -669,11 +774,19 @@ button:disabled:active{transform:none;}
 <!-- 「更多」底部面板 -->
 <div class="m-sheet-mask" id="mSheetMask" onclick="closeMoreSheet()"></div>
 <div class="m-sheet" id="mSheet" role="dialog" aria-label="全部板块">
-  <h4>全部板块 <button class="modal-x" onclick="closeMoreSheet()" aria-label="关闭">✕</button></h4>
+  <h4>全部板块 <span class="ms-sub">12 个板块 · 与顶栏「全部应用」同源</span><button class="modal-x" onclick="closeMoreSheet()" aria-label="关闭">✕</button></h4>
   <div class="m-sheet-grid">
-    <button class="m-sheet-item" data-mod="risk" onclick="mGoMod('risk')"><span class="mi">⚠️</span>风险预警</button>
+    <div class="m-sheet-sec">乘务服务</div>
+    <button class="m-sheet-item" data-mod="home" onclick="mGoMod('home')"><span class="mi">🏠</span>CC 之家</button>
+    <button class="m-sheet-item" data-mod="qa" onclick="mGoMod('qa')"><span class="mi">💬</span>你问我答</button>
     <button class="m-sheet-item" data-mod="medical" onclick="mGoMod('medical')"><span class="mi">🚑</span>医疗急救</button>
     <button class="m-sheet-item" data-mod="daily" onclick="mGoMod('daily')"><span class="mi">❓</span>日常问题</button>
+    <div class="m-sheet-sec">训练成长</div>
+    <button class="m-sheet-item" data-mod="quiz" onclick="mGoMod('quiz')"><span class="mi">📚</span>培训考核</button>
+    <button class="m-sheet-item" data-mod="performance" onclick="mGoMod('performance')"><span class="mi">📊</span>绩效管理</button>
+    <button class="m-sheet-item" data-mod="beauty" onclick="mGoMod('beauty')"><span class="mi">💄</span>美妆话术</button>
+    <div class="m-sheet-sec">运营管理</div>
+    <button class="m-sheet-item" data-mod="risk" onclick="mGoMod('risk')"><span class="mi">⚠️</span>风险预警</button>
     <button class="m-sheet-item" data-mod="manual" onclick="mGoMod('manual')"><span class="mi">📕</span>手册奖惩</button>
     <button class="m-sheet-item" data-mod="report" onclick="mGoMod('report')"><span class="mi">🗂</span>事件报告</button>
     <button class="m-sheet-item" data-mod="kbadmin" onclick="mGoMod('kbadmin')"><span class="mi">📇</span>库管理</button>
@@ -695,18 +808,8 @@ button:disabled:active{transform:none;}
   </div>
 </div>
 
-<!-- ===== 数据包在线更新（M2） ===== -->
-<div class="modal-mask" id="packsModal" onclick="if(event.target===this)closePacksModal()">
-  <div class="modal-card">
-    <h3 style="display:flex;align-items:center;justify-content:space-between;gap:8px">📦 发现可用数据包更新<button class="modal-x" onclick="closeModalId('packsModal')" title="关闭" aria-label="关闭">✕</button></h3>
-    <p class="m-sub" id="packsModalBody"></p>
-    <div class="m-actions">
-      <button class="m-btn primary" id="packsInstallBtn" onclick="installPacksUpdates()">⬇️ 全部安装</button>
-      <button class="m-btn ghost" onclick="closePacksModal()">稍后再说</button>
-    </div>
-    <div class="m-meta" id="packsModalMeta">来源：团队发布 · https + sha256 校验 · 不随个人备份迁移</div>
-  </div>
-</div>
+<!-- ===== 数据包在线更新（M2）：2026-09-19 按用户要求删除顶栏入口与弹窗。
+     引擎（window.PACKS）保留：kbadmin 数据包中心与构建链 M3 单测仍依赖它。 ===== -->
 
 <!-- ===== 个人资料（姓名 / 头像） ===== -->
 <div class="modal-mask" id="profileModal" onclick="if(event.target===this)closeProfileModal()">
@@ -1305,12 +1408,20 @@ function fxModal(mask, opts){
     const args = Array.prototype.slice.call(arguments);
     origAdd.apply(null, args);
     if(args.indexOf('show') >= 0){
+      /* __FOG_GUARD_20260919__：开弹窗前先收掉可能残留的新手教程雾层，
+         避免「教程雾层(z=5200) × 弹窗雾层(z=400)」叠加成整屏雾、或教程卡片缺失时只见雾不见卡片 */
+      try{
+        const _tour = document.querySelector('.tour-overlay.show');
+        if(_tour) _tour.classList.remove('show');
+      }catch(e){}
       fxRecede(true);
       if(card){
         cardCls(false, 'fx-out');
         try{ void card.offsetWidth; }catch(e){}
         cardCls(true, 'fx-in');
         if(mask._fxDir) cardCls(true, mask._fxDir);
+        /* 兜底：任何情况下卡片必须可见——只出现雾不见卡片即视为故障观感 */
+        try{ card.style.opacity = ''; }catch(e){}
       }
     }
   };
@@ -1504,7 +1615,8 @@ applyTheme('light');
 updateNetworkStatus();
 window.addEventListener('online', updateNetworkStatus);
 window.addEventListener('offline', updateNetworkStatus);
-checkPacksUpdate();
+/* 2026-09-19 数据包更新提示整体下线（用户要求）：入口已删，开机不再轮询 manifest；
+   checkPacksUpdate 保留原实现供 kbadmin 数据包中心与单测复用。 */
 renderUserChip();
 switchModule('qa');
 /* ===================== 手机端底部 TabBar（APP 式导航） ===================== */
@@ -1595,6 +1707,9 @@ button:active,[onclick]:active,a:active,summary:active,[role=button]:active{filt
 @media (prefers-reduced-motion:reduce){
   *,*::before,*::after{animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important}
 }
+<style id="ccSheetCss">
+
+</style>
 <style id="ccSheetCss">
 /*__CC_SHEET:v1__*/
 /* =============================================================
@@ -1829,6 +1944,15 @@ html[data-theme="dark"]{
     background:var(--csn-grabber); margin:-8px auto 12px;
   }
 }
+/* __FOG_GUARD_20260919__ 雾状遮罩兜底（① 头像弹窗雾层修复同源）：
+   动效 JS 一旦未生效（早期脚本报错 / 老 WebView / 安装时序异常），
+   .modal-card 常态是 opacity:0（手机档还停在屏幕外）——
+   用户就会看到「整屏雾状半透明遮罩、却没有弹窗卡片」。
+   这里给 .show 状态加纯 CSS 兜底：无 fx-in 时卡片也强制可见。 */
+.modal-mask.show .modal-card:not(.fx-in){ opacity:1; }
+@media (max-width:720px){
+  .modal-mask.show .modal-card:not(.fx-in){ transform:translate3d(0,0,0); }
+}
 @media (prefers-reduced-motion:reduce){
   .csn-mask,.csn-sheet,.csn-recede .sys-area,.csn-recede .m-tabbar{transition-duration:.01ms!important;}
   .csn-success .csn-tick{animation-duration:.01ms!important;}
@@ -1888,6 +2012,23 @@ html[data-theme="dark"]{
   addEventListener('load',safe);
   setTimeout(safe,800);
 })();
+</script>
+
+<script id="ccSheetJs">
+
+</script>
+<script id="ccEmbedRefresh">
+/* 重新把当前 TabBar 高度与主题写进所有已加载模块 */
+function refreshEmbedVars(){
+  ['qa','home','quiz','performance','beauty','risk','medical','daily','manual','report','kbadmin','issues'].forEach(function(id){
+    const f = document.getElementById('frame-'+id);
+    if(f && f.contentDocument){ try{ applyEmbedVars(id, f); }catch(e){} }
+  });
+}
+try{
+  window.addEventListener('resize', function(){ refreshEmbedVars(); });
+  window.addEventListener('orientationchange', function(){ setTimeout(refreshEmbedVars, 260); });
+}catch(e){}
 </script>
 
 <script id="ccSheetJs">
@@ -2350,20 +2491,69 @@ html[data-theme="dark"]{
   if(document.readyState === 'loading') document.addEventListener('DOMContentLoaded', bindModalDrag);
   else bindModalDrag();
 })();
+
+/* =============================================================
+ * __FOG_GUARD_20260919__ 雾状遮罩清扫守卫（低频自愈，正常路径零打扰）
+ * 治理三类「只剩雾」残留：
+ *   A) .csn-recede 残留 —— 弹窗/抽屉都关了，底层却还缩放+模糊+变暗（雾感主源）
+ *   B) .tour-overlay.show 残留 —— 新手教程卡片缺失/渲染失败时整屏只剩雾（z=5200 无解）
+ *   C) .mega-mask.show 残留 —— 巨型菜单面板已收但遮罩未收
+ * 实现：1.5s 周期 + visibilitychange 触发；全部只读判断、命中才动一次 class，
+ *       不碰任何业务状态；幂等标记 window.__CC_FOG_GUARD__。
+ * ============================================================= */
+(function(){
+  'use strict';
+  if(window.__CC_FOG_GUARD__) return;
+  window.__CC_FOG_GUARD__ = true;
+
+  function anyModalOpen(){
+    var m = document.querySelectorAll('.modal-mask.show');
+    return m && m.length > 0;
+  }
+  function sheetOpen(){
+    try{
+      if(window.CCSheet && typeof CCSheet.isOpen === 'function' && CCSheet.isOpen()) return true;
+    }catch(e){}
+    var sh = document.querySelector('.csn-overlay.show, .csn-sheet.show, .m-sheet.show');
+    return !!sh;
+  }
+  function megaOpen(){
+    var mask = document.querySelector('.mega-mask.show');
+    if(!mask) return false;
+    var btn = document.getElementById('megaBtn');
+    if(btn && btn.getAttribute('aria-expanded') === 'true') return true;
+    /* 无按钮参照（其他壳）时看面板本体是否可见 */
+    var panel = document.getElementById('megaPanel') || document.querySelector('.mega-panel');
+    return !!(panel && panel.getBoundingClientRect().height > 0);
+  }
+  function sweep(){
+    try{
+      /* A) csn-recede 残留 */
+      var root = document.documentElement;
+      if(root.classList.contains('csn-recede') && !anyModalOpen() && !sheetOpen()){
+        root.classList.remove('csn-recede');
+      }
+      /* B) 新手教程雾层残留：声明为 show，但卡片看不见（缺失/高度为 0） */
+      var tour = document.querySelector('.tour-overlay.show');
+      if(tour){
+        var cardEl = tour.querySelector('#tourCard') || tour.querySelector('.tour-card');
+        var vis = false;
+        if(cardEl){
+          var r = cardEl.getBoundingClientRect();
+          vis = r.height > 8 && getComputedStyle(cardEl).visibility !== 'hidden';
+        }
+        if(!vis) tour.classList.remove('show');
+      }
+      /* C) 巨型菜单遮罩残留：面板已收但遮罩还在 */
+      var mm = document.querySelector('.mega-mask.show');
+      if(mm && !megaOpen()) mm.classList.remove('show');
+    }catch(e){}
+  }
+  setInterval(sweep, 1500);
+  document.addEventListener('visibilitychange', function(){ if(!document.hidden) sweep(); });
+  document.addEventListener('DOMContentLoaded', sweep);
+})();
 /*__CC_SHEET_JS_END__*/
-</script>
-<script id="ccEmbedRefresh">
-/* 重新把当前 TabBar 高度与主题写进所有已加载模块 */
-function refreshEmbedVars(){
-  ['qa','home','quiz','performance','beauty','risk','medical','daily','manual','report','kbadmin','issues'].forEach(function(id){
-    const f = document.getElementById('frame-'+id);
-    if(f && f.contentDocument){ try{ applyEmbedVars(id, f); }catch(e){} }
-  });
-}
-try{
-  window.addEventListener('resize', function(){ refreshEmbedVars(); });
-  window.addEventListener('orientationchange', function(){ setTimeout(refreshEmbedVars, 260); });
-}catch(e){}
 </script>
 
 <script>
@@ -2409,6 +2599,14 @@ function syncCrumb(modId){
   var m = MODS[modId];
   el.textContent = m ? (m.icon + ' ' + m.name) : modId;
   setCrumbSub('');   /* 子页由 navJumpTo 延迟补写（等页签观察者微任务结束后） */
+  /* 2026-09-19：顶栏只保留 3 个板块。当前板块若在顶栏可见，面包屑与页签重复且挤占宽度 → 隐藏；
+     只有在顶栏看不到的板块（美妆话术/日常问题/手册奖惩…）才用面包屑提示位置。 */
+  var bar = document.getElementById('shellCrumb');
+  if(bar){
+    var t = document.querySelector('.module-tabs .mod-tab[data-mod="' + modId + '"]');
+    var visibleInTabs = !!(t && t.getBoundingClientRect().width > 0);
+    bar.style.display = visibleInTabs ? 'none' : '';
+  }
 }
 function subLabel(modId, view){
   var m = MODS[modId]; if(!m) return '';
@@ -2517,7 +2715,7 @@ function buildMega(){
   megaPanel.className = 'mega-panel'; megaPanel.id = 'megaPanel';
   megaPanel.setAttribute('role', 'dialog'); megaPanel.setAttribute('aria-label', '全部应用');
   var cm = curMod();
-  var h = '<div class="mega-head"><div class="mega-title">⊞ 全部应用 · ' + GROUPS.length + ' 大组 ' + Object.keys(MODS).length + ' 个模块</div>';
+  var h = '<div class="mega-head"><div class="mega-title">🧰 工具区 · 全部板块与设置（' + Object.keys(MODS).length + ' 个模块 / ' + GROUPS.length + ' 组）</div>';
   h += '<button class="modal-x" id="megaCloseX" title="关闭" aria-label="关闭">✕</button></div>';
   for(var g=0; g<GROUPS.length; g++){
     var grp = GROUPS[g];
@@ -2606,11 +2804,44 @@ window.addEventListener('message', function(e){
     var d = e.data || {};
     if(d.type === 'cc:crumb' && typeof d.text === 'string' && d.text){
       var act = document.querySelector('.mod-tab.active');
-      if(act && (!d.mod || d.mod === act.getAttribute('data-mod'))) setCrumbSub(d.text);
+      if(act && (!d.mod || d.mod === act.getAttribute('data-mod'))){
+        /* 2026-09-19：只取「›」后最后一段非空文本并限长 12 字，避免整串库名撑爆顶栏，
+           也避免模块上报 "... ›" 时留下孤零零的分隔符。 */
+        var parts = String(d.text).split('›').map(function(x){ return x.trim(); }).filter(Boolean);
+        var sub = parts.length ? parts[parts.length - 1] : '';
+        if(sub.length > 12) sub = sub.slice(0, 12) + '…';
+        setCrumbSub(sub);
+      }
     }
   }catch(err){}
 });
 
+/* ---------- 宽屏铺满：空间够就展示全部板块（2026-09-19 用户要求） ----------
+   做法：先把全部页签显形量一遍总宽（读 offsetWidth 会强制回流，测量有效），
+   与「顶栏可用宽度 - 右侧状态区 - 面包屑」比较，够则保留 .nav-all，否则退回 keep 白名单。 */
+function fitNavTabs(){
+  try{
+    var nav = document.getElementById('moduleTabs');
+    if(!nav) return;
+    var bar = nav.closest ? nav.closest('.topbar') : null;
+    if(!bar) bar = nav.parentNode;
+    var actions = bar.querySelector('.actions');
+    var crumb = document.getElementById('shellCrumb');
+    var pad = 40;
+    var avail = (bar.clientWidth || 0) - pad - (actions ? actions.offsetWidth : 0)
+              - ((crumb && crumb.offsetWidth) ? crumb.offsetWidth : 0) - 12;
+    if(avail <= 0) return;
+    nav.classList.add('nav-all');
+    var tabs = nav.querySelectorAll('.mod-tab'), need = 0;
+    for(var i = 0; i < tabs.length; i++){
+      var w = tabs[i].offsetWidth;
+      if(w > 0) need += w + 6;
+    }
+    if(need <= avail) nav.classList.add('nav-all');
+    else nav.classList.remove('nav-all');
+  }catch(e){}
+}
+window.fitNavTabs = fitNavTabs;
 /* ---------- #9 滚动收缩：绑定活动模块 iframe 滚动（同源，含 .main-scroll-container） ---------- */
 function activeScrollY(){
   try{
@@ -2669,6 +2900,13 @@ function init(){
   watchTabs();
   bindDrops();
   bindFrameScrolls();
+  fitNavTabs();
+  setTimeout(fitNavTabs, 600);           /* 字体/emoji 落位后复测 */
+  var _fitTimer = null;
+  window.addEventListener('resize', function(){
+    if(_fitTimer) clearTimeout(_fitTimer);
+    _fitTimer = setTimeout(fitNavTabs, 120);
+  });
 }
 if(document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init);
 else init();

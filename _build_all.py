@@ -23,7 +23,6 @@ BUILD_STEPS = [
     (u'同步数据包引擎(4源)', u'python _sync_packs.py --check'),
     (u'同步日期匹配引擎(3源)', u'python _sync_date_match.py --check'),
     (u'同步时节引擎(单一来源)', u'python _sync_season.py --check'),
-    (u'同步日期匹配引擎(单一来源)', u'python _sync_date_match.py --check'),
     (u'同步大撤专项(2源)', u'python _sync_dache.py --check'),
     (u'同步CBT练习场景数据(quiz单一来源)', u'python _sync_cbt.py'),
     (u'培训考核题库 = 原题库 + CBT练习独立分类(幂等)', u'python _apply_cbt_bank_20260918.py'),
@@ -31,12 +30,28 @@ BUILD_STEPS = [
     (u'扩展成就系统(CBT题库,幂等)', u'python _apply_cbt_achv_20260918.py'),
     (u'你问我答·接入CBT题库资源库(幂等)', u'python _sync_qa_cbt.py'),
     (u'你问我答·天气意图误吞手册问法修复', u'python _apply_qa_weather_guard_20260918.py'),
+    (u'你问我答·跳转目标修复(CBT/大撤去对应板块,幂等)', u'python _apply_qa_jumpfix_20260919.py'),
+    (u'你问我答·跨板块桥接(深链/深跳/面包屑,幂等)', u'python _apply_qa_bridge_20260919.py'),
+    (u'你问我答·会话记忆(持久化/多轮/抽屉,幂等)', u'python _apply_qa_memory_20260919.py'),
+    (u'你问我答·状态与反馈(aria-busy/失败出路/形象联动,幂等)', u'python _apply_qa_ux_20260919.py'),
+    (u'你问我答·能力增强(语音/跨板块数据/跨域引导/场景推荐,幂等)', u'python _apply_qa_capability_20260919.py'),
     (u'注入导航升级(#1/#3/#4/#5/#9,幂等)', u'python _apply_nav_20260917.py'),
     (u'同步壳层弹窗引擎(index→两模板)', u'python _sync_shell_js.py'),
+    (u'kb-admin AI 客户端对齐(降级链+熔断,幂等)', u'python _apply_kbadmin_ai_chain_20260919.py'),
+    # ===== 2026-09-19 彻底无密钥 / 本地模式 / 话术向导增强（必须在打包产物之前）=====
+    (u'你问我答·琴模块副本去重(幂等)', u'python _dedupe_qa_piano_20260919.py'),
+    (u'你问我答·首屏快问行(幂等)', u'python _apply_qa_quickstart_20260919.py'),
+    (u'你问我答·话术向导增强(产品名直触发+换个风格,幂等)', u'python _apply_qa_wizard2_20260919.py'),
+    # ===== 2026-09-19 平板 3D「无模型」：可用性甄别（WebGL 探测/兜底/三分文案）=====
+    (u'你问我答·3D可用性甄别(WebGL探测+回落2D+三分文案,幂等)', u'python _apply_qa_3dfix_20260919.py'),
+    # ===== 2026-09-19 设计审核 P0-C：标题层级与 skip-link（必须在打包产物之前）=====
+    (u'可访问性·标题层级+skip-link(幂等)', u'python _apply_a11y_20260919.py'),
+    (u'壳层设计审核修复·顶栏对比度/字号/触控44px+平板档(幂等)', u'python _apply_shell_sync_20260919.py'),
     (u'构建 kb-admin(库管理)', u'python _build_kbadmin.py'),
     (u'构建 spring(9模块单文件)', u'python _gzip_build.py'),
     (u'构建 4合1(10模块离线版)', u'python _build_4in1.py'),
     (u'UX 美化注入(幂等,构建后补挂产物)', u'python _apply_ux_polish.py'),
+    (u'你问我答·跳转落地页(9板块接收侧,幂等)', u'python _apply_qa_landing_20260919.py'),
 ]
 
 # M1-M3 逻辑验证套件（Node 先行、Python 收尾）
@@ -57,6 +72,12 @@ VERIFY_SCRIPTS = [
     u'node _verify_ai_price.js',   # 竞品分析 AI 更新价格（JSON 解析/覆盖层/预设与自定义应用）
     u'node _verify_qa_wakeup.js',   # 你问我答跨板块唤醒（33 用例：日常/手册/大撤/医疗/绩效/事件报告/病假）
     u'node _verify_qa_assoc.js',    # 你问我答候选追问+联想记忆（未收录表述候选收集/确认写入记忆/精确模糊命中/都不是跳过/撤销/200条上限/失效降级）
+    u'node _verify_qa_bridge.js',   # 你问我答跨板块桥接（URL 深链 / cc:nav-jump 深跳 / cc:crumb 上报 / jumpTo 带上下文；真实浏览器 22 项）
+    u'node _verify_qa_memory.js',   # 你问我答会话记忆（落盘+reload 恢复 / AI 请求真的带历史 / 记忆抽屉撤销与清空；真实浏览器 17 项）
+    u'node _verify_qa_capability.js',  # 你问我答能力增强（语音降级 / 跨板块数据进上下文 / 跨域引导 / 场景推荐；真实浏览器 15 项）
+    u'node _verify_qa_landing.js',     # 你问我答跳转落地闭环（URL 通道 / 填入搜索框 / qa→板块接住并消费 / TTL 与边界；真实浏览器 12 项）
+    u'node _verify_qa_jumpfix.js',     # 你问我答跳转目标（CBT→培训考核 / 大撤→答题 / 手册→手册奖惩，且不再误显「去日常库再问」；20 项）
+    u'node _e2e_apk_www_test.js',      # APK 内容 + 虚拟域实测（直接读 APK 内 assets/www + https://cabin.local；29 项）
     u'python _verify_packs_m3.py', # 发布管线 19
     u'python _verify_assets.py',   # 形象IP 素材完整性（母版/抠图/精灵/原稿_clean 覆盖/模型登记）
     u'node _verify_ccsheet_static.js',  # 十种弹窗交互引擎静态守护（index/两模板：CCSheet/动效层/--embed-bottom/深色打通/更多面板走引擎）
@@ -68,6 +89,22 @@ VERIFY_SCRIPTS = [
     u'python _apply_cbt_achv_20260918.py --check',   # CBT 题库专项成就（15 枚）
     u'python _sync_qa_cbt.py --check',               # 你问我答 CBT题库 资源库 = docs/_kb_cbt_new.js
     u'python _apply_qa_weather_guard_20260918.py --check',  # 天气意图不误吞手册/题库问法
+    u'python _apply_qa_bridge_20260919.py --check',         # 你问我答跨板块桥接标记块在位
+    u'python _apply_qa_memory_20260919.py --check',         # 你问我答会话记忆标记块在位
+    u'python _apply_qa_ux_20260919.py --check',             # 你问我答状态与反馈标记块在位
+    u'python _apply_qa_capability_20260919.py --check',     # 你问我答能力增强标记块在位
+    u'python _apply_qa_landing_20260919.py --check',        # 你问我答跳转落地页（9 板块）标记块在位
+    u'python _apply_qa_jumpfix_20260919.py --check',        # 你问我答跳转目标修复在位
+    u'python _apply_kbadmin_ai_chain_20260919.py --check',  # kb-admin AI 降级链对齐（E 组）
+    u'python _dedupe_qa_piano_20260919.py',                   # 琴模块恰好 1 份
+    u'python _apply_qa_quickstart_20260919.py --check',        # 首屏快问行在位
+    u'python _apply_qa_wizard2_20260919.py --check',           # 话术向导增强在位
+    u'python _apply_qa_3dfix_20260919.py --check',             # 3D 可用性甄别在位（2026-09-19）
+    u'python _apply_a11y_20260919.py --check',                 # 标题层级 + skip-link 在位（设计审核 P0-C）
+    u'python _apply_shell_sync_20260919.py --check',           # 顶栏对比度/字号/44px 触控 + 平板档（设计审核 P0-A/B）
+    u'node _ai_restore_verify_20260919.js',                    # AI 已恢复（2026-09-19 深夜用户指令）；localmode 验证器随之退役
+    u'python _verify_nokey_all.py --quiet',                     # 全链路零密钥审计（源/gz/壳载荷/www/PWA/APK）
+    u'python _check_apk_sync.py',                           # APK 内 assets/www 与源同步（落后即失败，防「改了源没装配」）
 ]
 
 # 全量语法检查覆盖：全部模块源 + 三外壳/产物（排除 .tmp_ 调试文件）

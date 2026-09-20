@@ -77,7 +77,12 @@
   function makeStage(el, opt) {
     var scene = new T.Scene();
     var cam = new T.PerspectiveCamera(32, 1, 0.05, 60);
-    var renderer = new T.WebGLRenderer({ antialias: true, alpha: true, powerPreference: 'high-performance' });
+    /* 2026-09-19：WebGL 上下文创建失败（老设备/被禁用/渲染进程异常）时返回 null，
+       由 mount() 回落 2D 精灵兜底，绝不让 3D 失败打断页面 */
+    var renderer;
+    try {
+      renderer = new T.WebGLRenderer({ antialias: true, alpha: true, powerPreference: 'high-performance' });
+    } catch (e) { return null; }
     renderer.setClearAlpha(0);
     if ('outputEncoding' in renderer) renderer.outputEncoding = T.sRGBEncoding;
     if ('toneMapping' in renderer) { renderer.toneMapping = T.ACESFilmicToneMapping; renderer.toneMappingExposure = 1.06; }
@@ -166,8 +171,13 @@
     var done = function (rec, err) { if (!rec) miss[i] = true; cb(rec, err); };
     var isFile = (location.protocol === 'file:');
     if (isFile) { viaScript(state, i, done); return; }
-    loader().load(url(i), function (g) { after(state, i, g, done); },
-      undefined, function (err) { viaScript(state, i, function (r, e) { done(r, e || err); }); });
+    /* 2026-09-19：loader().load 同步抛错（Loader 缺失等）也走 viaScript 回退 */
+    try {
+      loader().load(url(i), function (g) { after(state, i, g, done); },
+        undefined, function (err) { viaScript(state, i, function (r, e) { done(r, e || err); }); });
+    } catch (e) {
+      viaScript(state, i, function (r, e2) { done(r, e2 || e); });
+    }
   }
 
   function setForm(el, i) {
@@ -231,6 +241,7 @@
     }
     opt = opt || {};
     var st = makeStage(el, opt);
+    if (!st) return false;          /* WebGL 不可用 → 调用方保留 2D 兜底（2026-09-19） */
     el.__cc3d = st;
     bindPointer(st);
     fit(st);
