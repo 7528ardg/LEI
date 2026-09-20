@@ -2253,6 +2253,7 @@ html[data-theme="dark"] .dc-card{background:#162420;border-color:#1E3A2C;color:#
 
 
 
+
 <div class="livery-stripe"></div>
 
 <header class="topbar">
@@ -11187,7 +11188,8 @@ window.addEventListener('message', function(e){
     { ic:'📍', t:'位置上报', q:'忘记上传位置会不会扣分？' },
     { ic:'🚨', t:'大撤流程', q:'大撤整体流程' },
     { ic:'\u26C5',       t:'查天气',   q:'今天广州天气怎样' },
-    { ic:'🏅', t:'晋级条件', q:'竞聘带班乘务长有什么要求？' }
+    { ic:'🏅', t:'晋级条件', q:'竞聘带班乘务长有什么要求？' },
+    { ic:'🤖', t:'AI接口', act:'ai' }
   ];
 
   function css(){
@@ -11206,6 +11208,9 @@ window.addEventListener('message', function(e){
       + 'color:#2E6B4F;border-radius:999px;padding:6px 12px;font-size:.76rem;font-weight:700;cursor:pointer;'
       + 'font-family:inherit;min-height:36px;}'
       + '#qaQuickPop .qq-c:hover{border-color:var(--primary,#148453);color:var(--primary,#148453);}'
+      + '#qaQuickPop .qq-ai{border-style:dashed;background:transparent;color:var(--text2,#5A6F65);}'
+      + '#qaQuickPop .qq-ai:hover{border-color:var(--primary,#148453);color:var(--primary,#148453);background:var(--primary-mist,#F4F9F6);}'
+      + 'html[data-theme="dark"] #qaQuickPop .qq-ai{background:transparent;color:#8FD3B0;}'
       + '#qaQuickPop .qq-x{position:absolute;top:8px;right:8px;border:none;background:transparent;color:var(--text3,#B5C2BC);'
       + 'font-size:14px;line-height:1;cursor:pointer;padding:6px;width:32px;height:32px;}'
       + 'html[data-theme="dark"] #qaQuickPop{background:#162420;border-color:#1E3A2C;}'
@@ -11260,13 +11265,22 @@ window.addEventListener('message', function(e){
       p.innerHTML = '<button class="qq-x" type="button" aria-label="不再显示">\u2715</button>'
         + '<div class="qq-t">💡 想快点上手？点一个试试，也可以直接说产品名（如「雅诗兰黛小棕瓶」）出话术。</div>'
         + '<div class="qq-row">' + QUICK.map(function(c){
-            return '<button class="qq-c" type="button" data-q="' + String(c.q).replace(/"/g,'&quot;') + '">'
-                 + c.ic + ' ' + c.t + '</button>';
+            return '<button class="qq-c' + (c.act ? ' qq-ai' : '') + '" type="button"'
+                 + (c.act ? ' data-act="' + c.act + '"' : ' data-q="' + String(c.q).replace(/"/g,'&quot;') + '"')
+                 + '>' + c.ic + ' ' + c.t + '</button>';
           }).join('') + '</div>';
       d.appendChild(p);
       p.querySelector('.qq-x').onclick = function(){ close(true); };
       Array.prototype.forEach.call(p.querySelectorAll('.qq-c'), function(b){
         b.onclick = function(){
+          if(b.getAttribute('data-act') === 'ai'){
+            close(false);
+            try{
+              if(typeof SpringAI !== 'undefined' && SpringAI.openSettings) SpringAI.openSettings();
+              else if(typeof openAiSettings === 'function') openAiSettings();
+            }catch(e){}
+            return;
+          }
           var q = b.getAttribute('data-q') || ''; if(!q) return;
           close(false);
           try{ ask(q); }catch(e){}
