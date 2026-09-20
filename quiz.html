@@ -1794,6 +1794,15 @@ a{color:var(--primary);text-decoration:none;}
   .ecb-progress{max-width:120px;}
 }
 
+/* ===== 20260920 修复「倒计时/控制条 UI 不固定」：两者统一包进同一粘性层 =====
+   原问题：倒计时条 top:60px 与控制条 top:calc(topbar-h+12px) 各自独立 sticky，
+   偏移不一致导致滚动时相互漂移、盖住题目内容。
+   现方案：渲染时两者包进 .quiz-sticky-head（唯一粘性载体），条内 position 全部失效，
+   保证整块永远整体钉在顶栏下方，不再相对滑动。 */
+.quiz-sticky-head{position:sticky;top:calc(var(--topbar-h,60px) + 12px);z-index:20;margin-bottom:18px;}
+.quiz-sticky-head .exam-countdown-bar{position:static;top:auto;margin-bottom:12px;}
+.quiz-sticky-head .quiz-topbar{position:static;top:auto;margin-bottom:0;}
+
 /* 提交进度遮罩 */
 .me-submit-loading{position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(15,42,31,.55);backdrop-filter:blur(6px);z-index:9999;display:flex;align-items:center;justify-content:center;animation:fadeIn .2s ease-out;}
 .me-submit-card{background:var(--bg-card);padding:28px 36px;border-radius:16px;box-shadow:0 16px 48px rgba(0,0,0,.25);text-align:center;min-width:240px;animation:scaleIn .25s cubic-bezier(.34,1.56,.64,1);border:1px solid var(--border);}
@@ -8688,11 +8697,13 @@ function startChapterQuiz(chapterName){
   startQuiz(idxs);
 }
 
-/* 考试模式：限时、打乱、不可回退 */
+/* 考试模式：限时、打乱、不可回退（20260920：全库过大时随机抽 100 题） */
 function startExam(idxs, timeLimit){
   if(!idxs||!idxs.length){toast('请选择题目','warning');return;}
   const limit = timeLimit || 1800; // 默认30分钟
-  const shuffled = [...idxs].sort(()=>Math.random()-0.5);
+  const EXAM_MAX_Q = 100; // 单卷题量上限：超出时随机抽样
+  const shuffled = [...idxs].sort(()=>Math.random()-0.5).slice(0, EXAM_MAX_Q);
+  if(idxs.length > EXAM_MAX_Q) toast(`题库共 ${idxs.length} 题，已随机抽取 ${EXAM_MAX_Q} 题组卷`,'info');
   APP.quiz = {
     indices: shuffled,
     current: 0,
@@ -8917,6 +8928,7 @@ function renderQuiz(){
   const motivation = getMotivation(stats.accuracy);
 
   document.getElementById('mainContent').innerHTML = `
+    <div class="quiz-sticky-head">
     ${(isExam || isMock) && qz.timeLimit ? `
     <div class="exam-countdown-bar" id="examCountdownBar">
       <div class="ecb-inner">
@@ -8947,6 +8959,7 @@ function renderQuiz(){
         ${!isStudy ? `<button class="qt-icon-btn ${isFlagged?'active':''}" onclick="toggleFlag()" title="标记 (F)">${isFlagged?'🚩':'⚑'}</button>` : ''}
         <button class="qt-icon-btn" onclick="quickToggleFav(${qi})" title="收藏 (S)">${isFav(qi)?'⭐':'☆'}</button>
       </div>
+    </div>
     </div>
 
     <div class="quiz-layout">

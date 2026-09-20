@@ -9654,6 +9654,32 @@ button:disabled:active{transform:none;}
 })();
 /*__PERF_IMPORT_JS_END__*/
 </script>
+<style>
+/*__PERF_UIFIX_20260920_CSS_BEGIN__*/
+/* ① 新手引导弹窗：纯色占位 → 系统品牌风格（绿系渐变 + 金色收尾） */
+.wg-step-icon{width:60px;height:60px;border-radius:18px;display:inline-flex;align-items:center;justify-content:center;color:#fff;background:linear-gradient(135deg,#0C8454 0%,#1FA56A 100%);box-shadow:0 6px 18px rgba(12,132,84,.28);}
+.wg-step-icon.wg-step-2{background:linear-gradient(135deg,#1FA56A 0%,#8FC85C 100%);box-shadow:0 6px 18px rgba(143,200,92,.32);}
+.wg-step-icon.wg-step-3{background:linear-gradient(135deg,#F5B800 0%,#F08A00 100%);box-shadow:0 6px 18px rgba(240,138,0,.28);}
+/* ② 顶栏排版固定（修复「UI 不固定」：窄容器下右侧按钮被压成竖排字、行错乱）
+   策略：允许菜单项整齐换行（保住下拉菜单不被裁剪），右侧控件整组永不压缩 */
+.module-nav .container-fluid{row-gap:6px;}
+.module-nav .navbar-collapse{flex-wrap:wrap;row-gap:6px;}
+.module-nav #mainNav{flex-wrap:wrap;row-gap:4px;align-items:center;}
+.module-nav .navbar-nav .nav-item{flex-shrink:0;}
+.module-nav .nav-link{white-space:nowrap;}
+.module-nav .navbar-collapse > .d-flex{flex-wrap:nowrap;flex-shrink:0;gap:10px !important;margin-left:auto;}
+.module-nav .btn{white-space:nowrap;flex-shrink:0;}
+.module-nav .navbar-toggler{flex-shrink:0;}
+.module-nav .user-menu-nav{flex-shrink:0;}
+.module-nav .user-info-nav{min-width:0;}
+.module-nav .user-name-nav,.module-nav .user-role-nav{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:120px;}
+.module-nav .connection-status-nav{flex-shrink:0;}
+@media (max-width:1240px){
+  .module-nav .brand-subtitle{display:none;}
+  .module-nav .user-info-nav{display:none;}
+}
+/*__PERF_UIFIX_20260920_CSS_END__*/
+</style>
 </head>
 <body>
     <!-- ========== 首屏骨架屏（提升首屏感知速度） ========== -->
@@ -10296,7 +10322,7 @@ button:disabled:active{transform:none;}
     <div class="modal fade" id="welcomeGuideModal" tabindex="-1" aria-labelledby="welcomeGuideModalLabel">
         <div class="modal-dialog modal-dialog-centered modal-lg">
             <div class="modal-content border-0 shadow-lg" style="border-radius: 24px;">
-                <div class="modal-header border-0" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border-radius: 24px 24px 0 0;">
+                <div class="modal-header border-0" style="background: linear-gradient(135deg, #0C8454 0%, #1FA56A 100%); border-radius: 24px 24px 0 0;">
                     <h5 class="modal-title fw-bold text-white" id="welcomeGuideModalLabel"><i class="bi bi-rocket-takeoff me-2"></i>欢迎使用广州分队绩效管理系统</h5>
                     <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
@@ -10304,27 +10330,21 @@ button:disabled:active{transform:none;}
                     <div class="row g-4">
                         <div class="col-md-4">
                             <div class="text-center p-3 rounded-4 bg-light">
-                                <div class="bg-primary text-white rounded-circle d-inline-flex align-items-center justify-content-center mb-3" style="width: 60px; height: 60px;">
-                                    <i class="bi bi-cloud-upload fs-4"></i>
-                                </div>
+                                <div class="wg-step-icon wg-step-1"><i class="bi bi-cloud-upload fs-4"></i></div>
                                 <h6 class="fw-bold">第一步：导入数据</h6>
                                 <p class="small text-muted mb-0">点击「导入数据」上传单个Excel文件，或点击「导入文件夹」批量导入</p>
                             </div>
                         </div>
                         <div class="col-md-4">
                             <div class="text-center p-3 rounded-4 bg-light">
-                                <div class="bg-success text-white rounded-circle d-inline-flex align-items-center justify-content-center mb-3" style="width: 60px; height: 60px;">
-                                    <i class="bi bi-bar-chart fs-4"></i>
-                                </div>
+                                <div class="wg-step-icon wg-step-2"><i class="bi bi-bar-chart fs-4"></i></div>
                                 <h6 class="fw-bold">第二步：查看分析</h6>
                                 <p class="small text-muted mb-0">系统自动生成绩效图表和排名</p>
                             </div>
                         </div>
                         <div class="col-md-4">
                             <div class="text-center p-3 rounded-4 bg-light">
-                                <div class="bg-warning text-white rounded-circle d-inline-flex align-items-center justify-content-center mb-3" style="width: 60px; height: 60px;">
-                                    <i class="bi bi-download fs-4"></i>
-                                </div>
+                                <div class="wg-step-icon wg-step-3"><i class="bi bi-download fs-4"></i></div>
                                 <h6 class="fw-bold">第三步：导出报告</h6>
                                 <p class="small text-muted mb-0">一键导出绩效数据和分析报告</p>
                             </div>
