@@ -1925,6 +1925,38 @@ button:disabled:active{transform:none;}
     height:calc(138px * var(--pS,1));right:var(--pX,12px);}
 }
 </style>
+<style id="cbtPracticeCss">/*__CBT_PRACTICE_CSS__*/
+/* CBT 练习卡（风格对齐话术向导 .wz-* 系列） */
+.cbt-card{display:flex;flex-direction:column;gap:10px;}
+.cbt-head{display:flex;align-items:center;gap:8px;font-weight:800;color:var(--text,#0F2A1F);font-size:.92rem;flex-wrap:wrap;}
+.cbt-sub{font-size:.72rem;font-weight:600;color:var(--text3,#B5C2BC);}
+.cbt-prog{margin-left:auto;font-size:.72rem;font-weight:700;color:#148453;background:var(--primary-mist,#F4F9F6);border-radius:99px;padding:2px 10px;}
+.cbt-q{background:var(--primary-mist,#F4F9F6);border:1px solid var(--border,#E5EDE9);border-radius:12px;padding:12px 14px;font-size:.9rem;line-height:1.7;color:var(--text,#0F2A1F);}
+.cbt-ans{border:1px dashed var(--border,#E5EDE9);border-radius:12px;padding:12px 14px;font-size:.88rem;line-height:1.8;color:var(--text2,#5A6F65);}
+.cbt-ans b{color:#0C5F3A;}
+.cbt-meta{font-size:.7rem;color:var(--text3,#B5C2BC);display:flex;gap:10px;flex-wrap:wrap;}
+.cbt-chapters{display:flex;flex-wrap:wrap;gap:6px;}
+.cbt-chip{border:1px solid var(--border,#E5EDE9);background:var(--bg-card,#fff);color:var(--text2,#5A6F65);font-size:.74rem;font-weight:600;padding:5px 11px;border-radius:99px;cursor:pointer;transition:all .18s;}
+.cbt-chip:hover{border-color:#148453;color:#0C5F3A;}
+.cbt-tip{font-size:.72rem;color:var(--text3,#B5C2BC);line-height:1.6;}
+.cbt-opts{display:flex;flex-direction:column;gap:6px;}
+.cbt-opt{display:flex;align-items:center;gap:8px;text-align:left;border:1px solid var(--border,#E5EDE9);background:var(--bg-card,#fff);border-radius:10px;padding:9px 12px;font-size:.86rem;line-height:1.5;color:var(--text2,#5A6F65);cursor:pointer;transition:all .16s;}
+.cbt-opt:hover{border-color:#148453;color:#0C5F3A;}
+.cbt-l{flex:none;width:22px;height:22px;border-radius:50%;background:var(--primary-mist,#F4F9F6);color:#148453;font-weight:800;font-size:.72rem;display:flex;align-items:center;justify-content:center;}
+.cbt-opt.ok{border-color:#1FA56A;background:#EAF7F0;color:#0C5F3A;font-weight:700;}
+.cbt-opt.ok .cbt-l{background:#1FA56A;color:#fff;}
+.cbt-opt.bad{border-color:#E06A5A;background:#FDEEEB;color:#B3402F;}
+.cbt-opt.bad .cbt-l{background:#E06A5A;color:#fff;}
+.cbt-opt:disabled{cursor:default;opacity:.82;}
+.cbt-verdict{border-radius:10px;padding:9px 12px;font-size:.85rem;font-weight:700;line-height:1.6;}
+.cbt-verdict.ok{background:#EAF7F0;color:#0C5F3A;}
+.cbt-verdict.bad{background:#FDEEEB;color:#B3402F;}
+html[data-theme="dark"] .cbt-opt{background:#13251C;}
+html[data-theme="dark"] .cbt-opt.ok{background:#12301F;}
+html[data-theme="dark"] .cbt-opt.bad{background:#3A1D18;}
+html[data-theme="dark"] .cbt-q{background:#13251C;}
+html[data-theme="dark"] .cbt-prog{background:#13251C;color:#8FD3B0;}
+/*__CBT_PRACTICE_CSS_END__*/</style>
 <style id="qa-bridge-css">
 /*__QA_BRIDGE_CSS__*/
 /* 2026-09-19 用户要求：上下文条「置于聊天框弹出」——与底部控制台 #qaDeck 同宽，
@@ -1952,6 +1984,70 @@ html[data-theme="dark"] #qaCtxBar .qa-ctx-x:hover{background:rgba(245,217,138,.1
   #qaCtxBar .qa-ctx-x{width:44px;height:44px;min-width:44px;}
 }
 /*__QA_BRIDGE_CSS_END__*/
+</style>
+<style id="qa-mem-css">
+/*__QA_MEM_CSS__*/
+/* ---- B3 历史 / 记忆抽屉 ---- */
+#qaDrawer{position:fixed;inset:0;z-index:400;display:none;}
+#qaDrawer.on{display:block;}
+#qaDrawer .qd-mask{position:absolute;inset:0;background:rgba(15,42,31,.34);}
+#qaDrawer .qd-box{position:absolute;top:0;right:0;height:100%;width:min(340px,88vw);
+  background:var(--bg-card,#fff);border-left:1px solid var(--border,#E5EDE9);
+  box-shadow:-10px 0 30px rgba(15,42,31,.16);display:flex;flex-direction:column;}
+#qaDrawer .qd-h{display:flex;align-items:center;gap:8px;padding:12px 14px;
+  border-bottom:1px solid var(--border,#E5EDE9);font-size:.9rem;font-weight:800;color:var(--text,#0F2A1F);}
+#qaDrawer .qd-x{margin-left:auto;border:none;background:var(--primary-mist,#F4F9F6);color:var(--text2,#5A6F65);
+  width:36px;height:36px;border-radius:10px;font-size:15px;display:inline-flex;align-items:center;justify-content:center;}
+#qaDrawer .qd-x:hover{background:var(--primary-soft,#E8F3EE);color:var(--primary,#148453);}
+#qaDrawer .qd-b{flex:1;min-height:0;overflow-y:auto;padding:12px 14px 24px;-webkit-overflow-scrolling:touch;}
+#qaDrawer .qd-sec{font-size:.68rem;font-weight:800;color:var(--text3,#9DB0A6);letter-spacing:.6px;
+  margin:14px 0 7px;text-transform:uppercase;}
+#qaDrawer .qd-sec:first-child{margin-top:0;}
+#qaDrawer .qd-sec small{font-weight:600;letter-spacing:0;text-transform:none;}
+#qaDrawer .qd-item{display:flex;align-items:center;gap:8px;padding:9px 10px;border:1px solid var(--border,#E5EDE9);
+  border-radius:10px;margin-bottom:6px;font-size:.8rem;color:var(--text2,#5A6F65);line-height:1.5;
+  background:var(--bg-card,#fff);text-align:left;width:100%;min-height:44px;cursor:pointer;}
+#qaDrawer .qd-item:hover{border-color:var(--primary,#148453);color:var(--primary,#148453);background:var(--primary-mist,#F4F9F6);}
+#qaDrawer .qd-item .t{margin-left:auto;font-size:.68rem;color:var(--text3,#9DB0A6);flex-shrink:0;}
+#qaDrawer .qd-mem{padding:9px 10px;border:1px dashed var(--border,#E5EDE9);border-radius:10px;
+  margin-bottom:7px;font-size:.78rem;line-height:1.55;color:var(--text2,#5A6F65);}
+#qaDrawer .qd-mem b{display:block;color:var(--text,#0F2A1F);font-weight:700;margin-bottom:2px;}
+#qaDrawer .qd-mem .m{font-size:.7rem;color:var(--text3,#9DB0A6);margin-top:3px;}
+#qaDrawer .qd-mem .ops{margin-top:7px;}
+#qaDrawer .qd-mem .ops button{border:1px solid var(--border,#E5EDE9);background:transparent;color:var(--text3,#9DB0A6);
+  font-size:.7rem;padding:6px 11px;border-radius:8px;min-height:34px;}
+#qaDrawer .qd-mem .ops button:hover{border-color:var(--danger,#C62828);color:var(--danger,#C62828);}
+#qaDrawer .qd-ops{display:flex;flex-direction:column;gap:7px;}
+#qaDrawer .qd-ops button{border:1px solid var(--border,#E5EDE9);background:var(--bg-card,#fff);color:var(--text2,#5A6F65);
+  font-size:.8rem;padding:11px 12px;border-radius:10px;min-height:44px;text-align:left;}
+#qaDrawer .qd-ops button:hover{border-color:var(--primary,#148453);color:var(--primary,#148453);background:var(--primary-mist,#F4F9F6);}
+#qaDrawer .qd-empty{font-size:.78rem;color:var(--text3,#9DB0A6);padding:6px 2px;}
+html[data-theme="dark"] #qaDrawer .qd-box{background:#162420;border-color:#1E3A2C;}
+html[data-theme="dark"] #qaDrawer .qd-mask{background:rgba(0,0,0,.5);}
+html[data-theme="dark"] #qaDrawer .qd-h{color:#E8F3EE;border-color:#1E3A2C;}
+html[data-theme="dark"] #qaDrawer .qd-item,html[data-theme="dark"] #qaDrawer .qd-ops button{background:#162420;border-color:#1E3A2C;}
+@media (max-width:760px){ #qaDrawer .qd-box{width:92vw;} }
+/* ---- __QA_RESTORE_PILL_v2__ 恢复提示胶囊：对话流内居中、随消息滚动（含深色模式与触控 44px） ---- */
+.qa-restore-pill{display:flex;align-items:center;gap:8px;margin:4px auto 12px;padding:7px 8px 7px 14px;
+  width:fit-content;max-width:min(92%,560px);box-sizing:border-box;
+  background:var(--gold-soft,#FEF6DC);border:1px solid var(--gold,#F5B800);border-radius:999px;
+  font-size:12px;color:#6B5200;line-height:1.5;box-shadow:0 2px 8px rgba(107,82,0,.08);}
+.qa-restore-pill .qa-ctx-ico{font-size:14px;flex-shrink:0;}
+.qa-restore-pill .qa-ctx-tx{min-width:0;}
+.qa-restore-pill b{font-weight:700;}
+.qa-restore-pill .qa-ctx-x{margin-left:2px;border:none;background:transparent;color:#6B5200;cursor:pointer;
+  font-size:14px;width:30px;height:30px;min-width:30px;border-radius:50%;flex-shrink:0;
+  display:inline-flex;align-items:center;justify-content:center;transition:background .16s;}
+.qa-restore-pill .qa-ctx-x:hover{background:rgba(107,82,0,.12);}
+.qa-restore-pill .qa-ctx-x:focus-visible{outline:2px solid var(--gold,#F5B800);outline-offset:1px;}
+html[data-theme="dark"] .qa-restore-pill{background:#2A2410;border-color:#6B5200;color:#F5D98A;box-shadow:none;}
+html[data-theme="dark"] .qa-restore-pill .qa-ctx-x{color:#F5D98A;}
+html[data-theme="dark"] .qa-restore-pill .qa-ctx-x:hover{background:rgba(245,217,138,.14);}
+@media (max-width:760px){
+  .qa-restore-pill{max-width:calc(100% - 24px);}
+  .qa-restore-pill .qa-ctx-x{width:44px;height:44px;min-width:44px;}
+}
+/*__QA_MEM_CSS_END__*/
 </style>
 <style id="qa-cap-css">
 /*__QA_CAP_CSS__*/
@@ -1987,38 +2083,6 @@ html[data-theme="dark"] #qaSuggest{background:#142E22;border-color:#1E3A2C;}
 @media (prefers-reduced-motion:reduce){.skip-link{transition:none;}}
 </style>
 <!--__A11Y_20260919__END__-->
-<style id="cbtPracticeCss">/*__CBT_PRACTICE_CSS__*/
-/* CBT 练习卡（风格对齐话术向导 .wz-* 系列） */
-.cbt-card{display:flex;flex-direction:column;gap:10px;}
-.cbt-head{display:flex;align-items:center;gap:8px;font-weight:800;color:var(--text,#0F2A1F);font-size:.92rem;flex-wrap:wrap;}
-.cbt-sub{font-size:.72rem;font-weight:600;color:var(--text3,#B5C2BC);}
-.cbt-prog{margin-left:auto;font-size:.72rem;font-weight:700;color:#148453;background:var(--primary-mist,#F4F9F6);border-radius:99px;padding:2px 10px;}
-.cbt-q{background:var(--primary-mist,#F4F9F6);border:1px solid var(--border,#E5EDE9);border-radius:12px;padding:12px 14px;font-size:.9rem;line-height:1.7;color:var(--text,#0F2A1F);}
-.cbt-ans{border:1px dashed var(--border,#E5EDE9);border-radius:12px;padding:12px 14px;font-size:.88rem;line-height:1.8;color:var(--text2,#5A6F65);}
-.cbt-ans b{color:#0C5F3A;}
-.cbt-meta{font-size:.7rem;color:var(--text3,#B5C2BC);display:flex;gap:10px;flex-wrap:wrap;}
-.cbt-chapters{display:flex;flex-wrap:wrap;gap:6px;}
-.cbt-chip{border:1px solid var(--border,#E5EDE9);background:var(--bg-card,#fff);color:var(--text2,#5A6F65);font-size:.74rem;font-weight:600;padding:5px 11px;border-radius:99px;cursor:pointer;transition:all .18s;}
-.cbt-chip:hover{border-color:#148453;color:#0C5F3A;}
-.cbt-tip{font-size:.72rem;color:var(--text3,#B5C2BC);line-height:1.6;}
-.cbt-opts{display:flex;flex-direction:column;gap:6px;}
-.cbt-opt{display:flex;align-items:center;gap:8px;text-align:left;border:1px solid var(--border,#E5EDE9);background:var(--bg-card,#fff);border-radius:10px;padding:9px 12px;font-size:.86rem;line-height:1.5;color:var(--text2,#5A6F65);cursor:pointer;transition:all .16s;}
-.cbt-opt:hover{border-color:#148453;color:#0C5F3A;}
-.cbt-l{flex:none;width:22px;height:22px;border-radius:50%;background:var(--primary-mist,#F4F9F6);color:#148453;font-weight:800;font-size:.72rem;display:flex;align-items:center;justify-content:center;}
-.cbt-opt.ok{border-color:#1FA56A;background:#EAF7F0;color:#0C5F3A;font-weight:700;}
-.cbt-opt.ok .cbt-l{background:#1FA56A;color:#fff;}
-.cbt-opt.bad{border-color:#E06A5A;background:#FDEEEB;color:#B3402F;}
-.cbt-opt.bad .cbt-l{background:#E06A5A;color:#fff;}
-.cbt-opt:disabled{cursor:default;opacity:.82;}
-.cbt-verdict{border-radius:10px;padding:9px 12px;font-size:.85rem;font-weight:700;line-height:1.6;}
-.cbt-verdict.ok{background:#EAF7F0;color:#0C5F3A;}
-.cbt-verdict.bad{background:#FDEEEB;color:#B3402F;}
-html[data-theme="dark"] .cbt-opt{background:#13251C;}
-html[data-theme="dark"] .cbt-opt.ok{background:#12301F;}
-html[data-theme="dark"] .cbt-opt.bad{background:#3A1D18;}
-html[data-theme="dark"] .cbt-q{background:#13251C;}
-html[data-theme="dark"] .cbt-prog{background:#13251C;color:#8FD3B0;}
-/*__CBT_PRACTICE_CSS_END__*/</style>
 <style id="uxPolish">/*__UX_POLISH:v1__*/
 /* ---- UX Polish v1 · 统一交互规范（规范源：index.html 壳层）---- */
 :root{
@@ -2166,55 +2230,13 @@ html[data-theme="dark"] .dc-card{background:#162420;border-color:#1E3A2C;color:#
   .qq-c{min-height:44px;padding:8px 12px;}
 }
 /*__UX_POLISH_END__*/</style>
-<style id="qa-mem-css">
-/*__QA_MEM_CSS__*/
-/* ---- B3 历史 / 记忆抽屉 ---- */
-#qaDrawer{position:fixed;inset:0;z-index:400;display:none;}
-#qaDrawer.on{display:block;}
-#qaDrawer .qd-mask{position:absolute;inset:0;background:rgba(15,42,31,.34);}
-#qaDrawer .qd-box{position:absolute;top:0;right:0;height:100%;width:min(340px,88vw);
-  background:var(--bg-card,#fff);border-left:1px solid var(--border,#E5EDE9);
-  box-shadow:-10px 0 30px rgba(15,42,31,.16);display:flex;flex-direction:column;}
-#qaDrawer .qd-h{display:flex;align-items:center;gap:8px;padding:12px 14px;
-  border-bottom:1px solid var(--border,#E5EDE9);font-size:.9rem;font-weight:800;color:var(--text,#0F2A1F);}
-#qaDrawer .qd-x{margin-left:auto;border:none;background:var(--primary-mist,#F4F9F6);color:var(--text2,#5A6F65);
-  width:36px;height:36px;border-radius:10px;font-size:15px;display:inline-flex;align-items:center;justify-content:center;}
-#qaDrawer .qd-x:hover{background:var(--primary-soft,#E8F3EE);color:var(--primary,#148453);}
-#qaDrawer .qd-b{flex:1;min-height:0;overflow-y:auto;padding:12px 14px 24px;-webkit-overflow-scrolling:touch;}
-#qaDrawer .qd-sec{font-size:.68rem;font-weight:800;color:var(--text3,#9DB0A6);letter-spacing:.6px;
-  margin:14px 0 7px;text-transform:uppercase;}
-#qaDrawer .qd-sec:first-child{margin-top:0;}
-#qaDrawer .qd-sec small{font-weight:600;letter-spacing:0;text-transform:none;}
-#qaDrawer .qd-item{display:flex;align-items:center;gap:8px;padding:9px 10px;border:1px solid var(--border,#E5EDE9);
-  border-radius:10px;margin-bottom:6px;font-size:.8rem;color:var(--text2,#5A6F65);line-height:1.5;
-  background:var(--bg-card,#fff);text-align:left;width:100%;min-height:44px;cursor:pointer;}
-#qaDrawer .qd-item:hover{border-color:var(--primary,#148453);color:var(--primary,#148453);background:var(--primary-mist,#F4F9F6);}
-#qaDrawer .qd-item .t{margin-left:auto;font-size:.68rem;color:var(--text3,#9DB0A6);flex-shrink:0;}
-#qaDrawer .qd-mem{padding:9px 10px;border:1px dashed var(--border,#E5EDE9);border-radius:10px;
-  margin-bottom:7px;font-size:.78rem;line-height:1.55;color:var(--text2,#5A6F65);}
-#qaDrawer .qd-mem b{display:block;color:var(--text,#0F2A1F);font-weight:700;margin-bottom:2px;}
-#qaDrawer .qd-mem .m{font-size:.7rem;color:var(--text3,#9DB0A6);margin-top:3px;}
-#qaDrawer .qd-mem .ops{margin-top:7px;}
-#qaDrawer .qd-mem .ops button{border:1px solid var(--border,#E5EDE9);background:transparent;color:var(--text3,#9DB0A6);
-  font-size:.7rem;padding:6px 11px;border-radius:8px;min-height:34px;}
-#qaDrawer .qd-mem .ops button:hover{border-color:var(--danger,#C62828);color:var(--danger,#C62828);}
-#qaDrawer .qd-ops{display:flex;flex-direction:column;gap:7px;}
-#qaDrawer .qd-ops button{border:1px solid var(--border,#E5EDE9);background:var(--bg-card,#fff);color:var(--text2,#5A6F65);
-  font-size:.8rem;padding:11px 12px;border-radius:10px;min-height:44px;text-align:left;}
-#qaDrawer .qd-ops button:hover{border-color:var(--primary,#148453);color:var(--primary,#148453);background:var(--primary-mist,#F4F9F6);}
-#qaDrawer .qd-empty{font-size:.78rem;color:var(--text3,#9DB0A6);padding:6px 2px;}
-html[data-theme="dark"] #qaDrawer .qd-box{background:#162420;border-color:#1E3A2C;}
-html[data-theme="dark"] #qaDrawer .qd-mask{background:rgba(0,0,0,.5);}
-html[data-theme="dark"] #qaDrawer .qd-h{color:#E8F3EE;border-color:#1E3A2C;}
-html[data-theme="dark"] #qaDrawer .qd-item,html[data-theme="dark"] #qaDrawer .qd-ops button{background:#162420;border-color:#1E3A2C;}
-@media (max-width:760px){ #qaDrawer .qd-box{width:92vw;} }
-/*__QA_MEM_CSS_END__*/
-</style>
 </head>
 <body>
 <!--__A11Y_20260919__BEGIN__-->
 <h1 class="a11y-sr">你问我答 · 五库知识问答</h1>
 <!--__A11Y_20260919__END__-->
+
+
 
 
 
@@ -2378,7 +2400,6 @@ html[data-theme="dark"] #qaDeck .input-box{background:#101C17;border-color:#1E3A
     <div class="pb-s" id="pbSays">到岗啦，耳机也戴好了。今天想问点什么？</div>
   </div>
   <span class="pb-b" id="pbState">在岗 · 第 5 排待命</span>
-  <button class="pb-c" id="pbHi">打招呼</button>
   <!--PETBAR_QABTN_20260919_BEGIN-->
   <button class="pb-c" id="pbNewChat" onclick="resetChat()" title="开始新的对话（保留问候语）">🔄 新对话</button>
   <button class="pb-c" id="pbClearChat" onclick="qaClearChat()" title="清空全部对话记录">🗑 清空对话</button>
@@ -2388,8 +2409,6 @@ html[data-theme="dark"] #qaDeck .input-box{background:#101C17;border-color:#1E3A
   <button class="pb-c" id="pb3d">🧊 3D</button>
   <button class="pb-c" id="pbPiano" style="display:none" title="秋分琴房 · 贝多芬钢琴三首，可开关">🎵 贝多芬 · 关</button>
   <button class="pb-c" id="pbPianoNext" style="display:none" title="换一首（月光第一乐章 / 致爱丽丝 / 悲怆第二乐章）">⏭ 换曲</button>
-  <button class="pb-c" id="pbHome">CC 之家</button>
-  <button class="pb-c" id="pbFold">收起</button>
 </div>
 <div class="input-area">
   <div class="src-tabs" role="tablist" aria-label="知识库来源">
@@ -10363,11 +10382,14 @@ window.addEventListener('message', function(e){
     if(chat.msgs.length > 1) return false;      /* 本次已产生新内容 → 不覆盖 */
     chat.msgs = chat.msgs.concat(o.msgs);
     try{ renderChat(); }catch(e){}
+    /* __QA_RESTORE_PILL_v2__（2026-09-20 重设计）：恢复提示改为对话流内的居中胶囊，随消息一起滚动。
+       旧版把条插在聊天流顶部且复用 .qa-ctx-bar——但 .qa-ctx-bar 本身无基础样式（#qaCtxBar 的
+       金色样式只命中桥接条），实际渲染成一条灰色裸横幅；现改走独立胶囊样式并落在消息末尾。 */
     var host = el('chatScroll');
     if(host){
       var bar = document.createElement('div');
       bar.id = 'qaRestoreBar';
-      bar.className = 'qa-ctx-bar';
+      bar.className = 'qa-restore-pill';
       bar.setAttribute('role','status');
       bar.innerHTML = '<span class="qa-ctx-ico" aria-hidden="true">&#8635;</span>'
         + '<div class="qa-ctx-tx">已恢复 <b>' + fmtWhen(o.t) + '</b> 的对话（' + o.msgs.length + ' 条），接着问就行。</div>'
@@ -10377,7 +10399,8 @@ window.addEventListener('message', function(e){
         if(bar.parentNode) bar.parentNode.removeChild(bar);
         try{ resetChat(); }catch(e){}
       };
-      host.insertBefore(bar, host.firstChild);
+      host.appendChild(bar);
+      try{ host.scrollTop = host.scrollHeight; }catch(e){}
     }
     return true;
   }
@@ -10638,7 +10661,6 @@ window.addEventListener('message', function(e){
   };
 })();
 /*__QA_MEM_END__*/
-
 /*__QA_UX_BEGIN__*/
 (function(){
   function flag(k, v){
@@ -10762,6 +10784,22 @@ window.addEventListener('message', function(e){
       recOn:false, manualStop:false, base:'', finals:[], interim:'', rec:null, restartTimer:null, voiceOwned:false};
     function host(){ try{ var h=window.CabinHost||(window.parent&&window.parent.CabinHost); return (h&&typeof h.voiceStart==='function')?h:null; }catch(e){ return null; } }
     var NATIVE=!!host();
+    /* __QA_IOS_MIC_v1__ iOS 适配（2026-09-20）：iOS 的网页语音识别（webkitSpeechRecognition）
+       必须先拿到麦克风授权才可能出字，且首次弹窗常被吞——用 getUserMedia 在用户手势内先触发
+       系统授权弹窗（拿到后立即停轨），再进 SR；授权失败给出 iPhone 设置路径的定向提示。 */
+    var IS_IOS=(function(){ try{ var u=navigator.userAgent||''; return /iP(hone|od|ad)/.test(u)||(/Macintosh/.test(u)&&navigator.maxTouchPoints>1); }catch(e){ return false; } })();
+    function iOSMicUnlock(cb){
+      if(!(IS_IOS && navigator.mediaDevices && navigator.mediaDevices.getUserMedia)){ cb(); return; }
+      try{
+        navigator.mediaDevices.getUserMedia({audio:true}).then(function(st){
+          try{ st.getTracks().forEach(function(t){ t.stop(); }); }catch(e){}
+          cb();
+        }).catch(function(){
+          voiceHint('麦克风权限未开启：请在 iPhone「设置 > Safari > 麦克风」中允许，或刷新页面并在弹窗中点「允许」');
+          voiceOff(true);
+        });
+      }catch(e){ cb(); }
+    }
     function voiceHint(t){ try{ if(window.PET&&PET.say) PET.say(t); }catch(e){} try{ mic.title=t; }catch(e){} }
     function trRender(){
       var ti=$('qaInput'); if(!ti) return;
@@ -10825,8 +10863,8 @@ window.addEventListener('message', function(e){
       if(trBtn) trBtn.classList.toggle('on', mode==='translate');
       setPlaceholder(); applyLangChips(); uiRec(true);
       if(NATIVE){ try{ host().voiceStart(); }catch(e){ voiceHint('原生语音启动失败'); } }
-      else if(SR){ startWeb(); }
-      else{ voiceHint('当前环境不支持语音输入'); voiceOff(); }
+      else if(SR){ iOSMicUnlock(startWeb); }
+      else{ voiceHint(IS_IOS ? '此 iOS 环境不支持网页语音识别：请用 Safari 打开本页使用麦克风，或改用键盘输入' : '当前环境不支持语音输入'); voiceOff(); }
     }
     function voiceOff(silent){
       flushInterim();
@@ -10859,7 +10897,7 @@ window.addEventListener('message', function(e){
         V.rec.onerror=function(ev){
           var c=String((ev&&ev.error)||'');
           if(c==='no-speech'||c==='aborted') return;                 /* 交给 onend 自动重启 */
-          if(c==='not-allowed'||c==='service-not-allowed'){ voiceHint('麦克风权限被拒绝，请在浏览器设置里允许后重试'); voiceOff(true); return; }
+          if(c==='not-allowed'||c==='service-not-allowed'){ voiceHint(IS_IOS ? '麦克风权限被拒绝：请在 iPhone「设置 > Safari > 麦克风」中允许后重试' : '麦克风权限被拒绝，请在浏览器设置里允许后重试'); voiceOff(true); return; }
           if(c==='network') voiceHint('语音识别需要联网（当前环境或代理可能不通）');
           else if(c!=='no-speech') voiceHint('语音识别失败：'+c);
         };
@@ -12808,18 +12846,8 @@ window.CCPiano = (function(){
     st.lastType[type] = now; st.lastProactive = now; saveState();
   }
 
-  /* ① 时段问候（页面隐藏时顺延重试，避免问候静默丢失；最多顺延 5 次） */
-  let __greetTries = 0;
-  function doGreet(){
-    if(__greetTries >= 5) return;
-    if(document.hidden){ __greetTries++; setTimeout(doGreet, 60000); return; }
-    const b = timeBucket();
-    if(!canProactive('greet')) return;
-    __greetTries = 5; /* 已说出口，不再重试 */
-    speak(fill(pick(DIALOGS[b], 'greet')));
-    markProactive('greet');
-  }
-  setTimeout(doGreet, CONFIG.greetDelayMs);
+  /* ① 时段问候已下线（2026-09-20 用户指令：删除「打招呼」功能）——
+     doGreet/__greetTries 移除，canProactive/markProactive 保留给「连续使用关心」复用 */
 
   /* ② 连续使用关心（第二次起优先用当前角色的 care 口吻；后台时跳过本轮，防切回前台连发） */
   setInterval(function(){
