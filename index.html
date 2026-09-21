@@ -1610,6 +1610,9 @@ button:disabled:active{transform:none;}
 
 
 
+
+
+
 <div class="livery-stripe" data-page-node-id="mtousEj7ZN4Xi2uM9vjLkB"></div>
 
 <header class="topbar" data-page-node-id="nEnHIwBZCdN9arpgAxqVcb">
@@ -1857,25 +1860,57 @@ function injectEmbedCss(id, frame){
     applyEmbedVars(id, frame);
   }catch(e){}
 }
-/* 把宿主实时的底部导航高度写入模块 CSS 变量（TabBar 高度 + 安全区），
-   并在主题切换时同步 data-theme / data-bs-theme 到模块文档。 */
+/* 把嵌入态变量与主题同步到模块文档。
+   2026-09-22 变更：--embed-bottom 恒为 0 —— 手机端 .sys-area 的 bottom 已让出
+   「TabBar 高度 + 安全区」（见 @media max-width:720px），实测 iframe 底边与 TabBar
+   顶边贴合、并不被覆盖；模块若再按 TabBar 高度让一次，就会在列表底部撑出
+   60~170px 空白死带（手机端用户反馈）。变量本身保留，模块 CSS 仍可引用。 */
 function applyEmbedVars(id, frame){
   if(!frame) return;
   try{
     const d = frame.contentDocument, w = frame.contentWindow;
     if(!d || !d.documentElement) return;
-    const tb = document.getElementById('mTabbar');
-    let h = 0;
-    if(tb && w && w.innerWidth <= 720){
-      const r = tb.getBoundingClientRect();
-      h = Math.round(r.height) || 0;
-    }
-    d.documentElement.style.setProperty('--embed-bottom', h + 'px');
+    d.documentElement.style.setProperty('--embed-bottom', '0px');
+    // 嵌入态标记：模块 CSS 可据此收敛（顶部安全区已由宿主负责）
+    d.documentElement.setAttribute('data-embed', '1');
     const t = document.documentElement.getAttribute('data-theme') || 'light';
     d.documentElement.setAttribute('data-theme', t);
     // Bootstrap 5.3 原生暗色走 data-bs-theme
     d.documentElement.setAttribute('data-bs-theme', t === 'dark' ? 'dark' : 'light');
     if(d.body) d.body.setAttribute('data-bs-theme', t === 'dark' ? 'dark' : 'light');
+    fitEmbedMain(frame);
+    watchEmbedMain(frame);
+  }catch(e){}
+}
+/* 模块主滚动容器高度适配（2026-09-22 死带修复）
+   模块自身用 max-height:calc(100vh - Npx) 估算顶部占用；嵌入态模块顶栏被壳隐藏，
+   公式里的 N 失准，容器底边与 iframe 底边之间就留下空白。
+   此处按「iframe 视口高 − 容器实际顶边」精确计算并写回内联 max-height。 */
+function fitEmbedMain(frame){
+  if(!frame) return;
+  try{
+    const d = frame.contentDocument, w = frame.contentWindow;
+    if(!d || !w) return;
+    const el = d.querySelector('.main-scroll-container');
+    if(!el) return;
+    const top = Math.round(el.getBoundingClientRect().top);
+    if(top < 0) return;
+    // 实测顶部占位写回 --embed-top：模块 CSS 用它做兜底计算（见 ux-polish 嵌入态规则）
+    d.documentElement.style.setProperty('--embed-top', top + 'px');
+    el.style.setProperty('max-height', Math.max(200, Math.round(w.innerHeight - top)) + 'px', 'important');
+  }catch(e){}
+}
+/* 模块 render() 会整体替换 #app 子树 → 新容器节点上内联高度丢失，用 childList
+   观察补齐（不观察 subtree，开销可忽略）。 */
+function watchEmbedMain(frame){
+  if(!frame) return;
+  try{
+    const d = frame.contentDocument, w = frame.contentWindow;
+    if(!d || !w || d.__ccFitObs || !w.MutationObserver) return;
+    const app = d.getElementById('app') || d.body;
+    if(!app) return;
+    d.__ccFitObs = new w.MutationObserver(function(){ fitEmbedMain(frame); });
+    d.__ccFitObs.observe(app, {childList:true});
   }catch(e){}
 }
 

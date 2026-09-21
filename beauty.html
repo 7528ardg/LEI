@@ -887,8 +887,10 @@ button:disabled:active{transform:none;}
   --ux-gold:#F5B800;--ux-danger:#C62828;--ux-warn:#E64A19;
   --ux-ink:#0F2A1F;--ux-ink2:#5A6F65;--ux-border:#E5EDE9;
   --ux-radius-sm:8px;--ux-radius:12px;--ux-radius-lg:16px;
-  /* 嵌入态底部补偿：index 壳层内嵌时由宿主注入实际 TabBar 高度；
-     独立打开时回退 0px，模块自身安全区逻辑照旧（2026-09-16 遮挡修复） */
+  /* 嵌入态补偿变量（2026-09-22 语义更新）：
+     --embed-bottom 恒 0 —— 手机端壳 .sys-area 的 bottom 已让出「TabBar + 安全区」，
+     iframe 底边与 TabBar 顶边贴合，模块若再让一次就会在列表底部撑出空白死带。
+     --embed-top 由壳注入「主内容容器实际顶边」，供模块按真实占位算高。 */
   --embed-bottom:0px;
   --embed-top:0px;
 }
@@ -1058,16 +1060,25 @@ html[data-theme="dark"] .divide-gray-200 > * + *{border-color:var(--border)!impo
 .bg-gradient-to-r.from-emerald-500 .text-gray-800,
 .bg-gradient-to-r.from-emerald-600.text-gray-800,
 .bg-gradient-to-r.from-emerald-600 .text-gray-800{color:#fff!important;}
-/* ---- 嵌入态底部留白（2026-09-16 遮挡修复）----
-   内联 max-height:calc(100vh - 160px) 在壳层内嵌时按模块自身视口算，
-   与 iframe 实际高度不符，导致列表底边与 iframe 底边之间出现死带。
-   改用 --embed-bottom（宿主注入 TabBar 高度）参与计算。 */
+/* ---- 嵌入态高度（2026-09-16 首修 / 2026-09-22 复核重构）----
+   内联 max-height:calc(100vh - 160px) 在壳内嵌时按模块自身视口算，与 iframe 实际高度
+   不符；且模块顶栏在嵌入态被壳 display:none 隐藏，公式里为它预留的 150px 会整段变成
+   列表下方的空白死带（手机端实测 113px，刘海屏因安全区重复补偿更大）。
+   现分两层兜底：
+   ① 兜底：壳注入实测顶部占位 --embed-top（默认 96px），按 iframe 视口精确算高；
+   ② 精确：壳的 fitEmbedMain() 另行写内联 max-height(important)，随 render/resize 校正。 */
 .main-scroll-container{
   max-height:calc(100vh - 160px - var(--embed-bottom,0px))!important;
   padding-bottom:calc(16px + var(--embed-bottom,0px))!important;
 }
+html[data-embed="1"] .main-scroll-container{
+  max-height:calc(100dvh - var(--embed-top,96px) - var(--embed-bottom,0px))!important;
+  padding-bottom:16px!important;
+}
 @media (max-width:760px){
-  .main-scroll-container{max-height:calc(100dvh - 150px - var(--embed-bottom,0px))!important;}
+  /* 独立打开（无壳）时顶部占位 = 顶栏 + 导航 ≈ 158px，旧值 150 会让容器底边
+     溢出轨 8px（2026-09-22 实测）；对齐 >760px 档的 160，留 2px 余量。 */
+  .main-scroll-container{max-height:calc(100dvh - 160px - var(--embed-bottom,0px))!important;}
 }
 /*__UX_POLISH_END__*/</style>
 </head>

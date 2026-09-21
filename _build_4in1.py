@@ -678,6 +678,9 @@ button:disabled:active{transform:none;}
 
 
 
+
+
+
 <div class="livery-stripe"></div>
 
 <header class="topbar">
@@ -1133,18 +1136,41 @@ function applyEmbedVars(id, frame){
   try{
     const d = frame.contentDocument, w = frame.contentWindow;
     if(!d || !d.documentElement) return;
-    const tb = document.getElementById('mTabbar');
-    let h = 0;
-    if(tb && w && w.innerWidth <= 720){
-      const r = tb.getBoundingClientRect();
-      h = Math.round(r.height) || 0;
-    }
-    d.documentElement.style.setProperty('--embed-bottom', h + 'px');
+    d.documentElement.style.setProperty('--embed-bottom', '0px');
+    // 嵌入态标记：模块 CSS 可据此收敛（顶部安全区已由宿主负责）
+    d.documentElement.setAttribute('data-embed', '1');
     const t = document.documentElement.getAttribute('data-theme') || 'light';
     d.documentElement.setAttribute('data-theme', t);
     // Bootstrap 5.3 原生暗色走 data-bs-theme
     d.documentElement.setAttribute('data-bs-theme', t === 'dark' ? 'dark' : 'light');
     if(d.body) d.body.setAttribute('data-bs-theme', t === 'dark' ? 'dark' : 'light');
+    fitEmbedMain(frame);
+    watchEmbedMain(frame);
+  }catch(e){}
+}
+function fitEmbedMain(frame){
+  if(!frame) return;
+  try{
+    const d = frame.contentDocument, w = frame.contentWindow;
+    if(!d || !w) return;
+    const el = d.querySelector('.main-scroll-container');
+    if(!el) return;
+    const top = Math.round(el.getBoundingClientRect().top);
+    if(top < 0) return;
+    // 实测顶部占位写回 --embed-top：模块 CSS 用它做兜底计算（见 ux-polish 嵌入态规则）
+    d.documentElement.style.setProperty('--embed-top', top + 'px');
+    el.style.setProperty('max-height', Math.max(200, Math.round(w.innerHeight - top)) + 'px', 'important');
+  }catch(e){}
+}
+function watchEmbedMain(frame){
+  if(!frame) return;
+  try{
+    const d = frame.contentDocument, w = frame.contentWindow;
+    if(!d || !w || d.__ccFitObs || !w.MutationObserver) return;
+    const app = d.getElementById('app') || d.body;
+    if(!app) return;
+    d.__ccFitObs = new w.MutationObserver(function(){ fitEmbedMain(frame); });
+    d.__ccFitObs.observe(app, {childList:true});
   }catch(e){}
 }
 function applyTheme(t){

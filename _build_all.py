@@ -160,6 +160,7 @@ VERIFY_SCRIPTS = [
     u'python _verify_nokey_all.py --quiet',                     # 全链路零密钥审计（源/gz/壳载荷/www/PWA/APK）
     u'python _verify_hosted.py --quiet',                        # 在线版瘦壳体检（模块已置空/fetch 逻辑/JS 语法/mods 可解压）
     u'python _check_needles.py --quiet',                        # 最终产物针检查（移动端加固针/3D 针/反向针/壳内载荷取证）
+    u'node _verify_embed_gap_20260922.js',                      # 嵌入态「死带空白」回归：5 视口 × 切 tab 后 + 独立打开，main 底边须贴合 iframe 底边
     u'python _check_apk_sync.py',                           # APK 内 assets/www 与源同步（落后即失败，防「改了源没装配」）
 ]
 
