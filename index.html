@@ -1955,15 +1955,45 @@ function restoreModuleScroll(id){
   });
 }
 
-/* ===== 模块空闲预加载（2026-09-17 切换提速）：后台提前请求各模块 iframe，用户点击时已缓存秒开 ===== */
+/* ===== 模块空闲预加载（2026-09-21 移动端瘦身版）=====
+   旧逻辑：开机 900ms 后串行预取 11 个模块 iframe —— 单次访问要下约 18MB(gzip) / 36MB(解压)，
+   手机端带宽与内存被吃满（首屏 qa 本体已 5.5MB），表现为"打开非常慢"。
+   新逻辑：手机/平板/弱网/省流一律不后台预取，改为点击时按需加载（已有 loading + 双线路兜底）；
+   桌面端保留预取，但等 load 事件后再启动，且非 Wi-Fi 只预取轻量模块（<1MB）。 */
 var _pwOnlineStarted = false;
+var _pwAborted = false;
+function _pwEnv(){
+  var env = { allow:false, heavy:false };
+  try{
+    var coarse = window.matchMedia && window.matchMedia('(pointer:coarse)').matches;
+    var narrow = (window.innerWidth || 1280) < 900;
+    if(coarse || narrow) return env;                   // 手机/平板：不后台预取
+    var c = navigator.connection || navigator.webkitConnection || navigator.mozConnection;
+    if(c){
+      if(c.saveData) return env;                       // 省流模式：不预取
+      var et = c.effectiveType || '';
+      if(/^(slow-2g|2g|3g)$/.test(et)) return env;     // 弱网：不预取
+      env.heavy = (c.type === 'wifi');                 // 仅 Wi-Fi 才预取重模块(home/quiz/kbadmin 等)
+    }else{
+      env.heavy = true;                                // 无 Network Information API：按桌面宽带处理
+    }
+    env.allow = true;
+  }catch(e){}
+  return env;
+}
+window.addEventListener('offline', function(){ _pwAborted = true; });
 function _startOnlinePrewarm(){
   if(_pwOnlineStarted) return;
   _pwOnlineStarted = true;
-  var ids = ['home','quiz','performance','beauty','risk','medical','daily','manual','report','kbadmin','issues'];
+  var env = _pwEnv();
+  if(!env.allow) return;                               // 移动端/弱网：不预取，点击时再加载
+  var ids = env.heavy
+    ? ['home','quiz','performance','beauty','risk','medical','daily','manual','report','kbadmin','issues']
+    : ['risk','medical','daily','manual','report','issues'];
   var i = 0;
   (function next(){
     while(i < ids.length){
+      if(_pwAborted) return;                           // 断网或用户已手动操作：停止预取，让出带宽
       var id = ids[i++];
       if(_loaded[id]) continue;
       var f = document.getElementById('frame-'+id);
@@ -1979,7 +2009,11 @@ function _startOnlinePrewarm(){
     }
   })();
 }
-setTimeout(_startOnlinePrewarm, 900);
+(function(){
+  var kick = function(){ setTimeout(_startOnlinePrewarm, 1500); };   // 等首屏真正加载完再考虑预取
+  if(document.readyState === 'complete') kick();
+  else window.addEventListener('load', kick, {once:true});
+})();
 
 /* ===================== 主题 ===================== */
 let hostTheme = 'light';

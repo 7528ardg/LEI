@@ -14,7 +14,7 @@
                                                    （浏览器禁止 file:// 下 fetch，改用 <script> 注入；部署到服务器时可删）
   在线版/启动本地服务.bat                        —— 一键起 http 本地服务（推荐用法，功能最完整）
 """
-import base64, gzip, io, os, re, subprocess, sys
+import base64, fnmatch, gzip, io, os, re, shutil, subprocess, sys
 
 BASE = os.path.dirname(os.path.abspath(__file__))
 OUT_DIR = os.path.join(BASE, u'在线版')
@@ -97,9 +97,12 @@ README = u'''# 在线部署包 · 使用说明
 
 ```
 /mods/*.gz
+/assets/img/*            ← 模块用到的图片（2026-09-22 起从模块内联 base64 抽出，缺了会裂图）
 客舱小助手（在线版）.html
 index.html
 ```
+
+> 注意：`assets/` 目录必须和 HTML 同级上传（与 mods 一样是必需的），不要再把图片内联回 HTML。
 
 ## 常见问题
 - **模块加载失败 / CORS 报错**：说明你是用 file:// 打开的且 mods 目录不在旁边；
@@ -119,6 +122,41 @@ def write_helpers(out9):
         f.write(idx)
     with io.open(os.path.join(OUT_DIR, u'使用说明.txt'), 'w', encoding='utf-8', newline='\r\n') as f:
         f.write(README)
+
+
+def _sync_tree(src, dst, ignore_files=(), ignore_dirs=()):
+    """覆盖式同步：不删目录、不批量删除（批量删除会被文件安全策略拦下），可反复重跑"""
+    n = 0
+    for r, ds, fs in os.walk(src):
+        ds[:] = [d for d in ds if d not in ignore_dirs]
+        rel = os.path.relpath(r, src)
+        out = dst if rel == '.' else os.path.join(dst, rel)
+        if not os.path.isdir(out):
+            os.makedirs(out)
+        for f in fs:
+            if any(fnmatch.fnmatch(f, p) for p in ignore_files):
+                continue
+            shutil.copyfile(os.path.join(r, f), os.path.join(out, f))
+            n += 1
+    return n
+
+
+def sync_assets():
+    """把站点图集 assets/img/ 同步进在线部署包（模块 HTML 只保留相对引用）。
+
+    2026-09-22：模块内联 base64 大图已抽成 assets/img/*（`_extract_inline_images_20260921.py`），
+    模块以 srcdoc 注入 iframe，相对路径基准是 OUT_DIR → 不拷这份就会全站裂图。
+    独立成模块级函数是为了能单独调用验证（`python -c "import _build_hosted as b; b.sync_assets()"`）。
+    """
+    src = os.path.join(BASE, u'assets', u'img')
+    if not os.path.isdir(src):
+        print(u'  [跳过] 未找到 assets/img/（模块仍是内联 base64 形态）')
+        return 0
+    dst = os.path.join(OUT_DIR, u'assets', u'img')
+    n = _sync_tree(src, dst)
+    sz = sum(os.path.getsize(os.path.join(dst, f)) for f in os.listdir(dst))
+    print(u'  assets/img/ 已同步（{} 张，{:.1f}MB）'.format(n, sz / 1048576.0))
+    return n
 
 
 def main():
@@ -158,25 +196,6 @@ def main():
     # 4.5) 真 3D 形象资产：模块是以 srcdoc 注入 iframe 的，srcdoc 的 base URL 继承父页
     #      （在线版/index.html），所以 CC3D 用的相对路径 形象IP/models/... 必须在
     #      OUT_DIR 下真实存在。http(s) 走 fetch(ccNN.glb)，file:// 走 js/ccNN.js 的 base64 包装。
-    import shutil
-    import fnmatch
-
-    def _sync_tree(src, dst, ignore_files=(), ignore_dirs=()):
-        """覆盖式同步：不删目录、不批量删除（批量删除会被文件安全策略拦下），可反复重跑"""
-        n = 0
-        for r, ds, fs in os.walk(src):
-            ds[:] = [d for d in ds if d not in ignore_dirs]
-            rel = os.path.relpath(r, src)
-            out = dst if rel == '.' else os.path.join(dst, rel)
-            if not os.path.isdir(out):
-                os.makedirs(out)
-            for f in fs:
-                if any(fnmatch.fnmatch(f, p) for p in ignore_files):
-                    continue
-                shutil.copyfile(os.path.join(r, f), os.path.join(out, f))
-                n += 1
-        return n
-
     md_src = os.path.join(BASE, u'形象IP', u'models')
     md_dst = os.path.join(OUT_DIR, u'形象IP', u'models')
     if os.path.isdir(md_src):
@@ -190,6 +209,11 @@ def main():
         sz = sum(os.path.getsize(os.path.join(r, f))
                  for r, d, fs in os.walk(md_dst) for f in fs)
         print(u'  形象IP/models/ 已同步（3D 模型 {} 个，合计 {:.1f}MB）'.format(n_glb, sz / 1048576.0))
+
+    # 4.6) 站点图集：模块 HTML 已把内联 base64 大图抽到 assets/img/（2026-09-22 瘦身），
+    #      模块是以 srcdoc 注入 iframe 的，相对路径基准是 OUT_DIR → 必须把 assets/img 真实拷进来，
+    #      否则在线版/离线壳全是裂图。
+    sync_assets()
 
     # 5) 辅助文件：本地服务启动器 / index 跳转 / 说明
     write_helpers(out9)

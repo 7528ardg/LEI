@@ -2973,16 +2973,47 @@ def inline_risk_deps(raw):
     assert not leftover, 'risk 相对引用未完全内联: {}'.format(leftover)
     return raw
 
+RX_ASSET = re.compile(r'assets/img/[a-f0-9]{8}\.[a-z]+')
+_ASSET_CACHE = {}
+_MIME = {'jpg': 'jpeg', 'jpeg': 'jpeg', 'png': 'png', 'webp': 'webp', 'gif': 'gif', 'svg': 'svg+xml'}
+
+def inline_web_assets(raw):
+    """把模块 HTML 里对 assets/img/* 的引用还原成 data URI。
+
+    2026-09-22：站点侧已把内联 base64 大图抽成 assets/img/ 独立文件（_extract_inline_images_20260921.py），
+    单文件离线版必须自带图片，否则脱离 assets 目录就全变裂图 —— 这里在打包时回填。
+    """
+    def repl(m):
+        rel = m.group(0)
+        if rel not in _ASSET_CACHE:
+            p = os.path.join(BASE, *rel.split('/'))
+            if not os.path.exists(p):
+                _ASSET_CACHE[rel] = rel          # 找不到就原样保留（不静默改坏）
+                return rel
+            ext = os.path.splitext(p)[1].lstrip('.').lower()
+            b64 = base64.b64encode(io.open(p, 'rb').read()).decode('ascii')
+            _ASSET_CACHE[rel] = 'data:image/{};base64,{}'.format(_MIME.get(ext, 'png'), b64)
+        return _ASSET_CACHE[rel]
+    return RX_ASSET.sub(repl, raw)
+
 def build():
     t = TEMPLATE
     # 内嵌 pako 解压库：旧浏览器（Safari < 16.4）降级用（纯 JS，无网络依赖）
     t = _bc.embed_text(t, '__PAKO_SRC__', u'_pako.min.js')
     t = _bc.embed_text(t, '__SHELL_ENHANCE__', u'_shell_enhance.js')
     for key, path in SOURCES.items():
-        # risk 模块需先把 risk-lite.html 里的 risk/ 相对引用内联成单文件
-        xf = (lambda b: inline_risk_deps(b.decode('utf-8')).encode('utf-8')) if key == 'risk' else None
+        # risk 模块需先把 risk-lite.html 里的 risk/ 相对引用内联成单文件；
+        # 所有模块都要把 assets/img/* 回填成 data URI（单文件必须自带图片）
+        def xf(b, _key=key):
+            s = b.decode('utf-8')
+            if _key == 'risk':
+                s = inline_risk_deps(s)
+            s = inline_web_assets(s)
+            return s.encode('utf-8')
         t, nraw, ngz = _bc.embed_gz_b64(t, '__B64_{}__'.format(key), path, transform=xf)
         print('{}: raw {:.2f}MB -> gz {:.2f}MB'.format(key, nraw / 1048576.0, ngz / 1048576.0))
+    assert 'assets/img/' not in t, '离线单文件仍有 assets/img/ 外链，会导致脱离 assets 目录时裂图'
+    print('assets 回填自检: 通过（无 assets/img/ 残留外链）')
     out = os.path.join(BASE, OUT)
     # 原子写 + newline=''（见 _build_common.write_atomic）：产物 20MB+，
     # 直接原地写若中途崩溃会留下损坏的壳

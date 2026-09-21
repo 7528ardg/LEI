@@ -28,6 +28,18 @@ __pdfqa/
 *.pdf
 *.xlsx
 
+# ---- 纯构建产物：本地保留、不入库（2026-09-22 仓库瘦身）----
+# 以下两者都可由仓库内脚本 100% 重生成，每次构建都会整份重写，体积合计约 100MB
+#   在线版/                     <- _build_hosted.py 产出（瘦壳 + mods/*.gz + assets + 3D 副本）
+#   客舱小助手（离线完整版）.html  <- _build_4in1.py 产出（全部模块 gzip-base64 内嵌的单文件版）
+# 需要时重跑对应脚本即可；要临时查旧版可从历史取：git checkout <commit> -- <path>
+在线版/
+客舱小助手（离线完整版）.html
+
+# 站点图集是「必需入库」的：模块 HTML 只保留 assets/img/* 相对引用（2026-09-22 由内联 base64 抽出）
+!assets/
+!assets/img/
+
 # 手册解析临时文本与图片素材（qa.html 已内嵌知识库）
 docs/manual_parse/
 docs/manual_imgs/
