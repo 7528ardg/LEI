@@ -75,6 +75,12 @@ BUILD_STEPS = [
     (u'构建 CC之家模块', u'python _build_home.py'),
     (u'构建 日常问题模块', u'python _build_daily.py'),
     (u'构建 kb-admin(库管理)', u'python _build_kbadmin.py'),
+    # 2026-09-22 接入：站点侧把模块内联 base64 大图抽成 assets/img/*（首屏瘦身，见 _verify_inlineimg）。
+    #   必须在打包步骤之前跑：_build_4in1 会把 assets/img 回填成 data URI（保单文件自包含），
+    #   _build_hosted 会把 assets/img 拷进在线版目录 —— 两者都要拿到「已外置」的模块。
+    #   本步幂等（无大图即跳过）。注意：_build_home/_build_daily/_build_kbadmin 是从模板重建模块的，
+    #   模板里仍是内联形态 → 不接这一步，「一键构建」会把站点重新养胖。
+    (u'站点图集外置(内联大图→assets/img,幂等)', u'python _extract_inline_images_20260921.py'),
     (u'构建 spring(9模块单文件)', u'python _gzip_build.py'),
     (u'构建 4合1(10模块离线版)', u'python _build_4in1.py'),
     (u'UX 美化注入(幂等,构建后补挂产物)', u'python _apply_ux_polish.py'),
@@ -83,6 +89,9 @@ BUILD_STEPS = [
     # 它内部会重建 _gzip_build/_build_4in1/_apply_ux_polish（幂等），故必须放在所有模块补丁之后，
     # 这样壳内产物才能带上 landing/ux_polish 等最后的改动。
     (u'构建在线版(瘦壳+mods/*.gz,含壳内产物重建)', u'python _build_hosted.py'),
+    # 收尾再抽一次：_apply_ux_polish / landing 等最后几步也可能往模块里塞图，
+    # 站点根目录的模块必须是「已外置」形态，否则一次 git add 就把 9MB 的 qa.html 推回去。
+    (u'站点图集外置·产物收尾(幂等)', u'python _extract_inline_images_20260921.py'),
 ]
 
 # M1-M3 逻辑验证套件（Node 先行、Python 收尾）
@@ -98,6 +107,8 @@ VERIFY_SCRIPTS = [
     u'node _verify_kb_fullpack.js',     # 引擎级往返（8 源 4914 条逐条深比对 / 篡改拦截 / 编辑删除往返，51 项）
     u'node _verify_kb_console_e2e.js',  # 真实浏览器端到端（查看/编辑/删除/导出下载/重新导入/还原复核/撤销，29 项）
     u'node _verify_scriptlib_guard.js',          # 销售话术库入库闸（红线拦截/自动改写不误伤/1045 条全库扫描，34 项）
+    # 2026-09-22 站点图集外置：真实起静态服务加载 qa/cc-home iframe，断言 img 无加载失败、assets/img 无 404（6 项）
+    u'node _verify_inlineimg_20260921.js',
     u'python _apply_scriptlib_guard_20260921.py --check',  # 入库闸四道闸 + 库内口径修复 在位
     u'node _verify_date_match.js',  # 日期匹配引擎回归（节日词/修饰语/农历/通用节点/相对时间/跨年/表外估算）
     u'node _verify_se_lazy.js',     # SeasonEngine 懒获取回归（反序注入不再静默降级农历/节气）
