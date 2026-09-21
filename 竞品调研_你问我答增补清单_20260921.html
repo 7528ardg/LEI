@@ -1,0 +1,420 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>同领域竞品调研 · 你问我答增补功能清单（2026-09-21）</title>
+<style>
+  *{box-sizing:border-box}
+  body{margin:0;background:#f5f7f6;color:#1b2320;
+       font:15px/1.75 -apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Microsoft YaHei",sans-serif}
+  .wrap{max-width:1120px;margin:0 auto;padding:28px 20px 72px}
+  header.hd{background:linear-gradient(135deg,#00A650 0%,#008a42 100%);color:#fff;
+       border-radius:18px;padding:26px 28px;box-shadow:0 8px 26px rgba(0,166,80,.22)}
+  header.hd h1{margin:0 0 8px;font-size:25px;letter-spacing:.3px}
+  header.hd p{margin:0;opacity:.92;font-size:13.5px}
+  .stats{display:flex;flex-wrap:wrap;gap:10px;margin:16px 0 4px}
+  .stat{background:rgba(255,255,255,.16);border:1px solid rgba(255,255,255,.3);
+        border-radius:10px;padding:7px 13px;font-size:12.5px}
+  .stat b{font-size:16px;margin-right:4px}
+  h2{font-size:19px;margin:38px 0 6px;padding-left:12px;border-left:4px solid #00A650}
+  h2 .sub{font-size:13px;font-weight:400;color:#5d6b64;margin-left:8px}
+  h3{font-size:16px;margin:24px 0 4px;color:#134a2e}
+  .note{background:#fff;border:1px solid #dfe6e2;border-radius:12px;padding:14px 18px;
+        font-size:13.5px;color:#42504a}
+  .note b{color:#0a7d3f}
+  .warn{background:#fffaf0;border-color:#f0dcb0}
+  .warn b{color:#9a6100}
+  .stop{background:#fdf1f1;border-color:#f3c9c9}
+  .stop b{color:#a52a2a}
+  ol.ins{margin:10px 0 0;padding-left:22px}
+  ol.ins li{margin:7px 0}
+  ul.tight{margin:6px 0 0;padding-left:20px}
+  ul.tight li{margin:4px 0}
+  table{width:100%;border-collapse:collapse;background:#fff;border-radius:12px;overflow:hidden;
+        box-shadow:0 1px 3px rgba(24,40,34,.07);margin-top:12px;font-size:13px}
+  th,td{padding:9px 11px;text-align:left;vertical-align:top;border-bottom:1px solid #edf1ef}
+  th{background:#eef4f0;font-weight:600;font-size:12.5px;color:#2c3a34}
+  tr:last-child td{border-bottom:0}
+  td.id{font-weight:700;color:#00893f;white-space:nowrap;font-variant-numeric:tabular-nums}
+  td.nw{white-space:nowrap}
+  code{background:#eef4f0;color:#0a7d3f;padding:1px 5px;border-radius:5px;
+       font:12.5px/1.5 ui-monospace,Consolas,monospace}
+  .b{display:inline-block;padding:2px 8px;border-radius:20px;font-size:11.5px;font-weight:600;white-space:nowrap}
+  .b-p0{background:#e4f6ec;color:#0a7d3f;border:1px solid #b9e3cb}
+  .b-p1{background:#eaf3fd;color:#1462b8;border:1px solid #c2ddf7}
+  .b-p2{background:#f2f0fa;color:#5b4bb0;border:1px solid #d8d2f2}
+  .b-no{background:#fdecec;color:#a52a2a;border:1px solid #f5c6c6}
+  .b-src{background:#fff4e0;color:#9a6100;border:1px solid #f2d9a6}
+  .hot{color:#c0392b;font-weight:700}
+  .g{color:#0a7d3f;font-weight:700}
+  .r{color:#a52a2a;font-weight:700}
+  .m{color:#9a6100;font-weight:700}
+  summary{cursor:pointer;font-weight:600;color:#0a7d3f;font-size:14px;padding:6px 0}
+  details{background:#fff;border:1px solid #dfe6e2;border-radius:12px;padding:10px 16px;margin:10px 0}
+  .pcard{background:#fff;border:1px solid #dfe6e2;border-left:4px solid #00A650;
+         border-radius:12px;padding:12px 16px;margin:10px 0;font-size:13.5px}
+  .pcard b{color:#0a7d3f}
+  footer{margin-top:44px;padding-top:16px;border-top:1px solid #dfe6e2;
+         font-size:12.5px;color:#7b8781;text-align:center}
+  .src{font-size:11.5px;color:#7b8781}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<header class="hd">
+  <h1>同领域竞品调研 · 你问我答增补功能清单</h1>
+  <p>四类竞品 · 22 个样本 · 聚焦「你问我答」板块的实质性功能缺口 · 2026-09-21</p>
+  <div class="stats">
+    <span class="stat"><b>4</b>类竞品</span>
+    <span class="stat"><b>22</b>个样本</span>
+    <span class="stat"><b>13</b>项建议新增</span>
+    <span class="stat"><b>4</b>项明确不做</span>
+    <span class="stat"><b>口径不变</b>：源码零密钥 / 运行时零外发</span>
+  </div>
+</header>
+
+<h2>零、一句话结论 <span class="sub">先看这段，再决定翻不翻后面</span></h2>
+<div class="note">
+<ol class="ins">
+  <li><b>「问」的能力我们已经不落后了。</b>六库决策链 + 本地检索 + 形象 IP + 联想记忆，横向比东航 AI 业务助手（224 本手册 / RAG）和 ANA neoAI Chat 也不掉队；纯本地零外发这一点，甚至比它们更严。</li>
+  <li><b>真正被拉开的是三处：可信度治理、学习闭环、情景推演。</b>东航做到了「答案自动标注来源章节」，ANA 做到了「回答附带来源 + 版本 + 条款，低置信度转主管」，JAL 做到了「机上离线也能用」；备考类 App 做到了「错题—复习—模拟考」完整闭环。这三块我们目前都是空白或半成品。</li>
+  <li><b>竞品普遍不做「零外发」。</b>东航、ANA、飞书、乐享全走云端。这反而给我们的定位留下了差异点：<b>机上无网可用、数据不出机身</b>——但前提是我们先把离线与可信度补齐，否则「零外发」就只是宣传语。</li>
+  <li><b>13 项建议里有 11 项可在纯本地完成</b>（无 Key、无外发）。只有语音提问与话术跟读评分需要按 beauty 的 <code>__AI_HYBRID_20260919__</code> 例外姿势处理。</li>
+</ol>
+</div>
+
+<h2>一、调研范围 <span class="sub">四类竞品，每类解决的是不同的问题</span></h2>
+<table>
+<tr><th>类别</th><th>代表产品</th><th>它解决的核心问题</th><th>对我们的参考价值</th></tr>
+<tr>
+  <td><b>A · 航司内部 AI 知识助手</b><br><span class="src">最直接对标</span></td>
+  <td>东航 AI 业务助手（RAG）<br>ANA neoAI Chat<br>JAL × Fujitsu/Headwaters（Phi-4 端侧）</td>
+  <td>一线人员在海量手册/规章里几秒钟拿到「有据可查」的答案</td>
+  <td><span class="hot">最高</span>——同场景、同用户、同知识源，功能取舍可直接照搬</td>
+</tr>
+<tr>
+  <td><b>B · 航司员工移动平台</b><br><span class="src">载体对标</span></td>
+  <td>东航「掌上东航·百读」「移动客舱」「电子任务书」<br>东航易学网<br>春秋 SMP-移动乘务 / 春秋之家</td>
+  <td>把纸质手册、课程、任务、绩效搬进手机</td>
+  <td>中——提醒我们<b>错位定位</b>：它们是「办事 App」，我们应专注「知识与学习」</td>
+</tr>
+<tr>
+  <td><b>C · 企业知识库 / RAG 平台</b><br><span class="src">能力对标</span></td>
+  <td>腾讯乐享、飞书知识库、Glean、Onyx(Danswer)、Guru、RAGi、知索 RAG</td>
+  <td>知识治理、溯源引用、权限、缺口发现、反馈自优化</td>
+  <td>高——<b>可信度治理与知识运营</b>的方法论全在这里</td>
+</tr>
+<tr>
+  <td><b>D · 备考 / 刷题类 App</b><br><span class="src">学习闭环对标</span></td>
+  <td>刷刷题（民航专项）、菁优网、小猿/作业帮、分小全、错题 plus、Learn8</td>
+  <td>「刷过」变成「记住」，并让成绩可量化</td>
+  <td>高——CBT 题库、复训、晋级考核场景直接可借鉴</td>
+</tr>
+</table>
+
+<h2>二、竞品核心功能对比矩阵 <span class="sub">对勾差距一目了然</span></h2>
+<table>
+<tr>
+  <th>能力维度</th>
+  <th class="nw">A 航司 AI 助手</th>
+  <th class="nw">B 员工平台</th>
+  <th class="nw">C 知识库平台</th>
+  <th class="nw">D 备考 App</th>
+  <th class="nw">我方现状</th>
+  <th class="nw">结论</th>
+</tr>
+<tr><td>答案溯源（标到章节/页码）</td><td class="g">✔ 东航自动标章节</td><td class="m">△</td><td class="g">✔ 页码/视频秒级</td><td class="m">△ 给解析</td><td class="m">△ 只标书名+章节文字</td><td class="r">补：原文定位跳转</td></tr>
+<tr><td>版本 / 时效控制</td><td class="g">✔ ANA 附版本+条款</td><td class="m">△</td><td class="g">✔ 版本回溯、一键回滚</td><td class="r">✘</td><td class="r">✘ 换版后静默过期</td><td class="r">补：条目↔版本映射</td></tr>
+<tr><td>低置信兜底 / 转人工</td><td class="g">✔ ANA 标低置信转主管</td><td class="r">✘</td><td class="g">✔「查无依据」显式拒答</td><td class="m">△ 给相似题</td><td class="r">✘ 只有强命中/未命中二值</td><td class="r">补：置信度+查无依据</td></tr>
+<tr><td>多轮上下文 / 意图理解</td><td class="g">✔ 东航多轮记忆+识别未明示需求</td><td class="r">✘</td><td class="g">✔</td><td class="r">✘</td><td class="m">△ 联想记忆（部分）</td><td class="m">可加强</td></tr>
+<tr><td>离线 / 无网可用</td><td class="g">✔ JAL 端侧 SLM 机上可用</td><td class="m">△ 缓存</td><td class="r">✘ 云端为主</td><td class="m">△ 部分离线</td><td class="g">✔ 本地库天然离线</td><td class="g"><b>我方优势</b>，只差状态透明化</td></tr>
+<tr><td>错题本 / 复习 / 模拟考</td><td class="r">✘</td><td class="m">△ 易学网考试</td><td class="r">✘</td><td class="g">✔✔ 完整闭环</td><td class="r">✘ 出题即判分，答错即忘</td><td class="r"><b>最大缺口</b></td></tr>
+<tr><td>学情诊断 / 成绩档案</td><td class="r">✘</td><td class="g">✔ 易学网学分+记录</td><td class="m">△ 使用统计</td><td class="g">✔ 报告+雷达图</td><td class="m">△ 已做趋势曲线</td><td class="m">补：薄弱点热力图</td></tr>
+<tr><td>情景演练 / 案例处置</td><td class="m">△</td><td class="g">✔ 虚拟仿真/B737 三维</td><td class="r">✘</td><td class="g">✔ 情景题</td><td class="r">✘ 大撤专项偏清单式</td><td class="r">补：分支处置推演</td></tr>
+<tr><td>知识缺口发现 / 反馈自优化</td><td class="m">△</td><td class="r">✘</td><td class="g">✔ 乐享自动识别缺口</td><td class="m">△</td><td class="r">✘ 反馈仅单条记录</td><td class="r">补：缺口清单+看板</td></tr>
+<tr><td>条目治理（复核人/日期）</td><td class="m">△</td><td class="r">✘</td><td class="g">✔ Guru 知识卡片可校验</td><td class="r">✘</td><td class="r">✘</td><td class="m">补：轻量校验状态</td></tr>
+<tr><td>传播 / 协作（复制·分享）</td><td class="r">✘</td><td class="m">△ IM</td><td class="g">✔ 知识卡片分享</td><td class="g">✔ 班级共学</td><td class="g">✔ 复制/收藏/朗读已做</td><td class="m">补：分享问答卡</td></tr>
+<tr><td>语音 / 多模态提问</td><td class="m">△</td><td class="r">✘</td><td class="g">✔ 语音+图文</td><td class="g">✔ 语音/拍照/悬浮窗</td><td class="r">✘ iOS 受限于 ASR</td><td class="m">条件做（见 §五）</td></tr>
+<tr><td>权限 / 审计</td><td class="g">✔ 私有云+审计</td><td class="g">✔ 企业级</td><td class="g">✔ 四级隔离+日志</td><td class="r">✘</td><td class="g">✔ 本地单一用户态，最安全</td><td class="g">无需动作</td></tr>
+<tr><td>形象 IP / 情感化</td><td class="r">✘</td><td class="r">✘</td><td class="r">✘</td><td class="r">✘</td><td class="g">✔ 24 节气 3D 形象</td><td class="g"><b>我方独有</b></td></tr>
+</table>
+<div class="note" style="margin-top:12px">
+  <b>读法</b>：绿色是「别人有、我方也有」，红色是「别人有、我方没有」。
+  我方<span class="g">领先</span>的是离线、权限、形象 IP；<span class="r">落后</span>的全部集中在<b>「治理」与「学」</b>两类，恰好都不是算力问题，而是产品结构问题。
+</div>
+
+<h2>三、竞品样本明细 <span class="sub">每条结论都标出处，可核对</span></h2>
+
+<details open>
+<summary>A 类 · 航司内部 AI 知识助手（最直接对标）</summary>
+
+<h3>东航 AI 业务助手（RAG）<span class="src">中国民航网 2025-05</span></h3>
+<ul class="tight">
+  <li>整合 <b>224 本业务手册</b>（81 个公司级 + 143 个部门/岗位级文件），构建覆盖全业务流程的标准知识体系</li>
+  <li>核心机制：<b>「检索 — 生成 — 溯源」三阶段</b>，答案<b>自动标注来源章节</b>，确保每条回复有据可查</li>
+  <li>搭载<b>多轮对话记忆与场景理解</b>模块，能自动识别<b>未明示需求</b>（如携带宠物、同行人服务）</li>
+  <li>上线一个月覆盖 <b>9100+ 一线业务骨干</b>，效率提升数十倍</li>
+</ul>
+<div class="pcard"><b>可直接借鉴</b>：① 溯源到章节 → 我们的 <code>M3 原文定位跳转</code>；② 未明示需求识别 → 我们「联想记忆」的下一步（S4）；③ 224 本手册的组织方式 → 我们的六库决策链方向一致，但需补「版本归属」。</div>
+
+<h3>ANA「neoAI Chat」<span class="src">Future Travel Experience 2025-10</span></h3>
+<ul class="tight">
+  <li>部署在 ANA <b>安全私有云</b>，覆盖机场、<b>客舱</b>、机务、飞行四大运行部门</li>
+  <li>成效数据：文档/规章检索时间<b>减少约 90%</b>；报告、规章、教材撰写时间<b>减少约 75%</b></li>
+  <li>治理要求写得很硬：只用<b>已批准的、版本受控的来源</b>；每条回答<b>展示引用</b>供快速核验；<b>标记低置信度答案并转呈主管或值班经理</b>；安全关键决策<b>保留人在环路</b></li>
+</ul>
+<div class="pcard"><b>可直接借鉴</b>：这是本次调研里<b>最完整的一份「可信度治理」清单</b>。第 1 条我们已满足（离线本地库天然版本受控）；第 2、3 条正是我们的 <code>M1 置信度徽标</code> 与 <code>M4 版本时效标注</code>。</div>
+
+<h3>JAL × Fujitsu × Headwaters（Phi-4 端侧小模型）<span class="src">Fujitsu 2025-04</span></h3>
+<ul class="tight">
+  <li>用微软 Phi-4 小语言模型（<b>量化后跑在平板本地，不需要云连接</b>）做机上空勤交接报告助手</li>
+  <li>成效：交接报告耗时<b>从最长 1 小时降到约 20 分钟</b>；机上或落地即刻生成，报告质量与细节不降</li>
+  <li>关键前提：用 JAL 历史报告数据微调 → 说明<b>「垂直语料 + 端侧运行」是可落地的组合</b></li>
+</ul>
+<div class="pcard"><b>可直接借鉴</b>：① 我们的「零外发」路线与 JAL 一致，且我们已经跑在端侧；② 但<b>生成类任务（报告、特情记录）我们完全没做</b>——这是把「问答工具」升级成「生产力工具」的关键一跃（S2）。</div>
+</details>
+
+<details>
+<summary>B 类 · 航司员工移动平台（载体对标）</summary>
+<h3>东航体系</h3>
+<ul class="tight">
+  <li><b>掌上东航</b>内嵌「<b>百读</b>」电子图书馆：《客舱服务作业指导》《仪容仪表规范》《出勤规范》《暖心话术手册》全部在线</li>
+  <li><b>移动客舱</b>：舱段、会员信息、旅客生日、机上医疗志愿者；<b>电子任务书</b>内嵌「<b>客舱风险地图</b>」模块</li>
+  <li><b>东航易学网</b>：全岗位课程体系 + 多媒体资源库 + 学习管理（<b>学分统计、培训记录查询</b>）+ 内部问答社区</li>
+</ul>
+<div class="pcard"><b>可直接借鉴</b>：① 话术手册类内容我们已有（H 组话术向导）；② <b>学分/培训记录</b>是「学」的出口——建议我们以「成长档案 + 可导出」轻量对标（O2），不追学分体系（需与 HR 系统对接，超出边界）。</div>
+<h3>春秋自有体系<span class="src">SMP-移动乘务 2016 / 春秋之家</span></h3>
+<ul class="tight">
+  <li>SMP-移动乘务 12 大功能中的 7 项核心：日程管理、网上准备、档案管理、绩效奖惩、薪资查询、日常请假、航班动态</li>
+  <li>春秋之家：IM、审批、航班动态、天气、公告</li>
+</ul>
+<div class="pcard"><b>关键判断</b>：这些是<b>办事类</b>能力，与我们<b>知识类</b>定位不重叠、也不该重叠。我们要做的是「PC/办事 App 不覆盖的那块」——<b>随时可问、随时可学、无需登录外部系统</b>。</div>
+</details>
+
+<details>
+<summary>C 类 · 企业知识库 / RAG 平台（能力对标）</summary>
+<table>
+<tr><th>产品</th><th>值得抄的点</th></tr>
+<tr><td><b>腾讯乐享</b></td><td>RAG + Agent 架构，公开 <b>AI 问答准确率 92%</b>；解析 103+ 格式；<b>@ 指定文档精准问答</b>；回答可溯源到「视频的某一秒」；<b>实时学习用户反馈，自动识别知识缺口并推荐更新</b>（知识库自优化）；四级权限隔离 + 私有化</td></tr>
+<tr><td><b>飞书知识库</b></td><td>DeepSeek-R1 / 豆包双模型；提问即答并提炼重点；严格遵循权限管控；知识库可发布到「广场」</td></tr>
+<tr><td><b>Glean</b></td><td>275+ 连接器；<b>权限继承与实时同步</b>；<b>全量可观测——追踪每一次查询、答案与动作</b>；知识图谱</td></tr>
+<tr><td><b>Onyx（原 Danswer）</b></td><td>MIT 开源、可自托管、数据主权；开源版即可用 chat/RAG/agents</td></tr>
+<tr><td><b>Guru</b></td><td><b>知识卡片由责任人可校验、可维护</b>——答案质量取决于卡片是否被持续维护（反面提醒：没有治理机制的知识库会腐烂）</td></tr>
+<tr><td><b>RAGi / 知索 RAG / 数舵</b></td><td>回答附原文段落与页码，一键溯源；<b>检索信心不足时明确表示「查无依据」，而非勉强作答</b>；知识<b>版本管理 + 版本对比 + 一键回滚</b>；按角色/密级在检索阶段即过滤；实时学习反馈、自动识别知识缺口</td></tr>
+</table>
+<div class="pcard"><b>可直接借鉴</b>：这一类的四条通用做法我们必须补齐——<b>① 有据可查（溯源）② 查无依据就明说 ③ 版本可回溯 ④ 反馈驱动缺口发现</b>。它们的答案准确率天花板普遍在 92% 左右，说明「偶尔答错」是常态，<b>兜底机制比准确率更重要</b>。</div>
+</details>
+
+<details>
+<summary>D 类 · 备考 / 刷题类 App（学习闭环对标）</summary>
+<table>
+<tr><th>产品</th><th>值得抄的点</th></tr>
+<tr><td><b>刷刷题（民航专项）</b></td><td>五维搜题（文字 / 语音 / 拍照 / 悬浮窗 / 本题库导入）；<b>支持导入 Word/Excel/PDF 自建专属题库</b>；错题自动归类；全真模拟考试 + 成绩分析报告；班级组队刷题；<b>错题 DNA 分析</b>（错题类型、知识点关联度、错误频率等维度生成薄弱点报告）</td></tr>
+<tr><td><b>菁优网</b></td><td>学情报告 + 错题闭环「拍搜 — 练习 — 收录 — 分析 — 错题训练」；<b>同类题再练 / 举一反三</b>；按薄弱点跨章节 AI 组卷</td></tr>
+<tr><td><b>分小全 / 错题 plus</b></td><td><b>按艾宾浩斯记忆曲线提醒复习</b>、每周「斩错题」入口；知识点自动归类 + 匹配微课 + 举一反三三道；知识雷达诊断</td></tr>
+<tr><td><b>作业帮 / 小猿</b></td><td>本题精讲、<b>同类考点题练习</b>；AI 精准学做摸底诊断后生成学习路径</td></tr>
+<tr><td><b>Learn8</b></td><td>面向空乘的文字 / 语音 / 拍照 / 悬浮窗问答 + <b>分步解题</b>（不只给答案，给步骤）</td></tr>
+</table>
+<div class="pcard"><b>可直接借鉴</b>：这是本次调研里<b>最能把我们「你问我答」从工具变产品的一组</b>。核心公式：<b>错题本 → 间隔重复 → 薄弱点热力图 → 整卷模拟考 → 学情报告</b>。逐项对到我们的 L 组提案，几乎一一对应，且<b>全部可纯本地实现</b>。</div>
+</details>
+
+<h3>补充样本：客舱情景演练 <span class="src">南航 / 长龙 / 厦航 / 客舱虚拟仿真教学软件</span></h3>
+<ul class="tight">
+  <li>南航：<b>「情景模拟 + 跨组协作」培训体系</b>，针对儿童急症、心肺复苏等特情开展全要素演练；每年全流程急救演练覆盖癫痫、心梗等 20 余种突发状况；乘务员需通过 CRM 专项考核</li>
+  <li>长龙航空：<b>无脚本「红蓝」对抗演练</b>——质量管理部员工扮演情绪升级旅客（红方），乘务员与安全员应对（蓝方），专治「机闹」处置</li>
+  <li>厦航：空中急救为技能培训重要环节，初始培训考核后<b>每年复训</b></li>
+  <li>客舱服务虚拟仿真教学软件：B737-800 三维客舱，覆盖<b>乘务全流程四阶段</b>（预先准备/直接准备/飞行实施/航后评价）、设备检查标准、四人制/五人制/六人制<b>岗位分工</b>、特殊旅客服务、广播词双语、运行检查单</li>
+</ul>
+<div class="pcard"><b>可直接借鉴</b>：航司的真实训练方式是<b>「给一个情境，让学员决策，再看处置对不对」</b>，而不是「背条文」。我们的大撤专项偏清单式，缺<b>分支决策 + 处置评分</b>（S1）。这是把我们所有静态知识「激活」成训练的最高价值形态，且纯本地可实现。</div>
+
+<h2>四、我方现状诊断 <span class="sub">基线：qa.html 六库问答 · 78 项功能 / 11 组 / 300 函数</span></h2>
+<table>
+<tr><th>维度</th><th>现状</th><th>诊断</th></tr>
+<tr><td>知识覆盖</td><td>六库：日常 / 手册 01.10 / 管理 01.14 / 服务规范 00.07 / 大撤专项 / CBT 题库；决策链不可调换</td><td class="g">结构清晰，与东航 224 本手册的分层思路同源</td></tr>
+<tr><td>检索能力</td><td>本地检索 + <code>kbStrong</code> 可信判据 + 同义扩展 + 联想记忆</td><td class="m">引擎够用，但判据<b>只对内暴露</b>，用户看不到置信度</td></tr>
+<tr><td>答案呈现</td><td>正文 + 📚 出处（书名 + 章节文字）</td><td class="m">差「点进去看原文」的一步（对标东航 / 知索）</td></tr>
+<tr><td>标注与治理</td><td>无版本字段、无校验人、无复核日期</td><td class="r"><b>合规风险点</b>：手册换版后旧答案静默过期</td></tr>
+<tr><td>练习能力</td><td>CBT 题库出题 + 逐题即时判分 + 成绩趋势曲线（已做）</td><td class="r">答错即忘，无错题本 / 无复习 / 无整卷模拟</td></tr>
+<tr><td>反馈闭环</td><td><code>cabin_qa_feedback_v1</code> 单条记录</td><td class="r">只收集，不聚合，不回流到知识库</td></tr>
+<tr><td>传播能力</td><td>复制答案 / 收藏 / 朗读（已做）</td><td class="g">基本可用了，只差图文分享卡</td></tr>
+<tr><td>形态与气质</td><td>24 节气 3D 形象、话术向导、跨板块联动</td><td class="g"><b>竞品全部没有</b>——这是最硬的差异化</td></tr>
+<tr><td>合规口径</td><td>源码零密钥、运行时零外发</td><td class="g">比东航 / ANA 更严，是优势也是约束（决定了哪些功能不能做）</td></tr>
+</table>
+
+<h2>五、优先增加的功能清单 <span class="sub">13 项 · 按 P0 / P1 / P2 分层，每项标竞品来源</span></h2>
+
+<h3>P0 — 先做这 5 项 <span class="src">纯本地、互不依赖、各自可单独上线</span></h3>
+<table>
+<tr><th class="nw">编号</th><th class="nw">功能</th><th>是什么</th><th class="nw">竞品来源</th><th>预期用户价值</th></tr>
+<tr>
+  <td class="id">L1</td><td class="nw"><b>错题本</b> <span class="hot">★</span></td>
+  <td>答错的 CBT 题自动入库，带题干 / 章节 / 正确答案 / 解析；控制台抽屉「重练错题」</td>
+  <td><span class="b b-src">刷刷题</span><br><span class="b b-src">菁优网</span><br><span class="b b-src">错题 plus</span></td>
+  <td>把「刷过」变成「记住」。乘务员真正的刚需是<b>通过复训与晋级考核</b>，不是「问一句」。<br><b>它还是后续 4 项功能的地基</b>（间隔重复、热力图、模拟考、学情报告全都依赖它）</td>
+</tr>
+<tr>
+  <td class="id">M1</td><td class="nw"><b>置信度徽标 + 查无依据显式化</b> <span class="hot">★</span></td>
+  <td>答案顶部标「高 / 中 / 低」；命中分不足时<b>主动说「这个问题六库里没有明确依据，以下是最相近的条目」</b>，而不是硬答</td>
+  <td><span class="b b-src">ANA 低置信转主管</span><br><span class="b b-src">RAGi「查无依据」</span><br><span class="b b-src">知索 RAG</span></td>
+  <td>安全 / 服务类问题答错的代价远高于答不出。<b>让用户知道「这条能不能信」比多答对一条更有价值</b>。<br>落地成本极小：<code>kbStrong</code> 已算出总分，只是没展示</td>
+</tr>
+<tr>
+  <td class="id">M4</td><td class="nw"><b>版本时效标注</b> <span class="hot">★</span></td>
+  <td>每条答案标注「依据《管理手册》01.14 · 2026-xx-xx 版」；手册换版时对受影响条目提示「该条目依据的版本已更新，请以最新手册为准」</td>
+  <td><span class="b b-src">ANA 附版本+条款</span><br><span class="b b-src">乐享/知索 版本回溯</span><br><span class="b b-src">民航「现行有效性」制度</span></td>
+  <td><b>这是本次调研里最被低估、但合规风险最高的一项。</b>民航手册本身就是按「有效页清单 + 修订记录 + 有效日期」管理的（局方制度），我们目前是无标注裸答案——<b>手册一换版，库里的旧答案会静默过期且无人察觉</b></td>
+</tr>
+<tr>
+  <td class="id">M3</td><td class="nw"><b>原文定位跳转</b></td>
+  <td>点答案里的 📚 出处徽标，直达手册对应章节段落（高亮命中句），不是只给一个章节号</td>
+  <td><span class="b b-src">东航 自动标来源章节</span><br><span class="b b-src">知索 溯源到页码</span><br><span class="b b-src">乐享 溯源到视频某秒</span></td>
+  <td>从「告诉你出处」升级为「带你去看」。<b>新乘和见习最需要这一步</b>——他们要的不是结论，是上下文<br><span class="src">前置：需确认手册页有稳定锚点</span></td>
+</tr>
+<tr>
+  <td class="id">O4</td><td class="nw"><b>知识缺口清单</b></td>
+  <td>留存零命中 / 低置信问法，聚类后输出「该补进库的 Top N 问题」</td>
+  <td><span class="b b-src">乐享 自动识别知识缺口</span><br><span class="b b-src">Glean 全量可观测</span><br><span class="b b-src">RAGi 反馈驱动自优化</span></td>
+  <td>让知识库<b>自己长出该有的条目</b>。目前零命中问法根本没被记录，等于每次冷启动都在丢信息。<br>长期价值：把「维护知识库」从人肉活变成数据驱动</td>
+</tr>
+</table>
+
+<h3>P1 — 第二波 <span class="src">依赖 P0 数据，成对上线</span></h3>
+<table>
+<tr><th class="nw">编号</th><th class="nw">功能</th><th>是什么</th><th class="nw">竞品来源</th><th>预期用户价值</th></tr>
+<tr>
+  <td class="id">L3</td><td class="nw"><b>间隔重复复习</b></td>
+  <td>错题按 1 / 3 / 7 / 15 天自动排期，进页面提示「今日待复习 N 题」</td>
+  <td><span class="b b-src">分小全 艾宾浩斯提醒</span><br><span class="b b-src">错题 plus「斩错题」</span></td>
+  <td>把「做对过」变成「记住了」。这是学习类产品里<b>留存与效果最直接的机制</b>，且完全本地</td>
+</tr>
+<tr>
+  <td class="id">L4</td><td class="nw"><b>整卷模拟考 + 成绩单</b></td>
+  <td>限时整卷（如 40 题）、交卷统一评分、按章节输出正确率成绩单</td>
+  <td><span class="b b-src">刷刷题 全真模拟考</span><br><span class="b b-src">菁优网 学情报告</span><br><span class="b b-src">东航易学网 在线考试</span></td>
+  <td>现在的「出题即逐题判分」没有考场感。<b>复训 / 晋级是限时整卷场景</b>，需要一次完整模拟的心理与节奏训练</td>
+</tr>
+<tr>
+  <td class="id">L2</td><td class="nw"><b>章节掌握度热力图</b></td>
+  <td>按十章统计错题密度，输出薄弱章节热力块</td>
+  <td><span class="b b-src">刷刷题 错题 DNA 分析</span><br><span class="b b-src">菁优网 薄弱点跨章节组卷</span></td>
+  <td>一眼看出「第三章最弱」，把复习从「全部重来」变成「精准打击」</td>
+</tr>
+<tr>
+  <td class="id">S1</td><td class="nw"><b>情景处置推演</b> <span class="hot">★</span> <span class="b b-p1">新增</span></td>
+  <td>给一个客舱情境（如「平飞阶段旅客突发癫痫」「延误 3 小时旅客情绪升级要求下机」），用户选择处置动作，系统按处置顺序与规范性给分并复盘正确流程</td>
+  <td><span class="b b-src">南航 情景模拟</span><br><span class="b b-src">长龙 红蓝无脚本对抗</span><br><span class="b b-src">客舱虚拟仿真软件</span><br><span class="b b-src">Learn8 分步解题</span></td>
+  <td><b>本次清单里战略价值最高的一项。</b>航司真实训练是「给情境 → 决策 → 复盘」，我们目前全是静态问答。<br>把所有库（大撤、服务规范、急救、话术）<b>从「查得到」变成「练得会」</b>，且纯本地、纯数据驱动，可先做 6~8 个高频特情</td>
+</tr>
+<tr>
+  <td class="id">S2</td><td class="nw"><b>特情记录 / 报告草稿助手</b> <span class="b b-p1">新增</span></td>
+  <td>按模板引导填写（时间 / 位置 / 现象 / 处置 / 结果 / 涉及旅客），本地生成结构化文本，可复制提交</td>
+  <td><span class="b b-src">JAL × Phi-4 航后交接报告</span></td>
+  <td>JAL 实测把交接报告<b>从最长 1 小时压到 20 分钟</b>。这是把「问答工具」升级为「生产力工具」的关键一跃。<br><span class="src">约束：本地方案为「模板 + 引导填充」，非自由生成，规避外发</span></td>
+</tr>
+<tr>
+  <td class="id">S3</td><td class="nw"><b>条目校验状态</b> <span class="b b-p1">新增</span></td>
+  <td>高价值条目增加轻量元数据：复核人 / 复核日期 / 状态（已复核 / 待复核 / 有异议）</td>
+  <td><span class="b b-src">Guru 知识卡片可校验</span></td>
+  <td>Guru 的教训是「<b>没有人维护的知识库一定会腐烂</b>」。给条目一个可见的「谁在什么时候确认过」，是让业务方愿意接手维护的前提</td>
+</tr>
+<tr>
+  <td class="id">N2</td><td class="nw"><b>分享问答卡</b></td>
+  <td>把一条问答生成图文卡（问答 + 出处 + CC 形象）导出到班组群</td>
+  <td><span class="b b-src">乐享/飞书 知识卡片分享</span><br><span class="b b-src">刷刷题 班级共学</span></td>
+  <td>乘务员是<b>班组协作场景</b>，一条好答案的价值在于被转发。复制已做，卡片更体面、更不易失真</td>
+</tr>
+</table>
+
+<h3>P2 — 条件性 / 体验类 <span class="src">按实际反馈再定</span></h3>
+<table>
+<tr><th class="nw">编号</th><th class="nw">功能</th><th>是什么</th><th class="nw">竞品来源</th><th>预期用户价值 / 约束</th></tr>
+<tr>
+  <td class="id">P2</td><td class="nw"><b>离线状态条 + 离线包</b></td>
+  <td>明确提示「当前离线，六库仍可查」；PWA 侧预缓存六库</td>
+  <td><span class="b b-src">JAL 端侧离线</span></td>
+  <td>我们本来就离线可用，但用户不知道。断网时行为不透明 = 被当成「坏了」。<b>成本低，收益立竿见影</b></td>
+</tr>
+<tr>
+  <td class="id">O2</td><td class="nw"><b>我的成长档案</b></td>
+  <td>提问历史 + 练习记录 + 错题 + 薄弱章节汇总成一页，可导出</td>
+  <td><span class="b b-src">东航易学网 学习记录/学分</span><br><span class="b b-src">菁优网 学情报告</span></td>
+  <td>个人复盘素材，也可直接用于<b>晋级答辩 / 带班评估</b>；数据源全是本地已有，几乎零成本</td>
+</tr>
+<tr>
+  <td class="id">S5</td><td class="nw"><b>语音提问</b> <span class="b b-p2">新增 · 需例外</span></td>
+  <td>按住说话提问；Android 走系统本地 ASR，iOS 沿用现有 Safari 引导</td>
+  <td><span class="b b-src">刷刷题 语音搜题</span><br><span class="b b-src">Learn8 语音问答</span><br><span class="b b-src">企业 RAG 语音问答案例</span></td>
+  <td>手上在整理机供品 / 做安全检查时确实没法打字。<br><span class="r">约束</span>：Android Web Speech 走云端即属外发，须照 beauty 的 <code>__AI_HYBRID_20260919__</code> 例外姿势（显式告知 + 可关），<b>不默认开启</b></td>
+</tr>
+<tr>
+  <td class="id">S7</td><td class="nw"><b>话术跟读评分</b> <span class="b b-p2">新增</span></td>
+  <td>选一条话术 / 广播词，跟读后本地比对时长与停顿，给「流利度 / 完整度」分</td>
+  <td><span class="b b-src">客舱虚拟仿真 广播词模块</span><br><span class="b b-src">Learn8 分步演练</span></td>
+  <td>把话术向导从「读稿」变成「练口」；本地做音频比对无需 ASR 转写，可规避外发</td>
+</tr>
+<tr>
+  <td class="id">S6</td><td class="nw"><b>学习积分 / 培训档案对接</b> <span class="b b-p2">新增</span></td>
+  <td>本地积分与学习记录，预留导出格式供培训部门使用</td>
+  <td><span class="b b-src">东航易学网 学分统计</span></td>
+  <td>价值高但依赖外部系统对接，<b>建议先做「可导出」而不做「直连」</b></td>
+</tr>
+</table>
+
+<h2>六、明确不做 <span class="sub">省得反复试 · 附竞品确实有但我们放弃的理由</span></h2>
+<table>
+<tr><th class="nw">功能</th><th class="nw">竞品来源</th><th>不做 / 缓做的理由</th></tr>
+<tr>
+  <td class="nw">拍照 / 图片提问</td>
+  <td><span class="b b-src">刷刷题 拍照搜题</span><br><span class="b b-src">Learn8 拍照问答</span><br><span class="b b-src">企业 RAG 多模态</span></td>
+  <td><span class="r">本地无 OCR 引擎 → 必然外发</span>，直接违背「运行时零外发」口径。<br>除非未来引入端侧 OCR 模型，否则不排期。竞品能做是因为它们本来就跑云</td>
+</tr>
+<tr>
+  <td class="nw">悬浮窗搜题</td>
+  <td><span class="b b-src">刷刷题 悬浮窗</span><br><span class="b b-src">Learn8 浮窗问答</span></td>
+  <td>需要 Android 系统级悬浮窗权限，APK 内 WebView 做不到；且与现有三栏布局直接冲突。<b>收益不抵风险</b></td>
+</tr>
+<tr>
+  <td class="nw">回归云端大模型直连</td>
+  <td><span class="b b-src">东航 / ANA / 飞书 / 乐享 全部走云</span></td>
+  <td>违背 09-19 零密钥零外发决策，并会推翻四条守护链断言。<b>我们的差异点恰恰在这里</b>，不值得为对标而放弃</td>
+</tr>
+<tr>
+  <td class="nw">排班 / 执勤期 / 航段查询</td>
+  <td><span class="b b-src">SMP-移动乘务 日程/档案</span><br><span class="b b-src">东航 移动客舱</span></td>
+  <td>无合规数据来源，属「看起来很美但落地即违规」。这类交给春秋之家 / SMP，<b>定位错位比功能缺失更危险</b></td>
+</tr>
+</table>
+<div class="note stop" style="margin-top:12px">
+  <b>三条来自竞品的反面提醒</b>：
+  ① <b>RAG 无法完全消除错误</b>——业界公开准确率天花板约 92%，即使来源干净，检索没命中或库内本身矛盾仍会答错；涉及安全、法规的问题，必须把 AI 答案当「快速定位原文的入口」而非最终结论。
+  ② <b>没有治理机制的知识库必然腐烂</b>（Guru 的经验）——知识卡片要靠责任人持续复核，否则再好的检索也只会更快地给出过期答案。
+  ③ <b>功能堆得多不等于好用</b>——竞品里评分最低的往往不是功能少的，而是「初始化太重、要学很久才会用」的。我们的形态优势是<b>零配置、打开就能问</b>，新增功能不得破坏这一点。
+</div>
+
+<h2>七、你问我答专项 · 建议落地顺序 <span class="sub">按「依赖关系 + 性价比」排的实际执行序</span></h2>
+<table>
+<tr><th class="nw">序</th><th class="nw">项</th><th>为什么排这里</th><th class="nw">验收标准（可直接当断言写）</th></tr>
+<tr><td>1</td><td class="id">M1</td><td>分数已经算好，只差展示；同时立刻降低误答风险</td><td>答一个明显不在库里的问题 → 必须出现「无明确依据」提示，且不出现强命中样式</td></tr>
+<tr><td>2</td><td class="id">L1</td><td>后续 4 项学习功能全建在它上面，必须先落地数据结构</td><td>答错 3 题 → 题库抽屉出现 3 条错题，含题干与解析；重练后答对 → 自动移出</td></tr>
+<tr><td>3</td><td class="id">M4</td><td>合规风险最高，且越晚做历史条目越难补标注</td><td>每条答案显示版本号；模拟换版后相关条目出现时效提示</td></tr>
+<tr><td>4</td><td class="id">M3</td><td>依赖锚点确认，可与 2 并行推进</td><td>点击 📚 出处可跳到手册对应段落且命中句高亮</td></tr>
+<tr><td>5</td><td class="id">O4</td><td>越早开始记录，缺口数据越有价值</td><td>零命中问法被留存，管理面板可列出 Top N 高频未命中问法</td></tr>
+<tr><td>6</td><td class="id">L3</td><td>依赖 L1，第二波第一项</td><td>三天前答错的题，进页面出现「今日待复习」入口</td></tr>
+<tr><td>7</td><td class="id">L4</td><td>依赖 L1，与前项成对上线</td><td>整卷 40 题限时 → 交卷出总分 + 分章节正确率</td></tr>
+<tr><td>8</td><td class="id">S1</td><td>不依赖前面任何一项，独立可做；但工作量大，放第二波</td><td>≥6 个特情可推演，处置步骤错序会被指出并复盘正确流程</td></tr>
+<tr><td>9</td><td class="id">L2 · S3 · N2</td><td>L2 依赖 L1 数据量；S3/N2 属治理与传播补强</td><td>热力图按章显示出错密度；条目可见复核状态；问答卡可导出图片</td></tr>
+</table>
+<div class="note" style="margin-top:12px">
+  <b>与既有《增强提案清单》的关系</b>：本清单<b>不改动</b>原提案的编号与技术判断，只是补上「竞品依据」这一层，并新增 5 项原清单里没有的（S1 情景处置推演、S2 特情记录助手、S3 条目校验状态、S5 语音提问、S6 学习积分 / S7 话术跟读评分）。
+  原清单的「建议起手 8 条」中，L5 成绩趋势 / N3 复制 / N1 收藏 / P1 字号 / N5 朗读 <b>5 项已完成</b>，故本清单的起手项顺延为 M1 → L1 → M4。
+</div>
+
+<footer>
+  竞品信息来自公开报道与厂商公开资料（出处已逐条标注）· 我方现状基于 <code>qa.html</code> 源码实测与《你问我答_功能清单_20260919》<br>
+  调研与整理：2026-09-21
+</footer>
+</div>
+</body>
+</html>

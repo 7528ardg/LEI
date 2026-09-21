@@ -1585,6 +1585,31 @@ button:disabled:active{transform:none;}
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 <div class="livery-stripe" data-page-node-id="mtousEj7ZN4Xi2uM9vjLkB"></div>
 
 <header class="topbar" data-page-node-id="nEnHIwBZCdN9arpgAxqVcb">
@@ -2100,6 +2125,11 @@ function checkPacksUpdate(){
     .then(function(man){ writeManifestCache(man); applyManifest(man); })
     .catch(function(){ /* 网络不可达：有缓存（即使过期）也展示，弱网/离线仍能看到待装包 */ if(cached) applyManifest(cached.man); });
 }
+/* 2026-09-19 起：数据包「顶栏 📦 新数据包」入口与开机自动轮询已整体下线（用户要求），
+   顶栏按钮 packsBadge 与弹窗 packsModal 的 DOM 已移除（见 _apply_shell_sync_20260919.py）。
+   下面三个函数因此暂无调用点（仅 installPacksUpdates 内部调用 closePacksModal）——
+   这是「保留实现待恢复」而非废代码：恢复顶栏入口时无需重写。
+   检索链路 checkPacksUpdate() 同样保留，供库管理「📦 数据包」中心与单测复用。 */
 function openPacksModal(){
   if(!packsUpdateReady.length) return;
   const body = document.getElementById('packsModalBody');
@@ -2851,6 +2881,7 @@ function finishAuth(user, remember){
 }
 window.shellLogout = function(){
   saveSession(null);
+  authMode = 'login';  /* 登出后复位为登录页（注册/找回后再登出不至于停留在注册页） */
   var pm = el('profileModal');
   if(pm) pm.classList.remove('show');
   showAuth();

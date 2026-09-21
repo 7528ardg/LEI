@@ -1,0 +1,399 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>你问我答 · 云端 AI 接入方案与功能重估（2026-09-21）</title>
+<style>
+  *{box-sizing:border-box}
+  body{margin:0;background:#f5f7f6;color:#1b2320;
+       font:15px/1.75 -apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Microsoft YaHei",sans-serif}
+  .wrap{max-width:1140px;margin:0 auto;padding:28px 20px 72px}
+  header.hd{background:linear-gradient(135deg,#00A650 0%,#008a42 100%);color:#fff;
+       border-radius:18px;padding:26px 28px;box-shadow:0 8px 26px rgba(0,166,80,.22)}
+  header.hd h1{margin:0 0 8px;font-size:25px;letter-spacing:.3px}
+  header.hd p{margin:0;opacity:.92;font-size:13.5px}
+  .stats{display:flex;flex-wrap:wrap;gap:10px;margin:16px 0 4px}
+  .stat{background:rgba(255,255,255,.16);border:1px solid rgba(255,255,255,.3);
+        border-radius:10px;padding:7px 13px;font-size:12.5px}
+  .stat b{font-size:16px;margin-right:4px}
+  h2{font-size:19px;margin:38px 0 6px;padding-left:12px;border-left:4px solid #00A650}
+  h2 .sub{font-size:13px;font-weight:400;color:#5d6b64;margin-left:8px}
+  h3{font-size:16px;margin:26px 0 4px;color:#134a2e}
+  .note{background:#fff;border:1px solid #dfe6e2;border-radius:12px;padding:14px 18px;
+        font-size:13.5px;color:#42504a}
+  .note b{color:#0a7d3f}
+  .warn{background:#fffaf0;border-color:#f0dcb0}
+  .warn b{color:#9a6100}
+  .stop{background:#fdf1f1;border-color:#f3c9c9}
+  .stop b{color:#a52a2a}
+  ol.ins{margin:10px 0 0;padding-left:22px}
+  ol.ins li{margin:7px 0}
+  ul.tight{margin:6px 0 0;padding-left:20px}
+  ul.tight li{margin:4px 0}
+  table{width:100%;border-collapse:collapse;background:#fff;border-radius:12px;overflow:hidden;
+        box-shadow:0 1px 3px rgba(24,40,34,.07);margin-top:12px;font-size:13px}
+  th,td{padding:9px 11px;text-align:left;vertical-align:top;border-bottom:1px solid #edf1ef}
+  th{background:#eef4f0;font-weight:600;font-size:12.5px;color:#2c3a34}
+  tr:last-child td{border-bottom:0}
+  td.id{font-weight:700;color:#00893f;white-space:nowrap;font-variant-numeric:tabular-nums}
+  td.nw{white-space:nowrap}
+  code{background:#eef4f0;color:#0a7d3f;padding:1px 5px;border-radius:5px;
+       font:12.5px/1.5 ui-monospace,Consolas,monospace}
+  .b{display:inline-block;padding:2px 8px;border-radius:20px;font-size:11.5px;font-weight:600;white-space:nowrap}
+  .b-yes{background:#e4f6ec;color:#0a7d3f;border:1px solid #b9e3cb}
+  .b-up{background:#eaf3fd;color:#1462b8;border:1px solid #c2ddf7}
+  .b-no{background:#fdecec;color:#a52a2a;border:1px solid #f5c6c6}
+  .b-s{background:#fff4e0;color:#9a6100;border:1px solid #f2d9a6}
+  .b-keep{background:#f2f0fa;color:#5b4bb0;border:1px solid #d8d2f2}
+  .hot{color:#c0392b;font-weight:700}
+  .g{color:#0a7d3f;font-weight:700}
+  .r{color:#a52a2a;font-weight:700}
+  .m{color:#9a6100;font-weight:700}
+  .src{font-size:11.5px;color:#7b8781}
+  .pcard{background:#fff;border:1px solid #dfe6e2;border-left:4px solid #00A650;
+         border-radius:12px;padding:12px 16px;margin:10px 0;font-size:13.5px}
+  .pcard b{color:#0a7d3f}
+  .ver{background:#fff;border:1px solid #dfe6e2;border-radius:12px;padding:12px 16px;margin:10px 0;font-size:13.5px}
+  .ver b{color:#0a7d3f}
+  .ver .q{color:#a52a2a;font-weight:700}
+  .lay{display:flex;gap:10px;flex-wrap:wrap;margin-top:12px}
+  .layc{flex:1 1 200px;background:#fff;border:1px solid #dfe6e2;border-radius:12px;padding:12px 14px;font-size:13px}
+  .layc h4{margin:0 0 6px;font-size:13.5px;color:#134a2e}
+  .layc .x{color:#a52a2a;font-weight:700}
+  .layc .y{color:#0a7d3f;font-weight:700}
+  footer{margin-top:44px;padding-top:16px;border-top:1px solid #dfe6e2;
+         font-size:12.5px;color:#7b8781;text-align:center}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<header class="hd">
+  <h1>你问我答 · 云端 AI 接入方案与功能重估</h1>
+  <p>口径反转后的完整重估：AI 现状盘点 · 守护链处置 · 哪些功能现在真能做 · 2026-09-21</p>
+  <div class="stats">
+    <span class="stat"><b>3</b>条现状勘误</span>
+    <span class="stat"><b>10</b>项立即解锁</span>
+    <span class="stat"><b>6</b>项可升级</span>
+    <span class="stat"><b>3</b>项仍不可行</span>
+    <span class="stat"><b>1</b>个必须先定的决定</span>
+  </div>
+</header>
+
+<h2>零、先纠正我自己 <span class="sub">我上一条消息把 qa 的 AI 现状说错了三处</span></h2>
+<div class="note warn">
+  我说过「qa 侧源码零密钥、运行时零外发」并拿它当约束否决了几个功能。<b>这个说法是过期的。</b>
+  我把 qa.html 完整读了一遍——它<b>早就有完整的云端 AI 骨架，而且已经接进了问答主流程</b>。
+</div>
+
+<div class="ver">
+  <b>勘误 A ·「运行时零外发」早就不成立了</b><br>
+  源码 <code>qa.html:2494</code> 的原文注释写着：<br>
+  <span class="src">「2026-09-19 白天曾短暂切换为本地知识库模式（零密钥零外发）；<b>深夜按用户指令恢复 AI 能力</b>（<code>__AI_RESTORE_20260919__</code>）并按 beauty 混合口径清洗」</span><br>
+  <span class="g">→ 「零外发」只存在了一个白天。现在真正还立着的只剩「<b>源码零内置密钥</b>」这一半。我上一条消息里的"运行时零外发"约束，是我读了旧记忆没核源码。</span>
+</div>
+
+<div class="ver">
+  <b>勘误 B ·「四条守护链」实际只有三条是活的</b><br>
+  记忆里的第四条 <code>_apply_nokey_all_mods</code> <span class="q">已经退役</span>，现在躺在 <code>_retired_glm47/</code> 目录里，不在构建链上。活着的三条是：
+  <code>_check_needles.py</code>（BAN_RX）· <code>_verify_nokey_all.py</code>（BAN）· <code>_verify_ai_price.js</code>。
+</div>
+
+<div class="ver">
+  <b>勘误 C · qa 的 AI 骨架比我以为的完整得多</b><br>
+  不是"需要从零接入"，而是<b>已经跑通并且已经接进主流程</b>。这正是你要的"刷新认知"——它现在缺的不是管道，是<b>深度和位置</b>（见第三节）。
+</div>
+
+<h2>一、AI 现状盘点 <span class="sub">逐个核到行号，这些都已经在了</span></h2>
+<table>
+<tr><th class="nw">#</th><th class="nw">已有能力</th><th>实现位置与细节</th></tr>
+<tr><td class="id">1</td><td class="nw"><b>SpringAI 客户端</b></td><td><code>:2503</code> 双服务商：智谱 <b>GLM-4-Flash-250414（免费）</b> + Pollinations 免 Key 实验通道。Key 由用户运行时粘贴，存 <code>localStorage.spring_ai_cfg</code></td></tr>
+<tr><td class="id">2</td><td class="nw"><b>限流容错链</b></td><td><code>:2531-2555</code> 降级链 <code>glm-4-flash-250414</code> → <code>glm-4-flash</code>；429/1305 触发<b>立即换模型 + 熔断 60s</b>；推理型模型（<code>glm-4.5-flash</code>）因首字 20~60s 且正文常空已移出链</td></tr>
+<tr><td class="id">3</td><td class="nw"><b>AI 人格风格</b></td><td><code>:2725 AI_STYLES</code> + <code>currentAiStyle()</code>，已有 <code>/风格</code> 命令切换</td></tr>
+<tr><td class="id">4</td><td class="nw"><b>联网搜索</b></td><td><code>:2617 tavilySearch()</code>，支持 keyless 模式（<code>X-Tavily-Access-Mode: keyless</code>）</td></tr>
+<tr><td class="id">5</td><td class="nw"><b>AI 设置面板 + 教程 + 状态徽标</b></td><td><code>:2661 openSettings()</code>、连接测试、<code>AI 未连接 / AI 已连接</code> 徽标、顶栏 <code>⚙️ AI设置</code> 入口、对话内教程气泡</td></tr>
+<tr><td class="id">6</td><td class="nw"><b>四条已接通的 AI 通路</b></td><td>
+  ① <b>天气 AI 点缀</b>（<code>:8331</code>，强制数值逐字来自 Open-Meteo 实时数据）<br>
+  ② <b>情绪共情对话</b>（<code>:8353</code>，明确禁止输出规章条款与章节号）<br>
+  ③ <b>AI 自由问答兜底</b>（<code>:8442</code>）——<b>最强的一条</b>：把全库 Top3 + 其余每库 Top2（上限 12 条）作为上下文，并带<b>防编造双档护栏</b><br>
+  ④ 跨板块本机数据注入（<code>:11105</code> 相关数据拼进 user 消息）</td></tr>
+<tr><td class="id">7</td><td class="nw"><b>多轮对话</b></td><td><code>:10585</code> 已包装 <code>chatLLM</code> 做 <code>injectHistory()</code>；另有 <code>aiLastResp</code> 携带上一轮回答</td></tr>
+</table>
+
+<div class="pcard">
+  <b>所以"接入云端 AI"这件事本身已经完成了。</b>你要的"赋予灵魂"，真正要动的是三件不在管道上的事。
+</div>
+
+<h2>二、三个真正的断点 <span class="sub">"灵魂"缺在哪</span></h2>
+<div class="lay">
+  <div class="layc">
+    <h4>断点 1 · AI 是「兜底」不是「主链路」</h4>
+    <div class="x">AI 只在本地检索全军覆没之后才出场</div>
+    代码顺序写得很清楚：先 <code>kbSearch</code> → <code>kbStrong</code> → 跨库切库 → 候选追问 → <b>最后还是不行才 <code>SpringAI.chatLLM</code></b>（<code>:8442</code>）。<br>
+    <div class="y">→ 这注定它是备胎。用户感受到的仍然是"查词工具"，不是"有人在那头"。</div>
+  </div>
+  <div class="layc">
+    <h4>断点 2 · 入口只有键盘</h4>
+    <div class="x">拍照不行、语音受限</div>
+    客舱里最高频的提问场景是：<b>看见一个东西不认识</b>（设备铭牌、机供品标签、手册纸页）、<b>手上占着</b>（整理餐车、做安保检查）。<br>
+    <div class="y">→ 文字输入恰好是这两种场景下最不可用的方式。</div>
+  </div>
+  <div class="layc">
+    <h4>断点 3 · AI 不能"做事"</h4>
+    <div class="x">只会说话，不会干活</div>
+    现在 AI 能答、能共情、能播报——但不能起草报告、不能出变式题、不能给处置打分、不能复盘。<br>
+    <div class="y">→ JAL 那条路（把交接报告从 1 小时压到 20 分钟）我们一步都没走。</div>
+  </div>
+</div>
+
+<h2>三、守护链处置清单 <span class="sub">你要"删除/推翻"，我把该删什么、该留什么列清楚</span></h2>
+<div class="note">
+  <b>前置认知</b>：这三条链现在守的<b>不是</b>「不许联网」，而是「<b>源码里不许有内置密钥 / 不许引用高耗旗舰模型</b>」。
+  删掉它们不等于"解锁 AI"（AI 早就通了），而是等于"<b>可以把 Key 写进源码，让用户开箱即用</b>"。
+</div>
+
+<table>
+<tr><th class="nw">文件</th><th>守什么</th><th class="nw">建议</th><th>说明</th></tr>
+<tr>
+  <td><code>_check_needles.py</code><br><span class="src">:91 BAN_RX</span></td>
+  <td>6 条字面禁用：内置共享 Key <code>4986b927</code> · <code>BUILTIN_AI_KEY</code> · <code>api.siliconflow.cn</code> · <code>api.github.com</code>（Gist 同步） · <code>glm-4.7</code> · <code>glm47</code>；另加正则禁 <code>apiKey:'xxx'</code> 与内置 <code>Bearer</code> 令牌</td>
+  <td class="nw"><span class="b b-keep">删 2 留 4</span></td>
+  <td><b>删</b>「内置共享 Key」与「Key 常量名」两项（这正是你要解锁的）；<br><b>留</b>硅基流动 / Gist 云同步 / glm-4.7 两项——它们是历史踩坑记录，与"要不要内置 Key"无关</td>
+</tr>
+<tr>
+  <td><code>_check_needles.py</code><br><span class="src">:98 APIKEY_RX / :99 BEARER_RX</span></td>
+  <td>正则拦 <code>apiKey: '真实值'</code> 与内置 <code>Bearer</code> 长令牌</td>
+  <td class="nw"><span class="b b-no">建议保留</span></td>
+  <td>这两条是<b>防手滑</b>的，不是防联网的。如果真决定内置 Key，请改成白名单放行特定变量而非整条删除，否则以后任何人手抖写死一个 Key 都没人拦</td>
+</tr>
+<tr>
+  <td><code>_check_needles.py</code><br><span class="src">:101 LOCAL_MARKS</span></td>
+  <td>要求各模块带「AI 模式标记」串：qa → <code>__AI_RESTORE_20260919__</code>、beauty → <code>__AI_HYBRID_20260919__</code>、quiz / kb-admin / home → 本地模式串</td>
+  <td class="nw"><span class="b b-s">删本地模式串</span></td>
+  <td>qa / beauty 的标记<b>保留</b>（它们证明 AI 通路在位）；<code>quiz</code> / <code>kb-admin</code> / <code>home</code> 三条「本地模式（彻底无密钥）」断言<b>可以删</b>——它们只证明"没接 AI"，删掉不影响任何东西，但删除后这三个模块就没有 AI 在位性检查了</td>
+</tr>
+<tr>
+  <td><code>_verify_nokey_all.py</code><br><span class="src">:28 BAN / :104</span></td>
+  <td>对全部模块与壳内 base64 载荷做 <code>4986b927</code> / <code>BUILTIN_AI_KEY</code> / <code>glm-4.7</code> 三串扫描</td>
+  <td class="nw"><span class="b b-keep">改口径</span></td>
+  <td>建议<b>不删脚本</b>，而是把 BAN 收缩为 <code>['glm-4.7']</code> 并把脚本改名/改注释为「高耗模型与旧服务商守护」。<b>保留"壳内 base64 载荷也要扫"这个能力</b>——它防的是"改了源码没重建壳"这类真事故，非常有用</td>
+</tr>
+<tr>
+  <td><code>_verify_ai_price.js</code></td>
+  <td>beauty 侧的 AI 混合模式守护：断言三个域名（firecrawl / tavily / bigmodel）保留、<code>__AI_HYBRID_20260919__</code> 在位、内置密钥零容忍</td>
+  <td class="nw"><span class="b b-keep">改口径</span></td>
+  <td>与上面同理：把「内置密钥零容忍」改成「<b>只禁明文长 Key 字面量</b>」，其余断言全部保留</td>
+</tr>
+<tr>
+  <td><code>_verify_qa_localmode.js</code><br><code>_judge_qa_guard.js</code> / <code>_judge_qa_llm.js</code></td>
+  <td>专门验证"本地模式"的脚本（AI 下线那天写的）</td>
+  <td class="nw"><span class="b b-no">建议退役</span></td>
+  <td>搬进 <code>_retired_glm47/</code> 或直接改写为「AI 模式守护」。<b>留着它们在构建链上，等于每天都在断言一件已经不成立的事</b></td>
+</tr>
+<tr>
+  <td>各处注释与文案</td>
+  <td>「零密钥零外发」「彻底无密钥」「零联网」等措辞</td>
+  <td class="nw"><span class="b b-yes">全删</span></td>
+  <td>这些措辞现在与代码事实不符，是最容易误导下一个人的东西（我就被它误导了一次）</td>
+</tr>
+</table>
+
+<h3>必须先定的一个决定：Key 从哪来 <span class="src">这决定了上面清单怎么落地</span></h3>
+<table>
+<tr><th class="nw">方案</th><th>用户体感</th><th>Key 安全性</th><th>我的建议</th></tr>
+<tr>
+  <td class="nw"><b>甲 · 保持自填</b><br><span class="src">现状</span></td>
+  <td class="r">差。每个乘务员要自己注册智谱、拿 Key、粘贴</td>
+  <td class="g">最好，源码零密钥</td>
+  <td>仅适合内部测试阶段</td>
+</tr>
+<tr>
+  <td class="nw"><b>乙 · 内置共享 Key</b><br><span class="src">你这次要解锁的</span></td>
+  <td class="g">最好，装完就能用</td>
+  <td class="r">最差。APK 可反编译，<code>assets/*.gz</code> 解开就是明文；GLM 免费档 1302/1305 限流极严（源码注释里已实测记录），共享 Key 极易被刷爆作废</td>
+  <td>可做，但必须配三项缓解：① 客户端每日调用配额闸 ② 用户自填 Key <b>优先级高于</b>共享 Key ③ 保留现有 429 熔断与本地回落</td>
+</tr>
+<tr>
+  <td class="nw"><b>丙 · 自建中转</b><br><span class="src">推荐</span></td>
+  <td class="g">最好，装完就能用</td>
+  <td class="g">好。Key 只在服务端，客户端只知道一个中转地址；还能做真配额、真统计、真换 Key</td>
+  <td><b>唯一同时拿到"开箱即用"和"不泄露"的解法。</b>一个 Cloudflare Worker / 云函数几十行即可，客户端只改 <code>SpringAI</code> 的 base 指向</td>
+</tr>
+</table>
+<div class="note warn" style="margin-top:12px">
+  <b>我的建议</b>：走<b>丙</b>。它把你想要的"灵魂"（开箱即用）和"安全"同时满足，改动量比乙更小——只需在 <code>PROVIDERS</code> 里加一个中转服务商、<code>base</code> 指向你自己的域名。
+  如果你要的是立刻见效、先验证价值，那就先上<b>乙</b>（内部用、接受风险、加配额闸），等价值验证了再迁到丙，两者不冲突。
+</div>
+
+<h2>四、功能重估清单 <span class="sub">核心：放开云端 AI 之后，哪些真能做</span></h2>
+
+<h3>档 1 · 原本被否决，现在立刻可做 <span class="src">10 项</span></h3>
+<table>
+<tr><th class="nw">编号</th><th class="nw">功能</th><th>为什么现在能做</th><th class="nw">竞品来源</th><th class="nw">落点</th></tr>
+<tr>
+  <td class="id">A1</td><td class="nw"><b>拍照提问（多模态）</b> <span class="hot">★</span></td>
+  <td>原来卡在「本地无 OCR → 必然外发」被否；现在外发已是既定口径，<b>直接上多模态视觉模型</b>即可</td>
+  <td><span class="b b-s">刷刷题 拍照搜题</span><br><span class="b b-s">Learn8 拍照问答</span></td>
+  <td class="nw">输入框加 📷 → 压缩到长边 1024 → 多模态 → 结果文本注入 <code>process()</code></td>
+</tr>
+<tr>
+  <td class="id">A2</td><td class="nw"><b>语音提问</b></td>
+  <td>Android 已有 Web Speech 通道（<code>__QA_IOS_MIC_v1__</code>），可再挂云端 ASR 补 iOS 短板</td>
+  <td><span class="b b-s">刷刷题 语音搜题</span><br><span class="b b-s">Learn8 语音问答</span></td>
+  <td class="nw">复用现有麦克风入口，识别结果走同一文本链路</td>
+</tr>
+<tr>
+  <td class="id">A3</td><td class="nw"><b>问法改写 / 查询扩展</b> <span class="hot">★</span></td>
+  <td>本地检索是关键词 + 2-gram 匹配，<b>换种说法就查不到</b>（召回一致性审计里失败案例的主因）。用 AI 先把口语问法改写成库内可能的问法，<b>再走本地检索</b></td>
+  <td><span class="b b-s">东航 RAG</span><br><span class="b b-s">知索 RAG 语义检索</span></td>
+  <td class="nw"><code>process()</code> 前置一层；<b>AI 失败则原样走原链路</b>，零风险</td>
+</tr>
+<tr>
+  <td class="id">A4</td><td class="nw"><b>多轮指代消解</b></td>
+  <td>已有 <code>injectHistory</code> 注入历史，但缺结构化补全——"那这个呢""几天内"这类追问现在必然断链</td>
+  <td><span class="b b-s">东航 多轮对话记忆</span></td>
+  <td class="nw">在历史注入基础上加一层实体补全，把追问还原成完整问句</td>
+</tr>
+<tr>
+  <td class="id">A5</td><td class="nw"><b>未明示需求识别</b></td>
+  <td>用户问「宠物」其实想问两件事：运输规定 + 同机旅客服务。AI 可主动把隐含需求列出来</td>
+  <td><span class="b b-s">东航 识别未明示需求</span></td>
+  <td class="nw">答案尾部生成 1~3 个追问芯片（沿用现有 <code>.w-chip</code>）</td>
+</tr>
+<tr>
+  <td class="id">A6</td><td class="nw"><b>强制溯源标注</b> <span class="hot">★</span></td>
+  <td>AI 生成后用库内条目<b>逐句核对</b>：哪些句子有原文依据、哪些是模型自己补的，分色标注</td>
+  <td><span class="b b-s">ANA 引用核验</span><br><span class="b b-s">东航 检索-生成-溯源</span></td>
+  <td class="nw">现有 <code>:8442</code> 生成段之后加核对层 —— <b>这是"AI 有灵魂"与"AI 不可信"之间的唯一桥梁</b></td>
+</tr>
+<tr>
+  <td class="id">A7</td><td class="nw"><b>特情记录 / 航后报告 AI 起草</b></td>
+  <td>从"模板拼接"升级为"给要点 → AI 出规范文本 → 人工校对"。这就是 JAL 那条路</td>
+  <td><span class="b b-s">JAL × Phi-4</span><br><span class="src">1h → 20min</span></td>
+  <td class="nw">把上一版计划里的 R5 从模板版换成 AI 版</td>
+</tr>
+<tr>
+  <td class="id">A8</td><td class="nw"><b>变式题 / 举一反三</b></td>
+  <td>基于错题生成同考点变式题，解决"背答案"而非"会知识"</td>
+  <td><span class="b b-s">刷刷题 举一反三</span><br><span class="b b-s">菁优网 同类题再练</span></td>
+  <td class="nw">接在错题本（W1）之后，产出题仍走 <code>qaTrainQuizHtml</code> 渲染</td>
+</tr>
+<tr>
+  <td class="id">A9</td><td class="nw"><b>学情诊断报告</b></td>
+  <td>把错题分布与成绩趋势交给 AI，输出"你的薄弱在第四/七章，建议先补这三块"</td>
+  <td><span class="b b-s">菁优网 学情报告</span><br><span class="b b-s">刷刷题 错题 DNA</span></td>
+  <td class="nw">接在章节热力图（R3）之后</td>
+</tr>
+<tr>
+  <td class="id">A10</td><td class="nw"><b>知识缺口 AI 归因</b></td>
+  <td>零命中问法不再只是列表，而是聚类后输出"该补哪些条目、建议条目问法怎么写"</td>
+  <td><span class="b b-s">乐享 自动识别缺口</span></td>
+  <td class="nw">接在缺口留痕（G1）之后</td>
+</tr>
+</table>
+
+<h3>档 2 · 原本只能做"阉割版"，现在可升级 <span class="src">6 项</span></h3>
+<table>
+<tr><th class="nw">编号</th><th class="nw">原来的阉割版</th><th>AI 版</th><th class="nw">竞品来源</th></tr>
+<tr>
+  <td class="id">B1</td><td>情景处置推演：只能做<b>固定选项分支</b>（做几个特情就得写几套分支，写不动）</td>
+  <td><b>用户自由作答 + AI 按 SOP 评分 + 指出漏项 + 复盘正确流程</b>。这样特情数量不再受开发量限制，写 20 个、50 个都行</td>
+  <td><span class="b b-s">南航 情景模拟</span><br><span class="b b-s">长龙 红蓝对抗</span></td>
+</tr>
+<tr>
+  <td class="id">B2</td><td>话术生成：本地规则引擎拼模板（<code>qaRenderScript</code>）+ 节日/节气匹配</td>
+  <td>按航班时段、旅客类型、突发情境（延误 / 超售 / 婴儿哭闹）实时生成；<b>失败回落本地引擎</b>，不丢现有能力</td>
+  <td><span class="src">现有 __QA_WIZARD2_v1__ 升级</span></td>
+</tr>
+<tr>
+  <td class="id">B3</td><td>答案一刀切，乘务长和见习看到同一份</td>
+  <td><b>岗位化裁剪</b>：同一规章给乘务长（管理视角）/ 见习（步骤视角）/ 教员（考核视角）不同层次</td>
+  <td><span class="src">原计划 O1 升级</span></td>
+</tr>
+<tr>
+  <td class="id">B4</td><td>整卷模拟考：只出分与分章节正确率</td>
+  <td>交卷后 <b>AI 讲评</b>：错在哪一类、为什么错、哪几条规章是同一考点</td>
+  <td><span class="b b-s">刷刷题 成绩分析</span></td>
+</tr>
+<tr>
+  <td class="id">B5</td><td>出处只显示书名 + 章节号</td>
+  <td>「<b>为什么是这条</b>」由 AI 用一句话解释命中理由，帮用户判断该不该信</td>
+  <td><span class="b b-s">Glean explainable</span></td>
+</tr>
+<tr>
+  <td class="id">B6</td><td>「你可能还想了解」靠标签匹配（<code>rel</code> 字段），跨库串味是老大难</td>
+  <td>AI 语义关联：真正按意图推荐，而不是按关键词重合</td>
+  <td><span class="b b-s">乐享 知识关联</span></td>
+</tr>
+</table>
+
+<h3>档 3 · 与 AI 无关，仍然不可行 <span class="src">不要因为"现在能联网了"就以为它们能做了</span></h3>
+<table>
+<tr><th class="nw">项</th><th>为什么仍然不行</th></tr>
+<tr><td class="nw">悬浮窗搜题</td><td>需要 Android <b>系统级悬浮窗权限</b>，APK 内 WebView 拿不到；且与现有三栏布局直接冲突。<b>这是权限问题，不是算力问题</b></td></tr>
+<tr><td class="nw">排班 / 执勤期 / 航段查询</td><td><b>没有合规数据源。</b>AI 再强也变不出真实排班数据；编造排班比查不到危险得多</td></tr>
+<tr><td class="nw">机上无网时的云 AI</td><td>物理限制。只能靠本地库 + 回落——<b>而这恰好是我们相对东航 / ANA 的独有优势，别丢</b></td></tr>
+</table>
+
+<h2>五、"灵魂"清单 <span class="sub">让 AI 有灵魂的不是功能数量，是这六件事</span></h2>
+<div class="note">
+<ol class="ins">
+  <li><b>把 AI 从"兜底"提到"主链路"。</b>现在的顺序是「本地先试 → 全失败才问 AI」。改成<b>AI-first 的意图理解</b>：先让 AI 判断「这是问规章？要干活？还是闲聊？」，再决定走库、走生成还是走工具。<b>库内直答仍然优先</b>（可信、零延迟），但由 AI 来决定该走哪条——它从"备胎"变成"调度员"，这才是灵魂的位置。</li>
+  <li><b>强制溯源。</b>（A6）没有溯源的多模态 + 生成能力，等于把"查得到"换成"看起来很专业但可能错"。ANA 的治理要求写得很硬：每条回答展示引用供核验、低置信转主管、安全关键保留人在环路。</li>
+  <li><b>人格一致性。</b>已经有 <code>AI_STYLES</code> + 24 节气形象 + 口播，但 AI 生成的长回答往往与形象口吻脱节。要把 CC 人设（<code>_pet_roster.py</code> 是单一来源）贯彻到<b>生成层</b>，而不是只体现在气泡里。</li>
+  <li><b>有状态。</b>现在只有 <code>aiLastResp</code>（一轮）+ 历史注入。<b>跨会话</b>的记忆才有"熟人感"：这个新乘常问什么、在哪个号位、上次问过哪一章。存本机 localStorage 即可，不必上云。</li>
+  <li><b>会做事，不只是会说话。</b>（A7/B1）起草报告、出变式题、给处置打分——这三件事做完，它就不再是"问答框"，而是"班上的老手"。</li>
+  <li><b>安全红线强制本地。</b>酒测标准、撤离口令、安全底线红线类条目，<b>禁止走 AI 生成</b>，强制呈现库内原文。这不是妥协，是 ANA 那份治理清单里最核心的一条：安全关键决策保留人在环路。</li>
+</ol>
+</div>
+
+<h2>六、风险与护栏 <span class="sub">放开之后必须补上的六道闸</span></h2>
+<table>
+<tr><th class="nw">风险</th><th>具体表现</th><th>护栏</th></tr>
+<tr><td class="nw"><b>Key 泄露</b></td><td>内置 Key 随 APK 分发，<code>assets/*.gz</code> 解开即明文；一旦泄露会被刷量直至封号</td><td>走丙方案（中转）；若走乙：每日配额闸 + 自填 Key 优先 + Key 可轮换</td></tr>
+<tr><td class="nw"><b>限流 / 429</b></td><td>GLM 免费档 1302/1305 限流严（源码已实测）；批量用户必然撞墙</td><td>已有熔断 60s + 降级链，<b>保留</b>；再加本地队列与「弱网时刻自动转本地库直答」</td></tr>
+<tr><td class="nw"><b>隐私外发</b></td><td>A1 拍照可能拍到旅客面孔、工牌、航班信息；提问可能含旅客姓名</td><td>图片本地压缩 + 首次使用时明确告知；<b>提问内容自动脱敏</b>（姓名 / 手机号 / 工号）后再外发</td></tr>
+<tr><td class="nw"><b>安全红线误答</b></td><td>AI 用通用知识回答"酒测超标怎么办"，听起来合理但与公司规定不符</td><td>按条目 <code>cat</code> 标记安全类 → <b>强制本地原文直答</b>，不送 AI</td></tr>
+<tr><td class="nw"><b>成本失控</b></td><td>免费额度用尽后自动计费；AI 通路一多，单次提问可能触发多次调用</td><td>单次会话调用上限；<code>_verify_ai_price.js</code> 口径改为「禁高耗旗舰模型引用」（保留）</td></tr>
+<tr><td class="nw"><b>离线体验退化</b></td><td>用户形成"AI 什么都能答"的预期后，机上断网会显得"坏了"</td><td>明确状态提示 + 本地库能力永不删除；<b>离线提示要写清"现在只能查库"</b></td></tr>
+</table>
+
+<h2>七、实施批次 <span class="sub">按"先赋魂、再开输入、最后会做事"排</span></h2>
+<table>
+<tr><th class="nw">批次</th><th>内容</th><th>为什么这个顺序</th></tr>
+<tr>
+  <td class="nw"><b>批 α</b><br><span class="src">赋魂</span></td>
+  <td><b>A6</b> 强制溯源 · <b>A3</b> 问法改写 · <b>A4</b> 指代消解 · <b>A5</b> 未明示需求 · 守护链按第三节处置 + Key 方案落地</td>
+  <td>这几项<b>不新增能力、只改变 AI 的站位与可信度</b>，风险最低、感知最强。做完用户会觉得"它变聪明了"，而不是"它多了个按钮"</td>
+</tr>
+<tr>
+  <td class="nw"><b>批 β</b><br><span class="src">开输入</span></td>
+  <td><b>A1</b> 拍照提问 · <b>A2</b> 语音提问</td>
+  <td>输入通道是启用频率的杠杆。客舱场景里"看见就能问"的价值远高于任何答案排版优化</td>
+</tr>
+<tr>
+  <td class="nw"><b>批 γ</b><br><span class="src">会做事</span></td>
+  <td><b>A7</b> 报告起草 · <b>B1</b> 情景推演 AI 版 · <b>A8</b> 变式题 · <b>B2</b> 话术生成升级</td>
+  <td>这四项是"从工具变同事"的分水岭，但都依赖批 α 的溯源与护栏先就位</td>
+</tr>
+<tr>
+  <td class="nw"><b>批 δ</b><br><span class="src">深化</span></td>
+  <td><b>B3</b> 岗位化裁剪 · <b>B4</b> AI 讲评 · <b>B5</b> 命中理由 · <b>B6</b> 语义关联 · <b>A9</b> 学情诊断 · <b>A10</b> 缺口归因</td>
+  <td>精细化能力，等前面的数据（错题本 / 缺口记录 / 成绩）积累起来再做才有内容</td>
+</tr>
+</table>
+<div class="pcard">
+  <b>和上一份《落地实施计划》的关系</b>：上一份里的 <b>W1 错题本 / W2 面板 / V1 版本时效 / G1 缺口留痕</b> 依旧要做，它们是 A8 / A9 / A10 / B4 的<b>数据地基</b>（AI 出变式题得先有错题、AI 学情诊断得先有成绩、AI 缺口归因得先有留痕）。
+  唯一被替换的是 <b>R5</b>：原来的"模板拼接版特情记录"直接换成 <b>A7 的 AI 起草版</b>；<b>S1 情景推演</b>换成 <b>B1 的自由作答 + AI 评分版</b>。
+  另外 <b>R4 / X1 那套"出处详情卡 / 带词跳手册"可以缓一缓</b>——有了 A6 强制溯源之后，用户对这一个章节号的信任问题已经被更根本地解决了。
+</div>
+
+<footer>
+  基于 <code>qa.html</code>（9.55 MB / 09-21 版）逐处源码核实：<code>SpringAI:2503</code> · <code>AI_STYLES:2725</code> · <code>chatLLM:2556</code> · <code>tavilySearch:2617</code> · <code>openSettings:2661</code> · <code>天气AI:8331</code> · <code>情绪共情:8353</code> · <code>AI兜底:8442</code> · <code>injectHistory:10585</code> · <code>跨数据注入:11105</code><br>
+  守护链核实：<code>_check_needles.py:91</code> · <code>_verify_nokey_all.py:28/104</code> · <code>_verify_ai_price.js</code> · <code>_retired_glm47/_apply_nokey_all_mods_20260919.py</code>（已退役）<br>
+  调研与整理：2026-09-21
+</footer>
+</div>
+</body>
+</html>

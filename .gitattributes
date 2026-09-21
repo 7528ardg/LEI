@@ -1,0 +1,22 @@
+# 本项目所有补丁脚本都按 LF 匹配标记块边界（如 '\n/*__NAV_DESIGN_20260917_CSS__BEGIN' … 'END*/\n'）。
+# 本机 core.autocrlf=true，任何一次 git checkout / 还原更改都会把工作区文件写成 CRLF，
+# 于是 BEGIN 侥幸命中、END 永远找不到 → 构建链在导航补丁处硬停（2026-09-21 实测踩到）。
+# 这里锁死工作区行尾为 LF，让 git 不再做任何行尾转换。
+* text=auto eol=lf
+
+# 二进制与 Windows 脚本显式声明，避免被当文本处理
+*.gz   binary
+*.zip  binary
+*.png  binary
+*.jpg  binary
+*.jpeg binary
+*.webp binary
+*.ico  binary
+*.woff binary
+*.woff2 binary
+*.ttf  binary
+*.mp4  binary
+*.glb  binary
+*.pdf  binary
+*.bat  -text
+*.cmd  -text

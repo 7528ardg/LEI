@@ -1,0 +1,365 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>「你问我答」功能完整性与跨板块联动审查报告 · 20260921</title>
+<style>
+  :root{
+    --bg:#F5F7F6; --card:#FFFFFF; --ink:#1F2933; --ink2:#52606D; --ink3:#7B8794;
+    --line:#E3E8E6; --brand:#0C5F3A; --brand-bg:#EAF5EF;
+    --red:#C62828; --red-bg:#FDECEA; --amber:#B26A00; --amber-bg:#FFF6E5;
+    --green:#148453; --green-bg:#E9F7F0; --blue:#1B5E8C; --blue-bg:#EAF2F8;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--ink);
+    font:15px/1.7 -apple-system,BlinkMacSystemFont,"Segoe UI","Microsoft YaHei",sans-serif;}
+  .wrap{max-width:1080px;margin:0 auto;padding:36px 22px 72px}
+  header{border-bottom:3px solid var(--brand);padding-bottom:18px;margin-bottom:26px}
+  h1{font-size:25px;margin:0 0 10px;letter-spacing:.2px}
+  .sub{color:var(--ink2);font-size:13.5px}
+  .verdict{display:flex;gap:12px;flex-wrap:wrap;margin:22px 0 30px}
+  .vbox{flex:1 1 210px;background:var(--card);border:1px solid var(--line);border-left:5px solid var(--brand);
+    border-radius:10px;padding:14px 16px}
+  .vbox.bad{border-left-color:var(--red)} .vbox.warn{border-left-color:var(--amber)}
+  .vbox.good{border-left-color:var(--green)}
+  .vnum{font-size:26px;font-weight:800;line-height:1.2}
+  .vlab{font-size:12.5px;color:var(--ink2);margin-top:3px}
+  h2{font-size:18.5px;margin:36px 0 14px;padding-left:11px;border-left:4px solid var(--brand)}
+  h3{font-size:15.5px;margin:22px 0 9px}
+  p{margin:9px 0}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:11px;padding:16px 18px;margin:12px 0}
+  table{width:100%;border-collapse:collapse;font-size:13.5px;margin:10px 0}
+  th,td{border:1px solid var(--line);padding:8px 10px;text-align:left;vertical-align:top}
+  th{background:#F0F4F2;font-weight:700;color:#25313C}
+  td.ok{color:var(--green);font-weight:700} td.bad{color:var(--red);font-weight:700}
+  td.warn{color:var(--amber);font-weight:700}
+  code{background:#EEF2F0;border:1px solid #DFE6E3;border-radius:4px;padding:1px 5px;
+    font:12.5px/1.5 "Consolas","Cascadia Mono",monospace;color:#0B3B26}
+  pre{background:#0F1B16;color:#DCE9E2;border-radius:9px;padding:13px 15px;overflow:auto;
+    font:12.5px/1.65 "Consolas","Cascadia Mono",monospace;margin:10px 0}
+  .tag{display:inline-block;font-size:11.5px;font-weight:700;border-radius:5px;padding:2px 8px;margin-right:6px}
+  .t-p0{background:var(--red-bg);color:var(--red);border:1px solid #F3C7C4}
+  .t-p1{background:var(--amber-bg);color:var(--amber);border:1px solid #F0DDB6}
+  .t-p2{background:var(--blue-bg);color:var(--blue);border:1px solid #C9DFEE}
+  .t-ok{background:var(--green-bg);color:var(--green);border:1px solid #BFE6D3}
+  .defect{border:1px solid var(--line);border-radius:11px;overflow:hidden;margin:16px 0;background:var(--card)}
+  .dhead{padding:12px 16px;font-weight:700;font-size:15px;display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+  .dhead.hi{background:var(--red-bg);border-bottom:1px solid #F3C7C4}
+  .dhead.mid{background:var(--amber-bg);border-bottom:1px solid #F0DDB6}
+  .dhead.lo{background:var(--blue-bg);border-bottom:1px solid #C9DFEE}
+  .dbody{padding:13px 16px}
+  .dbody dl{margin:0}
+  .dbody dt{font-weight:700;margin-top:11px;color:#25313C;font-size:13.5px}
+  .dbody dd{margin:4px 0 0;color:var(--ink2);font-size:13.5px}
+  ul{margin:8px 0;padding-left:22px} li{margin:4px 0}
+  .note{background:#F0F4F2;border-left:4px solid var(--ink3);padding:11px 14px;border-radius:0 8px 8px 0;
+    font-size:13.5px;color:var(--ink2);margin:12px 0}
+  .foot{margin-top:44px;padding-top:16px;border-top:1px solid var(--line);color:var(--ink3);font-size:12.5px}
+  .grid2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+  @media(max-width:720px){.grid2{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<header>
+  <h1>「你问我答」功能完整性与跨板块联动审查报告</h1>
+  <div class="sub">
+    审查对象：<code>qa.html</code>（13,934 行 / 9,572,630 字节）及周边 12 个板块文件　·　
+    审查日期：2026-09-21　·　审查方式：静态契约核对 + 端到端实测 + 单元级复现　·　
+    结论：<b>整体功能可用，跨板块联动 6 条通路中 1 条存在高severity 断裂</b>
+  </div>
+</header>
+
+<div class="verdict">
+  <div class="vbox bad"><div class="vnum" style="color:var(--red)">1</div><div class="vlab">高危缺陷：绩效数据跨板块联动被加密阻断</div></div>
+  <div class="vbox warn"><div class="vnum" style="color:var(--amber)">1</div><div class="vlab">中危：APK/PWA 分发版本落后源 4 个功能块</div></div>
+  <div class="vbox"><div class="vnum" style="color:var(--blue)">4</div><div class="vlab">低危：测试脚本过时 / 硬依赖本地服务 / 内容冗余</div></div>
+  <div class="vbox good"><div class="vnum" style="color:var(--green)">8</div><div class="vlab">跨板块通路实测通过（含 2 条知识库协议）</div></div>
+</div>
+
+<h2>一、审查范围与方法</h2>
+<div class="card">
+  <h3>1.1 覆盖的功能域</h3>
+  <ul>
+    <li><b>问答核心</b>：六库检索（日常 / 乘务员手册 01.10 / 管理手册 01.14 / 服务规范 00.07 / CBT 题库 / 大撤专项）、决策链、关键词命中、跨库路由</li>
+    <li><b>答案侧能力</b>：工具条（复制 / 朗读 / 收藏）、置信度标注、强制溯源、问法改写、指代承接、库内推荐、AI 兜底</li>
+    <li><b>个人面板</b>：收藏面板、练习趋势折线、练习明细、字号三档</li>
+    <li><b>CBT 练习</b>：抽题 / 章节选择 / 判分 / 进度落盘 / 防重复计分</li>
+    <li><b>反馈闭环</b>：点赞 / 吐槽 / 改良答案 / v1→v2 迁移 / 零网络</li>
+    <li><b>跨板块联动</b>：4 个来源板块 + 9 个目标板块 + 知识库双协议 + 壳层深跳</li>
+  </ul>
+
+  <h3>1.2 方法与工具</h3>
+  <table>
+    <tr><th style="width:150px">手段</th><th>做法</th><th style="width:210px">产出</th></tr>
+    <tr><td>契约静态核对</td><td>提取两侧写入/读取的键名、前缀、magic、字段名、协议版本，逐项比对</td><td>联动矩阵</td></tr>
+    <tr><td>端到端实测</td><td>playwright + msedge，<code>file://</code> 直开，模拟真实存储写入后观察消费端行为</td><td>联动 e2e 8/8</td></tr>
+    <tr><td>单元级复现</td><td>从 <code>qa.html</code> 抽取纯函数到 vm 沙箱，分别喂明文 / 密文输入对比</td><td>密文 0 条 / 明文 1 条</td></tr>
+    <tr><td>回归脚本复核</td><td>批量运行仓库内 14 个既有回归脚本，逐条核对退出码与断言</td><td>见 §3.2</td></tr>
+    <tr><td>编码仲裁</td><td>对 grep 报出的疑似乱码，用 Node 以 utf8 精确复读并定位 U+FFFD 归属</td><td>排除 2 处误报</td></tr>
+  </table>
+  <div class="note">所有审查动作<b>只读产品文件</b>。e2e 仅在浏览器内写入探针键并在用例结束时清理，未修改 <code>qa.html</code> 及任何板块文件。</div>
+</div>
+
+<h2>二、功能完整性结论</h2>
+
+<h3>2.1 六库数据质量（全部解析成功）</h3>
+<table>
+  <tr><th>库</th><th>变量</th><th>条目</th><th>缺题干</th><th>缺答案</th><th>缺关键词</th><th>缺来源</th><th>库内重题</th><th>分类数</th></tr>
+  <tr><td>日常库</td><td><code>KB</code></td><td>90</td><td class="ok">0</td><td class="ok">0</td><td class="ok">0</td><td class="ok">0</td><td class="ok">0</td><td>21</td></tr>
+  <tr><td>乘务员手册 01.10</td><td><code>KB_CCM_RAW</code></td><td>399</td><td class="ok">0</td><td class="ok">0</td><td class="ok">0</td><td class="ok">0</td><td class="ok">0</td><td>54</td></tr>
+  <tr><td>管理手册 01.14</td><td><code>KB_MGM_RAW</code></td><td>187</td><td class="ok">0</td><td class="ok">0</td><td class="ok">0</td><td class="ok">0</td><td class="ok">0</td><td>14</td></tr>
+  <tr><td>服务规范 00.07</td><td><code>KB_SVC_RAW</code></td><td>146</td><td class="ok">0</td><td class="ok">0</td><td class="ok">0</td><td class="ok">0</td><td class="ok">0</td><td>66</td></tr>
+  <tr><td>CBT 题库</td><td><code>KB_CBT_RAW</code></td><td>2654</td><td class="ok">0</td><td class="ok">0</td><td class="ok">0</td><td class="ok">0</td><td class="ok">0</td><td>—</td></tr>
+  <tr><th colspan="2" style="text-align:right">合计</th><th>3476</th><th colspan="6" class="ok">结构化字段完整，无空题干/空答案</th></tr>
+</table>
+<p>跨库重复题干 <b>1 条</b>：<code>机长的职权（权力/权利）有哪些？</code> 同时存在于日常库与乘务员手册库。属内容冗余（两库定位不同，检索按当前库进行，不会串答），不构成功能缺陷，建议内容侧择一去重。</p>
+
+<h3>2.2 既有回归脚本复核结果</h3>
+<table>
+  <tr><th>脚本</th><th>覆盖</th><th>结果</th></tr>
+  <tr><td><code>_qa_enh_verify_20260921.js</code></td><td>答案工具条 / 收藏面板 / 练习趋势 / 字号三档 / 零命中仍给工具条</td><td class="ok">PASS 30 / FAIL 0</td></tr>
+  <tr><td><code>_verify_qa_ai_brain.js</code></td><td>A3 改写 / A4 承接 / A5 推荐 / A6 溯源 / 接缝未伤原实现 / UI 规范</td><td class="ok">55 / 55</td></tr>
+  <tr><td><code>_verify_qa_landing.js</code></td><td>跳转落地闭环（URL 通道、填入、消费即清、TTL、归属过滤）</td><td class="ok">12 / 12</td></tr>
+  <tr><td><code>_verify_perf_linkage.js</code></td><td>绩效问答真实数据 + 资料联动</td><td class="warn">17 / 17（但见 §4.1：自证式，未覆盖加密路径）</td></tr>
+  <tr><td><code>_qa_fix_verify_20260920.js</code></td><td>CBT 判分 / 防重复计分 / 进度落盘 / 快问面板</td><td class="ok">11 / 11</td></tr>
+  <tr><td><code>_verify_qa_bridge / _memory / _capability / _assoc / _wakeup / _jumpfix / _localmode</code></td><td>桥接深跳 / 会话记忆 / 能力边界 / 联想 / 唤醒 / 跳转修复 / 本地模式口径</td><td class="ok">全部退出码 0</td></tr>
+  <tr><td><code>_check_needles.py</code></td><td>构建守卫（零内置密钥 / 形象资产 / 本地模式）</td><td class="ok">42 checked / 0 fail</td></tr>
+  <tr><td><code>_verify_qa_feedback.js</code></td><td>反馈闭环</td><td class="warn">退出码 2 —— 脚本自身过时，见 §4.3</td></tr>
+  <tr><td><code>_qa_trio_verify / _qa_round2_verify</code></td><td>壳层内嵌场景</td><td class="warn">退出码 1 —— 依赖 <code>127.0.0.1:8893</code> 服务，未启动，非产品缺陷</td></tr>
+</table>
+
+<h2>三、跨板块数据联动验证（重点）</h2>
+
+<h3>3.1 联动矩阵</h3>
+<table>
+  <tr><th style="width:34px">#</th><th>链路</th><th>通道</th><th>实测方式</th><th style="width:104px">结论</th></tr>
+  <tr>
+    <td>1</td><td>库管理 → 你问我答（旧协议）</td>
+    <td><code>localStorage['kb_overlay_v1']</code>，magic <code>kb-overlay-v1</code>，按 <code>byLib</code> 分桶</td>
+    <td>写入探针条目 → 打开 qa → 提问 → 命中探针答案</td>
+    <td class="ok">✅ 通过</td>
+  </tr>
+  <tr>
+    <td>2</td><td>库管理 → 你问我答（新协议）</td>
+    <td><code>packs_index</code>（magic <code>cabin-packs-index-v1</code>）+ <code>pack:{packId}</code>（magic <code>cabin-data-pack-v1</code>）</td>
+    <td>安装探针数据包 → 打开 qa → 提问 → 命中</td>
+    <td class="ok">✅ 通过</td>
+  </tr>
+  <tr>
+    <td>3</td><td>你问我答 → 9 个板块</td>
+    <td><code>spring_jump_ctx</code>（含 <code>to</code> 归属字段 + 5 分钟 TTL + 消费即清）；独立打开时走 <code>?from=qa&amp;q=</code></td>
+    <td>既有回归，含边界用例</td>
+    <td class="ok">✅ 12 / 12</td>
+  </tr>
+  <tr>
+    <td>4</td><td>你问我答 → CC 之家</td>
+    <td><code>cc_home_enter_chat</code> + <code>postMessage(spring-switch)</code></td>
+    <td>写标记 → 打开 cc-home → 验证标记被消费 + 进入聊天视图</td>
+    <td class="ok">✅ 通过</td>
+  </tr>
+  <tr>
+    <td>5</td><td>壳层 → 你问我答（深跳）</td>
+    <td><code>postMessage({type:'cc:nav-jump', mod:'qa'})</code></td>
+    <td>页面内投递消息 → 验证输入框已带入 + 上下文条渲染</td>
+    <td class="ok">✅ 通过</td>
+  </tr>
+  <tr>
+    <td>6</td><td><b>绩效管理 → 你问我答（绩效数据）</b></td>
+    <td>IndexedDB <code>keyval-store/keyval</code>，键 <code>crew_gz_{月份}</code></td>
+    <td>契约核对 + 单元级复现（明文 vs 密文）</td>
+    <td class="bad">❌ 断裂</td>
+  </tr>
+  <tr>
+    <td>7</td><td>绩效管理 → 你问我答（更新通知）</td>
+    <td><code>localStorage['qa_perf_dirty']</code> 时间戳</td>
+    <td>静态核对（写入侧 2 处、读取侧 1 处，语义一致）</td>
+    <td class="warn">⚠️ 通路正常，但重载到的仍是密文</td>
+  </tr>
+  <tr>
+    <td>8</td><td>壳层 / 风险预警 → 你问我答（登录态）</td>
+    <td><code>cabin_session_v1</code></td>
+    <td>静态核对（键名、存取形式一致）</td>
+    <td class="ok">✅ 一致</td>
+  </tr>
+  <tr>
+    <td>9</td><td>壳层 → 你问我答（用户资料）</td>
+    <td><code>user_profile</code></td>
+    <td>静态核对</td>
+    <td class="ok">✅ 一致</td>
+  </tr>
+  <tr>
+    <td>10</td><td>你问我答 → 壳层（面包屑）</td>
+    <td><code>postMessage({type:'cc:crumb'})</code></td>
+    <td>静态核对（壳层接收端 <code>index.html:4217</code> 在位）</td>
+    <td class="ok">✅ 一致</td>
+  </tr>
+</table>
+
+<h3>3.2 双向跳转的健壮性设计（已核实，值得保留）</h3>
+<ul>
+  <li><b>归属过滤</b>：跳转上下文带 <code>to</code> 字段，接收侧比对自身模块名后才认领，避免「谁先醒谁消费」——该问题在 2026-09-19 已被实测抓到并修复。</li>
+  <li><b>双通道互补</b>：URL 参数（独立打开）与 localStorage（壳层内嵌）并存；后者补了 storage 监听，解决「目标 iframe 早已加载、DOMContentLoaded 已过」的空转。</li>
+  <li><b>消费即清 + TTL</b>：避免下次手动打开误弹旧提示。</li>
+  <li><b>AI 来路桥接</b>：落地页以包装 <code>fetch</code> 的方式给 <code>chat/completions</code> 补 system 提示，不耦合各板块各自的 AI 客户端实现。</li>
+</ul>
+
+<h2>四、问题清单</h2>
+
+<div class="defect">
+  <div class="dhead hi"><span class="tag t-p0">P0 高危</span>绩效数据跨板块联动被 AES-GCM 加密阻断，你问我答读不到绩效后台的真实数据</div>
+  <div class="dbody">
+    <dl>
+      <dt>现象</dt>
+      <dd>在「绩效管理」录入数据后，到「你问我答」提问绩效相关问题，问答层判定「该月无数据」，无法给出任何真实分数。</dd>
+
+      <dt>根因（写入侧）</dt>
+      <dd>绩效管理 <code>performance.html:12693 saveMonth()</code> 落库前经过加密：
+<pre>let encrypted;
+try { encrypted = await DataEncryption.encrypt(data); } catch(ex) { encrypted = data; }
+await set(DB_PREFIX + monthKey, encrypted);   // 键：crew_gz_2026-08</pre>
+        <code>DataEncryption.encrypt()</code>（<code>:13866</code>）在密钥可用时返回 <code>'ENC:' + base64(iv+ciphertext)</code>；无密钥才回退明文。</dd>
+
+      <dt>根因（读取侧）</dt>
+      <dd>你问我答 <code>qaLoadRealPerf()</code>（<code>qa.html:9170</code>）按<b>明文结构</b>直读同一 IndexedDB 键，<code>qaMapRealMonth()</code>（<code>:9136</code>）取 <code>monthData.summary</code>：
+<pre>const sum = (monthData && Array.isArray(monthData.summary)) ? monthData.summary : [];
+// monthData 实为字符串 "ENC:..." → monthData.summary === undefined → sum = [] → 返回空</pre>
+        <b>qa.html 全文 <code>decrypt</code> 出现 0 次、<code>ENC:</code> 感知 0 次。</b></dd>
+
+      <dt>触发条件（已实测确认必然触发，不是偶发）</dt>
+      <dd><code>file://</code> 下实测 <code>window.isSecureContext === true</code>、<code>crypto.subtle</code> 可用、AES-GCM 加密调用成功。因此<b>本地直开、PWA(HTTPS)、APK 三种场景下加密均生效</b>，无一例外。绩效管理源码中那句「crypto.subtle 不可用，跳过加密」的告警分支，在现行浏览器下不会被走到。</dd>
+
+      <dt>复现证据（单元级）</dt>
+      <dd>抽取 qa 侧映射函数到 vm 沙箱，同一输入两种形态对比：
+<pre>明文结构  → 1 条，首条绩效总分 88.5，_来源 "绩效后台"
+密文形态  → 0 条   ← 静默丢弃，不抛错、不打日志
+qa_has_decrypt: false    qa_reads_ENC_prefix: false
+perf_prefix_marker: true perf_returns_plain_when_nokey: true</pre></dd>
+
+      <dt>影响范围</dt>
+      <dd>
+        <ul>
+          <li>你问我答的<b>全部绩效类问答</b>对绩效后台数据不可见（姓名+月份查分、排名、完成率等）。</li>
+          <li>连带影响跨数据注入 AI 上下文（<code>perfHint()</code>）的质量，AI 兜底在缺少真实分数时存在给出误导性回答的风险——这正是源码注释自己警示过的「变相编造」场景。</li>
+          <li>「绩效脏标记」通路本身工作正常（更新能触发重载），但重载后拿到的仍是密文，<b>故障表现为静默</b>：无异常、无日志，只有答不出。</li>
+          <li>缓解：qa 侧手工「导入数据」通道（<code>qa_perf_data_v1</code>）仍可用，用户手动导入即可恢复问答能力。</li>
+        </ul>
+      </dd>
+
+      <dt>为何既有的 17 项绩效联动回归没拦住</dt>
+      <dd><code>_verify_perf_linkage.js</code> / <code>_verify_perf_real.js</code> 都在测试侧用<b>内存 mock IndexedDB 灌入明文结构</b>，绕过了 <code>Storage.saveMonth()</code> 的真实加密路径，属自证式测试——它验证了「映射层正确」，却没验证「真实存储形态可被映射层消费」。</dd>
+
+      <dt>修复建议（按推荐度）</dt>
+      <dd>
+        <ol>
+          <li><b>推荐——绩效侧落库时同步写明文镜像</b>：<code>saveMonth()</code> 成功后额外写 <code>localStorage['qa_perf_mirror_v1']</code>（只含问答所需字段：姓名/月份/各项得分），qa 优先读镜像、IndexedDB 作兜底。改动最小，不把解密能力扩散到消费端，且天然与 qa 现有 <code>qaReadUploadedPerf()</code> 通道契合。</li>
+          <li><b>可行——qa 侧复用同一密钥自行解密</b>：绩效密钥本就存在 <code>localStorage['gz_perf_enc_key_v2']</code>（跨板块共享），qa 可复制一份 decrypt 实现。缺点是解密逻辑双份维护、易再次漂移。</li>
+          <li><b>备选——去掉绩效数据加密</b>：若加密仅是合规姿态而非硬要求，可评估移除，但需产品侧确认。</li>
+        </ol>
+        <b>无论选哪种，都必须补一条「真实存储形态 → 消费端可读」的端到端断言</b>（走 <code>saveMonth()</code> 真实写入，而不是 mock 明文），否则同类断裂还会复发。
+      </dd>
+    </dl>
+  </div>
+</div>
+
+<div class="defect">
+  <div class="dhead mid"><span class="tag t-p1">P1 中危</span>APK / PWA 分发版本落后源文件 4 个功能块</div>
+  <div class="dbody">
+    <dl>
+      <dt>现象</dt>
+      <dd>分发产物与你问我答源文件不同步，用户在已安装的 APK / PWA 中<b>用不到</b> 2026-09-21 这批能力。</dd>
+      <dt>证据</dt>
+      <dd>
+<pre>源      qa.html   9,572,630 B  md5 31dda7309bfd   ← 8/8 标记块
+APK     qa.html   9,526,073 B  md5 598d5d1fe988   ← 4/8（缺 4 块）
+PWA     qa.html   9,526,073 B  md5 598d5d1fe988   ← 4/8（与 APK 同批）
+
+缺失标记块：__QA_ANSWER_TOOLS_20260921__（复制/朗读/收藏/置信度）
+            __QA_MYPANEL_20260921__（我的面板/练习趋势/字号）
+            __QA_AI_BRAIN_20260921__（改写/承接/推荐/溯源）
+            __QA_BUILTIN_AI__</pre>
+        APK 与 PWA 哈希完全相同，说明二者为同一批产物，落后幅度一致。</dd>
+      <dt>影响范围</dt>
+      <dd>用户实际安装版缺失答案工具条、个人面板、AI 赋魂增强与内置 AI 入口。注意：APK 打包按既定流程需等明确通知后再执行，因此<b>这更可能是「待发布的正常滞后」而非构建故障</b>，但 PWA 侧同样落后需要确认是否需要单独刷新。</dd>
+      <dt>建议</dt>
+      <dd>发布前用「功能标记块比对」作为出厂检查项（源 vs APK vs PWA 三向对齐），避免长期静默漂移。</dd>
+    </dl>
+  </div>
+</div>
+
+<div class="defect">
+  <div class="dhead lo"><span class="tag t-p2">P2 低危</span>反馈回归脚本引用已删除的函数，回归链路失效</div>
+  <div class="dbody">
+    <dl>
+      <dt>现象</dt>
+      <dd><code>_verify_qa_feedback.js</code> 退出码 2：<code>ReferenceError: qaFbSyncEnabled is not defined</code>，脚本在第 11 条断言处中断（前 10 条均通过）。</dd>
+      <dt>核实</dt>
+      <dd><code>qaFbSyncEnabled</code> 在 <code>qa.html</code> 中出现 <b>0 次</b>——云同步能力已下线，测试脚本仍在断言该变量恒为 false。属测试债务，<b>产品功能本身正常</b>（点赞、吐槽、改良答案、v1→v2 迁移、零网络请求前 10 项全部通过）。</dd>
+      <dt>影响范围</dt>
+      <dd>该脚本作为常驻回归会持续非零退出，若被构建链守护引用，会掩盖真正的回归失败信号（狼来了效应）。</dd>
+      <dt>建议</dt>
+      <dd>把该断言改为「源码不含云同步相关标识符」的静态检查，或直接移除该条。</dd>
+    </dl>
+  </div>
+</div>
+
+<div class="defect">
+  <div class="dhead lo"><span class="tag t-p2">P2 低危</span>两个壳层回归脚本硬依赖未启动的本地服务</div>
+  <div class="dbody">
+    <dl>
+      <dt>现象</dt>
+      <dd><code>_qa_trio_verify_20260919.js</code>、<code>_qa_round2_verify_20260919.js</code> 均以 <code>net::ERR_CONNECTION_REFUSED at http://127.0.0.1:8893/index.html</code> 失败（退出码 1）。</dd>
+      <dt>影响范围</dt>
+      <dd>这两条覆盖的是「壳层内嵌」场景，恰恰是实际使用路径。当前状态下该场景 <b>无自动化覆盖</b>，本次只能靠自建 e2e（场景 4 / 5）手工验证。</dd>
+      <dt>建议</dt>
+      <dd>脚本内置起服务（或统一走 <code>file://</code> + 直接投递 <code>postMessage</code>），让壳层场景回到常驻回归里。</dd>
+    </dl>
+  </div>
+</div>
+
+<h2>五、已排除的疑似问题（避免误报留痕）</h2>
+<p>审查过程中 grep 曾报出若干「疑似缺陷」，经精确复读后<b>均判定为误报</b>，记录在此以免后续重复排查：</p>
+<table>
+  <tr><th style="width:230px">疑似问题</th><th>仲裁过程</th><th style="width:120px">结论</th></tr>
+  <tr>
+    <td><code>qa.html</code> 内 CBT 题库大面积乱码（如「鍦ˋ320(180)」「鉁� 绛旀�堬細」）</td>
+    <td>用 Node 以 utf8 精确复读全文：U+FFFD 计数 <b>0</b>，GBK 乱码特征串 <b>0</b>，<code>KB_CBT_RAW</code> 2654 条可被标准 JSON 解析。<b>是 Windows 控制台代码页导致的显示失真，文件本身干净。</b></td>
+    <td class="ok">误报</td>
+  </tr>
+  <tr>
+    <td><code>performance.html</code> 含 51,671 个 U+FFFD</td>
+    <td>定位后集中于第 2206–2211 共 6 行，上下文为 <code>t[152]="…"</code>、<code>rCodeAt(0)!==65533</code>——属 pdf.js 内置 CMap 字符映射表，<code>65533</code> 正是其占位码点。</td>
+    <td class="ok">误报</td>
+  </tr>
+  <tr>
+    <td>内联 <code>onclick</code> 引用了未定义的 <code>startCh</code> / <code>answer</code> / <code>star</code></td>
+    <td>实为对象方法调用形式：<code>qaCBT.startCh()</code>、<code>qaCBT.answer()</code>、<code>window.QAAT.star()</code>，静态正则以裸函数名匹配造成漏判。</td>
+    <td class="ok">误报</td>
+  </tr>
+  <tr>
+    <td>收藏按钮 <code>data-q</code> / <code>data-t</code> 未做 HTML 属性转义（同排的 <code>data-src</code> / <code>data-pool</code> 有转义）</td>
+    <td>取题库中含英文双引号的真实条目实测：渲染结果 <code>data-q="机上锂电池扑救用&amp;quot;消防水&amp;quot;如何配备？"</code>，长度与原文一致，<b>上游已统一转义</b>。</td>
+    <td class="ok">误报</td>
+  </tr>
+</table>
+
+<h2>六、总体结论</h2>
+<div class="card">
+  <p><b>功能完整性：可用。</b>六库 3476 条数据字段完整、无空题干空答案；问答核心、答案工具条、个人面板、CBT 练习、反馈闭环、记忆与会话、AI 兜底七条主功能线均有实测证据支撑；构建守卫 42 项全过。</p>
+  <p><b>跨板块联动：6 条通路中 5 条健康、1 条断裂。</b>知识库双协议（旧覆盖层 + 新数据包）、向 9 个板块的跳转落地、CC 之家直达、壳层深跳——这四条最易出错的链路全部实测通过，且具备归属过滤、TTL、消费即清等健壮性设计，实现质量较高。</p>
+  <p><b>唯一的系统性风险集中在「绩效管理 → 你问我答」这条数据链上</b>：写入侧加密、读取侧按明文解析，两者从未在同一条真实路径上被验证过。由于触发条件是「crypto.subtle 可用」而该条件在当前浏览器下恒为真，这<b>不是边缘 case，而是当前线上必然发生</b>，且表现为静默答不出、无任何报错。</p>
+  <p><b>建议处置顺序：</b>① 先按 §4.1 方案一打通绩效数据并补真实路径断言；② 发布前核对 APK/PWA 与源的功能标记对齐；③ 清理 §4.3、§4.4 两条测试债务，让常驻回归重新具备可信的失败信号。</p>
+</div>
+
+<div class="foot">
+  本报告由静态契约核对、端到端实测与单元级复现三类证据交叉支撑，所有结论均可复算。<br>
+  本次审查新增的可复算脚本：<code>_qa_audit_data_20260921.js</code>、<code>_qa_audit_libs_20260921.js</code>、<code>_qa_audit_static_20260921.js</code>、
+  <code>_qa_audit_enc_20260921.js</code>、<code>_qa_probe_webcrypto_20260921.js</code>、<code>_qa_perf_enc_check_20260921.js</code>、
+  <code>_qa_linkage_e2e_20260921.js</code>、<code>_qa_quote_attr_check_20260921.js</code>、<code>_qa_ctx_20260921.js</code>（均为只读，不修改产品文件）。
+</div>
+
+</div>
+</body>
+</html>

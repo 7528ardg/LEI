@@ -103,7 +103,43 @@ label.lbl{font-size:.74rem;color:var(--text2);display:block;margin-bottom:4px;}
 @keyframes tin{from{transform:translateX(60px);opacity:0;}to{transform:translateX(0);opacity:1;}}
 .kbox{background:var(--primary-mist);border-left:3px solid var(--primary);border-radius:8px;padding:8px 12px;font-size:.76rem;color:var(--text2);line-height:1.6;margin-top:8px;}
 .empt{text-align:center;color:var(--text3);padding:26px 0;font-size:.84rem;}
-@media(max-width:720px){.kb-tabs{top:0;}main{padding:10px 10px 60px;}.cell-var{min-width:200px;}}
+/* ===== 库管理总台（2026-09-21）===== */
+.cs-bar{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-bottom:10px;}
+.cs-chips{display:flex;gap:6px;flex-wrap:wrap;flex:1;min-width:220px;}
+.cs-chip{padding:6px 11px;border-radius:14px;background:var(--primary-mist);border:1px solid var(--border);font-size:.76rem;color:var(--text2);display:flex;align-items:center;gap:6px;cursor:pointer;}
+.cs-chip b{color:var(--primary);font-weight:800;}
+.cs-chip.on{background:var(--primary);border-color:var(--primary);color:#fff;}
+.cs-chip.on b{color:#fff;}
+.cs-chip .dotm{width:6px;height:6px;border-radius:99px;background:var(--gold);display:inline-block;}
+.cs-tools{display:flex;gap:6px;flex-wrap:wrap;align-items:center;}
+.cs-search{min-width:200px;flex:1;max-width:320px;}
+.cs-st{font-size:.74rem;color:var(--text2);}
+.cs-st .tag{margin-left:4px;}
+.cs-tbl{width:100%;border-collapse:collapse;font-size:.78rem;}
+.cs-tbl th{position:sticky;top:0;background:var(--card);z-index:2;}
+.cs-tbl td{padding:8px 9px;border-bottom:1px solid var(--border);vertical-align:top;}
+.cs-tbl tr:hover td{background:var(--primary-mist);}
+.cs-idx{color:var(--text3);font-size:.72rem;width:44px;}
+.cs-uid{font-family:ui-monospace,Menlo,Consolas,monospace;font-size:.7rem;color:var(--text2);word-break:break-all;max-width:150px;}
+.cs-main{max-width:520px;}
+.cs-main .t1{font-weight:600;color:var(--text);line-height:1.5;}
+.cs-main .t2{font-size:.72rem;color:var(--text2);margin-top:3px;line-height:1.5;max-height:3.2em;overflow:hidden;}
+.cs-act{white-space:nowrap;width:150px;}
+.cs-act button{margin-right:4px;margin-bottom:2px;}
+.cs-pager{display:flex;gap:8px;align-items:center;justify-content:center;margin-top:12px;flex-wrap:wrap;}
+.cs-form{display:grid;grid-template-columns:1fr;gap:10px;}
+.cs-form .fld label{font-size:.74rem;color:var(--text2);display:block;margin-bottom:3px;}
+.cs-form .fld textarea{min-height:70px;}
+.cs-form .fld textarea.tall{min-height:150px;}
+.cs-rpt td,.cs-rpt th{font-size:.76rem;}
+.cs-rpt .ok{color:var(--ok);font-weight:700;}
+.cs-rpt .bad{color:var(--bad);font-weight:700;}
+.cs-empty{text-align:center;color:var(--text3);padding:24px 0;font-size:.84rem;}
+@media (pointer:coarse){
+  .cs-chip{min-height:40px;}
+  .cs-act button{min-height:40px;}
+}
+@media(max-width:720px){.kb-tabs{top:0;}main{padding:10px 10px 60px;}.cell-var{min-width:200px;}.cs-main{max-width:60vw;}.cs-uid{display:none;}}
 </style>
 <script>
 /* 客舱小助手数据包引擎（_sync_packs.py 自动注入；改 docs/_packs_engine.js 后重跑 python _sync_packs.py） */
@@ -408,6 +444,506 @@ label.lbl{font-size:.74rem;color:var(--text2);display:block;margin-bottom:4px;}
 //__PACKS_ENGINE_END__
 </script>
 
+<script>
+/* 客舱小助手全量数据包引擎（_sync_fullpack.py 自动注入；改 docs/_fullpack_engine.js 后重跑 python _sync_fullpack.py） */
+//__FULLPACK_ENGINE_START__
+/* =============================================================================
+ * 客舱小助手 · 全量数据包引擎 v1（库管理 · 导出/导入/一致性校验）
+ * -----------------------------------------------------------------------------
+ * 目的：把「库管理」中集中展示的全部数据源（六库 + 销售话术库 + 产品库）
+ *       导出为一个自描述、可校验、可完整还原的数据包；
+ *       导入时验证「能被正确识别」并「完整还原」，给出逐源逐条的一致性报告。
+ *
+ * 设计要点：
+ *   1. 稳定 uid：条目在包内的唯一身份。
+ *        kb 类（日常/ccm/mgm/svc/大撤/CBT） = 「源id#基线序号」
+ *        script（销售话术）                 = 「源id#栏目key/脚本id」
+ *        product（产品）                    = 「源id#产品id」
+ *      编辑层与导入均按 uid 定位，保证「改哪一条就是哪一条」。
+ *   2. 指纹 fp：条目做「键排序的稳定序列化」后 FNV-1a-32 哈希，
+ *      导入时逐条复算比对 —— 校验的是内容而非只看条数。
+ *   3. checksum：源级 = 该源全部 fp 序列再哈希；包级 = 全部源 checksum 再哈希。
+ *      任一条被篡改/丢失/错位，校验必然失败。
+ *   4. 零 DOM：浏览器挂 window.FULLPACK，Node 挂 module.exports，
+ *      构建期校验脚本与运行时复用同一份逻辑（避免两套实现漂移）。
+ *
+ * 包结构：
+ *   {
+ *     magic:'cabin-fullpack-v1', kind:'full',
+ *     packId, title, version, exportedAt, app, builder,
+ *     sources:[ { id, kind, name, origin, count, checksum,
+ *                 items:[ { uid, fp, data } ] } ],
+ *     summary:{ sources:N, items:N, checksum:'...' }
+ *   }
+ *
+ * 本文件由 _sync_fullpack.py 注入各模块；改这里后必须重跑 python _sync_fullpack.py。
+ * ============================================================================= */
+(function (global) {
+  'use strict';
+
+  var MAGIC = 'cabin-fullpack-v1';
+  var EDIT_MAGIC = 'cabin-console-edit-v1';
+  var KIND_KB = 'kb';
+  var KIND_SCRIPT = 'script';
+  var KIND_PRODUCT = 'product';
+  var KINDS = [KIND_KB, KIND_SCRIPT, KIND_PRODUCT];
+  var META_KEY = '_uid';   // 写进 data 的元字段：让导入后 uid 依旧稳定
+
+  /* ---------------- 稳定序列化（键排序，跨环境可复现） ---------------- */
+  function stableStringify(v) {
+    if (v === null || v === undefined) return 'null';
+    var t = typeof v;
+    if (t === 'number') return isFinite(v) ? String(v) : 'null';
+    if (t === 'boolean' || t === 'string') return JSON.stringify(v);
+    if (Array.isArray(v)) {
+      var out = [];
+      for (var i = 0; i < v.length; i++) out.push(stableStringify(v[i]));
+      return '[' + out.join(',') + ']';
+    }
+    if (t === 'object') {
+      var keys = Object.keys(v).sort();
+      var parts = [];
+      for (var k = 0; k < keys.length; k++) {
+        var val = v[keys[k]];
+        if (val === undefined) continue;
+        parts.push(JSON.stringify(keys[k]) + ':' + stableStringify(val));
+      }
+      return '{' + parts.join(',') + '}';
+    }
+    return 'null';
+  }
+
+  /* ---------------- FNV-1a 32bit（对 UTF-16 code unit，Node/浏览器一致） ---------------- */
+  function hashStr(s) {
+    var h = 0x811c9dc5;
+    for (var i = 0; i < s.length; i++) {
+      h ^= s.charCodeAt(i);
+      h = (h + ((h << 1) + (h << 4) + (h << 7) + (h << 8) + (h << 24))) >>> 0;
+    }
+    return ('00000000' + h.toString(16)).slice(-8);
+  }
+  function fingerprint(v) { return hashStr(stableStringify(v)); }
+
+  /* ---------------- 稳定 uid ---------------- */
+  function makeUid(src, item, index) {
+    var id = src && src.id ? String(src.id) : 'src';
+    var kind = src && src.kind ? src.kind : KIND_KB;
+    if (kind === KIND_SCRIPT) {
+      var cat = (item && (item.__cat || item.catKey)) ? String(item.__cat || item.catKey) : '_';
+      var sid = (item && item.id != null) ? String(item.id) : String(index);
+      return id + '#' + cat + '/' + sid;
+    }
+    if (kind === KIND_PRODUCT) {
+      return id + '#' + ((item && item.id != null) ? String(item.id) : String(index));
+    }
+    return id + '#' + index;
+  }
+
+  /* ---------------- 条目规范化（挂 uid 元字段，导出/编辑统一形态） ---------------- */
+  function normalizeItem(src, item, index) {
+    var data = {};
+    var k;
+    for (k in item) { if (Object.prototype.hasOwnProperty.call(item, k)) data[k] = item[k]; }
+    var uid = (item && item[META_KEY]) ? String(item[META_KEY]) : makeUid(src, item, index);
+    data[META_KEY] = uid;
+    return { uid: uid, fp: fingerprint(data), data: data };
+  }
+
+  /* 给基线数组固化 uid（幂等）。
+     必须在「任何编辑发生之前」做一次：kb 类条目的 uid 由基线序号生成，
+     若等到工作区已删/增过条目再按当前下标生成，uid 会整体错位一格，
+     导致「改 A 条却写到了 B 条」。固化后 uid 终身不变，与位置无关。 */
+  function stampUids(items, src) {
+    items = Array.isArray(items) ? items : [];
+    for (var i = 0; i < items.length; i++) {
+      if (items[i] && typeof items[i] === 'object' && !items[i][META_KEY]) {
+        items[i][META_KEY] = makeUid(src, items[i], i);
+      }
+    }
+    return items;
+  }
+
+  /* 去掉 uid 元字段后的副本：用于「内容是否真的变了」的比较。
+     导入一个未改动的导出包时，条目只多了 _uid，不应被记成「已修改」。 */
+  function stripMeta(o) {
+    if (!o || typeof o !== 'object') return o;
+    if (Array.isArray(o)) return o.map(stripMeta);
+    var c = {}, k;
+    for (k in o) { if (k === META_KEY) continue; if (Object.prototype.hasOwnProperty.call(o, k)) c[k] = o[k]; }
+    return c;
+  }
+
+  /* =========================================================================
+   * 导出：构建全量数据包
+   * sources: [ { id, name, kind, origin, items:[...] } ]
+   * opts: { packId, title, version, exportedAt }
+   * ========================================================================= */
+  function buildFullPack(sources, opts) {
+    opts = opts || {};
+    if (!Array.isArray(sources)) throw new Error('sources 必须是数组');
+    var outSources = [];
+    var total = 0;
+    var srcSums = [];
+    for (var i = 0; i < sources.length; i++) {
+      var s = sources[i] || {};
+      var kind = s.kind || KIND_KB;
+      if (KINDS.indexOf(kind) < 0) throw new Error('未知数据源 kind：' + kind);
+      var items = Array.isArray(s.items) ? s.items : [];
+      var norm = [];
+      var fps = [];
+      for (var j = 0; j < items.length; j++) {
+        var n = normalizeItem(s, items[j], j);
+        norm.push(n);
+        fps.push(n.uid + ':' + n.fp);
+        total++;
+      }
+      var checksum = hashStr(fps.join('|'));
+      srcSums.push(String(s.id) + ':' + checksum);
+      outSources.push({
+        id: String(s.id),
+        kind: kind,
+        name: s.name || String(s.id),
+        origin: s.origin || '',
+        count: norm.length,
+        checksum: checksum,
+        items: norm
+      });
+    }
+    var pack = {
+      magic: MAGIC,
+      kind: 'full',
+      packId: opts.packId || ('full-' + (opts.exportedAt ? String(opts.exportedAt).slice(0, 10) : 'x')),
+      title: opts.title || '库管理完整数据包',
+      version: opts.version != null ? opts.version : 1,
+      exportedAt: opts.exportedAt || new Date().toISOString(),
+      app: '客舱小助手',
+      builder: 'kb-admin·库管理',
+      sources: outSources,
+      summary: { sources: outSources.length, items: total, checksum: hashStr(srcSums.join('|')) }
+    };
+    return pack;
+  }
+
+  /* =========================================================================
+   * 校验：包能否被正确识别且内容自洽
+   * 返回 { ok, errors:[], warnings:[], stats:{sources,items,bySource:[]} }
+   * ========================================================================= */
+  function verifyPack(pack, opts) {
+    opts = opts || {};
+    var errors = [], warnings = [], bySource = [];
+    if (!pack || typeof pack !== 'object') return { ok: false, errors: ['不是合法的 JSON 对象'], warnings: warnings, stats: null };
+    if (pack.magic !== MAGIC) {
+      // 兼容旧增量包协议：不是全量包就明确告知，避免"导入了但没还原"
+      if (pack.magic === 'cabin-data-pack-v1') errors.push('这是旧版增量数据包（cabin-data-pack-v1），请在「📦 数据包」页导入；完整全量包 magic 应为 ' + MAGIC);
+      else errors.push('magic 标识不符（期望 ' + MAGIC + '，实际 ' + String(pack.magic) + '）');
+      return { ok: false, errors: errors, warnings: warnings, stats: null };
+    }
+    if (pack.kind && pack.kind !== 'full') warnings.push('kind 为 ' + pack.kind + '（期望 full），已按全量包解析');
+    if (!Array.isArray(pack.sources)) { errors.push('缺少 sources 数组'); return { ok: false, errors: errors, warnings: warnings, stats: null }; }
+    if (!pack.sources.length) errors.push('包内没有任何数据源');
+
+    var total = 0, sums = [];
+    for (var i = 0; i < pack.sources.length; i++) {
+      var s = pack.sources[i] || {};
+      var sid = String(s.id || ('#' + i));
+      if (KINDS.indexOf(s.kind) < 0) warnings.push('数据源 ' + sid + ' 的 kind 未知（' + String(s.kind) + '），按 kb 处理');
+      if (!Array.isArray(s.items)) { errors.push('数据源 ' + sid + ' 缺少 items 数组'); continue; }
+      var fps = [], badFp = 0, badUid = 0;
+      for (var j = 0; j < s.items.length; j++) {
+        var it = s.items[j] || {};
+        if (!it.uid) { badUid++; continue; }
+        var fp = fingerprint(it.data);
+        fps.push(it.uid + ':' + fp);
+        if (it.fp && it.fp !== fp) badFp++;
+      }
+      if (badUid) errors.push('数据源 ' + sid + ' 有 ' + badUid + ' 条缺少 uid');
+      if (badFp) errors.push('数据源 ' + sid + ' 有 ' + badFp + ' 条指纹与内容不符（内容被改动或传输损坏）');
+      var checksum = hashStr(fps.join('|'));
+      if (s.checksum && s.checksum !== checksum) errors.push('数据源 ' + sid + ' 校验和不一致（期望 ' + s.checksum + '，实算 ' + checksum + '）');
+      if (s.count != null && s.count !== s.items.length) errors.push('数据源 ' + sid + ' 声明 ' + s.count + ' 条，实际 ' + s.items.length + ' 条');
+      sums.push(sid + ':' + checksum);
+      total += s.items.length;
+      bySource.push({ id: sid, kind: s.kind, name: s.name || sid, count: s.items.length, checksum: checksum, fpMismatch: badFp });
+    }
+    var sum = hashStr(sums.join('|'));
+    if (pack.summary) {
+      if (pack.summary.items != null && pack.summary.items !== total) errors.push('包级声明 ' + pack.summary.items + ' 条，实际合计 ' + total + ' 条');
+      if (pack.summary.checksum && pack.summary.checksum !== sum) errors.push('包级校验和不一致（期望 ' + pack.summary.checksum + '，实算 ' + sum + '）');
+    } else {
+      warnings.push('包内缺少 summary 段，已按各源校验和复核');
+    }
+    if (opts.expectSources) {
+      for (var e = 0; e < opts.expectSources.length; e++) {
+        var want = opts.expectSources[e];
+        var hit = false;
+        for (var b = 0; b < bySource.length; b++) if (bySource[b].id === want) { hit = true; break; }
+        if (!hit) warnings.push('缺少数据源 ' + want + '（本包不完整）');
+      }
+    }
+    return {
+      ok: errors.length === 0,
+      errors: errors,
+      warnings: warnings,
+      stats: { sources: bySource.length, items: total, checksum: sum, bySource: bySource }
+    };
+  }
+
+  /* =========================================================================
+   * 还原：把包内数据应用到当前工作区
+   * mode: 'replace' 整包还原（目标源内条目 = 包内条目）
+   *       'merge'   按 uid 合并（命中的覆盖，缺失的追加，不删现有）
+   * current: { sourceId: [items] }（可选，merge 时作为基线与统计基准）
+   * 返回 { ok, state:{sourceId:[items]}, report:[...] }
+   * ========================================================================= */
+  function applyFullPack(pack, opts) {
+    opts = opts || {};
+    var mode = opts.mode === 'merge' ? 'merge' : 'replace';
+    var current = opts.current || {};
+    var v = verifyPack(pack);
+    var state = {}, report = [];
+    if (!pack || !Array.isArray(pack.sources)) return { ok: false, errors: ['包结构不可用'], state: state, report: report, verify: v };
+
+    for (var i = 0; i < pack.sources.length; i++) {
+      var s = pack.sources[i] || {};
+      var sid = String(s.id || ('#' + i));
+      var packItems = [];
+      var items = Array.isArray(s.items) ? s.items : [];
+      for (var j = 0; j < items.length; j++) {
+        var it = items[j] || {};
+        if (!it.data) continue;
+        packItems.push(it.data);
+      }
+      var base = Array.isArray(current[sid]) ? current[sid] : [];
+      var out;
+      var matched = 0, added = 0, updated = 0, removed = 0, fpMismatch = 0;
+      if (mode === 'replace') {
+        out = packItems;
+        var baseByUid = {};
+        for (var b = 0; b < base.length; b++) {
+          var bu = (base[b] && base[b][META_KEY]) ? String(base[b][META_KEY]) : makeUid(s, base[b], b);
+          if (!baseByUid.hasOwnProperty(bu)) baseByUid[bu] = true;
+        }
+        for (var p = 0; p < packItems.length; p++) {
+          var pu = String(packItems[p][META_KEY] || '');
+          if (baseByUid[pu]) { matched++; updated++; } else { added++; }
+        }
+        removed = Math.max(0, base.length - matched);
+      } else {
+        out = [];
+        var idxByUid = {}, packByUid = {};
+        for (var q = 0; q < base.length; q++) {
+          var qu = (base[q] && base[q][META_KEY]) ? String(base[q][META_KEY]) : makeUid(s, base[q], q);
+          if (!idxByUid.hasOwnProperty(qu)) idxByUid[qu] = [];
+          idxByUid[qu].push(q);
+        }
+        for (var r = 0; r < packItems.length; r++) {
+          var ru = String(packItems[r][META_KEY] || '');
+          if (packByUid.hasOwnProperty(ru)) continue;
+          packByUid[ru] = packItems[r];
+        }
+        for (var t = 0; t < base.length; t++) {
+          var tu = (base[t] && base[t][META_KEY]) ? String(base[t][META_KEY]) : makeUid(s, base[t], t);
+          if (packByUid.hasOwnProperty(tu)) {
+            var pd = packByUid[tu];
+            if (stableStringify(pd) !== stableStringify(base[t])) { updated++; } else { matched++; }
+            out.push(pd);
+          } else { out.push(base[t]); }
+        }
+        var keys = Object.keys(packByUid);
+        for (var k = 0; k < keys.length; k++) {
+          if (!idxByUid.hasOwnProperty(keys[k])) { out.push(packByUid[keys[k]]); added++; }
+        }
+      }
+      // 逐条复算指纹，确认还原内容未被损坏
+      for (var z = 0; z < out.length; z++) {
+        var srcIt = null;
+        for (var y = 0; y < items.length; y++) {
+          if (items[y] && items[y].data && String(items[y].data[META_KEY] || '') === String(out[z][META_KEY] || '')) { srcIt = items[y]; break; }
+        }
+        if (srcIt && srcIt.fp && srcIt.fp !== fingerprint(out[z])) fpMismatch++;
+      }
+      state[sid] = out;
+      report.push({
+        id: sid, name: s.name || sid, kind: s.kind,
+        packCount: items.length, outCount: out.length, baseCount: base.length,
+        matched: matched, updated: updated, added: added, removed: removed,
+        fpMismatch: fpMismatch,
+        ok: (out.length === items.length) && fpMismatch === 0
+      });
+    }
+    var okAll = v.ok;
+    for (var g = 0; g < report.length; g++) if (!report[g].ok) okAll = false;
+    return { ok: okAll, errors: v.errors, warnings: v.warnings, state: state, report: report, verify: v };
+  }
+
+  /* =========================================================================
+   * 编辑层：库管理里人工改动的持久化
+   *   edits = { mod:{ uid: data }, del:[uid], add:[ {uid,data} ] }
+   * ========================================================================= */
+  function emptyEdits() { return { mod: {}, del: [], add: [] }; }
+  function editStats(edits) {
+    edits = edits || emptyEdits();
+    var mod = edits.mod ? Object.keys(edits.mod).length : 0;
+    var del = Array.isArray(edits.del) ? edits.del.length : 0;
+    var add = Array.isArray(edits.add) ? edits.add.length : 0;
+    return { mod: mod, del: del, add: add, total: mod + del + add };
+  }
+  /* 把编辑层应用到基线数组，得到「工作区条目」 */
+  function applyEdits(baseItems, edits, src) {
+    baseItems = Array.isArray(baseItems) ? baseItems : [];
+    edits = edits || emptyEdits();
+    var mod = edits.mod || {}, del = Array.isArray(edits.del) ? edits.del : [], add = Array.isArray(edits.add) ? edits.add : [];
+    var out = [];
+    for (var i = 0; i < baseItems.length; i++) {
+      var it = baseItems[i];
+      var uid = (it && it[META_KEY]) ? String(it[META_KEY]) : makeUid(src || { id: 'x', kind: KIND_KB }, it, i);
+      if (del.indexOf(uid) >= 0) continue;
+      if (Object.prototype.hasOwnProperty.call(mod, uid)) { out.push(mod[uid]); continue; }
+      out.push(it);
+    }
+    for (var a = 0; a < add.length; a++) {
+      if (add[a] && add[a].data) out.push(add[a].data);
+      else if (add[a]) out.push(add[a]);
+    }
+    return out;
+  }
+
+  /* 把「目标条目集合」相对「基线」的差异转成编辑层 —— 导入完整包后用它落盘，
+     使工作区 == 包内数据，而基线仍保持内嵌原值（不改动源文件即可完成还原）。 */
+  function diffToEdits(baseItems, targetItems, src) {
+    baseItems = Array.isArray(baseItems) ? baseItems : [];
+    targetItems = Array.isArray(targetItems) ? targetItems : [];
+    var e = emptyEdits();
+    var baseByUid = {}, baseUids = {};
+    for (var i = 0; i < baseItems.length; i++) {
+      var bu = (baseItems[i] && baseItems[i][META_KEY]) ? String(baseItems[i][META_KEY]) : makeUid(src || { id: 'x', kind: KIND_KB }, baseItems[i], i);
+      if (!baseByUid.hasOwnProperty(bu)) { baseByUid[bu] = baseItems[i]; baseUids[bu] = true; }
+    }
+    var targetUids = {};
+    for (var j = 0; j < targetItems.length; j++) {
+      var t = targetItems[j];
+      if (!t) continue;
+      var tu = (t && t[META_KEY]) ? String(t[META_KEY]) : makeUid(src || { id: 'x', kind: KIND_KB }, t, j);
+      if (targetUids.hasOwnProperty(tu)) continue;   // 包内重复 uid：保留首条
+      targetUids[tu] = true;
+      if (baseByUid.hasOwnProperty(tu)) {
+        // 只多/少了 _uid 元字段不算内容改动（否则导入一份未改动的包会把全库标成「已改」）
+        if (stableStringify(stripMeta(baseByUid[tu])) !== stableStringify(stripMeta(t))) e.mod[tu] = t;
+      } else {
+        e.add.push({ uid: tu, data: t });
+      }
+    }
+    var bu2 = Object.keys(baseUids);
+    for (var k = 0; k < bu2.length; k++) {
+      if (!targetUids.hasOwnProperty(bu2[k])) e.del.push(bu2[k]);
+    }
+    return e;
+  }
+
+  /* 合并两个编辑层（b 覆盖 a）：用于「导入 → 落盘」时保留未涉及源的改动 */
+  function mergeEdits(a, b) {
+    var out = emptyEdits();
+    a = a || emptyEdits(); b = b || emptyEdits();
+    var k;
+    for (k in a.mod) { if (Object.prototype.hasOwnProperty.call(a.mod, k)) out.mod[k] = a.mod[k]; }
+    for (k in b.mod) { if (Object.prototype.hasOwnProperty.call(b.mod, k)) out.mod[k] = b.mod[k]; }
+    var del = {};
+    (a.del || []).forEach(function (u) { del[u] = true; });
+    (b.del || []).forEach(function (u) { del[u] = true; });
+    out.del = Object.keys(del);
+    var seenAdd = {};
+    (a.add || []).forEach(function (it) { seenAdd[String(it.uid)] = it; });
+    (b.add || []).forEach(function (it) { seenAdd[String(it.uid)] = it; });
+    out.add = Object.keys(seenAdd).map(function (u) { return seenAdd[u]; });
+    return out;
+  }
+
+  /* =========================================================================
+   * 往返自检（导出 → 校验 → 还原 → 逐条深比对）
+   * 不依赖文件 IO，纯内存跑一遍，用于「导入后能被完整还原」的强断言
+   * ========================================================================= */
+  function roundTripCheck(sources, opts) {
+    opts = opts || {};
+    var t0 = (typeof Date !== 'undefined') ? Date.now() : 0;
+    var pack = buildFullPack(sources, { exportedAt: opts.exportedAt || new Date().toISOString(), title: '往返自检包' });
+    var v = verifyPack(pack);
+    if (!v.ok) {
+      return { ok: false, phase: 'verify', errors: v.errors, warnings: v.warnings, perSource: [], pack: pack };
+    }
+    var current = opts.current || {};
+    var ap = applyFullPack(pack, { mode: 'replace', current: current });
+    var perSource = [];
+    for (var i = 0; i < sources.length; i++) {
+      var s = sources[i];
+      var sid = String(s.id);
+      var origin = Array.isArray(s.items) ? s.items : [];
+      var restored = ap.state[sid] || [];
+      var diffs = [];
+      var len = Math.max(origin.length, restored.length);
+      for (var j = 0; j < len; j++) {
+        var a = origin[j], b = restored[j];
+        if (a === undefined) { diffs.push({ index: j, uid: (b && b[META_KEY]) || '', why: '多出条目' }); continue; }
+        if (b === undefined) { diffs.push({ index: j, uid: (a && a[META_KEY]) || '', why: '缺少条目' }); continue; }
+        var ua = (a && a[META_KEY]) ? String(a[META_KEY]) : makeUid(s, a, j);
+        var ub = (b && b[META_KEY]) ? String(b[META_KEY]) : '';
+        if (ua !== ub) { diffs.push({ index: j, uid: ua, why: 'uid 不一致：' + ua + ' vs ' + ub }); continue; }
+        // 比内容：基线原始条目 + uid 元字段  ==  还原条目
+        var expect = {};
+        for (var k in a) { if (Object.prototype.hasOwnProperty.call(a, k)) expect[k] = a[k]; }
+        expect[META_KEY] = ua;
+        if (stableStringify(expect) !== stableStringify(b)) diffs.push({ index: j, uid: ua, why: '内容不一致' });
+      }
+      perSource.push({
+        id: sid, name: s.name || sid,
+        srcCount: origin.length, outCount: restored.length,
+        same: origin.length === restored.length && diffs.length === 0,
+        diffCount: diffs.length, diffs: diffs.slice(0, 10),
+        fpMismatch: (ap.report[i] && ap.report[i].fpMismatch) || 0
+      });
+    }
+    var ok = true;
+    for (var p = 0; p < perSource.length; p++) if (!perSource[p].same) ok = false;
+    var t1 = (typeof Date !== 'undefined') ? Date.now() : 0;
+    return {
+      ok: ok, phase: ok ? 'done' : 'compare',
+      errors: [], warnings: v.warnings,
+      perSource: perSource,
+      report: ap.report,
+      stats: { sources: perSource.length, items: v.stats ? v.stats.items : 0, ms: t1 - t0 },
+      pack: opts.keepPack ? pack : undefined
+    };
+  }
+
+  var FULLPACK = {
+    MAGIC: MAGIC,
+    EDIT_MAGIC: EDIT_MAGIC,
+    META_KEY: META_KEY,
+    KINDS: KINDS,
+    stableStringify: stableStringify,
+    stripMeta: stripMeta,
+    hashStr: hashStr,
+    fingerprint: fingerprint,
+    makeUid: makeUid,
+    stampUids: stampUids,
+    normalizeItem: normalizeItem,
+    buildFullPack: buildFullPack,
+    verifyPack: verifyPack,
+    applyFullPack: applyFullPack,
+    emptyEdits: emptyEdits,
+    editStats: editStats,
+    applyEdits: applyEdits,
+    diffToEdits: diffToEdits,
+    mergeEdits: mergeEdits,
+    roundTripCheck: roundTripCheck
+  };
+
+  if (typeof module !== 'undefined' && module.exports) module.exports = FULLPACK;
+  if (typeof window !== 'undefined') window.FULLPACK = FULLPACK;
+  else if (typeof globalThis !== 'undefined') globalThis.FULLPACK = FULLPACK;
+})(typeof window !== 'undefined' ? window : (typeof globalThis !== 'undefined' ? globalThis : this));
+//__FULLPACK_ENGINE_END__
+</script>
+
 <!--__A11Y_20260919__BEGIN__-->
 <style id="a11y20260919">
 /* 2026-09-19 设计审核 P0-C：屏幕阅读器专用工具类 + 跳到主内容 */
@@ -528,6 +1064,31 @@ html[data-theme="dark"] .border-slate-200{ border-color:var(--border)!important;
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 <header class="kb-top">
   <div class="kb-logo"><span class="dot">库</span>知识库管理<small>手册数字化工作台</small></div>
   <div class="lib-chips" id="libChips"></div>
@@ -538,7 +1099,8 @@ html[data-theme="dark"] .border-slate-200{ border-color:var(--border)!important;
 </header>
 
 <nav class="kb-tabs">
-  <button class="kb-tab active" data-v="upload" onclick="switchTab('upload')">📄 上传解析</button>
+  <button class="kb-tab active" data-v="console" onclick="switchTab('console')">🗂 库管理</button>
+  <button class="kb-tab" data-v="upload" onclick="switchTab('upload')">📄 上传解析</button>
   <button class="kb-tab" data-v="cover" onclick="switchTab('cover')">🗺 覆盖率地图</button>
   <button class="kb-tab" data-v="diff" onclick="switchTab('diff')">📋 差异审核</button>
   <button class="kb-tab" data-v="health" onclick="switchTab('health')">🏥 体检报告</button>
@@ -548,8 +1110,48 @@ html[data-theme="dark"] .border-slate-200{ border-color:var(--border)!important;
 
 <main>
 
+<!-- ========== 库管理总台（集中展示 / 编辑 / 导出 / 导入） ========== -->
+<section class="view active" id="view-console">
+  <div class="card">
+    <div class="sect-h">
+      <h3>🗂 库管理总台</h3>
+      <span class="hint">集中展示全部话术数据与相关手册数据：六库 + 销售话术库 + 产品库。可直接查看、编辑、新增、删除；改动存本机编辑层，可导出完整数据包、导入还原并校验一致性。</span>
+    </div>
+    <div class="cs-bar">
+      <div class="cs-chips" id="dsChips"></div>
+      <div class="cs-tools">
+        <input type="text" id="csSearch" class="cs-search" placeholder="搜索内容 / 标签 / 分类…" oninput="csOnSearch()">
+        <select id="csPageSize" class="small-btn" onchange="csOnPageSize()">
+          <option value="20">20 条/页</option>
+          <option value="50" selected>50 条/页</option>
+          <option value="100">100 条/页</option>
+          <option value="200">200 条/页</option>
+        </select>
+      </div>
+    </div>
+    <div class="cs-bar">
+      <div class="cs-tools">
+        <button class="big-btn" onclick="csAdd()">➕ 新增条目</button>
+        <button class="big-btn ghost" onclick="csExportAll()">⬇ 导出完整数据包</button>
+        <button class="big-btn ghost" onclick="$('csFile').click()">⬆ 导入数据包</button>
+        <button class="small-btn" onclick="csRoundTrip()">🧪 往返自检</button>
+        <button class="small-btn" onclick="csRevertSource()">↩ 撤销本源改动</button>
+        <button class="small-btn" onclick="csSyncOutlets()">🔗 同步到问答/美妆</button>
+        <button class="small-btn" style="color:var(--danger);" onclick="csClearAll()">🗑 清空全部改动</button>
+      </div>
+      <span class="cs-st" id="csStat"></span>
+    </div>
+    <input type="file" id="csFile" accept=".json,application/json" hidden>
+    <div style="overflow-x:auto;">
+      <table class="cs-tbl" id="csTbl"></table>
+    </div>
+    <div class="cs-pager" id="csPager"></div>
+    <div class="kbox" id="csHint">改动仅存于本机编辑层（不改动程序内置数据），可随时撤销；导出的数据包可在任意一台设备导入还原。</div>
+  </div>
+</section>
+
 <!-- ========== 上传解析 ========== -->
-<section class="view active" id="view-upload">
+<section class="view" id="view-upload">
   <div class="card">
     <div class="sect-h"><h3>上传新版手册</h3><span class="hint">解析后自动与该库现有条目匹配，产出覆盖率地图与差异清单</span></div>
     <div class="row">
@@ -695,8 +1297,13 @@ const BASE_LIBS = {
   daily: __BASE_DAILY_ARR__,
   ccm: __BASE_CCM_ARR__,
   mgm: __BASE_MGM_ARR__,
-  svc: __BASE_SVC_ARR__
+  svc: __BASE_SVC_ARR__,
+  dc: __BASE_DC_ARR__,
+  cbt: __BASE_CBT_ARR__
 };
+/* 销售话术库（栏目 → scripts 嵌套结构）与产品库：库管理总台展平后统一呈现 */
+const BASE_SCRIPT_LIB = __BASE_SCRIPT_OBJ__;
+const BASE_PRODUCTS = __BASE_PRODUCT_ARR__;
 const LIBS_META = [
   { id:'daily', name:'日常库', ac:'手册' },
   { id:'ccm',   name:'乘务员手册', ac:'CCM' },
@@ -748,6 +1355,7 @@ function switchTab(v){
   document.querySelectorAll('.kb-tab').forEach(b=>b.classList.toggle('active', b.dataset.v===v));
   document.querySelectorAll('.view').forEach(s=>s.classList.toggle('active', s.id==='view-'+v));
   if(v === 'packs') renderPacks();
+  if(v === 'console' && typeof csRenderAll === 'function') csRenderAll();
 }
 
 /* ===================== AI 候选 ===================== */
@@ -1476,7 +2084,514 @@ function openModal(title, body, acts){
 }
 function closeModal(){ $('modal').classList.remove('show'); }
 
+/* ===================== 库管理总台（2026-09-21 · 集中展示/编辑/导出/导入） =====================
+   设计要点：
+   1) 数据源注册表 CS_SOURCES 是全台唯一定义：六库（qa.html 同步注入）+ 销售话术库 + 产品库
+   2) 全部人工改动落在「本机编辑层」localStorage(kb_console_edit_v1)，不动内嵌基线；
+      工作区视图 = 基线 + 编辑层（FULLPACK.applyEdits），可逐源/整体撤销
+   3) 导出 = FULLPACK.buildFullPack（全量 + 指纹 + 校验和）；
+      导入 = verifyPack（识别与自洽）→ applyFullPack（还原）→ diffToEdits 落编辑层
+         → 再逐条比对工作区与包内容，出「还原一致性报告」，做到可验证而非"看着像导入成功了"
+   4) 「🧪 往返自检」在内存里跑 导出→校验→还原→逐条深比对，无需下载文件即可证明闭环 */
+const CS_KEY = 'kb_console_edit_v1';
+const CS_MAGIC = 'cabin-console-edit-v1';
+const CS_SOURCES = [
+  { id:'daily',   kind:'kb',      name:'日常库',     origin:'qa.html · KB',            ac:'手册' },
+  { id:'ccm',     kind:'kb',      name:'乘务员手册', origin:'qa.html · KB_CCM_RAW',    ac:'CCM' },
+  { id:'mgm',     kind:'kb',      name:'管理手册',   origin:'qa.html · KB_MGM_RAW',    ac:'手册' },
+  { id:'svc',     kind:'kb',      name:'服务规范',   origin:'qa.html · KB_SVC_RAW',    ac:'服务规范' },
+  { id:'dc',      kind:'kb',      name:'大撤专项',   origin:'qa.html · DC_KB',         ac:'大撤' },
+  { id:'cbt',     kind:'kb',      name:'CBT 题库',   origin:'qa.html · KB_CBT_RAW',    ac:'CBT' },
+  { id:'script',  kind:'script',  name:'销售话术库', origin:'beauty.html · scriptLibraryData', ac:'话术' },
+  { id:'product', kind:'product', name:'产品库',     origin:'beauty.html · products',  ac:'商品' }
+];
+const CS_FIELDS = {
+  kb:      { order:['cat','icon','src','t','rel','q','a'], area:['a'], csv:['t','rel'] },
+  script:  { order:['__cat','id','content','tags'], area:['content'], csv:['tags'], select:{ '__cat': function(){ return Object.keys(BASE_SCRIPT_LIB || {}); } } },
+  product: { order:['id','name','brand','category','tale','volume','origin','stock','description','coreBenefits','targetSkinTypes','keyIngredients','unsuitable','tags','reviewCount'],
+             area:['description'], csv:['coreBenefits','targetSkinTypes','keyIngredients','unsuitable','tags'] }
+};
+let CS_CUR = 'daily', CS_PAGE = 1, CS_Q = '', CS_SIZE = 50;
+let CS_EDITS = null;
+let CS_SCRIPT_CACHE = null;
+let CS_IDX = {};          // 搜索索引缓存 { srcId: [txt...] }
+let CS_FILTERED = [];     // 当前过滤后的 { it, uid, state }
+
+function csSrc(id){ return CS_SOURCES.find(function(s){ return s.id === id; }) || CS_SOURCES[0]; }
+function csFlattenScript(){
+  const out = [];
+  Object.keys(BASE_SCRIPT_LIB || {}).forEach(function(catKey){
+    const c = BASE_SCRIPT_LIB[catKey] || {};
+    (c.scripts || []).forEach(function(s){
+      out.push({ __cat: catKey, __label: c.label || catKey, id: s.id, content: s.content, tags: s.tags || [] });
+    });
+  });
+  return out;
+}
+function csBase(id){
+  if(id === 'script'){ if(!CS_SCRIPT_CACHE) CS_SCRIPT_CACHE = csFlattenScript(); return CS_SCRIPT_CACHE; }
+  if(id === 'product') return BASE_PRODUCTS || [];
+  return BASE_LIBS[id] || [];
+}function csLoadEdits(){
+  try{
+    const raw = localStorage.getItem(CS_KEY);
+    if(!raw) return {};
+    const o = JSON.parse(raw);
+    if(!o || o.magic !== CS_MAGIC) return {};
+    return o.bySource || {};
+  }catch(e){ return {}; }
+}
+function csSaveEdits(){
+  try{
+    localStorage.setItem(CS_KEY, JSON.stringify({ magic: CS_MAGIC, updatedAt: new Date().toISOString(), bySource: CS_EDITS }));
+  }catch(e){ toast('本机存储写入失败（可能空间不足）', true); }
+}
+function csEdits(id){
+  if(!CS_EDITS) CS_EDITS = csLoadEdits();
+  if(!CS_EDITS[id]) CS_EDITS[id] = FULLPACK.emptyEdits();
+  return CS_EDITS[id];
+}
+/* 工作区条目 = 基线 + 编辑层 */
+function csItems(id){ return FULLPACK.applyEdits(csBase(id), csEdits(id), csSrc(id)); }
+function csText(s){
+  return stripHtml(String(s == null ? '' : s).replace(/<br\s*\/?>/gi, '\n').replace(/<\/(p|div|li|tr)>/gi, '\n'));
+}
+function csItemText(src, it){
+  if(src.kind === 'kb') return { t1: csText(it.q), t2: csText(it.a).slice(0, 160), meta: [it.cat, it.src].filter(Boolean).join(' · ') };
+  if(src.kind === 'script') return { t1: csText(it.content), t2: (it.tags || []).join(' / '), meta: [it.__label || it.__cat, it.id].filter(Boolean).join(' · ') };
+  return { t1: csText(it.name), t2: [it.brand, it.category, it.volume].filter(Boolean).join(' · '), meta: [it.id, it.stock].filter(Boolean).join(' · ') };
+}
+/* 搜索索引：每条拼一个纯文本，构建一次复用（CBT 2654 条也只在首次或改动后重建） */
+function csIndex(id){
+  if(CS_IDX[id]) return CS_IDX[id];
+  const src = csSrc(id), arr = csBase(id);
+  CS_IDX[id] = arr.map(function(it){
+    const t = csItemText(src, it);
+    return [t.t1, t.t2, t.meta, (it.t || it.tags || []).join(' ')].join(' ').toLowerCase();
+  });
+  return CS_IDX[id];
+}
+function csInvalidate(id){ delete CS_IDX[id]; }
+function csStateOf(srcId, uid){
+  const e = csEdits(srcId);
+  if((e.del || []).indexOf(uid) >= 0) return 'del';
+  if(e.mod && Object.prototype.hasOwnProperty.call(e.mod, uid)) return 'mod';
+  const add = e.add || [];
+  for(let i = 0; i < add.length; i++) if(String(add[i].uid) === uid) return 'add';
+  return 'base';
+}
+/* ---------- 渲染 ---------- */
+function csRenderChips(){
+  $('dsChips').innerHTML = CS_SOURCES.map(function(s){
+    const total = csItems(s.id).length;
+    const st = FULLPACK.editStats(csEdits(s.id));
+    const changed = st.total > 0;
+    return '<span class="cs-chip' + (s.id === CS_CUR ? ' on' : '') + '" onclick="csPick(\'' + s.id + '\')">'
+      + (changed ? '<i class="dotm"></i>' : '') + s.name + ' <b>' + total + '</b>'
+      + (changed ? '<span class="tag warn" style="margin:0;">改 ' + st.total + '</span>' : '')
+      + '</span>';
+  }).join('');
+}
+function csRenderStat(){
+  let mod = 0, del = 0, add = 0;
+  CS_SOURCES.forEach(function(s){ const st = FULLPACK.editStats(csEdits(s.id)); mod += st.mod; del += st.del; add += st.add; });
+  const total = CS_SOURCES.reduce(function(a, s){ return a + csItems(s.id).length; }, 0);
+  $('csStat').innerHTML = '全库共 <b>' + total + '</b> 条'
+    + (mod ? ' <span class="tag blue">改 ' + mod + '</span>' : '')
+    + (add ? ' <span class="tag ok">增 ' + add + '</span>' : '')
+    + (del ? ' <span class="tag bad">删 ' + del + '</span>' : '')
+    + ((mod + add + del) ? '' : ' <span class="tag muted">未改动</span>');
+}
+function csFilter(){
+  const src = csSrc(CS_CUR);
+  const arr = csItems(CS_CUR);
+  const idx = csIndex(CS_CUR);
+  const q = CS_Q.trim().toLowerCase();
+  CS_FILTERED = [];
+  for(let i = 0; i < arr.length; i++){
+    const it = arr[i];
+    const uid = (it && it[FULLPACK.META_KEY]) ? String(it[FULLPACK.META_KEY]) : FULLPACK.makeUid(src, it, i);
+    if(q){
+      const hay = (idx[i] || '') + ' ' + uid.toLowerCase();
+      if(hay.indexOf(q) < 0) continue;
+    }
+    CS_FILTERED.push({ it: it, uid: uid, state: csStateOf(CS_CUR, uid) });
+  }
+  const maxPage = Math.max(1, Math.ceil(CS_FILTERED.length / CS_SIZE));
+  if(CS_PAGE > maxPage) CS_PAGE = maxPage;
+}
+function csRenderTable(){
+  const src = csSrc(CS_CUR);
+  const tbl = $('csTbl');
+  if(!CS_FILTERED.length){
+    tbl.innerHTML = '<tr><td class="cs-empty">' + (CS_Q ? '没有匹配的条目（试试更短的关键词）' : '该数据源暂无条目') + '</td></tr>';
+    $('csPager').innerHTML = '';
+    return;
+  }
+  const start = (CS_PAGE - 1) * CS_SIZE;
+  const page = CS_FILTERED.slice(start, start + CS_SIZE);
+  const rows = ['<tr><th class="cs-idx">#</th><th>内容</th><th class="cs-uid">标识</th><th>操作</th></tr>'];
+  page.forEach(function(r, k){
+    const t = csItemText(src, r.it);
+    const gi = start + k;   // 在过滤结果中的全局序号（操作按钮下标）
+    const stTag = r.state === 'mod' ? '<span class="tag blue">改</span>'
+      : (r.state === 'add' ? '<span class="tag ok">新</span>' : '');
+    rows.push('<tr>'
+      + '<td class="cs-idx">' + (start + k + 1) + '</td>'
+      + '<td class="cs-main"><div class="t1">' + esc(t.t1 || '（无标题）') + '</div>'
+      + '<div class="t2">' + esc(t.t2 || '') + '</div>'
+      + '<div class="kv" style="margin-top:3px;">' + esc(t.meta || '') + ' ' + stTag + '</div></td>'
+      + '<td class="cs-uid">' + esc(r.uid) + '</td>'
+      + '<td class="cs-act"><button class="small-btn" onclick="csView(' + gi + ')">查看</button>'
+      + '<button class="small-btn" onclick="csEdit(' + gi + ')">编辑</button>'
+      + '<button class="small-btn" style="color:var(--danger);" onclick="csDel(' + gi + ')">删除</button></td>'
+      + '</tr>');
+  });
+  tbl.innerHTML = rows.join('');
+  const maxPage = Math.max(1, Math.ceil(CS_FILTERED.length / CS_SIZE));
+  $('csPager').innerHTML = '<button class="small-btn" onclick="csGo(1)">« 首页</button>'
+    + '<button class="small-btn" onclick="csGo(' + (CS_PAGE - 1) + ')">‹ 上一页</button>'
+    + '<span class="kv">第 ' + CS_PAGE + ' / ' + maxPage + ' 页 · 共 ' + CS_FILTERED.length + ' 条</span>'
+    + '<button class="small-btn" onclick="csGo(' + (CS_PAGE + 1) + ')">下一页 ›</button>'
+    + '<button class="small-btn" onclick="csGo(' + maxPage + ')">末页 »</button>';
+}
+function csRenderAll(){ csRenderChips(); csFilter(); csRenderTable(); csRenderStat(); }
+function csPick(id){ CS_CUR = id; CS_PAGE = 1; csRenderAll(); }
+function csGo(p){
+  const maxPage = Math.max(1, Math.ceil(CS_FILTERED.length / CS_SIZE));
+  CS_PAGE = Math.min(maxPage, Math.max(1, p));
+  csRenderTable();
+}
+let CS_SEARCH_T = null;
+function csOnSearch(){
+  clearTimeout(CS_SEARCH_T);
+  CS_SEARCH_T = setTimeout(function(){ CS_Q = $('csSearch').value || ''; CS_PAGE = 1; csFilter(); csRenderTable(); }, 180);
+}
+function csOnPageSize(){ CS_SIZE = parseInt($('csPageSize').value, 10) || 50; CS_PAGE = 1; csRenderTable(); }
+
+/* ---------- 查看 ---------- */
+function csView(gi){
+  const r = CS_FILTERED[gi]; if(!r) return;
+  const src = csSrc(CS_CUR);
+  const body = ['<div style="max-height:52vh;overflow:auto;">'];
+  Object.keys(r.it).forEach(function(k){
+    if(k === FULLPACK.META_KEY) return;
+    const v = r.it[k];
+    const txt = Array.isArray(v) ? v.join('、') : csText(v);
+    body.push('<div style="margin-bottom:8px;"><span class="kv">' + esc(k) + '</span><div style="white-space:pre-wrap;font-size:.8rem;line-height:1.7;">' + esc(txt) + '</div></div>');
+  });
+  body.push('</div>');
+  body.push('<div class="kv" style="margin-top:8px;">uid：<b>' + esc(r.uid) + '</b> · ' + esc(src.origin) + '</div>');
+  openModal('查看条目', body.join(''), [
+    { label:'复制内容', fn(){ const t = csItemText(src, r.it); navigator.clipboard && navigator.clipboard.writeText(t.t1 + '\n' + t.t2).then(function(){ toast('已复制'); }, function(){ toast('复制失败', true); }); } },
+    { label:'编辑', fn(){ closeModal(); csEdit(gi); } },
+    { label:'关闭', fn(){ closeModal(); } }
+  ]);
+}
+
+/* ---------- 编辑 / 新增（动态表单，按 kind 自适应字段） ---------- */
+function csFormSpec(src, it){
+  const cfg = CS_FIELDS[src.kind] || CS_FIELDS.kb;
+  const keys = [];
+  cfg.order.forEach(function(k){ if(k === '__cat' || it && Object.prototype.hasOwnProperty.call(it, k)) keys.push(k); });
+  if(it){
+    Object.keys(it).forEach(function(k){
+      if(k === FULLPACK.META_KEY) return;
+      if(keys.indexOf(k) < 0) keys.push(k);
+    });
+  }else{
+    cfg.order.forEach(function(k){ if(keys.indexOf(k) < 0) keys.push(k); });
+  }
+  return { cfg: cfg, keys: keys };
+}
+function csDefaultItem(src){
+  if(src.kind === 'script'){
+    const cats = Object.keys(BASE_SCRIPT_LIB || {});
+    return { __cat: cats[0] || '', id: 'script-' + Date.now(), content: '', tags: [] };
+  }
+  if(src.kind === 'product'){
+    return { id: 'p-' + Date.now(), name: '', brand: '', category: '', tale: '', volume: '', origin: '', stock: 'in_stock', description: '', coreBenefits: [], targetSkinTypes: [], keyIngredients: [], unsuitable: [], tags: [], reviewCount: 0 };
+  }
+  return { cat: '', icon: '📘', src: src.ac + ' 新增', t: [], q: '', a: '' };
+}
+function csOpenForm(src, it, uid, isNew){
+  const spec = csFormSpec(src, it);
+  const html = ['<div class="cs-form">'];
+  spec.keys.forEach(function(k, i){
+    const v = it[k];
+    const isArr = Array.isArray(v);
+    const isCsv = spec.cfg.csv.indexOf(k) >= 0 || isArr;
+    const isArea = spec.cfg.area.indexOf(k) >= 0;
+    const val = isArr ? v.join(', ') : (v == null ? '' : String(v));
+    html.push('<div class="fld"><label>' + esc(k) + (isCsv ? '（逗号分隔）' : '') + '</label>');
+    if(spec.cfg.select && spec.cfg.select[k]){
+      const opts = spec.cfg.select[k]();
+      html.push('<select id="csf' + i + '" style="width:100%;border:1px solid var(--border);border-radius:8px;padding:8px 10px;font-size:.8rem;background:var(--bg);color:var(--text);">'
+        + opts.map(function(o){ const lb = (BASE_SCRIPT_LIB[o] && BASE_SCRIPT_LIB[o].label) || o; return '<option value="' + esc(o) + '"' + (String(v) === o ? ' selected' : '') + '>' + esc(lb) + '</option>'; }).join('') + '</select>');
+    }else if(isArea){
+      html.push('<textarea id="csf' + i + '" class="tall">' + esc(val) + '</textarea>');
+    }else{
+      html.push('<input type="text" id="csf' + i + '" value="' + esc(val) + '">');
+    }
+    html.push('</div>');
+  });
+  html.push('</div>');
+  openModal(isNew ? '新增条目 · ' + src.name : '编辑条目 · ' + src.name, html.join(''), [
+    { label:'取消', fn(){ closeModal(); } },
+    { label:'保存', cls:'on', fn(){
+      const out = {};
+      spec.keys.forEach(function(k, i){
+        const el = $('csf' + i); if(!el) return;
+        let v = el.value;
+        const orig = it[k];
+        if(spec.cfg.csv.indexOf(k) >= 0 || Array.isArray(orig)){
+          out[k] = String(v).split(/[,，]/).map(function(s){ return s.trim(); }).filter(Boolean);
+        }else if(typeof orig === 'number'){
+          out[k] = Number(v) || 0;
+        }else{
+          out[k] = v;
+        }
+      });
+      Object.keys(it || {}).forEach(function(k){ if(k !== FULLPACK.META_KEY && !Object.prototype.hasOwnProperty.call(out, k)) out[k] = it[k]; });
+      csCommit(src, out, uid, isNew);
+      closeModal();
+    } }
+  ]);
+}
+function csCommit(src, data, uid, isNew){
+  const e = csEdits(src.id);
+  if(isNew){
+    let nuid = uid;
+    if(src.kind === 'script') nuid = src.id + '#' + (data.__cat || '_') + '/' + (data.id || Date.now());
+    else if(src.kind === 'product') nuid = src.id + '#' + (data.id || Date.now());
+    else nuid = src.id + '#new-' + Date.now();
+    const dup = (e.add || []).some(function(x){ return String(x.uid) === nuid; });
+    if(dup){ toast('该标识已存在，请换一个 id', true); return; }
+    data[FULLPACK.META_KEY] = nuid;
+    e.add.push({ uid: nuid, data: data });
+    toast('已新增条目（' + src.name + '）');
+  }else{
+    // 新增条目被再次编辑：直接改 add 里的数据，不进 mod
+    const ai = (e.add || []).findIndex(function(x){ return String(x.uid) === uid; });
+    if(ai >= 0){
+      data[FULLPACK.META_KEY] = uid;
+      e.add[ai] = { uid: uid, data: data };
+    }else{
+      data[FULLPACK.META_KEY] = uid;
+      e.mod[uid] = data;
+    }
+    toast('已保存修改（' + src.name + '）');
+  }
+  csSaveEdits(); csInvalidate(src.id); csRenderAll();
+}
+function csEdit(gi){
+  const r = CS_FILTERED[gi]; if(!r) return;
+  csOpenForm(csSrc(CS_CUR), r.it, r.uid, false);
+}
+function csAdd(){ csOpenForm(csSrc(CS_CUR), csDefaultItem(csSrc(CS_CUR)), '', true); }
+function csDel(gi){
+  const r = CS_FILTERED[gi]; if(!r) return;
+  const src = csSrc(CS_CUR);
+  const t = csItemText(src, r.it);
+  openModal('删除条目', '确定删除这条吗？<br><b>' + esc((t.t1 || '').slice(0, 80)) + '</b><br><span class="kv">uid：' + esc(r.uid) + '</span><br><br>删除只记录在本机编辑层，可随时「撤销本源改动」恢复。', [
+    { label:'取消', fn(){ closeModal(); } },
+    { label:'确认删除', cls:'danger', fn(){
+      const e = csEdits(src.id);
+      const ai = (e.add || []).findIndex(function(x){ return String(x.uid) === r.uid; });
+      if(ai >= 0) e.add.splice(ai, 1);                       // 新增的：直接抹掉
+      else { if(e.del.indexOf(r.uid) < 0) e.del.push(r.uid); delete e.mod[r.uid]; }
+      csSaveEdits(); csInvalidate(src.id); csRenderAll(); closeModal();
+      toast('已删除（可撤销）');
+    } }
+  ]);
+}
+function csRevertSource(){
+  const src = csSrc(CS_CUR);
+  const st = FULLPACK.editStats(csEdits(src.id));
+  if(!st.total){ toast('本源没有改动'); return; }
+  openModal('撤销改动', '将丢弃「' + src.name + '」的全部本机改动（改 ' + st.mod + ' / 增 ' + st.add + ' / 删 ' + st.del + '），恢复到程序内置基线。', [
+    { label:'取消', fn(){ closeModal(); } },
+    { label:'确认撤销', cls:'danger', fn(){ CS_EDITS[src.id] = FULLPACK.emptyEdits(); csSaveEdits(); csInvalidate(src.id); csRenderAll(); closeModal(); toast('已撤销「' + src.name + '」的改动'); } }
+  ]);
+}
+function csClearAll(){
+  let n = 0;
+  CS_SOURCES.forEach(function(s){ n += FULLPACK.editStats(csEdits(s.id)).total; });
+  if(!n){ toast('当前没有任何改动'); return; }
+  openModal('清空全部改动', '将丢弃全部数据源共 <b>' + n + '</b> 项本机改动，恢复到程序内置基线。此操作不可撤销。', [
+    { label:'取消', fn(){ closeModal(); } },
+    { label:'确认清空', cls:'danger', fn(){ CS_EDITS = {}; CS_SOURCES.forEach(function(s){ CS_EDITS[s.id] = FULLPACK.emptyEdits(); }); csSaveEdits(); CS_IDX = {}; csRenderAll(); closeModal(); toast('已清空全部改动'); } }
+  ]);
+}
+
+/* ---------- 导出 / 导入 / 校验 ---------- */
+function csCollectSources(){
+  return CS_SOURCES.map(function(s){ return { id: s.id, name: s.name, kind: s.kind, origin: s.origin, items: csItems(s.id) }; });
+}
+function csDownload(name, text){
+  const blob = new Blob([text], { type: 'application/json;charset=utf-8' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = name;
+  document.body.appendChild(a); a.click();
+  setTimeout(function(){ URL.revokeObjectURL(a.href); a.remove(); }, 500);
+}
+function csExportAll(){
+  const sources = csCollectSources();
+  const now = new Date();
+  const d = now.getFullYear() + pad(now.getMonth() + 1) + pad(now.getDate());
+  let pack = null;
+  try{ pack = FULLPACK.buildFullPack(sources, { packId: 'full-' + d, title: '库管理完整数据包（' + d + '）', exportedAt: now.toISOString() }); }
+  catch(e){ toast('导出失败：' + e.message, true); return; }
+  const v = FULLPACK.verifyPack(pack);
+  if(!v.ok){ toast('导出自检未通过，已中止：' + v.errors[0], true); return; }
+  csDownload('客舱小助手_库管理完整数据包_' + d + '.json', JSON.stringify(pack));
+  const lines = ['已导出完整数据包：' + v.stats.sources + ' 个数据源 / ' + v.stats.items + ' 条', '包级校验和：<b>' + v.stats.checksum + '</b>'];
+  v.stats.bySource.forEach(function(s){ lines.push('· ' + esc(s.name) + '：' + s.count + ' 条（' + s.checksum + '）'); });
+  openModal('✅ 导出完成（已通过自检）', lines.join('<br>'), [{ label:'知道了', fn(){ closeModal(); } }]);
+  toast('已导出 ' + v.stats.items + ' 条');
+}
+function csImportFile(file){
+  const r = new FileReader();
+  r.onerror = function(){ toast('读取文件失败', true); };
+  r.onload = function(ev){
+    let pack = null;
+    try{ pack = JSON.parse(ev.target.result); }
+    catch(e){ openModal('⚠️ 无法解析', '文件不是合法 JSON，请确认导出时未被截断。', [{ label:'知道了', fn(){ closeModal(); } }]); return; }
+    csPreviewImport(pack);
+  };
+  r.readAsText(file);
+}
+function csPreviewImport(pack){
+  const v = FULLPACK.verifyPack(pack);
+  if(!v.ok){
+    openModal('⚠️ 数据包校验未通过',
+      '该文件未能通过识别校验，已阻止导入（不会改动现有数据）：<br>· ' + v.errors.map(esc).join('<br>· '),
+      [{ label:'知道了', fn(){ closeModal(); } }]);
+    return;
+  }
+  const rows = v.stats.bySource.map(function(s){
+    const cur = csItems(s.id).length;
+    return '<tr><td>' + esc(s.name) + '</td><td>' + s.count + '</td><td>' + cur + '</td><td>' + (s.count === cur ? '<span class="ok">一致</span>' : '<span style="color:var(--warn);">将变为 ' + s.count + '</span>') + '</td></tr>';
+  }).join('');
+  const body = '识别结果：<b>' + esc(pack.title || pack.packId) + '</b> · ' + v.stats.sources + ' 个数据源 / ' + v.stats.items + ' 条<br>'
+    + '包级校验和：<b>' + v.stats.checksum + '</b><br>'
+    + '<table class="cs-tbl cs-rpt" style="margin-top:8px;"><tr><th>数据源</th><th>包内</th><th>当前</th><th>差异</th></tr>' + rows + '</table>'
+    + '<div class="kv" style="margin-top:8px;">「整包还原」= 以包内内容为准（包里没有的条目会被移除）；「合并追加」= 只覆盖/补充相同标识的条目，保留其余。</div>';
+  openModal('数据包校验通过', body, [
+    { label:'取消', fn(){ closeModal(); } },
+    { label:'合并追加', fn(){ closeModal(); csApplyImport(pack, 'merge'); } },
+    { label:'整包还原', cls:'on', fn(){ closeModal(); csApplyImport(pack, 'replace'); } }
+  ]);
+}
+function csApplyImport(pack, mode){
+  const current = {};
+  CS_SOURCES.forEach(function(s){ current[s.id] = csItems(s.id); });
+  const res = FULLPACK.applyFullPack(pack, { mode: mode, current: current });
+  const touched = [];
+  (pack.sources || []).forEach(function(ps){
+    const src = csSrc(ps.id);
+    if(!src || !res.state[ps.id]) return;
+    const target = res.state[ps.id];
+    const e = FULLPACK.diffToEdits(csBase(ps.id), target, src);
+    CS_EDITS[ps.id] = (mode === 'merge') ? FULLPACK.mergeEdits(csEdits(ps.id), e) : e;
+    touched.push(ps.id);
+    csInvalidate(ps.id);
+  });
+  csSaveEdits();
+  csRenderAll();
+  // 还原一致性复核：逐条比对「工作区」与「包内容」（忽略 uid 元字段）
+  const rows = [];
+  let bad = 0;
+  (pack.sources || []).forEach(function(ps){
+    const cur = csItems(ps.id);
+    const want = (ps.items || []).map(function(x){ return x.data; });
+    const n = Math.max(cur.length, want.length);
+    let diff = 0, first = '';
+    for(let i = 0; i < n; i++){
+      const a = cur[i], b = want[i];
+      if(!a || !b){ diff++; if(!first) first = '第 ' + (i + 1) + ' 条缺失'; continue; }
+      if(FULLPACK.stableStringify(FULLPACK.stripMeta(a)) !== FULLPACK.stableStringify(FULLPACK.stripMeta(b))){
+        diff++; if(!first) first = '第 ' + (i + 1) + ' 条内容不一致';
+      }
+    }
+    if(diff) bad++;
+    rows.push('<tr><td>' + esc(ps.name || ps.id) + '</td><td>' + want.length + '</td><td>' + cur.length + '</td>'
+      + '<td class="' + (diff ? 'bad' : 'ok') + '">' + (diff ? diff + ' 条不符（' + esc(first) + '）' : '✓ 完全一致') + '</td></tr>');
+  });
+  const okAll = bad === 0 && res.ok;
+  openModal(okAll ? '✅ 导入完成 · 还原校验全部通过' : '⚠️ 导入完成 · 存在不一致',
+    '模式：<b>' + (mode === 'merge' ? '合并追加' : '整包还原') + '</b>｜涉及数据源 ' + touched.length + ' 个<br>'
+    + '逐条复核（工作区 vs 包内容）：<br>'
+    + '<table class="cs-tbl cs-rpt" style="margin-top:8px;"><tr><th>数据源</th><th>包内</th><th>当前</th><th>复核</th></tr>' + rows.join('') + '</table>'
+    + (okAll ? '<div class="kbox">数据包已被正确识别，且内容逐条还原一致。</div>' : '<div class="kbox" style="border-left-color:var(--danger);">存在不一致，请查看上方明细（可「撤销本源改动」回到基线后重试）。</div>'),
+    [{ label:'知道了', fn(){ closeModal(); } }]);
+  toast(okAll ? '导入完成，还原校验通过' : '导入完成，但存在不一致', !okAll);
+}
+function csRoundTrip(){
+  const r = FULLPACK.roundTripCheck(csCollectSources());
+  const rows = r.perSource.map(function(p){
+    return '<tr><td>' + esc(p.name) + '</td><td>' + p.srcCount + '</td><td>' + p.outCount + '</td>'
+      + '<td class="' + (p.same ? 'ok' : 'bad') + '">' + (p.same ? '✓ 逐条一致' : (p.diffCount + ' 条不一致：' + esc((p.diffs[0] && p.diffs[0].why) || ''))) + '</td></tr>';
+  }).join('');
+  const v = r.stats || {};
+  openModal(r.ok ? '✅ 往返自检通过' : '⚠️ 往返自检发现差异',
+    '流程：导出（构建全量包 + 指纹）→ 校验（magic/校验和/指纹）→ 还原（整包回填）→ 逐条深比对。<br>'
+    + '合计 ' + (v.sources || 0) + ' 个数据源 / ' + (v.items || 0) + ' 条，耗时约 ' + (v.ms || 0) + ' ms。<br>'
+    + '<table class="cs-tbl cs-rpt" style="margin-top:8px;"><tr><th>数据源</th><th>导出</th><th>还原</th><th>比对</th></tr>' + rows + '</table>'
+    + (r.ok ? '<div class="kbox">导出的数据包可被正确识别，且重新导入后内容完整还原、逐条一致。</div>'
+            : '<div class="kbox" style="border-left-color:var(--danger);">' + esc((r.errors || []).join('；')) + '</div>'),
+    [{ label:'知道了', fn(){ closeModal(); } }]);
+  toast(r.ok ? '往返自检通过' : '往返自检发现差异', !r.ok);
+}
+/* 同步到问答/美妆：把工作区相对基线的差异按现有数据包协议落盘，qa / beauty 无需刷新即生效 */
+function csSyncOutlets(){
+  const kbItems = [], prodItems = [];
+  let nMod = 0, nAdd = 0, nDel = 0;
+  CS_SOURCES.forEach(function(s){
+    const base = csBase(s.id), cur = csItems(s.id);
+    const e = FULLPACK.diffToEdits(base, cur, s);
+    nMod += Object.keys(e.mod).length; nAdd += e.add.length; nDel += e.del.length;
+    if(s.id === 'product'){
+      Object.keys(e.mod).forEach(function(k){ prodItems.push({ op: 'upsert', key: String(e.mod[k].id || k), data: e.mod[k] }); });
+      e.add.forEach(function(x){ prodItems.push({ op: 'upsert', key: String(x.data.id || x.uid), data: x.data }); });
+      e.del.forEach(function(u){ prodItems.push({ op: 'delete', key: String(u).replace(/^product#/, '') }); });
+    }else if(s.kind === 'kb'){
+      const push = function(d){ kbItems.push({ op: 'upsert', key: String(d.src || d[FULLPACK.META_KEY] || ''), data: d }); };
+      Object.keys(e.mod).forEach(function(k){ push(e.mod[k]); });
+      e.add.forEach(function(x){ push(x.data); });
+      e.del.forEach(function(u){
+        const hit = base.find(function(b){ return String(b.src) === String(u).replace(/^\w+#/, ''); });
+        kbItems.push({ op: 'delete', key: hit ? String(hit.src) : '' });
+      });
+    }
+  });
+  if(!kbItems.length && !prodItems.length){ toast('当前没有改动需要同步'); return; }
+  const d = today();
+  const out = [];
+  if(kbItems.length){
+    const r1 = PACKS.installPack(localStorage, { magic: PACKS.MAGIC, packId: 'kb-console-sync', type: 'kb', lib: '', title: '库管理同步（知识）', version: 1, issuedAt: d, items: kbItems }, 'console');
+    out.push('知识包：' + (r1.ok ? '已安装 ' + kbItems.length + ' 条' : '失败 ' + r1.reason));
+  }
+  if(prodItems.length){
+    const r2 = PACKS.installPack(localStorage, { magic: PACKS.MAGIC, packId: 'sales-console-sync', type: 'sales', lib: '', title: '库管理同步（商品）', version: 1, issuedAt: d, items: prodItems }, 'console');
+    out.push('商品包：' + (r2.ok ? '已安装 ' + prodItems.length + ' 条' : '失败 ' + r2.reason));
+  }
+  openModal('🔗 同步完成', out.join('<br>')
+    + '<div class="kv" style="margin-top:8px;">改动合计：改 ' + nMod + ' / 增 ' + nAdd + ' / 删 ' + nDel
+    + '。日常·乘务员手册·管理手册·服务规范 与 商品库 会在「你问我答」「美妆销售」自动生效；'
+    + '大撤 / CBT / 销售话术暂无跨模块消费端，改动保存在本机编辑层并可随完整数据包导出。</div>',
+    [{ label:'知道了', fn(){ closeModal(); } }]);
+}
+$('csFile').addEventListener('change', function(ev){ const f = ev.target.files && ev.target.files[0]; if(f) csImportFile(f); this.value = ''; });
+
 /* ===================== 启动 ===================== */
+function csInit(){
+  CS_EDITS = csLoadEdits();
+  // 先固化基线 uid（kb 类按基线序号）：固化前若已发生增删，uid 会错位导致「改 A 条却写到 B 条」
+  CS_SOURCES.forEach(function(s){ FULLPACK.stampUids(csBase(s.id), s); csEdits(s.id); });
+  csRenderAll();
+}
 $('diffList').addEventListener('input', onDiffInput, true);
 function renderLibChips(){
   const o = loadOverlay();
@@ -1488,6 +2603,7 @@ function renderLibChips(){
 initTargetLib();
 renderLibChips();
 renderOverlay();
+csInit();
 </script>
 <style id="mobile-native-hardening">
 /* === mobile-native-hardening 2026-09-14 · finesse-ui h5-mobile + impeccable === */

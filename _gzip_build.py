@@ -4,6 +4,7 @@ import gzip
 import base64
 import io
 import os
+import _build_common as _bc   # 公共工具：路径归一 / 占位符嵌入 / 原子写（2026-09-21）
 
 SOURCES = {
     'qa': u'qa.html',
@@ -639,6 +640,31 @@ button:disabled:active{transform:none;}
 <a class="skip-link" href="#sysArea">跳到主要内容</a>
 <h1 class="a11y-sr">客舱小助手 · 客舱服务一线工具融合平台</h1>
 <!--__A11Y_20260919__END__-->
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -1726,8 +1752,6 @@ button:active,[onclick]:active,a:active,summary:active,[role=button]:active{filt
 @media (prefers-reduced-motion:reduce){
   *,*::before,*::after{animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important}
 }
-<style id="ccSheetCss">
-
 </style>
 <style id="ccSheetCss">
 /*__CC_SHEET:v1__*/
@@ -1977,7 +2001,6 @@ html[data-theme="dark"]{
   .csn-success .csn-tick{animation-duration:.01ms!important;}
 }
 /*__CC_SHEET_END__*/
-</style>
 </style>
 <script id="mobile-native-js">
 (function(){
@@ -2938,29 +2961,19 @@ else init();
 
 def build():
     t = TEMPLATE
-    # 内嵌 pako（保留缩进版，避免占位符处报缩进错误）
-    pako_src = io.open(u'_pako.min.js', 'rb').read().decode('utf-8')
-    pako_injected = pako_src.replace(u'function(t,e){', u';(function(t){var e=t.exports||{};')
-    # pako umd 在浏览器 <script> 中执行时 exports 为 undefined → 直接走 root 分支挂到 window.pako
-    # 因此无需改写，直接原样注入到 __PAKO_SRC__ 占位处
-    pako_injected = pako_src
-    assert '__PAKO_SRC__' in t, 'placeholder missing __PAKO_SRC__'
-    t = t.replace('__PAKO_SRC__', pako_injected)
-    enhance_src = io.open(u'_shell_enhance.js', 'rb').read().decode('utf-8')
-    t = t.replace('__SHELL_ENHANCE__', enhance_src)
+    # 内嵌 pako：原样注入到 __PAKO_SRC__ 占位处。
+    # pako umd 在浏览器 <script> 中执行时 exports 为 undefined → 直接走 root 分支挂到 window.pako，
+    # 因此无需改写源码。（2026-09-21 删除：上一行曾先做 replace 再被整体覆盖，是死代码。）
+    t = _bc.embed_text(t, '__PAKO_SRC__', u'_pako.min.js')
+    t = _bc.embed_text(t, '__SHELL_ENHANCE__', u'_shell_enhance.js')
     for key, path in SOURCES.items():
-        raw = io.open(path, 'rb').read()
-        gz = gzip.compress(raw, 9)
-        b64 = base64.b64encode(gz).decode('ascii')
-        ph = '__B64_{}__'.format(key)
-        assert ph in t, 'placeholder missing ' + ph
-        t = t.replace(ph, b64)
-        print('{}: raw {:.2f}MB -> gz {:.2f}MB'.format(key, len(raw)/1048576.0, len(gz)/1048576.0))
+        t, nraw, ngz = _bc.embed_gz_b64(t, '__B64_{}__'.format(key), path)
+        print('{}: raw {:.2f}MB -> gz {:.2f}MB'.format(key, nraw / 1048576.0, ngz / 1048576.0))
     for out in OUTS:
-        # newline=''：禁用通用换行转换，避免 Windows 下把产物里的 \n 改写成 \r\n
-        with io.open(out, 'w', encoding='utf-8', newline='') as f:
-            f.write(t)
-        print('写出', out, '{:.2f}MB'.format(os.path.getsize(out)/1048576.0))
+        # 原子写 + newline=''（见 _build_common.write_atomic）：产物 20MB+，
+        # 直接原地写若中途崩溃会留下损坏的壳
+        _bc.write_atomic(out, t)
+        print('写出', out, '{:.2f}MB'.format(os.path.getsize(_bc.abspath(out))/1048576.0))
 
 if __name__ == '__main__':
     build()

@@ -670,11 +670,13 @@ a{color:var(--primary);text-decoration:none;}
   .page-hero{padding:20px;}
   .page-hero h1{font-size:1.2rem;}
   .page-hero .plane-anim{display:none;}
-  /* 手机：默认完全隐藏，悬浮右下角"🎨"小按钮，点击后弹出 */
-  .style-switcher{right:8px;bottom:8px;flex-direction:row;padding:0;border:none;background:transparent;box-shadow:none;backdrop-filter:none;overflow:visible;pointer-events:none;}
+  /* 手机：默认完全隐藏，悬浮右下角"🎨"小按钮，点击后弹出。
+     bottom 用 calc(8px + var(--embed-bottom,0px)) 避让壳层底部 TabBar：
+     独立打开时 return 8px，嵌入主应用时基于壳层注入的真实 TabBar 高度自动抬升（2026-09-21 间距修复） */
+  .style-switcher{right:8px;bottom:calc(8px + var(--embed-bottom,0px));flex-direction:row;padding:0;border:none;background:transparent;box-shadow:none;backdrop-filter:none;overflow:visible;pointer-events:none;}
   .style-switcher .ss-title{display:none;}
   .style-switcher .ss-toggle{pointer-events:auto;width:38px;height:38px;border-radius:50%;border:2px solid var(--primary);background:var(--bg-card);box-shadow:var(--shadow);font-size:1rem;display:flex;align-items:center;justify-content:center;}
-  .style-switcher button:not(.ss-toggle){pointer-events:auto;position:fixed;width:38px;height:38px;border-radius:50%;font-size:.95rem;right:54px;bottom:8px;border:2px solid var(--border);background:var(--bg-card);box-shadow:var(--shadow-sm);}
+  .style-switcher button:not(.ss-toggle){pointer-events:auto;position:fixed;width:38px;height:38px;border-radius:50%;font-size:.95rem;right:54px;bottom:calc(8px + var(--embed-bottom,0px));border:2px solid var(--border);background:var(--bg-card);box-shadow:var(--shadow-sm);}
   .style-switcher.collapsed button:not(.ss-toggle){display:none;}
   .style-switcher:not(.collapsed) button:not(.ss-toggle){animation:ssPopIn .3s cubic-bezier(.4,0,.2,1) backwards;}
   .style-switcher:not(.collapsed) button:nth-child(3){animation-delay:.05s;}
@@ -6659,12 +6661,7 @@ function toast(msg, type='success'){
 }
 
 /* ===== LOADING ===== */
-function showLoading(){
-  document.getElementById('loadingOverlay').classList.add('show');
-}
-function hideLoading(){
-  document.getElementById('loadingOverlay').classList.remove('show');
-}
+
 
 /* ===== HTML 转义辅助 ===== */
 function escapeHtml(s){
@@ -7530,64 +7527,6 @@ function parseExcel(rows){
    2) 用 DOMParser 解析 XML
    3) 提取 <w:p> 段落 / <w:tbl> 表格 文本
 =========================================== */
-function parseZip(arrayBuffer){
-  // 简化 ZIP 解析：仅支持 STORED(0) + DEFLATE(8)，足够解析 .docx
-  const data = new Uint8Array(arrayBuffer);
-  const view = new DataView(arrayBuffer);
-  const files = {};
-
-  // 1. 找 End of Central Directory Record（签名 0x06054b50 = 117853销量）
-  let eocdOffset = -1;
-  for(let i = data.length - 22; i >= Math.max(0, data.length - 65557); i--){
-    if(view.getUint32(i, true) === 0x06054b50){
-      eocdOffset = i;
-      break;
-    }
-  }
-  if(eocdOffset < 0) throw new Error('ZIP 格式错误：未找到 End of Central Directory');
-
-  // 2. 解析 EOCD
-  const totalEntries = view.getUint16(eocdOffset + 10, true);
-  const cdOffset = view.getUint32(eocdOffset + 16, true);
-
-  // 3. 遍历 Central Directory 找到每个文件
-  let offset = cdOffset;
-  for(let i = 0; i < totalEntries; i++){
-    if(view.getUint32(offset, true) !== 0x02014b50) break;
-    const method = view.getUint16(offset + 10, true);
-    const compSize = view.getUint32(offset + 20, true);
-    const uncompSize = view.getUint32(offset + 24, true);
-    const fnameLen = view.getUint16(offset + 28, true);
-    const extraLen = view.getUint16(offset + 30, true);
-    const commentLen = view.getUint16(offset + 32, true);
-    const localHeaderOffset = view.getUint32(offset + 42, true);
-    const fname = new TextDecoder().decode(data.slice(offset + 46, offset + 46 + fnameLen));
-    // 读取 Local File Header 找到实际数据
-    const lh = localHeaderOffset;
-    if(view.getUint32(lh, true) !== 0x04034b50) { offset += 46 + fnameLen + extraLen + commentLen; continue; }
-    const lhFnameLen = view.getUint16(lh + 26, true);
-    const lhExtraLen = view.getUint16(lh + 28, true);
-    const dataStart = lh + 30 + lhFnameLen + lhExtraLen;
-    const fileData = data.slice(dataStart, dataStart + compSize);
-
-    if(method === 0){
-      // STORED：未压缩
-      files[fname] = fileData;
-    } else if(method === 8){
-      // DEFLATE：用 DecompressionStream API（现代浏览器/Node 18+）
-      try{
-        // 同步解压不可用，使用异步转同步的方式
-        // 由于本函数是同步的，这里采用一个轻量级方案：
-        // 调用方应改用 parseDOCXAsync
-        files[fname] = fileData; // 占位，下面用异步解压
-      }catch(e){
-        files[fname] = fileData;
-      }
-    }
-    offset += 46 + fnameLen + extraLen + commentLen;
-  }
-  return files;
-}
 
 // 异步解压 DEFLATE 数据
 async function inflateRaw(compressedData){
@@ -8008,11 +7947,7 @@ function renderHome(){
   const hasUnstartedMock = APP._meConfig && APP._meConfig.totalQuestions > 0;
   const hasNotes = APP.notes && Object.keys(APP.notes).length > 0;
   const totalFav = APP.favorites.length;
-  const pendingCount = (() => {
-    // 错题中未"已掌握"的数量（暂时等于错题数）
-    return APP.wrong.length;
-  })();
-  const todoCount = wrongNeedReview + (hasUnstartedMock?1:0);
+ const todoCount = wrongNeedReview + (hasUnstartedMock?1:0);
 
   // 检测薄弱章节
   const chapAccList = getChapters().map(c => {
@@ -12065,45 +12000,6 @@ function previewMEQuestionPool(){
 }
 
 /* ===== 3. 题目分值单独调整 ===== */
-function openScoreAdjuster(){
-  const cfg = APP._meConfig;
-  const pool = drawQuestionPool(cfg);
-  if(!pool.length){toast('请先在配置中抽题','warning');return;}
-
-  const typeGroups = {};
-  pool.forEach(q=>{ if(!typeGroups[q.type]) typeGroups[q.type]=[]; typeGroups[q.type].push(q); });
-
-  modal({
-    title: '💯 调整题目分值',
-    body: `
-      <div style="max-height:60vh;overflow-y:auto;padding-right:8px;">
-        <div style="margin-bottom:12px;padding:8px 10px;background:var(--primary-soft);border-radius:6px;font-size:.82rem;">
-          💡 提示：可在下方对每道题单独设置分值，批量设置同类型题统一分值请点击对应题型标题旁的「批量设置」。
-        </div>
-        ${Object.entries(typeGroups).map(([t,arr])=>{
-          const ds = cfg.defaultScore[t]||ME_DEFAULT_SCORE[t]||1;
-          return `<div class="qe-section">
-            <div class="qe-section-head">
-              <span>${t} · ${arr.length} 题 · 单题分值 <input type="number" min="0" max="100" step="0.5" value="${ds}" style="width:60px;padding:2px 6px;border:1px solid var(--border);border-radius:4px;font-size:.82rem;" onchange="bulkSetScore('${t}', +this.value)" title="批量设置该题型分值"></span>
-              <span class="qe-section-count">小计 ${arr.reduce((s,q)=>s+(cfg.scoreOverrides[q._idx]||ds),0)} 分</span>
-            </div>
-            ${arr.map(q=>{
-              const cur = cfg.scoreOverrides[q._idx] || ds;
-              return `<div style="display:flex;gap:6px;padding:4px 8px;font-size:.82rem;align-items:center;border-bottom:1px dashed var(--border);">
-                <span style="flex:1;color:var(--text2);">${escapeHtml(q.q.length>36?q.q.slice(0,36)+'…':q.q)}</span>
-                <input type="number" min="0" max="100" step="0.5" value="${cur}" style="width:60px;padding:3px 6px;border:1px solid var(--border);border-radius:4px;font-size:.82rem;" onchange="APP._meConfig.scoreOverrides[${q._idx}]=+this.value">
-                <span style="color:var(--text3);font-size:.76rem;">分</span>
-              </div>`;
-            }).join('')}
-          </div>`;
-        }).join('')}
-      </div>
-    `,
-    okText: '完成',
-    cancelText: '取消',
-    onOk: ()=>{ previewMEQuestionPool(); toast('分值已更新','success'); }
-  });
-}
 
 function bulkSetScore(type, score){
   // 修复：直接更新分值覆盖，避免重新打开模态框导致卡顿
@@ -12525,10 +12421,6 @@ function importMEConfig(e){
   e.target.value = '';
 }
 
-function resetMEConfig(){
-  // 兼容旧调用：直接重置为初始状态（带确认）
-  resetMEConfigToInitial();
-}
 
 /* 工具：洗牌 */
 function shuffle(arr){
@@ -14430,15 +14322,6 @@ function pulseQuiz(answerStatus){
 }
 
 /* 屏幕错误闪烁（背题模式误交卷等场景） */
-function flashScreenError(){
-  let overlay = document.getElementById('flashErrorOverlay');
-  if(overlay) overlay.remove();
-  overlay = document.createElement('div');
-  overlay.id = 'flashErrorOverlay';
-  overlay.style.cssText = 'position:fixed;top:0;left:0;right:0;bottom:0;pointer-events:none;z-index:9999;box-shadow:inset 0 0 0 8px var(--danger);animation:flashErr .6s ease-out;';
-  document.body.appendChild(overlay);
-  setTimeout(()=>overlay.remove(), 700);
-}
 
 /* ============================================
    快捷键支持
@@ -14836,8 +14719,7 @@ const QuizSpringAI = (function(){
   /* ===== 本地模式（2026-09-19：彻底无密钥 · __NOKEY_LOCAL_MOD__）=====
      删除内置共享 Key、服务商配置（含已停用的旗舰模型）与外部模型调用；
      isEnabled() 恒 false → 错题薄弱点分析只用上方的规则版统计，不再外发任何数据。 */
-  const getCfg = () => ({ local: true });
-  const isEnabled = () => false;
+ const isEnabled = () => false;
   async function chatLLM(){ throw new Error('本地知识库模式：本版本不接入外部 AI'); }
   return { isEnabled, chatLLM };
 })();

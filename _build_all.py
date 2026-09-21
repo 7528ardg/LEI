@@ -3,8 +3,9 @@
 --------------------------------------------------------------------------------
 用法：
   python _build_all.py            # 默认 all：构建 → 全套回归
-  python _build_all.py build      # 只构建（sync check → kb-admin → spring → 4合1，任一步失败即停）
-  python _build_all.py verify     # 只回归（全量语法检查 + 7 套逻辑验证）
+  python _build_all.py build      # 只构建（见下方 BUILD_STEPS：引擎同步 → 各模块补丁 → kb-admin
+                                  #   → spring 9模块 → 4合1 10模块 → UX 美化 → 落地页 → 在线版瘦壳）
+  python _build_all.py verify     # 只回归（全量语法检查 + 全套逻辑/针/零密钥验证）
 --------------------------------------------------------------------------------
 规则：
   - 构建链任一步失败立即终止并返回非零
@@ -13,6 +14,7 @@
 import io
 import os
 import re
+import shlex
 import subprocess
 import sys
 
@@ -20,7 +22,14 @@ sys.stdout.reconfigure(encoding='utf-8')
 HERE = os.path.dirname(os.path.abspath(__file__))
 
 BUILD_STEPS = [
+    # ===== 2026-09-21 加在最前：行尾必须先是 LF，否则下面所有按 LF 匹配标记块的补丁都会失配 =====
+    # 根因：core.autocrlf=true + 无 .gitattributes → 任何一次 git checkout/还原更改都会把工作区
+    #       文件写成 CRLF（实测 index.html 等 5 个壳被写成纯 CRLF，导航补丁当场抛「缺收口」）。
+    (u'行尾归一·CRLF→LF(护住标记块匹配)', u'python _normalize_lf_20260921.py'),
     (u'同步数据包引擎(4源)', u'python _sync_packs.py --check'),
+    # 2026-09-21 新增：库管理总台的「全量数据包引擎」同样单一来源（docs/_fullpack_engine.js），
+    # 消费端 kb-admin.template.html。构建期用 --check 卡住漂移，避免运行时与校验脚本两套实现。
+    (u'同步全量数据包引擎(kb-admin单一来源)', u'python _sync_fullpack.py --check'),
     (u'同步日期匹配引擎(3源)', u'python _sync_date_match.py --check'),
     (u'同步时节引擎(单一来源)', u'python _sync_season.py --check'),
     (u'同步大撤专项(2源)', u'python _sync_dache.py --check'),
@@ -42,26 +51,54 @@ BUILD_STEPS = [
     (u'你问我答·琴模块副本去重(幂等)', u'python _dedupe_qa_piano_20260919.py'),
     (u'你问我答·首屏快问行(幂等)', u'python _apply_qa_quickstart_20260919.py'),
     (u'你问我答·话术向导增强(产品名直触发+换个风格,幂等)', u'python _apply_qa_wizard2_20260919.py'),
+    # ===== 2026-09-21 批1 增强：答案卡工具条（复制/朗读/收藏/置信度）+「我的」面板（收藏/练习/字号）
+    #   A 锚定 QUICKSTART_END，故必须排在 quickstart 之后；B 锚定 A 的 END，故 A 必须在前。=====
+    (u'你问我答·答案卡增强(复制/朗读/收藏/置信度徽标,幂等)', u'python _apply_qa_answer_tools_20260921.py'),
+    (u'你问我答·我的面板(收藏/练习趋势/字号三档,幂等)', u'python _apply_qa_mypanel_20260921.py'),
+    (u'你问我答·AI赋魂(问法改写/指代消解/未明示需求/强制溯源,幂等)', u'python _apply_qa_ai_brain_20260921.py'),
+    # ===== 2026-09-21 销售板块话术库修复+补充（结构/红线/口径/冗余/报价/场景/库外商品/酒类补齐）
+    #   幂等（重复执行 Δ=0，全项 skip）；自带 node --check 语法闸，失败则不落盘。
+    #   必须在 _gzip_build / _build_4in1 / _build_hosted 之前，产物才能带上修复后的 beauty.html。=====
+    (u'销售板块话术库修复+补充(结构/红线/口径/去重/补充,幂等)', u'python _apply_scriptlib_fix_20260921.py'),
+    # 2026-09-21 补：话术库是独立数据块，生成引擎的 tsSanitize 管不到它。
+    # 本补丁补上 scriptLibGuard() 四道闸（入库/复制/渲染兜底/本地读入），
+    # 顺带修「块级 const 未挂 window 导致按钮 ReferenceError」与「整段文案塞进 onclick 破串」。
+    # 必须排在 _apply_scriptlib_fix 之后（其口径修复以 fix 后的文案为锚点）。
+    (u'销售话术库入库闸(保存/复制/渲染/读入,幂等)', u'python _apply_scriptlib_guard_20260921.py'),
     # ===== 2026-09-19 平板 3D「无模型」：可用性甄别（WebGL 探测/兜底/三分文案）=====
     (u'你问我答·3D可用性甄别(WebGL探测+回落2D+三分文案,幂等)', u'python _apply_qa_3dfix_20260919.py'),
     # ===== 2026-09-19 设计审核 P0-C：标题层级与 skip-link（必须在打包产物之前）=====
     (u'可访问性·标题层级+skip-link(幂等)', u'python _apply_a11y_20260919.py'),
     (u'壳层设计审核修复·顶栏对比度/字号/触控44px+平板档(幂等)', u'python _apply_shell_sync_20260919.py'),
+    # 2026-09-21 补入：cc-home.html / daily.html 的唯一生成器原先不在链里，
+    # 改了模板跑一键构建会「成功」却发布陈旧模块且全程不报错。必须排在打包步骤之前。
+    (u'构建 CC之家模块', u'python _build_home.py'),
+    (u'构建 日常问题模块', u'python _build_daily.py'),
     (u'构建 kb-admin(库管理)', u'python _build_kbadmin.py'),
     (u'构建 spring(9模块单文件)', u'python _gzip_build.py'),
     (u'构建 4合1(10模块离线版)', u'python _build_4in1.py'),
     (u'UX 美化注入(幂等,构建后补挂产物)', u'python _apply_ux_polish.py'),
     (u'你问我答·跳转落地页(9板块接收侧,幂等)', u'python _apply_qa_landing_20260919.py'),
+    # 2026-09-21 接入：_build_hosted 原先不在链里，「一键构建」既不产在线版也不刷新瘦壳。
+    # 它内部会重建 _gzip_build/_build_4in1/_apply_ux_polish（幂等），故必须放在所有模块补丁之后，
+    # 这样壳内产物才能带上 landing/ux_polish 等最后的改动。
+    (u'构建在线版(瘦壳+mods/*.gz,含壳内产物重建)', u'python _build_hosted.py'),
 ]
 
 # M1-M3 逻辑验证套件（Node 先行、Python 收尾）
 VERIFY_SCRIPTS = [
+    u'python _normalize_lf_20260921.py --check',   # 行尾全部 LF（CRLF 会让补丁的标记块匹配静默/硬停）
     u'node _verify_packs.js',      # 引擎单测 46
     u'node _verify_packs_e2e.js',  # 消费端真实数据 23
     u'node _verify_packs_m13.js',  # kb-admin 数据包中心 30
     u'node _verify_packs_m14.js',  # 备份内容层隔离 14
     u'node _verify_packs_m15.js',  # 产物内嵌特征 40
     u'node _verify_packs_m2.js',   # 在线更新 27
+    # 2026-09-21 库管理总台：全量数据包「导出 → 识别 → 还原 → 一致性」
+    u'node _verify_kb_fullpack.js',     # 引擎级往返（8 源 4914 条逐条深比对 / 篡改拦截 / 编辑删除往返，51 项）
+    u'node _verify_kb_console_e2e.js',  # 真实浏览器端到端（查看/编辑/删除/导出下载/重新导入/还原复核/撤销，29 项）
+    u'node _verify_scriptlib_guard.js',          # 销售话术库入库闸（红线拦截/自动改写不误伤/1045 条全库扫描，34 项）
+    u'python _apply_scriptlib_guard_20260921.py --check',  # 入库闸四道闸 + 库内口径修复 在位
     u'node _verify_date_match.js',  # 日期匹配引擎回归（节日词/修饰语/农历/通用节点/相对时间/跨年/表外估算）
     u'node _verify_se_lazy.js',     # SeasonEngine 懒获取回归（反序注入不再静默降级农历/节气）
     u'node _verify_fest_hookup.js',        # 节日识别 → 话术挂载 端到端
@@ -77,6 +114,7 @@ VERIFY_SCRIPTS = [
     u'node _verify_qa_capability.js',  # 你问我答能力增强（语音降级 / 跨板块数据进上下文 / 跨域引导 / 场景推荐；真实浏览器 15 项）
     u'node _verify_qa_landing.js',     # 你问我答跳转落地闭环（URL 通道 / 填入搜索框 / qa→板块接住并消费 / TTL 与边界；真实浏览器 12 项）
     u'node _verify_qa_jumpfix.js',     # 你问我答跳转目标（CBT→培训考核 / 大撤→答题 / 手册→手册奖惩，且不再误显「去日常库再问」；20 项）
+    u'node _qa_enh_verify_20260921.js', # 你问我答批1增强（答案卡工具条复制/朗读/收藏/置信度 + 我的面板收藏/练习趋势/字号；31 项）
     u'node _e2e_apk_www_test.js',      # APK 内容 + 虚拟域实测（直接读 APK 内 assets/www + https://cabin.local；29 项）
     u'python _verify_packs_m3.py', # 发布管线 19
     u'python _verify_assets.py',   # 形象IP 素材完整性（母版/抠图/精灵/原稿_clean 覆盖/模型登记）
@@ -99,11 +137,18 @@ VERIFY_SCRIPTS = [
     u'python _dedupe_qa_piano_20260919.py',                   # 琴模块恰好 1 份
     u'python _apply_qa_quickstart_20260919.py --check',        # 首屏快问行在位
     u'python _apply_qa_wizard2_20260919.py --check',           # 话术向导增强在位
+    u'python _apply_qa_answer_tools_20260921.py --check',      # 答案卡工具条（复制/朗读/收藏/置信度）在位
+    u'python _apply_qa_mypanel_20260921.py --check',           # 「我的」面板（收藏/练习/字号）在位
+    u'python _apply_qa_ai_brain_20260921.py --check',          # AI 赋魂（问法改写/指代消解/未明示需求/强制溯源）在位
+    u'node _verify_qa_ai_brain.js',                            # AI 赋魂四件事 + 三处接缝未被后续补丁踩坏（41 项）
+    u'node _verify_perf_decrypt_link.js',                      # 绩效跨板块链路：performance 加密落库 → qa 解密还原（真实路径 20 项；来源：2026-09-21 审查 P0）
     u'python _apply_qa_3dfix_20260919.py --check',             # 3D 可用性甄别在位（2026-09-19）
     u'python _apply_a11y_20260919.py --check',                 # 标题层级 + skip-link 在位（设计审核 P0-C）
     u'python _apply_shell_sync_20260919.py --check',           # 顶栏对比度/字号/44px 触控 + 平板档（设计审核 P0-A/B）
     u'node _ai_restore_verify_20260919.js',                    # AI 已恢复（2026-09-19 深夜用户指令）；localmode 验证器随之退役
     u'python _verify_nokey_all.py --quiet',                     # 全链路零密钥审计（源/gz/壳载荷/www/PWA/APK）
+    u'python _verify_hosted.py --quiet',                        # 在线版瘦壳体检（模块已置空/fetch 逻辑/JS 语法/mods 可解压）
+    u'python _check_needles.py --quiet',                        # 最终产物针检查（移动端加固针/3D 针/反向针/壳内载荷取证）
     u'python _check_apk_sync.py',                           # APK 内 assets/www 与源同步（落后即失败，防「改了源没装配」）
 ]
 
@@ -122,7 +167,18 @@ SYNTAX_FILES = [
 def run(cmd, label, fail_on_err=True):
     print(u'\n==> ' + label)
     print(u'    ' + cmd)
-    r = subprocess.run(cmd, shell=True, cwd=HERE)
+    # 2026-09-21：不再用 shell=True + 裸 python。shell=True 依赖系统 PATH 解析解释器，
+    # venv / 多 Python 并存时子步骤会跑在另一个解释器上；改用 sys.executable 保证与本进程一致。
+    argv = shlex.split(cmd)
+    if argv and argv[0] in ('python', 'python3', 'py'):
+        argv = [sys.executable] + argv[1:]
+    try:
+        r = subprocess.run(argv, cwd=HERE)
+    except FileNotFoundError as e:
+        print(u'!! 命令可执行文件缺失：%s（%s）' % (argv[0], e))
+        if fail_on_err:
+            sys.exit(2)
+        return 2
     if r.returncode != 0:
         print(u'!! %s 失败（exit=%d）' % (label, r.returncode))
         if fail_on_err:
@@ -134,6 +190,11 @@ def syntax_check():
     print(u'\n===== 全量语法检查 =====')
     node = 'node'
     fails = 0
+    # 2026-09-21：临时文件改为「固定路径 + 覆盖写，不再 os.remove」。
+    # 原因：每个文件都删一次，在做过大批量归档/清理的会话里累计删除数会触发
+    # 文件安全护栏（SAFE_DELETE_BULK_CONFIRM_REQUIRED）而中断回归；且该文件本就
+    # 被根级 /_* 规则 gitignore，留一个缓存文件无害。
+    tmp = os.path.join(HERE, '_syntax_check_tmp.js')
     for name in SYNTAX_FILES:
         path = os.path.join(HERE, name)
         if not os.path.exists(path):
@@ -142,11 +203,13 @@ def syntax_check():
         s = io.open(path, encoding='utf-8', newline='').read()
         parts = re.findall(r'<script[^>]*>(.*?)</script>', s, re.S)
         js = '\n;\n'.join(parts)
-        tmp = os.path.join(HERE, '__all_check_tmp.js')
-        with io.open(tmp, 'w', encoding='utf-8') as f:
+        with io.open(tmp, 'w', encoding='utf-8', newline='') as f:
             f.write(js)
-        r = subprocess.run([node, '--check', tmp], capture_output=True, text=True)
-        os.remove(tmp)
+        try:
+            r = subprocess.run([node, '--check', tmp], capture_output=True, text=True)
+        except FileNotFoundError:
+            print(u'  !! 未找到 node（请把 node 加入 PATH），无法执行语法检查')
+            sys.exit(2)
         ok = r.returncode == 0
         print(u'  %s -> %s' % (name, 'SYNTAX_OK' if ok else 'SYNTAX_ERR'))
         if not ok:

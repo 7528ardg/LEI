@@ -1,8 +1,9 @@
 # -*- coding: utf-8 -*-
 """重建「客舱小助手（离线完整版）」离线单文件（9 模块 gzip 内嵌）（临时工具，用后可删）"""
 import gzip, base64, io, os, re
+import _build_common as _bc   # 公共工具：路径归一 / 占位符嵌入 / 原子写（2026-09-21）
 
-BASE = r'c:\Users\Admin\Desktop\融合版'
+BASE = _bc.ROOT   # 2026-09-21：不再硬编码绝对路径（原为小写 c 盘符，换机即失效）
 SOURCES = {
     'qa': u'qa.html',
     'home': u'cc-home.html',
@@ -630,6 +631,31 @@ button:disabled:active{transform:none;}
 <a class="skip-link" href="#sysArea">跳到主要内容</a>
 <h1 class="a11y-sr">客舱小助手 · 客舱服务一线工具融合平台</h1>
 <!--__A11Y_20260919__END__-->
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -1713,8 +1739,6 @@ button:active,[onclick]:active,a:active,summary:active,[role=button]:active{filt
 @media (prefers-reduced-motion:reduce){
   *,*::before,*::after{animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important}
 }
-<style id="ccSheetCss">
-
 </style>
 <style id="ccSheetCss">
 /*__CC_SHEET:v1__*/
@@ -1964,7 +1988,6 @@ html[data-theme="dark"]{
   .csn-success .csn-tick{animation-duration:.01ms!important;}
 }
 /*__CC_SHEET_END__*/
-</style>
 </style>
 <script id="mobile-native-js">
 (function(){
@@ -2953,25 +2976,17 @@ def inline_risk_deps(raw):
 def build():
     t = TEMPLATE
     # 内嵌 pako 解压库：旧浏览器（Safari < 16.4）降级用（纯 JS，无网络依赖）
-    pako_src = io.open(os.path.join(BASE, u'_pako.min.js'), 'rb').read().decode('utf-8')
-    assert '__PAKO_SRC__' in t, 'placeholder missing __PAKO_SRC__'
-    t = t.replace('__PAKO_SRC__', pako_src)
-    enhance_src = io.open(os.path.join(BASE, u'_shell_enhance.js'), 'rb').read().decode('utf-8')
-    t = t.replace('__SHELL_ENHANCE__', enhance_src)
+    t = _bc.embed_text(t, '__PAKO_SRC__', u'_pako.min.js')
+    t = _bc.embed_text(t, '__SHELL_ENHANCE__', u'_shell_enhance.js')
     for key, path in SOURCES.items():
-        raw = io.open(os.path.join(BASE, path), 'rb').read()
-        if key == 'risk':
-            raw = inline_risk_deps(raw.decode('utf-8')).encode('utf-8')
-        gz = gzip.compress(raw, 9)
-        b64 = base64.b64encode(gz).decode('ascii')
-        ph = '__B64_{}__'.format(key)
-        assert ph in t, 'placeholder missing ' + ph
-        t = t.replace(ph, b64)
-        print('{}: raw {:.2f}MB -> gz {:.2f}MB'.format(key, len(raw)/1048576.0, len(gz)/1048576.0))
+        # risk 模块需先把 risk-lite.html 里的 risk/ 相对引用内联成单文件
+        xf = (lambda b: inline_risk_deps(b.decode('utf-8')).encode('utf-8')) if key == 'risk' else None
+        t, nraw, ngz = _bc.embed_gz_b64(t, '__B64_{}__'.format(key), path, transform=xf)
+        print('{}: raw {:.2f}MB -> gz {:.2f}MB'.format(key, nraw / 1048576.0, ngz / 1048576.0))
     out = os.path.join(BASE, OUT)
-    # newline=''：禁用通用换行转换，避免 Windows 下把产物里的 \n 改写成 \r\n
-    with io.open(out, 'w', encoding='utf-8', newline='') as f:
-        f.write(t)
+    # 原子写 + newline=''（见 _build_common.write_atomic）：产物 20MB+，
+    # 直接原地写若中途崩溃会留下损坏的壳
+    _bc.write_atomic(out, t)
     print('写出', OUT, '{:.2f}MB'.format(os.path.getsize(out)/1048576.0))
 
 if __name__ == '__main__':

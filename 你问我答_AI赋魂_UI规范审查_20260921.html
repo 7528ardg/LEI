@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>你问我答 · AI 赋魂界面 UI 规范审查（2026-09-21）</title>
+<style>
+  *{box-sizing:border-box}
+  body{margin:0;background:#f5f7f6;color:#1b2320;
+       font:15px/1.75 -apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Microsoft YaHei",sans-serif}
+  .wrap{max-width:1120px;margin:0 auto;padding:28px 20px 72px}
+  header.hd{background:linear-gradient(135deg,#00A650 0%,#008a42 100%);color:#fff;
+       border-radius:18px;padding:26px 28px;box-shadow:0 8px 26px rgba(0,166,80,.22)}
+  header.hd h1{margin:0 0 8px;font-size:25px;letter-spacing:.3px}
+  header.hd p{margin:0;opacity:.92;font-size:13.5px}
+  .stats{display:flex;flex-wrap:wrap;gap:10px;margin:16px 0 4px}
+  .stat{background:rgba(255,255,255,.16);border:1px solid rgba(255,255,255,.3);
+        border-radius:10px;padding:7px 13px;font-size:12.5px}
+  .stat b{font-size:16px;margin-right:4px}
+  h2{font-size:19px;margin:38px 0 6px;padding-left:12px;border-left:4px solid #00A650}
+  h2 .sub{font-size:13px;font-weight:400;color:#5d6b64;margin-left:8px}
+  h3{font-size:16px;margin:26px 0 4px;color:#134a2e}
+  .note{background:#fff;border:1px solid #dfe6e2;border-radius:12px;padding:14px 18px;
+        font-size:13.5px;color:#42504a}
+  .note b{color:#0a7d3f}
+  .warn{background:#fffaf0;border-color:#f0dcb0}
+  .warn b{color:#9a6100}
+  ol.ins{margin:10px 0 0;padding-left:22px}
+  ol.ins li{margin:7px 0}
+  ul.tight{margin:6px 0 0;padding-left:20px}
+  ul.tight li{margin:4px 0}
+  table{width:100%;border-collapse:collapse;background:#fff;border-radius:12px;overflow:hidden;
+        box-shadow:0 1px 3px rgba(24,40,34,.07);margin-top:12px;font-size:13px}
+  th,td{padding:9px 11px;text-align:left;vertical-align:top;border-bottom:1px solid #edf1ef}
+  th{background:#eef4f0;font-weight:600;font-size:12.5px;color:#2c3a34}
+  tr:last-child td{border-bottom:0}
+  td.nw{white-space:nowrap}
+  code{background:#eef4f0;color:#0a7d3f;padding:1px 5px;border-radius:5px;
+       font:12.5px/1.5 ui-monospace,Consolas,monospace}
+  .b{display:inline-block;padding:2px 8px;border-radius:20px;font-size:11.5px;font-weight:600;white-space:nowrap}
+  .b-fix{background:#e4f6ec;color:#0a7d3f;border:1px solid #b9e3cb}
+  .b-todo{background:#fff4e0;color:#9a6100;border:1px solid #f2d9a6}
+  .b-pre{background:#f2f0fa;color:#5b4bb0;border:1px solid #d8d2f2}
+  .b-ok{background:#eaf3fd;color:#1462b8;border:1px solid #c2ddf7}
+  .hot{color:#c0392b;font-weight:700}
+  .src{font-size:11.5px;color:#7b8781}
+  .pcard{background:#fff;border:1px solid #dfe6e2;border-left:4px solid #00A650;
+         border-radius:12px;padding:12px 16px;margin:10px 0;font-size:13.5px}
+  .pcard b{color:#0a7d3f}
+  .shots{display:flex;gap:14px;flex-wrap:wrap;margin-top:12px}
+  .shot{flex:1 1 260px;background:#fff;border:1px solid #dfe6e2;border-radius:12px;padding:10px;font-size:12.5px;color:#5d6b64}
+  .shot img{width:100%;border-radius:8px;border:1px solid #edf1ef;display:block;margin-bottom:6px}
+  footer{margin-top:44px;padding-top:16px;border-top:1px solid #dfe6e2;
+         font-size:12.5px;color:#7b8781;text-align:center}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<header class="hd">
+  <h1>你问我答 · AI 赋魂界面 UI 规范审查</h1>
+  <p>依据 Vercel Web Interface Guidelines 逐条核对新增与维护的界面元素 · 2026-09-21</p>
+  <div class="stats">
+    <span class="stat"><b>14</b>项发现</span>
+    <span class="stat"><b>8</b>项已修</span>
+    <span class="stat"><b>3</b>项待办</span>
+    <span class="stat"><b>3</b>项判定无需改</span>
+    <span class="stat">真机截图 9 张 · 零溢出</span>
+  </div>
+</header>
+
+<h2>一、审查范围 <span class="sub">新增的 + 这次动过的，都算</span></h2>
+<table>
+<tr><th class="nw">类别</th><th>具体元素</th><th class="nw">位置</th></tr>
+<tr>
+  <td class="nw"><b>本次新增</b></td>
+  <td>A6 溯源状态栏（<code>.qa-gr-bar</code> / <code>-ok</code> / <code>-warn</code> / <code>-miss</code> / <code>-ico</code> / <code>-c</code>）、未核实标记（<code>.qa-gr-unv</code>）、A5 推荐芯片区（<code>.qa-gr-chips</code>）</td>
+  <td class="nw"><code>qa.html:11445-11466</code><br><code>:11600-11650</code></td>
+</tr>
+<tr>
+  <td class="nw"><b>本次维护</b></td>
+  <td>答案卡工具条 <code>.qa-at-b</code>（复制 / 朗读 / 收藏）、置信度徽标 <code>.qa-at-conf</code>、承接提示 toast <code>.qa-at-toast</code>、我的面板 tab <code>.mp-tab</code>、复用芯片 <code>.w-chip</code></td>
+  <td class="nw"><code>:11680-11720</code><br><code>:12030-12060</code><br>全局 <code>:134</code> / <code>:2096</code></td>
+</tr>
+</table>
+
+<h2>二、发现与处置 <span class="sub">14 项 · 8 修 / 3 待办 / 3 无需改</span></h2>
+
+<h3>已修（8 项）<span class="src">均已进回归断言，防回退</span></h3>
+<table>
+<tr><th class="nw">#</th><th class="nw">问题</th><th>为什么是问题</th><th class="nw">处置</th><th class="nw">严重度</th></tr>
+<tr>
+  <td class="nw">1</td>
+  <td><b>溯源说明挂在 <code>title</code> 上</b><br><span class="src">原 <code>.qa-gr-unv</code></span></td>
+  <td><b>触屏永远看不到 <code>title</code></b>。本项目主战场是 Android APK，等于 A6 最关键的「哪几处不可信」在手机上完全失明</td>
+  <td>去掉 <code>title</code>，把未核实的 token 直接写进状态栏文案：<br><span class="src">「其中 4 处…未能找到对应（手册 8.8.8、96 小时、3 小时、12 小时，已用波浪线标出）」</span></td>
+  <td class="nw"><span class="b b-fix">高</span></td>
+</tr>
+<tr>
+  <td class="nw">2</td>
+  <td><b>状态栏 <code>display:flex</code> 把正文切成多栏</b></td>
+  <td>flex 容器的**文本节点与 <code>&lt;b&gt;</code> 各自成为独立 flex item**，实际渲染成三列并排（截图复现）。这是本次新写的样式，属自造缺陷</td>
+  <td>改 <code>display:block</code>，正文收进单一 <code>.qa-gr-c</code> 容器；图标改 <code>.qa-gr-ico</code> + <code>margin-right</code></td>
+  <td class="nw"><span class="b b-fix">高</span></td>
+</tr>
+<tr>
+  <td class="nw">3</td>
+  <td>异步状态无 <code>role="status"</code></td>
+  <td>Guidelines：toast / 校验等异步更新需 aria-live。溯源栏正是异步结果</td>
+  <td>三个状态栏均加 <code>role="status"</code>（<b>注</b>：根因修复见「待办 1」）</td>
+  <td class="nw"><span class="b b-fix">中</span></td>
+</tr>
+<tr>
+  <td class="nw">4</td>
+  <td>状态图标未 <code>aria-hidden</code></td>
+  <td>🔍 / ✓ / 🔗 会被读屏器念成「放大镜」「对勾」，污染语义</td>
+  <td>包 <code>&lt;span class="qa-gr-ico" aria-hidden="true"&gt;</code></td>
+  <td class="nw"><span class="b b-fix">低</span></td>
+</tr>
+<tr>
+  <td class="nw">5</td>
+  <td>章节号 / 数值可被自动翻译改写</td>
+  <td>Guidelines：品牌名与代码 token 需 <code>translate="no"</code>。浏览器翻译会把 <code>6.7.9.1</code> 之类当数字改写</td>
+  <td>未核实 token 的 <code>span</code> 加 <code>translate="no"</code></td>
+  <td class="nw"><span class="b b-fix">低</span></td>
+</tr>
+<tr>
+  <td class="nw">6</td>
+  <td>长问法芯片可能顶破气泡</td>
+  <td>Guidelines：容器需处理长内容。推荐芯片直接来自库内条目 <code>q</code>，最长可达数十字；<code>.w-chip</code> 无 <code>max-width</code></td>
+  <td>仅对推荐区生效：<code>.qa-gr-chips .w-chip{max-width:100%;overflow-wrap:anywhere}</code>（<b>不动全局类</b>）</td>
+  <td class="nw"><span class="b b-fix">中</span></td>
+</tr>
+<tr>
+  <td class="nw">7</td>
+  <td>波浪线颜色裸硬编码</td>
+  <td>与项目既有约定（<code>var(--x, fallback)</code>）不一致，主题调整时会漏改</td>
+  <td><code>text-decoration-color:var(--gold,#D98324)</code>，深色 <code>var(--gold,#E8C77A)</code></td>
+  <td class="nw"><span class="b b-fix">低</span></td>
+</tr>
+<tr>
+  <td class="nw">8</td>
+  <td><b>答案卡工具键在触屏上仅 30px</b><br><span class="src">维护项 <code>.qa-at-b</code></span></td>
+  <td>项目自身已在 <code>@media (pointer:coarse)</code> 把 <code>.w-chip</code> / <code>.src-tab</code> / <code>.icon-btn</code> 补到 44px，<b>唯独漏了答案卡工具键</b>。复制/朗读/收藏是最高频的四个键</td>
+  <td>补进新块样式：<code>@media (pointer:coarse){.qa-at-b{min-height:44px;padding:9px 13px}}</code></td>
+  <td class="nw"><span class="b b-fix">中</span></td>
+</tr>
+</table>
+
+<h3>待办（3 项）<span class="src">需要动渲染内核或跨模块，不在本批范围</span></h3>
+<table>
+<tr><th class="nw">#</th><th class="nw">问题</th><th>说明与建议</th><th class="nw">严重度</th></tr>
+<tr>
+  <td class="nw">1</td>
+  <td>异步播报的真正修法</td>
+  <td>给新插入节点加 <code>role="status"</code> 在部分读屏器上不播报。<b>正确做法</b>是把 <code>aria-live="polite"</code> 挂在一个<b>常驻容器</b>上。<br>但本模块的 <code>renderChat()</code> 是「整体重写 innerHTML」，若直接给消息容器加 <code>aria-live</code>，每次重渲染都会<b>把整屏历史念一遍</b>——比现在更糟。需先改造渲染路径（增量渲染或单独常驻播报节点），建议单独立项。</td>
+  <td class="nw"><span class="b b-todo">中</span></td>
+</tr>
+<tr>
+  <td class="nw">2</td>
+  <td><code>.w-chip{transition:all .16s}</code></td>
+  <td>Guidelines 明确列为反模式（<code>transition: all</code> 应列明确属性）。属<b>既有全局样式</b>，影响面广，不宜在本次顺手改，建议单独提交一次样式收敛。</td>
+  <td class="nw"><span class="b b-todo">低</span></td>
+</tr>
+<tr>
+  <td class="nw">3</td>
+  <td>暗色主题缺 <code>color-scheme: dark</code></td>
+  <td>Guidelines：暗色主题需在 <code>&lt;html&gt;</code> 声明 <code>color-scheme: dark</code>，否则原生滚动条、表单控件仍是亮色。项目用 <code>data-theme="dark"</code> 自绘主题，未声明该属性。属全局外壳，非本次新增范围。</td>
+  <td class="nw"><span class="b b-todo">低</span></td>
+</tr>
+</table>
+
+<h3>判定无需改（3 项）<span class="src">逐条对照后确认合规</span></h3>
+<table>
+<tr><th class="nw">#</th><th>项</th><th>结论</th></tr>
+<tr><td class="nw">1</td><td>对比度（浅 + 深共 6 组配色）</td><td>实测均在 <b>4.79:1 ~ 8.11:1</b>，全部过 WCAG AA 的 4.5:1。最低是浅色 ok 栏 4.79:1、warn 栏 4.99:1。<b>无需改</b></td></tr>
+<tr><td class="nw">2</td><td>触控热区（推荐芯片）</td><td>复用 <code>.w-chip</code>，已被既有 <code>@media (max-width:760px),(pointer:coarse)</code> 补到 <code>min-height:44px</code>。<b>合规</b></td></tr>
+<tr><td class="nw">3</td><td>空状态 / 长内容兜底</td><td>无可推荐条目时 <b>不渲染空推荐区</b>（<code>chipsOf</code> 返回空串）；未核实项超 6 处以「等」收尾，不撑破气泡。均有回归断言</td></tr>
+</table>
+
+<h2>三、真机截图证据 <span class="sub">430×1500 / 320×1500 视口 · 浅色 + 深色 + 窄屏</span></h2>
+<div class="pcard">
+  <b>自动断言结果</b>：9 张截图全部 <code>overflow=false</code>（气泡右边界未超出视口、芯片无横向溢出）、状态栏 class 与用例一一对应（ok / warn / miss 各 3 张）、页面 <b>零 JS 错误</b>。
+</div>
+<div class="shots">
+  <div class="shot">
+    <img src="_ai_brain_shots/light-warn.png" alt="浅色：未核实项状态栏，波浪线标出 8.8.8 / 96 小时 / 3 小时 / 12 小时，下方为库内推荐芯片">
+    浅色 · warn：文案内联列出 4 处未核实项，正文对应位置打波浪线，下方 3 枚库内推荐芯片
+  </div>
+  <div class="shot">
+    <img src="_ai_brain_shots/light-ok.png" alt="浅色：全部数值与章节号均可在库内找到对应">
+    浅色 · ok：全部数值与章节号均可在库内找到对应
+  </div>
+  <div class="shot">
+    <img src="_ai_brain_shots/narrow-miss.png" alt="窄屏 320px：无库内依据的提示栏">
+    窄屏 320px · miss：明确告知「没有库内条目作为依据」
+  </div>
+</div>
+
+<h2>四、本批交付的技术留痕 <span class="sub">改了什么、怎么验的</span></h2>
+<table>
+<tr><th class="nw">文件</th><th>作用</th></tr>
+<tr><td><code>_apply_qa_ai_brain_20260921.py</code></td><td>幂等补丁 → 块 <code>__QA_AI_BRAIN_20260921__</code>，含 A3/A4/A5/A6 与全部 UI 样式；另做三处 in-place 接缝（各带唯一标记，重跑按标记跳过）</td></tr>
+<tr><td><code>_verify_qa_ai_brain.js</code></td><td>回归 <b>55 项</b>（A4 8 / A6 9 / A5 5 / A3 7 / 接缝 12 / UI 规范 14），已挂进 <code>_build_all.py</code> VERIFY 链</td></tr>
+<tr><td><code>_qa_ai_brain_shots.js</code></td><td>真机截图 + 溢出检测（浅/深/窄 × ok/warn/miss = 9 张）</td></tr>
+<tr><td><code>_bak_qa_ai_brain_20260921.html</code></td><td>改动前备份</td></tr>
+</table>
+<div class="note warn" style="margin-top:12px">
+  <b>过程中修掉的两个自身缺陷（值得记）</b>：
+  ① 补丁初版写成 <code>window.SpringAI</code> —— <code>SpringAI</code> 在 qa.html 里是<b>顶层 <code>const</code>，不挂 window</b>，导致 A3 永远静默不触发。已改 bare 引用 + <code>typeof</code> 兜底，并写进回归。
+  ② 截图脚本第一版取的是<b>第一条</b> <code>.qa-gr-wrap</code>，三张图全是同一用例；且用 <code>title</code> 承载说明的版本在触屏上等于没提示。<b>这类「看起来通过、其实没生效」的坑，只有真机截图能暴露</b>。
+</div>
+
+<footer>
+  审查依据：Vercel Web Interface Guidelines（<code>command.md</code>，2026-09-21 拉取）· 覆盖 Accessibility / Focus / Animation / Typography / Content Handling / Touch / Dark Mode / Anti-patterns 各节<br>
+  断言与截图：<code>node _verify_qa_ai_brain.js</code>（55/55）· <code>node _qa_ai_brain_shots.js</code>（9 张，零溢出）<br>
+  2026-09-21
+</footer>
+</div>
+</body>
+</html>

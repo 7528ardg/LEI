@@ -248,6 +248,31 @@ small{font-size:12px;}
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 <header class="top">
   <div class="t-top">
     <div class="t-logo">📕</div>
@@ -590,7 +615,7 @@ function ruleObjName(r){
   const map = o.map(x=> x==='乘务长'?'乘务长':x==='分队长'||x==='班组长'?'班组干部':x==='备份人员'?'乘务员':x==='4 号位'||x==='4号位'?'乘务员':x);
   return [...new Set(map)];
 }
-function ruleMatchesFav(r, idx){ return favs.has(String(idx)); }
+
 function badgeClass(r){
   const nums = (r.scores||[]).map(Number).filter(n=> !isNaN(n));
   if(nums.length===0) return 's-sub';

@@ -29,14 +29,17 @@ SRC = {
     'kbadmin': u'kb-admin.html', 'issues': u'issues.html',
 }
 
-# 匹配 MODULES 对象里形如  "  key: "H4sI...很长的base64...", "  的整行，把 base64 置空
-B64_LINE = re.compile(r'^[ \t]*((?:qa|quiz|performance|beauty|medical|risk|daily|manual|report|kbadmin|issues|home)\s*:\s*)"[A-Za-z0-9+/=]{120,}"[,]?\s*$', re.MULTILINE)
+# 匹配 MODULES 对象里形如  "  key: "H4sI...很长的base64..."  的片段，把 base64 置空。
+# 2026-09-21 放宽：原正则要求 base64 独占整行（行尾只允许逗号），一旦上游产物把该行折叠/加了尾注，
+# 就会静默不替换、瘦壳仍内嵌大块数据。现在只锚定「行首 + key: "长base64"」，行尾内容不受影响。
+B64_LINE = re.compile(
+    r'^([ \t]*(?:qa|quiz|performance|beauty|medical|risk|daily|manual|report|kbadmin|issues|home)\s*:\s*)'
+    r'"[A-Za-z0-9+/=]{120,}"', re.MULTILINE)
 
 
 def strip_modules(html):
     def rep(m):
-        tail = ',' if m.group(0).rstrip().endswith(',') else ''
-        return m.group(1) + '""' + tail
+        return m.group(1) + '""'
     return B64_LINE.sub(rep, html)
 
 
@@ -47,14 +50,16 @@ def build_mods():
     for key, fn in SRC.items():
         if not os.path.exists(os.path.join(BASE, fn)):
             continue
-        raw = io.open(os.path.join(BASE, fn), encoding='utf-8').read()
+        raw = io.open(os.path.join(BASE, fn), encoding='utf-8', newline='').read()
         gz = gzip.compress(raw.encode('utf-8'), 9)
         with io.open(os.path.join(MODS_DIR, key + '.gz'), 'wb') as f:
             f.write(gz)
         # file:// 双击打开时 fetch 被 CORS 拦截，改由经典 <script> 注入该 js（不受 CORS 限制）
         b64 = base64.b64encode(gz).decode('ascii')
         js = u"(function(){window.__MODSRC__=window.__MODSRC__||{};window.__MODSRC__['%s']=\"%s\";})();\n" % (key, b64)
-        with io.open(os.path.join(MODS_DIR, key + '.js'), 'w', encoding='utf-8') as f:
+        # newline='' 必须给：否则 Windows 文本模式把 \n 写成 \r\n，工作区行尾不变量被破坏
+        # （2026-09-21 实测：这里漏了 newline=''，12 个 mods/*.js 全变 CRLF）
+        with io.open(os.path.join(MODS_DIR, key + '.js'), 'w', encoding='utf-8', newline='') as f:
             f.write(js)
         names.append((key, len(raw), len(gz)))
     return names
@@ -105,13 +110,14 @@ index.html
 
 def write_helpers(out9):
     # 本地服务启动器（ASCII/GBK 均可，提示语用英文避免编码问题）
-    with io.open(os.path.join(OUT_DIR, u'启动本地服务.bat'), 'w', encoding='utf-8') as f:
+    # 2026-09-21：显式指定换行为 CRLF（.bat 在 Windows 上最稳），取代原先依赖文本模式的隐式转换
+    with io.open(os.path.join(OUT_DIR, u'启动本地服务.bat'), 'w', encoding='utf-8', newline='\r\n') as f:
         f.write(BAT)
     # index.html：本地服务 / Pages 根路径自动进入在线版
     idx = u'<meta charset="utf-8">\n<meta http-equiv="refresh" content="0;url=./%s">\n' % os.path.basename(out9)
-    with io.open(os.path.join(OUT_DIR, u'index.html'), 'w', encoding='utf-8') as f:
+    with io.open(os.path.join(OUT_DIR, u'index.html'), 'w', encoding='utf-8', newline='') as f:
         f.write(idx)
-    with io.open(os.path.join(OUT_DIR, u'使用说明.txt'), 'w', encoding='utf-8') as f:
+    with io.open(os.path.join(OUT_DIR, u'使用说明.txt'), 'w', encoding='utf-8', newline='\r\n') as f:
         f.write(README)
 
 
@@ -128,15 +134,23 @@ def main():
     shell = io.open(os.path.join(BASE, u'spring-assistant.html'), encoding='utf-8').read()
     hosted = strip_modules(shell)
     out9 = os.path.join(OUT_DIR, u'客舱小助手（在线版）.html')
-    with io.open(out9, 'w', encoding='utf-8') as f:
+    # 瘦壳必须真的被置空：B64_LINE 依赖「base64 独占一行」，若上游产物格式变了会静默不替换
+    assert B64_LINE.search(hosted) is None, u'strip_modules 未生效：瘦壳仍内嵌模块载荷'
+    assert len(hosted) < len(shell) * 0.9, u'strip_modules 效果异常：瘦壳体积未明显下降'
+    tmp9 = out9 + '.tmp_write'
+    with io.open(tmp9, 'w', encoding='utf-8', newline='') as f:
         f.write(hosted)
+    os.replace(tmp9, out9)
 
     # 3) 离线完整版 -> 10 模块瘦壳（含 risk）
     shell4 = io.open(os.path.join(BASE, u'客舱小助手（离线完整版）.html'), encoding='utf-8').read()
     hosted4 = strip_modules(shell4)
     out10 = os.path.join(OUT_DIR, u'客舱小助手（离线完整版-在线部署）.html')
-    with io.open(out10, 'w', encoding='utf-8') as f:
+    assert len(hosted4) < len(shell4) * 0.9, u'strip_modules 效果异常（4in1）：瘦壳体积未明显下降'
+    tmp10 = out10 + '.tmp_write'
+    with io.open(tmp10, 'w', encoding='utf-8', newline='') as f:
         f.write(hosted4)
+    os.replace(tmp10, out10)
 
     # 4) mods/*.gz + mods/*.js
     gzs = build_mods()

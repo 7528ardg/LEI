@@ -4,6 +4,9 @@ __check_*
 __pycache__/
 .DS_Store
 
+# APK 签名密码文件（勿入库）
+.ks_pass
+
 # 依赖与 IDE/AI 工作目录（不入库）
 node_modules/
 .trae/

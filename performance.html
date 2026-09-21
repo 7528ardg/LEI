@@ -20,6 +20,19 @@
       ✓ FileSaver 2.0.5 (文件保存)
       ✓ idb-keyval 6.2.1 (本地存储)
 ================================================================================
+    【归属说明 · 2026-09-21 补充】
+    本文件 = 融合版导航中的「📊 绩效管理」模块**本体**（mod-tab / 移动端 Tab /
+    巨型菜单 / 模块元数据均引用 performance），不是历史遗留或误入文件，请勿移出。
+    它由「广州分队乘务管理系统」以单机自包含形态整体集成而来，故自带 Bootstrap /
+    Chart.js / SheetJS 等内联库；因体积与维护成本考虑，暂不做 vendor 拆分。
+    结构提醒：本文件的 head 闭合标签出现两次 —— 一处在内嵌库的 JS 字符串里，
+    真正的文档头在文件末（其后紧随 body 开标签）。任何注入脚本都必须按
+    「head 闭合标签后跟换行 + body 开标签」判别（见 _sync_packs.find_head_anchor /
+    _apply_perf_import_20260918），不可用首个或末个一刀切。
+    ⚠️ 同理：_apply_ux_polish 的扫描器只跳过 script/style，**不跳过 HTML 注释**，
+    所以在本文件的注释里也**不要**写出 head 闭合标签的字面量，否则会被当成锚点。
+    本段因此刻意用文字描述尖括号，不写标签字面量。
+================================================================================
 -->
 
 <html lang="zh-CN">
@@ -10961,7 +10974,7 @@ button:disabled:active{transform:none;}
                             <div class="col-md-2"><label class="form-label fw-semibold">排序</label><select class="form-select" id="sortSelect"><option value="performance-desc">绩效⬇️</option><option value="performance-asc">绩效⬆️</option><option value="flightHours-desc">飞行小时⬇️</option><option value="flightHours-asc">飞行小时⬆️</option><option value="name">姓名</option></select></div>
                             <div class="col-md-2"><label class="form-label fw-semibold">搜索</label><input type="text" class="form-control" id="searchInput" placeholder="姓名/工号..."></div>
                         </div>
-                        <div id="customMonthSelector" style="display: none;" class="bg-light p-3 rounded-4 mb-4"><label class="fw-semibold">✓ 选择多个月份：</label><div class="month-checkboxes" id="customMonthCheckboxes"></div><button class="btn btn-sm btn-primary mt-2" id="applyCustomMonths">应用自定义月份</button></div>
+                        <div id="customMonthSelector" style="display: none;" class="bg-light p-3 rounded-4 mb-4"><label class="fw-semibold">✓ 选择多个月份：</label><div class="month-checkboxes" id="summaryCustomMonthCheckboxes"></div><button class="btn btn-sm btn-primary mt-2" id="applyCustomMonths">应用自定义月份</button></div>
                         
                         <!-- 数据看板：关键绩效指标 -->
                         <div class="row g-3 mb-4" id="summaryDashboard">
@@ -12602,7 +12615,8 @@ button:disabled:active{transform:none;}
     <!-- 全局隐藏文件上传控件 -->
     <input type="file" id="globalFileInput" accept=".xlsx,.xls" multiple />
     <input type="file" id="folderFileInput" accept=".xlsx,.xls" multiple webkitdirectory directory />
-    <input type="file" id="backupFileInput" accept=".json" />
+    <!-- 2026-09-21：这里原本还有一份 backupFileInput 的副本，与备份弹窗内的控件重复 id，
+         且从未被 JS 引用（接线的是弹窗内那一份），删除以消除重复 id。 -->
     <input type="file" id="recoveryFileInput" accept=".json" style="display:none" />
 
     <!-- 数据丢失恢复提示模态框 -->
@@ -17255,45 +17269,11 @@ async clearAll() {
             }
             
             // 性能优化：节流函数
-            function throttle(func, limit) {
-                let inThrottle = false;
-                return function(...args) {
-                    if (!inThrottle) {
-                        func.apply(this, args);
-                        inThrottle = true;
-                        setTimeout(() => inThrottle = false, limit);
-                    }
-                };
-            }
-            
+
             // 性能优化：requestAnimationFrame 包装
-            function rafSchedule(callback) {
-                let scheduled = false;
-                return function(...args) {
-                    if (!scheduled) {
-                        scheduled = true;
-                        requestAnimationFrame(() => {
-                            scheduled = false;
-                            callback.apply(this, args);
-                        });
-                    }
-                };
-            }
-            
+
             // 性能优化：批量更新 DOM
-            function batchDOMUpdate(updates) {
-                const fragment = document.createDocumentFragment();
-                updates.forEach(update => {
-                    const el = document.getElementById(update.id);
-                    if (el) {
-                        if (update.html !== undefined) el.innerHTML = update.html;
-                        if (update.text !== undefined) el.textContent = update.text;
-                        if (update.value !== undefined) el.value = update.value;
-                        if (update.style) Object.assign(el.style, update.style);
-                    }
-                });
-            }
-            
+
             const chartInitFlags = { perf: false, sales: false, flight: false, team: false };
             function initCharts(module) {
                 if (module && chartInitFlags[module]) return;
@@ -18073,79 +18053,10 @@ async clearAll() {
                     };
 
                     // 辅助函数：构建单行HTML（按Excel标准模板的18列）
-                    const buildStandardRow = (p, month, idx) => {
-                        const rawRec = (p._meta?.rawDataRecords || []).find(r => r.month === month) || {};
-                        const evtRecs = (p._meta?.eventRecords || []).filter(e => e.month === month);
-                        const details = rawRec.details || {};
-                        // 该月五大板块事件扣分（仅来自五大板块sheet）
-                        const evtSafe = evtRecs.filter(e => e.category === 'safe').reduce((s, e) => s + (e.score || 0), 0);
-                        const evtBus = evtRecs.filter(e => e.category === 'bus').reduce((s, e) => s + (e.score || 0), 0);
-                        const evtOp = evtRecs.filter(e => e.category === 'op').reduce((s, e) => s + (e.score || 0), 0);
-                        const evtComp = evtRecs.filter(e => e.category === 'comp').reduce((s, e) => s + (e.score || 0), 0);
-                        const evtWork = evtRecs.filter(e => e.category === 'work').reduce((s, e) => s + (e.score || 0), 0);
-                        // 带%列直接导出系统原始绩效分数（不进行权重计算）
-                        const perfSafe = details.safe || 0;
-                        const perfBus = details.bus || 0;
-                        const perfOp = details.op || 0;
-                        const perfComp = details.comp || 0;
-                        const perfWork = details.work || 0;
-                        // 销售完成率
-                        const personalSale = rawRec.personalSale || 0;
-                        const personalTarget = rawRec.personalTarget || 0;
-                        let salesNum = 0;
-                        if (personalTarget > 0) {
-                            salesNum = Math.round((personalSale / personalTarget) * 100) / 100;
-                        }
-                        const flightHoursVal = rawRec.flightHours || 0;
-                        const monthPerf = rawRec.performance;
-                        return `<tr>
-                            <td>${idx + 1}</td>
-                            <td><span class="cursor-pointer text-primary" onclick="Renderer.showDataTraceBack('${Utils.escape(p.name)}')" title="点击查看数据追溯">${Utils.escape(p.name)}</span></td>
-                            <td>${Utils.escape(p['工号'] || p.id || '-')}</td>
-                            <td>${Utils.escape(p.team || '-')}</td>
-                            <td>${Utils.escape(p.squad || '广州分队')}</td>
-                            <td>${Utils.escape(p.position || '普通乘务员')}</td>
-                            <td>${formatFlightHours(flightHoursVal)}</td>
-                            <td><strong>${monthPerf !== undefined && monthPerf !== null ? Utils.formatNum(monthPerf) : '-'}</strong></td>
-                            <td>${Utils.formatNum(evtSafe, 2)}</td>
-                            <td>${Utils.formatNum(evtBus, 2)}</td>
-                            <td>${Utils.formatNum(evtOp, 2)}</td>
-                            <td>${Utils.formatNum(evtComp, 2)}</td>
-                            <td>${Utils.formatNum(evtWork, 2)}</td>
-                            <td>${Utils.formatNum(perfSafe, 2)}</td>
-                            <td>${Utils.formatNum(perfBus, 2)}</td>
-                            <td>${Utils.formatNum(perfOp, 2)}</td>
-                            <td>${Utils.formatNum(perfComp, 2)}</td>
-                            <td>${Utils.formatNum(perfWork, 2)}</td>
-                            <td>${salesNum.toFixed(2)}</td>
-                        </tr>`;
-                    };
 
                     // 辅助函数：构建标准表头HTML
-                    const buildStandardHead = () => {
-                        return '<tr>' + STANDARD_HEADERS.map(h => `<th>${h}</th>`).join('') + '</tr>';
-                    };
 
                     // 辅助函数：构建筛选后的列表（按姓名/工号/班组过滤）
-                    const filterList = (sourceList) => {
-                        if (!sourceList || sourceList.length === 0) return [];
-                        let filtered = sourceList;
-                        // 班组筛选
-                        const teamFilterVal = document.getElementById('teamFilter')?.value;
-                        if (teamFilterVal) filtered = filtered.filter(p => p.team === teamFilterVal);
-                        // 职位筛选
-                        const positionFilterVal = document.getElementById('positionFilter')?.value;
-                        if (positionFilterVal) filtered = filtered.filter(p => p.position === positionFilterVal);
-                        // 搜索（支持拼音首字母、模糊匹配）
-                        const searchVal = document.getElementById('searchInput')?.value?.trim();
-                        if (searchVal) {
-                            filtered = filtered.filter(p =>
-                                fuzzyMatch(p.name, searchVal) ||
-                                (p['工号'] || '').toString().toLowerCase().includes(searchVal.toLowerCase())
-                            );
-                        }
-                        return filtered;
-                    };
 
                     const summaryMonthBlocks = document.getElementById('summaryMonthBlocks');
                     const summaryTableContainer = document.getElementById('summaryTableContainer');
@@ -24040,61 +23951,16 @@ async clearAll() {
             /**
              * 更新指定行的考核分和综合得分单元格
              */
-            function _updateRowCells(idx) {
-                if (!_gradeTrackAllData || !_gradeTrackAllData[idx]) return;
-                const p = _gradeTrackAllData[idx];
-                const row = document.querySelector(`tr[data-idx="${idx}"]`);
-                if (!row) return;
-                const safeCell = row.querySelector('.cell-safe-score');
-                const serviceCell = row.querySelector('.cell-service-score');
-                const extraCell = row.querySelector('.cell-extra-score');
-                const flightCell = row.querySelector('.cell-flight-bonus');
-                const totalCell = row.querySelector('.cell-total-score');
-                if (safeCell) safeCell.textContent = Utils.formatNum(p.safeScore, 1);
-                if (serviceCell) serviceCell.textContent = Utils.formatNum(p.serviceScore, 1);
-                if (extraCell) extraCell.textContent = Utils.formatNum(p.annualExtraScore, 1);
-                if (flightCell) flightCell.textContent = Utils.formatNum(p.flightTimeBonus, 2);
-                if (totalCell) totalCell.textContent = Utils.formatNum(p.totalScore, 2);
-            }
 
             /**
              * 输入框值变化时的实时联动处理
              */
-            function _onScoreInputChange(idx, field, value) {
-                if (!_gradeTrackAllData || !_gradeTrackAllData[idx]) return;
-                const p = _gradeTrackAllData[idx];
-                const numVal = parseFloat(value) || 0;
-                p[field] = numVal;
-
-                // 重新计算
-                _recalcPersonTotal(p);
-
-                // 全部人员重新排名后更新档位
-                _recalcAllGrades();
-                // 实时重新排序渲染
-                _renderGradeTrackFiltered();
-                // 自动保存
-                _saveGradeTrackData();
-            }
 
             /**
              * 上移/下移排名（自由编辑排名顺序）
              * @param {number} idx - _gradeTrackAllData中的索引
              * @param {number} direction - -1上移, 1下移
              */
-            function _moveRank(idx, direction) {
-                if (!_gradeTrackAllData || idx < 0 || idx >= _gradeTrackAllData.length) return;
-                const targetIdx = idx + direction;
-                if (targetIdx < 0 || targetIdx >= _gradeTrackAllData.length) return;
-                // 交换位置
-                const temp = _gradeTrackAllData[idx];
-                _gradeTrackAllData[idx] = _gradeTrackAllData[targetIdx];
-                _gradeTrackAllData[targetIdx] = temp;
-                // 重新渲染
-                _renderGradeTrackFiltered();
-                // 自动保存
-                _saveGradeTrackData();
-            }
 
             /**
              * 保存档位追踪数据到IndexedDB
@@ -25888,8 +25754,7 @@ async clearAll() {
                 renderThresholdsPanel(result) {
                     if (!result) return '<div class="text-muted small">无阈值数据</div>';
                     const { thresholds, teamThresholds, sampleSize, monthsCovered, computedAt, stats } = result;
-                    const fmtPct = (n, total) => total ? (n / total * 100).toFixed(0) + '%' : '0%';
-                    return `
+ return `
                         <div class="card border-0 shadow-sm">
                             <div class="card-header bg-white d-flex justify-content-between align-items-center">
                                 <strong><i class="bi bi-sliders2 me-1 text-primary"></i>当前阈值依据（基于已上传数据动态计算）</strong>
@@ -26379,7 +26244,7 @@ async clearAll() {
 
                     const sevColor = (s) => ({ critical: '#dc2626', high: '#ea580c', medium: '#ca8a04', low: '#2563eb' })[s] || '#6b7280';
                     const trendIcon = (t) => ({ up: 'arrow-up', down: 'arrow-down', flat: 'arrow-right' })[t] || 'arrow-right';
-                    const trendCls = (t) => ({ up: 'text-danger', down: 'text-success', flat: 'text-muted' })[t] || 'text-muted';
+[t] || 'text-muted';
 
                     // ========== 整体趋势卡 ==========
                     const trendCard = `
@@ -27628,13 +27493,9 @@ async clearAll() {
                 resetImportProgress();
                 progressModal.show();
                 importStartTime = Date.now();
+                /* __REVIEW_FIX_PERF_20260921__ 重入先清旧计时器，避免叠加 */
+                if (importTimerInterval) { clearInterval(importTimerInterval); importTimerInterval = null; }
                 importTimerInterval = setInterval(updateImportTimer, 1000);
-                /* v3：启动真倒计时引擎 */
-                if (window.ImportTimer) window.ImportTimer.start();
-                /* v3：启动真倒计时引擎 */
-                if (window.ImportTimer) window.ImportTimer.start();
-                /* v3：启动真倒计时引擎 */
-                if (window.ImportTimer) window.ImportTimer.start();
                 /* v3：启动真倒计时引擎 */
                 if (window.ImportTimer) window.ImportTimer.start();
 
@@ -27771,106 +27632,6 @@ async clearAll() {
 
             // ========== 导入数据预览 ==========
             let _previewResolve = null;
-            async function showImportPreview(file, sheets, sheetNames, detectedInfo) {
-                return new Promise((resolve) => {
-                    _previewResolve = resolve;
-                    const modal = new bootstrap.Modal(document.getElementById('importPreviewModal'));
-                    const modalEl = document.getElementById('importPreviewModal');
-
-                    // 基本信息
-                    document.getElementById('previewFileName').textContent = file.name;
-                    const sizeKB = (file.size / 1024).toFixed(1);
-                    document.getElementById('previewFileSize').textContent = sizeKB + ' KB';
-                    document.getElementById('previewSheetCount').textContent = sheetNames.length;
-                    document.getElementById('previewDetectedMonth').textContent = detectedInfo.month ? `${detectedInfo.year}-${String(detectedInfo.month).padStart(2,'0')}` : '自动识别';
-                    
-                    let totalRowCount = 0;
-                    sheetNames.forEach(n => { if (sheets[n]) totalRowCount += sheets[n].length; });
-                    document.getElementById('previewTotalRows').textContent = totalRowCount;
-
-                    // 生成 sheet 标签页
-                    const tabsContainer = document.getElementById('importPreviewTabs');
-                    tabsContainer.innerHTML = sheetNames.map((n, i) => {
-                        const isActive = i === 0;
-                        return `<span class="preview-tab" data-sheet="${i}" style="cursor:pointer;padding:8px 16px;font-size:0.85rem;border-bottom:2px solid ${isActive ? '#0d6efd' : 'transparent'};color:${isActive ? '#0d6efd' : '#6c757d'};font-weight:${isActive ? '600' : '400'};white-space:nowrap;">
-                            ${n} <span class="badge bg-light text-dark ms-1">${sheets[n]?.length || 0}</span>
-                        </span>`;
-                    }).join('');
-
-                    // 渲染第一个 sheet
-                    const renderSheet = (idx) => {
-                        const name = sheetNames[idx];
-                        const rows = sheets[name] || [];
-                        const head = document.getElementById('importPreviewHead');
-                        const body = document.getElementById('importPreviewBody');
-                        if (rows.length === 0) {
-                            head.innerHTML = '<tr><th>空工作表</th></tr>';
-                            body.innerHTML = '<tr><td class="text-muted text-center">无数据</td></tr>';
-                            document.getElementById('previewStats').textContent = `工作表 "${name}" 无数据`;
-                            return;
-                        }
-                        const headerRow = rows[0] || [];
-                        const dataRows = rows.slice(1, 21); // 最多显示20行
-                        head.innerHTML = '<tr>' + headerRow.map(h => `<th>${h || ''}</th>`).join('') + '</tr>';
-                        body.innerHTML = dataRows.map(r =>
-                            '<tr>' + headerRow.map((_, ci) => `<td>${r[ci] !== undefined && r[ci] !== null ? r[ci] : ''}</td>`).join('') + '</tr>'
-                        ).join('');
-                        document.getElementById('previewStats').textContent = `工作表 "${name}" 共 ${rows.length} 行，预览前 ${dataRows.length} 行`;
-                    };
-
-                    // 绑定标签切换
-                    tabsContainer.querySelectorAll('.preview-tab').forEach(tab => {
-                        tab.addEventListener('click', () => {
-                            tabsContainer.querySelectorAll('.preview-tab').forEach(t => {
-                                t.style.borderBottomColor = 'transparent';
-                                t.style.color = '#6c757d';
-                                t.style.fontWeight = '400';
-                            });
-                            tab.style.borderBottomColor = '#0d6efd';
-                            tab.style.color = '#0d6efd';
-                            tab.style.fontWeight = '600';
-                            renderSheet(parseInt(tab.dataset.sheet));
-                        });
-                    });
-
-                    // 初始渲染第一个 sheet
-                    if (sheetNames.length > 0) renderSheet(0);
-
-                    // 检查预警
-                    const warnings = [];
-                    if (detectedInfo.month === null) warnings.push('⚠️ 未能自动识别月份，请手动确认');
-                    sheetNames.forEach(n => {
-                        const rows = sheets[n] || [];
-                        if (rows.length > 200) warnings.push(`ℹ️ 工作表 "${n}" 数据行数较多 (${rows.length} 行)`);
-                        if (rows.length < 2) warnings.push(`⚠️ 工作表 "${n}" 似乎为空`);
-                    });
-                    const warningsEl = document.getElementById('previewWarnings');
-                    if (warnings.length > 0) {
-                        warningsEl.style.display = 'block';
-                        warningsEl.innerHTML = warnings.map(w => `<div class="small ${w.includes('⚠️') ? 'text-warning' : 'text-info'}"><i class="bi bi-info-circle me-1"></i>${w}</div>`).join('');
-                    } else {
-                        warningsEl.style.display = 'none';
-                    }
-
-                    // 确认/取消
-                    const confirmBtn = document.getElementById('confirmImportBtn');
-                    const cancelBtn = document.getElementById('previewCancelBtn');
-                    const onConfirm = () => { modal.hide(); cleanup(); resolve(true); };
-                    const onCancel = () => { cleanup(); resolve(false); };
-                    const onHide = () => { cleanup(); if (_previewResolve) { _previewResolve(false); _previewResolve = null; } };
-                    const cleanup = () => {
-                        confirmBtn.removeEventListener('click', onConfirm);
-                        cancelBtn.removeEventListener('click', onCancel);
-                        modalEl.removeEventListener('hidden.bs.modal', onHide);
-                        _previewResolve = null;
-                    };
-                    confirmBtn.addEventListener('click', onConfirm);
-                    cancelBtn.addEventListener('click', onCancel);
-                    modalEl.addEventListener('hidden.bs.modal', onHide);
-
-                    modal.show();
-                });
-            }
 
             async function processFile(e) {
                 const _perfFileStart = performance.now();
@@ -27899,13 +27660,9 @@ async clearAll() {
                 resetImportProgress();
                 progressModal.show();
                 importStartTime = Date.now();
+                /* __REVIEW_FIX_PERF_20260921__ 重入先清旧计时器，避免叠加 */
+                if (importTimerInterval) { clearInterval(importTimerInterval); importTimerInterval = null; }
                 importTimerInterval = setInterval(updateImportTimer, 1000);
-                /* v3：启动真倒计时引擎 */
-                if (window.ImportTimer) window.ImportTimer.start();
-                /* v3：启动真倒计时引擎 */
-                if (window.ImportTimer) window.ImportTimer.start();
-                /* v3：启动真倒计时引擎 */
-                if (window.ImportTimer) window.ImportTimer.start();
                 /* v3：启动真倒计时引擎 */
                 if (window.ImportTimer) window.ImportTimer.start();
 
@@ -28117,12 +27874,6 @@ async clearAll() {
                     
                     importStartTime = Date.now();
                     importTimerInterval = setInterval(updateImportTimer, 1000);
-                /* v3：启动真倒计时引擎 */
-                if (window.ImportTimer) window.ImportTimer.start();
-                /* v3：启动真倒计时引擎 */
-                if (window.ImportTimer) window.ImportTimer.start();
-                /* v3：启动真倒计时引擎 */
-                if (window.ImportTimer) window.ImportTimer.start();
                 /* v3：启动真倒计时引擎 */
                 if (window.ImportTimer) window.ImportTimer.start();
                 }
@@ -28748,7 +28499,7 @@ async clearAll() {
                 if (period === 'custom') {
                     document.querySelectorAll('#customMonthCheckboxes input:checked').forEach(cb => customMonths.push(cb.value));
                     if (customMonths.length === 0) {
-                        alert('请至少选择一个月份'); return;
+                        showNotification('请至少选择一个月份', 'warning'); return;
                     }
                 }
                 // 关闭选择对话框
@@ -31045,7 +30796,10 @@ async clearAll() {
                         const name = document.getElementById('gradeTrackNameSelect')?.value;
                         if (!name) { showNotification('未找到人员信息', 'warning'); return; }
                         const historyKey = `scoreOverrideHistory_${name}`;
-                        const history = JSON.parse(localStorage.getItem(historyKey) || '[]');
+                        let history = [];
+                        try { history = JSON.parse(localStorage.getItem(historyKey) || '[]'); }
+                        catch (err) { console.warn('[修改历史] 本地数据损坏，已按空处理:', historyKey); }
+                        if (!Array.isArray(history)) history = [];
                         let html = `<div class="modal-header"><h5 class="modal-title"><i class="bi bi-clock-history me-2"></i>${Utils.escape(name)} - 分数修改记录</h5><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div><div class="modal-body">`;
                         if (history.length === 0) {
                             html += '<div class="text-center text-muted py-3">暂无修改记录</div>';
@@ -31374,7 +31128,7 @@ async clearAll() {
                         document.getElementById('summaryQuarterCol').style.display = 'none';
                         document.getElementById('summaryYearCol').style.display = 'none';
                         document.getElementById('summarySAYearCol').style.display = 'none';
-                        populateMonthCheckboxes('customMonthCheckboxes', AppState.customMonths);
+                        populateMonthCheckboxes('summaryCustomMonthCheckboxes', AppState.customMonths);
                     } else if (e.target.value === 'quarter') {
                         document.getElementById('customMonthSelector').style.display = 'none';
                         document.getElementById('summaryMonthCol').style.display = 'none';
@@ -31407,7 +31161,7 @@ async clearAll() {
                     Renderer.summary();
                 });
                 document.getElementById('applyCustomMonths')?.addEventListener('click', function() {
-                    const checked = Array.from(document.querySelectorAll('#customMonthCheckboxes .month-checkbox:checked')).map(cb => cb.value);
+                    const checked = Array.from(document.querySelectorAll('#summaryCustomMonthCheckboxes .month-checkbox:checked')).map(cb => cb.value);
                     AppState.customMonths = checked;
                     Renderer.summary();
                 });
@@ -32786,7 +32540,7 @@ async clearAll() {
 
             /* 手动触发命令：window.runPreOct2024Cleanup() */
             window.runPreOct2024Cleanup = async function() {
-                if (typeof Storage === 'undefined') { alert('Storage 未就绪'); return null; }
+                if (typeof Storage === 'undefined') { showNotification('Storage 未就绪', 'danger'); return null; }
                 console.log('[Manual] 开始清理 2024-10 之前数据...');
                 const result = await Storage.backupAndCleanupPreOct2024();
                 console.table({ '删除数': result.deleted.length, '保留数': result.kept.length, '备份文件': result.backupName || 'N/A', '错误数': result.errors.length });

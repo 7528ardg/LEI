@@ -52,7 +52,7 @@
 
 * 数据包存本机 `packs_index` + `pack:{packId}`，**不随个人备份迁移**；旧版覆盖层（`kb_overlay_v1`）首次进入数据包中心自动迁移
 
-* **在线发布（M2）**：App 启动时自动拉取 `packs/manifest.json`（<<https://7528ardg.github.io/LEI/packs/manifest.json）比对版本，发现新包顶栏出现「📦> 新数据包」→ 一键安装自动生效；发布流程与格式见 `packs/README.md`
+* **在线发布（M2）**：数据包引擎与 `checkPacksUpdate()` 检索链路保留（供库管理「📦 数据包」中心与单测复用）；**顶栏「📦 新数据包」入口与开机自动轮询已于 2026-09-19 下线**——App 启动时不再自动拉取 `packs/manifest.json`；需要更新请到库管理「📦 数据包」tab 导入 JSON 包；发布流程与格式见 `packs/README.md`
 
   * **大陆网络友好**：manifest/数据包请求均带超时（不再无限等待），源站 github.io 不可达时自动回源 jsdelivr 镜像（<<https://cdn.jsdelivr.net/gh/7528ardg/LEI@main/），下载仍走> sha256 校验；manifest 本地缓存 1 小时减少重复拉取；下载失败提示"请检查网络后重试"而非"联系管理员"
 

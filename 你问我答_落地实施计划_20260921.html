@@ -1,0 +1,350 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>你问我答 · 增补功能落地实施计划（2026-09-21）</title>
+<style>
+  *{box-sizing:border-box}
+  body{margin:0;background:#f5f7f6;color:#1b2320;
+       font:15px/1.75 -apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Microsoft YaHei",sans-serif}
+  .wrap{max-width:1120px;margin:0 auto;padding:28px 20px 72px}
+  header.hd{background:linear-gradient(135deg,#00A650 0%,#008a42 100%);color:#fff;
+       border-radius:18px;padding:26px 28px;box-shadow:0 8px 26px rgba(0,166,80,.22)}
+  header.hd h1{margin:0 0 8px;font-size:25px;letter-spacing:.3px}
+  header.hd p{margin:0;opacity:.92;font-size:13.5px}
+  .stats{display:flex;flex-wrap:wrap;gap:10px;margin:16px 0 4px}
+  .stat{background:rgba(255,255,255,.16);border:1px solid rgba(255,255,255,.3);
+        border-radius:10px;padding:7px 13px;font-size:12.5px}
+  .stat b{font-size:16px;margin-right:4px}
+  h2{font-size:19px;margin:38px 0 6px;padding-left:12px;border-left:4px solid #00A650}
+  h2 .sub{font-size:13px;font-weight:400;color:#5d6b64;margin-left:8px}
+  h3{font-size:16px;margin:26px 0 4px;color:#134a2e}
+  .note{background:#fff;border:1px solid #dfe6e2;border-radius:12px;padding:14px 18px;
+        font-size:13.5px;color:#42504a}
+  .note b{color:#0a7d3f}
+  .warn{background:#fffaf0;border-color:#f0dcb0}
+  .warn b{color:#9a6100}
+  .stop{background:#fdf1f1;border-color:#f3c9c9}
+  .stop b{color:#a52a2a}
+  ol.ins{margin:10px 0 0;padding-left:22px}
+  ol.ins li{margin:7px 0}
+  ul.tight{margin:6px 0 0;padding-left:20px}
+  ul.tight li{margin:4px 0}
+  table{width:100%;border-collapse:collapse;background:#fff;border-radius:12px;overflow:hidden;
+        box-shadow:0 1px 3px rgba(24,40,34,.07);margin-top:12px;font-size:13px}
+  th,td{padding:9px 11px;text-align:left;vertical-align:top;border-bottom:1px solid #edf1ef}
+  th{background:#eef4f0;font-weight:600;font-size:12.5px;color:#2c3a34}
+  tr:last-child td{border-bottom:0}
+  td.id{font-weight:700;color:#00893f;white-space:nowrap;font-variant-numeric:tabular-nums}
+  td.nw{white-space:nowrap}
+  code{background:#eef4f0;color:#0a7d3f;padding:1px 5px;border-radius:5px;
+       font:12.5px/1.5 ui-monospace,Consolas,monospace}
+  .b{display:inline-block;padding:2px 8px;border-radius:20px;font-size:11.5px;font-weight:600;white-space:nowrap}
+  .b-now{background:#e4f6ec;color:#0a7d3f;border:1px solid #b9e3cb}
+  .b-b2{background:#eaf3fd;color:#1462b8;border:1px solid #c2ddf7}
+  .b-b3{background:#f2f0fa;color:#5b4bb0;border:1px solid #d8d2f2}
+  .b-no{background:#fdecec;color:#a52a2a;border:1px solid #f5c6c6}
+  .b-s{background:#fff4e0;color:#9a6100;border:1px solid #f2d9a6}
+  .hot{color:#c0392b;font-weight:700}
+  .g{color:#0a7d3f;font-weight:700}
+  .r{color:#a52a2a;font-weight:700}
+  .m{color:#9a6100;font-weight:700}
+  .src{font-size:11.5px;color:#7b8781}
+  .pcard{background:#fff;border:1px solid #dfe6e2;border-left:4px solid #00A650;
+         border-radius:12px;padding:12px 16px;margin:10px 0;font-size:13.5px}
+  .pcard b{color:#0a7d3f}
+  .ver{background:#fff;border:1px solid #dfe6e2;border-radius:12px;padding:12px 16px;margin:10px 0;font-size:13.5px}
+  .ver b{color:#0a7d3f}
+  .ver .q{color:#a52a2a;font-weight:700}
+  footer{margin-top:44px;padding-top:16px;border-top:1px solid #dfe6e2;
+         font-size:12.5px;color:#7b8781;text-align:center}
+  .chk{font-family:ui-monospace,Consolas,monospace;font-size:12.5px}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<header class="hd">
+  <h1>你问我答 · 增补功能落地实施计划</h1>
+  <p>把竞品调研的 13 项建议翻译成「能直接开工」的批次清单 · 基于 qa.html 源码逐处核实 · 2026-09-21</p>
+  <div class="stats">
+    <span class="stat"><b>3</b>处调研结论需勘误</span>
+    <span class="stat"><b>15</b>项排入计划</span>
+    <span class="stat"><b>11</b>项纯本地零外发</span>
+    <span class="stat"><b>3</b>批 + 1 个技术底座</span>
+    <span class="stat"><b>4</b>项明确不做</span>
+  </div>
+</header>
+
+<h2>零、先说三处勘误 <span class="sub">竞品报告是对着外部写的；这一份是对着源码写的，结论有出入</span></h2>
+<div class="note warn">
+  我把竞品报告里的每一项都拿去源码里核对了一遍，<b>有 3 项判断需要修正</b>——如果直接按上一份报告排期会白做。
+</div>
+
+<div class="ver">
+  <b>勘误 1 · M1 置信度徽标「待做」→ 实际已完成</b><br>
+  源码 <code>qa.html:11507</code> 已有完整实现（<code>__QA_ANSWER_TOOLS_20260921__</code> 内），三档文案齐全，低置信原文为：<br>
+  <span class="src">「当前知识库没有直接命中，下面是相近条目或引导。建议换个关键词，或切换到对应库再问。」</span><br>
+  <span class="g">→ 所以「查无依据显式化」这件事<span class="hot">基本已经做到了</span>，剩下的是「低置信时主动告诉用户该去哪个库」这一层引导。M1 降级为「收尾项」，不再占用一个 P0 名额。</span>
+</div>
+
+<div class="ver">
+  <b>勘误 2 · M3 原文定位跳转「中成本可做」→ 实际做不到，必须降级</b><br>
+  · <code>manual.html</code>（163 KB）<span class="q">没有任何章节级 DOM 锚点</span>——它的 <code>id</code> 全是 <code>kw</code> / <code>rules</code> / <code>view-scores</code> 这类 UI 元素，不是手册正文段落。它是<b>一个查询界面，不是手册全文</b>。<br>
+  · 它只读一个 URL 参数 <code>?from=</code>，<span class="q">不支持 <code>?kw=</code> 预填搜索词</span>。<br>
+  · 现有 <code>jumpTo()</code>（<code>qa.html:2748</code>）走 <code>postMessage({type:'spring-switch', module})</code>，<b>只传模块名、不传参数</b>；壳层 <code>index.html</code> 只认这一个字段。<br>
+  <span class="g">→ 拆成两案：<b>案 A（批 2，纯 qa 侧，小成本）</b>点出处展开「出处详情小卡」；<b>案 B（批 3，跨 3 文件，含壳层）</b>才是一键带词跳到手册查询页。原报告把它写成一次改动，成本低估了。</span>
+</div>
+
+<div class="ver">
+  <b>勘误 3 · M4 版本时效「需给条目逐条建版本映射」→ 不需要，成本大幅低于预估</b><br>
+  实测 <code>src</code> 字段是<b>章节号</b>而非文件名，例如 <code>管理手册 4.35 酒精测试管理规定</code> / <code>CCM 7.10.4</code> / <code>手册 6.7.9.3.4</code>——也就是<b>已经标到章节了</b>。<br>
+  更关键的是：CBT 题库里本来就带版本考题，例如 <code>现行有效的《客舱乘务员手册》版本号为 01/10</code>，解析里写「<b>现行有效版本为 01/10，修订日期 2026-03-02</b>」。<br>
+  <span class="g">→ 说明版本信息是<b>库级</b>的、不是条目级的。做一张<b>六库版本注册表</b>就够了，不必给几千条目逐条打标。这一项从「中-高成本」降到<b>低成本</b>，可以提到批 1。</span>
+</div>
+
+<div class="pcard">
+  <b>顺带捡到一个质量问题（不在原清单里）</b>：<code>QA_QUIZ_POOL</code> 的解析字段 <code>e</code> 里有大量 OCR 残留，形如
+  <code>========== PAGE 41 ==========</code>。这些残串会原样显示在「❌ 正确答案…」的解析里。
+  清洗成本极低（一次正则 + 幂等补丁），建议并入批 1 顺带做掉，编号 <b>Q1</b>。
+</div>
+
+<h2>一、技术底座 <span class="sub">批 0 · 先建一次，后面所有批次都复用它</span></h2>
+
+<h3>1.1 新增补丁块与命名规范</h3>
+<table>
+<tr><th class="nw">补丁文件</th><th class="nw">块名（守卫串）</th><th>职责</th><th class="nw">批次</th></tr>
+<tr>
+  <td><code>_apply_qa_wrongbook_20260921.py</code></td>
+  <td><code>__QA_WRONGBOOK_20260921__</code></td>
+  <td>包裹 <code>qaGradeQuiz</code> 捕获错题快照；维护 <code>qa_wrong_v1</code>；暴露 <code>window.QAWB</code>（增/删/查/排期）</td>
+  <td class="nw"><span class="b b-now">批 1</span></td>
+</tr>
+<tr>
+  <td><code>_apply_qa_kbver_20260921.py</code></td>
+  <td><code>__QA_KBVER_20260921__</code></td>
+  <td>六库版本注册表 <code>QA_KBVER</code>；答案来源行追加版本；换版条幅</td>
+  <td class="nw"><span class="b b-now">批 1</span></td>
+</tr>
+<tr>
+  <td><code>_apply_qa_misslog_20260921.py</code></td>
+  <td><code>__QA_MISSLOG_20260921__</code></td>
+  <td>零命中 / 低置信问法留痕 <code>qa_miss_q_v1</code>；缺口 Top 列表</td>
+  <td class="nw"><span class="b b-now">批 1</span></td>
+</tr>
+<tr>
+  <td><code>_apply_qa_examtool_20260921.py</code></td>
+  <td><code>__QA_EXAMTOOL_20260921__</code></td>
+  <td>整卷模式 + 错题重练 + 复习排期 + 章节热力</td>
+  <td class="nw"><span class="b b-b2">批 2</span></td>
+</tr>
+<tr>
+  <td colspan="4" class="src">
+    <b>已存在的补丁，只做小幅扩展（不新建块）：</b>
+    <code>_apply_qa_mypanel_20260921.py</code>（<code>__QA_MYPANEL_20260921__</code>）→ 面板加 <code>wrong</code> / <code>gap</code> 两个 tab；
+    <code>_apply_qa_answer_tools_20260921.py</code>（<code>__QA_ANSWER_TOOLS_20260921__</code>）→ 出处徽标改为可点、低置信加引导行。
+    两者都是幂等补丁，<b>改完必须重跑对应 patcher 并确认守卫串仍生效</b>。
+  </td>
+</tr>
+</table>
+
+<h3>1.2 新增本地存储键 <span class="src">现有 15 个键（含变量式 STAR/CONF），新增 5 个</span></h3>
+<table>
+<tr><th class="nw">键名</th><th class="nw">上限</th><th>结构</th><th>说明</th></tr>
+<tr><td><code>qa_wrong_v1</code></td><td class="nw">300</td><td class="chk">[{h,c,q,o,a,e,at,n,due}]</td><td>错题<b>存全量快照</b>（含题干/选项/答案/解析/章节），不靠回查题库——因为 <code>QA_QUIZ_POOL</code> 无稳定 id，只有 <code>c+q</code>，回查脆弱</td></tr>
+<tr><td><code>qa_wrong_done_v1</code></td><td class="nw">300</td><td class="chk">[{h,at}]</td><td>已重练通过的题（保留记录便于统计，不参与待复习）</td></tr>
+<tr><td><code>qa_kbver_seen_v1</code></td><td class="nw">—</td><td class="chk">{cbm:'01/10', mgm:'01.14', …}</td><td>上次已见的六库版本号，用于换版提示</td></tr>
+<tr><td><code>qa_miss_q_v1</code></td><td class="nw">300</td><td class="chk">[{k,o,pool,at,n}]</td><td>零命中/低置信问法的归一化问法 + 次数</td></tr>
+<tr><td><code>qa_exam_rec_v1</code></td><td class="nw">50</td><td class="chk">[{at,score,correct,total,mode,byChapter}]</td><td>整卷成绩（含分章节正确率）。<b>与 <code>qa_train_records_v1</code> 并存</b>，不动旧格式</td></tr>
+</table>
+<div class="note" style="margin-top:12px">
+  <b>为什么整卷成绩要新开一个键</b>：<code>qa_train_records_v1</code> 每条只有 <code>{at, correct, total, score}</code>，现有成绩趋势曲线依赖这个形状。
+  往里塞 <code>mode</code> / <code>byChapter</code> 会让<b>旧记录与新记录形状不一致</b>，趋势曲线和已有断言都可能错。
+  新键更安全，代价只是「趋势曲线只反映随堂练习」。若之后要让整卷也进趋势，再单开一次迁移。
+</div>
+
+<h3>1.3 复用的现成能力 <span class="src">不要重造</span></h3>
+<ul class="tight">
+  <li><code>window.QAAT</code>：toast、<code>stripTags</code>、复制（<code>fallbackCopy</code>）—— 批 2/3 的分享、复制、提示全走它</li>
+  <li><code>__QA_MYPANEL_20260921__</code> 的 tab 机制（<code>var tab='star'</code> + <code>.mp-tab</code>）—— 新面板一律加成 tab，不新开弹层</li>
+  <li><code>kbStrong(hits)</code> 与 <code>hits[0].s</code> —— 已有包装捕获了 <code>last = {top,n,src,pool}</code>，置信度/出处详情/缺口记录共用这一份数据，<b>不要再包一层</b></li>
+  <li><code>qaTrainQuizHtml</code> 渲染路径 + <code>qaGradeQuiz</code> 判分 —— 错题重练与整卷模式都复用它，只是传参与后续处理不同</li>
+  <li><code>setQaSource(pool)</code> / <code>jumpTo(mod)</code> —— 切库引导与跨模块跳转</li>
+</ul>
+
+<h2>二、批 1 · 五项 <span class="sub">纯本地 · 互不依赖 · 每项都能单独上线</span></h2>
+<table>
+<tr><th class="nw">编号</th><th class="nw">功能</th><th>具体做法（落点已核到行）</th><th class="nw">依赖</th><th class="nw">改动面</th></tr>
+<tr>
+  <td class="id">W1</td><td class="nw"><b>错题本 · 数据层</b></td>
+  <td>包裹 <code>qaGradeQuiz</code>（<code>qa.html:9652</code>）：它已经遍历 <code>.tq-item</code> 并知道 <code>data-ans</code>，但<b>拿不到题干与选项</b>——所以同时包裹 <code>qaTrainQuizHtml</code>（<code>:9623</code>）用<b>入参 <code>questions</code> 数组</b>把 <code>c/q/o/a/e</code> 按 <code>data-i</code> 对齐缓存到本次会话的 <code>qaQuizSnap</code>，判分时按 <code>data-i</code> 取回写库。<br>哈希 <code>h = hash(c+'|'+q)</code> 去重，重复答错 <code>n+1</code></td>
+  <td class="nw">无</td>
+  <td class="nw"><span class="b b-now">小-中</span></td>
+</tr>
+<tr>
+  <td class="id">W2</td><td class="nw"><b>错题本 · 面板</b></td>
+  <td>扩展 <code>_apply_qa_mypanel_20260921.py</code> 加 <code>wrong</code> tab：按章节分组列出错题、标错误次数、单题「重练」、两段式清空。<br>重练走<b>现有渲染路径</b>：把错题快照拼成 <code>questions</code> 数组直接调 <code>qaTrainQuizHtml</code>，不新写题卡模板</td>
+  <td class="nw">W1</td>
+  <td class="nw"><span class="b b-now">中</span></td>
+</tr>
+<tr>
+  <td class="id">V1</td><td class="nw"><b>版本时效标注</b> <span class="hot">★</span></td>
+  <td>建六库注册表（手册 01/10 修订 2026-03-02 / 管理 01.14 / 服务规范 00.07 / 日常 / 大撤 / CBT）；<br>在答案「🔎 来源：xx库」那一行追加版本号（该行由 <code>kbReply</code> 生成，用<b>外层包装 + 字符串后处理</b>注入，不改原实现）；<br>进页面比较 <code>qa_kbver_seen_v1</code>，版本变化时出条幅「管理手册已更新至 01.15，建议重新核对相关条目」</td>
+  <td class="nw">无</td>
+  <td class="nw"><span class="b b-now">小</span></td>
+</tr>
+<tr>
+  <td class="id">S1</td><td class="nw"><b>低置信主动引导</b>（M1 收尾）</td>
+  <td>置信度=低 或 零命中时，答案顶部统一一行引导：「这题更像是关于〈管理手册 · 考勤〉，要不要切到那个库再问一次？」+ 一键 <code>setQaSource</code>；<br>低置信文案与未命中卡<b>统一口径</b>（现在两处措辞不同）</td>
+  <td class="nw">无</td>
+  <td class="nw"><span class="b b-now">小</span></td>
+</tr>
+<tr>
+  <td class="id">G1</td><td class="nw"><b>知识缺口留痕</b></td>
+  <td>在 <code>kbReply</code> 的零命中/低置信分支写 <code>qa_miss_q_v1</code>（归一化问法 + 当前库 + 次数）；<br>面板加 <code>gap</code> tab 只读展示「最常问但库里没有的 Top 10」</td>
+  <td class="nw">W2（共用面板）</td>
+  <td class="nw"><span class="b b-now">小-中</span></td>
+</tr>
+<tr>
+  <td class="id">Q1</td><td class="nw"><b>解析 OCR 残串清洗</b> <span class="src">顺带</span></td>
+  <td>正则清掉 <code>e</code> 字段里的 <code>========== PAGE N ==========</code> 等残串（渲染前处理，不改题库源）</td>
+  <td class="nw">无</td>
+  <td class="nw"><span class="b b-now">极小</span></td>
+</tr>
+</table>
+
+<h3>批 1 验收断言 <span class="src">可直接写成 e2e 检查项</span></h3>
+<ul class="tight">
+  <li><b>W1/W2</b>：连答 3 题故意答错 → 面板「错题」出现 3 条，含题干与解析；同一题再错 → 计数变 2、不重复新增；重练答对 → 移出待复习</li>
+  <li><b>V1</b>：任意答案的「来源」行出现版本号；把 <code>qa_kbver_seen_v1</code> 手动改成旧版本再刷新 → 出现换版条幅，点关闭后不再重复弹</li>
+  <li><b>S1</b>：问一个明显不在库里的问题 → 出现「无明确依据 + 建议切库」引导，且<b>不出现强命中样式</b>（沿用现有置信度=低 的判定，不新增判据）</li>
+  <li><b>G1</b>：连问 3 次库里没有的问法 → <code>qa_miss_q_v1</code> 出现 3 条、重复问法合并计数</li>
+  <li><b>Q1</b>：CBT 练习交卷 → 解析里不再出现 <code>PAGE 41</code> 之类残串</li>
+</ul>
+
+<h2>三、批 2 · 六项 <span class="sub">依赖批 1 的数据，成对上线</span></h2>
+<table>
+<tr><th class="nw">编号</th><th class="nw">功能</th><th>具体做法</th><th class="nw">依赖</th><th class="nw">改动面</th></tr>
+<tr>
+  <td class="id">R1</td><td class="nw"><b>间隔重复复习</b></td>
+  <td>错题带 <code>due</code> 排期（1/3/7/15 天），进页面算到期数 → 首屏提示「今日待复习 N 题」；重练路径复用 W2</td>
+  <td class="nw">W1·W2</td><td class="nw"><span class="b b-b2">小-中</span></td>
+</tr>
+<tr>
+  <td class="id">R2</td><td class="nw"><b>整卷模拟考</b></td>
+  <td><code>qaTrainQuizHtml(questions, chapter, count, mode)</code> <b>新增第 4 个形参</b>（<code>mode='exam'</code>）——原逻辑分支一行不动，只在 <code>exam</code> 时隐藏逐题解析、交卷后统一出分；<br>成绩写新键 <code>qa_exam_rec_v1</code>，含分章节正确率</td>
+  <td class="nw">无</td><td class="nw"><span class="b b-b2">中</span></td>
+</tr>
+<tr>
+  <td class="id">R3</td><td class="nw"><b>章节掌握度热力图</b></td>
+  <td>读 <code>qa_wrong_v1</code> 按 <code>c</code> 聚合十章错题密度 → 热力条；挂面板 <code>wrong</code> tab 顶部</td>
+  <td class="nw">W1</td><td class="nw"><span class="b b-b2">小</span></td>
+</tr>
+<tr>
+  <td class="id">R4</td><td class="nw"><b>出处详情小卡</b>（M3 案 A）</td>
+  <td>出处徽标改可点 → 原地展开小卡：库名 / 章节号 / 命中总分 / 命中词 / 相近条目数。<b>数据全部来自已有包装捕获的 <code>last</code></b>，零新查询；<br>卡内给「去这个库再问」按钮</td>
+  <td class="nw">V1（同行展示）</td><td class="nw"><span class="b b-b2">小</span></td>
+</tr>
+<tr>
+  <td class="id">R5</td><td class="nw"><b>特情记录草稿助手</b> <span class="b b-s">新增</span></td>
+  <td>固定模板（时间 / 航班 · 站位 / 现象 / 处置动作 / 结果 / 涉及旅客 / 见证人）+ 分步引导填写 → 本地拼成结构化文本 → <b>走 <code>QAAT</code> 复制</b>。<br><b>不做自由生成</b>，纯模板拼接，零外发</td>
+  <td class="nw">无</td><td class="nw"><span class="b b-b2">中</span></td>
+</tr>
+<tr>
+  <td class="id">R6</td><td class="nw"><b>分享问答卡</b></td>
+  <td><code>canvas</code> 绘制（问答 + 出处 + 版本 + CC 形象）→ 优先 <code>navigator.share</code>，<b>APK WebView 无 share 则直接降级为下载 PNG + toast 提示</b></td>
+  <td class="nw">V1</td><td class="nw"><span class="b b-b2">中</span></td>
+</tr>
+</table>
+
+<h3>批 2 风险点 <span class="src">这几处最容易踩</span></h3>
+<ul class="tight">
+  <li><b>R2 新增形参必须在函数签名末尾</b>。现有调用点有 4 处（<code>:9746</code> / <code>:9819</code> / <code>:9827</code> / <code>:9858</code>），其中 <code>:9746</code> 来自 <code>params</code>（语音/命令触发）。只加末尾形参可保证 4 处调用全部不受影响。</li>
+  <li><b>R6 分享在 APK 内必失败</b>。<code>navigator.share</code> 需要 HTTPS 安全上下文（PWA 侧才有），APK 是 <code>https://cabin.local</code> 自定义 scheme，必须准备好下载降级，否则点了没反应。（此类坑本模块已有先例：WebView 未实现 <code>onJsConfirm</code> 导致 <code>confirm</code> 静默返回 false）</li>
+  <li><b>R4 与 V1 抢同一行 DOM</b>。两件事都改「🔎 来源」行，建议<b>合并为一次改动</b>做，别分两次碰同一处字符串，否则第二次的精确匹配会失配。</li>
+  <li><b>R5 不要做成「AI 写报告」</b>。一旦引入自由生成就是外发，违背口径；模板 + 拼接足够覆盖 JAL 那个场景的核心价值（结构化、不遗漏、可复制）。</li>
+</ul>
+
+<h2>四、批 3 · 四项 <span class="sub">跨模块 / 治理 / 体验，风险最高，放最后</span></h2>
+<table>
+<tr><th class="nw">编号</th><th class="nw">功能</th><th>具体做法</th><th>为什么排在最后</th></tr>
+<tr>
+  <td class="id">X1</td><td class="nw"><b>带词跳手册查询</b><br>（M3 案 B）</td>
+  <td>① <code>manual.html</code> 增加读 <code>?kw=</code> 预填搜索框并触发查询（现在只读 <code>?from=</code>）；<br>② 壳层 <code>index.html</code> 的 <code>spring-switch</code> 分支转发 <code>d.q</code>；<br>③ <code>jumpTo</code> 支持带参重载</td>
+  <td>要动 <b>3 个文件、其中 2 个是壳层</b>。壳层改动必须同步改对应 patcher（导航 <code>_apply_nav_20260917</code> / actions <code>_apply_shell_sync_20260919</code>），否则下次构建被覆盖。<b>收益（少点一次搜索）远小于风险</b>，等 R4 上线看实际反馈再定</td>
+</tr>
+<tr>
+  <td class="id">X2</td><td class="nw"><b>条目校验状态</b></td>
+  <td>按 <code>cat</code> 粒度（不是逐条）配复核人 / 复核日期 / 状态，显示在出处行：「已复核 · 客舱部 · 2026-08」</td>
+  <td>依赖业务方配合确认，不是技术问题；先出结构与占位，等有人认领再填</td>
+</tr>
+<tr>
+  <td class="id">X3</td><td class="nw"><b>离线状态条 + 可访问性</b></td>
+  <td>离线时提示「当前离线，六库仍可查」；PWA 侧 Service Worker 预缓存；结果区补 <code>aria-live</code>（现只标了 <code>aria-busy</code>）</td>
+  <td>PWA 侧缓存策略要配合 <code>_build_pwa.py</code>，且 SW 只在 HTTPS 下激活，验证链路长</td>
+</tr>
+<tr>
+  <td class="id">X4</td><td class="nw"><b>反馈看板</b></td>
+  <td>聚合 <code>cabin_qa_feedback_v1</code> + <code>qa_miss_q_v1</code> → 「最常被吐槽 / 最常零命中」Top 10</td>
+  <td>数据量需要时间积累，早做没有内容可看；G1 上线 1~2 周后再做</td>
+</tr>
+</table>
+
+<h2>五、明确不做 <span class="sub">本轮再次确认，省得反复试</span></h2>
+<table>
+<tr><th class="nw">项</th><th>理由</th></tr>
+<tr><td class="nw">拍照 / 图片提问</td><td>本地无 OCR → 必然外发，违背口径。<b>竞品能做是因为它们本来跑云</b></td></tr>
+<tr><td class="nw">悬浮窗搜题</td><td>需 Android 系统级悬浮窗权限，APK 内 WebView 做不到；且与三栏布局冲突</td></tr>
+<tr><td class="nw">云端大模型直连</td><td>违背 09-19 零密钥零外发决策，会推翻四条守护链断言</td></tr>
+<tr><td class="nw">排班 / 执勤期 / 航段查询</td><td>无合规数据源；且属春秋之家 / SMP 的职责，<b>定位错位比功能缺失更危险</b></td></tr>
+<tr><td class="nw">语音提问（本轮暂缓）</td><td>Android Web Speech 走云端即外发，须照 beauty 的 <code>__AI_HYBRID_20260919__</code> 例外姿势且默认关。<b>本轮先不排</b>，等批 1/2 稳定后再单独立项评估</td></tr>
+</table>
+
+<h2>六、每批的构建与验证流程 <span class="sub">照这个顺序走，别跳步</span></h2>
+<div class="note">
+<ol class="ins">
+  <li><b>写 patcher</b>：Python 脚本读写一律 <code>newline=''</code>；注入用 strip→replay 幂等块；块头写清楚需求与回归命令。</li>
+  <li><b>跑 patcher</b>：改的是既有块（mypanel / answer_tools）就<b>先跑对应的原 patcher</b>，再跑新 patcher。</li>
+  <li><b>补断言</b>：把本计划里的验收断言写进 <code>_check_needles.py</code> 或对应 <code>_verify_*.js</code>；新块守卫串必须本补丁特有。</li>
+  <li><b>构建</b>：<code>_build_all</code> → <code>_build_hosted</code> → <code>_check_needles</code>。<b>前台跑别超过 120s</b>，超时会被 SIGTERM 掐（卡在 APK 实测段属正常）。</li>
+  <li><b>浏览器实测</b>：playwright 用 <code>channel:'msedge'</code>；<code>liveDocs</code>（<code>src≠about:blank</code>）才是活跃指标；本地存储键用 <code>localStorage</code> 直接读校。</li>
+  <li><b>落盘安全</b>：脚本用「固定临时名覆盖写 + 不删除」。沙箱单轮 <code>os.remove</code> 累计到 50 会静默死、无 traceback。</li>
+  <li><b>APK 打包</b>：<b>等你明确通知再打</b>，不自动跑。</li>
+</ol>
+</div>
+
+<h2>七、一页速览 <span class="sub">排出去了 15 项，怎么归位</span></h2>
+<table>
+<tr><th class="nw">批次</th><th>项</th><th class="nw">数量</th><th>特征</th></tr>
+<tr>
+  <td class="nw"><span class="b b-now">批 1</span></td>
+  <td><b>W1</b> 错题本数据层 · <b>W2</b> 错题本面板 · <b>V1</b> 版本时效 · <b>S1</b> 低置信引导 · <b>G1</b> 缺口留痕 · <b>Q1</b> 解析清洗</td>
+  <td class="nw">6</td>
+  <td>全部纯本地；<b>V1 / S1 / Q1 各自独立可单独上线</b>；W1→W2→G1 有顺序</td>
+</tr>
+<tr>
+  <td class="nw"><span class="b b-b2">批 2</span></td>
+  <td><b>R1</b> 间隔重复 · <b>R2</b> 整卷模拟考 · <b>R3</b> 章节热力 · <b>R4</b> 出处详情卡 · <b>R5</b> 特情记录 · <b>R6</b> 分享卡</td>
+  <td class="nw">6</td>
+  <td>把「能答题」变成「记得住 + 用得上」；R4+R6 建议合并成一次改动</td>
+</tr>
+<tr>
+  <td class="nw"><span class="b b-b3">批 3</span></td>
+  <td><b>X1</b> 带词跳手册 · <b>X2</b> 条目校验 · <b>X3</b> 离线条+无障碍 · <b>X4</b> 反馈看板</td>
+  <td class="nw">4</td>
+  <td>X1 触碰壳层、X2 依赖业务方、X4 需要数据积累——都不急</td>
+</tr>
+</table>
+<div class="pcard">
+  <b>建议的开动顺序</b>：批 0 底座 → 批 1 里先做 <b>S1 + Q1 + V1</b>（三项都极小、互不碰同一处源码，一天内可全上）→ 再做 <b>W1 → W2 → G1</b> → 批 2 → 批 3。<br>
+  这样安排的原因：前三项不依赖任何新数据结构，能立刻改善「答案可不可信」的体验；错题本虽然价值最高，但它要动题卡渲染路径，是本计划里唯一有回归风险的地方，放在底座稳了之后做。
+</div>
+
+<footer>
+  本计划基于 <code>qa.html</code>（9.55 MB / 09-21 版）逐处源码核实：<code>kbStrong:7961</code> · <code>kbReply:8521</code> · <code>qaPickTrainQuestions:9396</code> · <code>qaTrainQuizHtml:9623</code> · <code>qaGradeQuiz:9652</code> · <code>jumpTo:2748</code> · <code>__QA_ANSWER_TOOLS_20260921__:11408</code> · <code>__QA_MYPANEL_20260921__:11735</code> · <code>manual.html</code> 参数与锚点实测<br>
+  调研与整理：2026-09-21
+</footer>
+</div>
+</body>
+</html>

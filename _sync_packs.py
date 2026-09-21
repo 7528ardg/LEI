@@ -67,8 +67,27 @@ def locate_block(s):
     return (script_open, script_close + len(u'</script>'))
 
 
+def find_head_anchor(s):
+    """定位「真正的」</head>（2026-09-21 加固）。
+
+    不能用 s.find(HEAD_TAG)：单文件模块里可能有第二处 </head> 出现在 JS 模板字符串中
+    （performance.html 的假锚点在文件前部、真锚点在文件末；quiz.html 恰好相反），
+    按「首个/末个」一刀切迟早会插到 <script> 文本里把 JS 弄坏。
+    判别条件（与 _apply_perf_import_20260918.py 同口径）：</head> 之后只允许水平空白，
+    然后必须换行，再是 <body —— 库/字符串里的假锚点通常紧跟 ; 或引号，不会满足。
+    """
+    cands = [m.start() for m in re.finditer(r'</head>', s, re.I)
+             if re.match(r'[ \t]*\r?\n[ \t]*<body', s[m.end():m.end() + 40], re.I)]
+    if cands:
+        return cands[-1]
+    # 兜底：没有换行的紧凑写法（如 </head><body>），取最后一个
+    i = s.rfind(HEAD_TAG)
+    return i
+
+
 def read_text(p):
-    return io.open(p, encoding='utf-8', newline='').read()
+    with io.open(p, encoding='utf-8', newline='') as f:
+        return f.read()
 
 
 def sync_file(path, src):
@@ -79,12 +98,15 @@ def sync_file(path, src):
         s = s[:loc[0]] + block + s[loc[1]:]
         act = u'替换'
     else:
-        head = s.find(HEAD_TAG)
+        head = find_head_anchor(s)
         if head == -1:
             raise ValueError(u'未找到 </head>，无法确定注入位置：' + path)
         s = s[:head] + block + s[head:]
         act = u'注入'
-    io.open(path, 'w', encoding='utf-8', newline='').write(s)
+    tmp = path + '.tmp_write'   # 原子写：异常不再把源文件截成半截
+    with io.open(tmp, 'w', encoding='utf-8', newline='') as f:
+        f.write(s)
+    os.replace(tmp, path)
     return act
 
 

@@ -1,0 +1,289 @@
+<!DOCTYPE html>
+<html lang="zh-CN"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>销售板块话术库 · 修复与补充报告</title>
+<style>
+*{box-sizing:border-box}
+body{margin:0;background:#f5f7fa;color:#1f2937;
+ font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Microsoft YaHei",sans-serif;
+ line-height:1.75;-webkit-font-smoothing:antialiased}
+.wrap{max-width:1180px;margin:0 auto;padding:0 24px 96px}
+header{background:linear-gradient(135deg,#0f766e,#0e7490);color:#fff;padding:44px 24px 38px;margin-bottom:28px}
+header .inner{max-width:1180px;margin:0 auto}
+header h1{margin:0 0 6px;font-size:28px;letter-spacing:-.4px}
+header .sub{opacity:.9;font-size:14px}
+header .meta{margin-top:18px;display:flex;flex-wrap:wrap;gap:8px}
+header .meta span{background:rgba(255,255,255,.16);border:1px solid rgba(255,255,255,.28);
+ border-radius:999px;padding:3px 12px;font-size:12.5px}
+nav.toc{background:#fff;border:1px solid #e5e7eb;border-radius:14px;padding:16px 20px;margin-bottom:28px;
+ box-shadow:0 1px 3px rgba(16,24,40,.05);columns:2;column-gap:32px}
+nav.toc a{display:block;color:#0f766e;text-decoration:none;font-size:13.5px;padding:3px 0;
+ break-inside:avoid;border-bottom:1px dashed #f1f5f9}
+nav.toc a:hover{color:#115e59;background:#f0fdfa;border-radius:4px}
+nav.toc a.lvl1{font-weight:700;color:#134e4a;margin-top:8px}
+h1{font-size:24px;margin:38px 0 14px;padding-bottom:10px;border-bottom:2px solid #0f766e;color:#134e4a}
+h2{font-size:20px;margin:40px 0 14px;padding:10px 14px;background:#ecfeff;border-left:4px solid #0e7490;
+ border-radius:0 8px 8px 0;color:#155e75}
+h3{font-size:16.5px;margin:26px 0 10px;color:#0f766e}
+h3::before{content:"◆";color:#14b8a6;font-size:11px;margin-right:7px;vertical-align:2px}
+p{margin:11px 0}
+ul,ol{margin:10px 0;padding-left:24px}
+li{margin:5px 0}
+strong{color:#b91c1c;font-weight:600}
+blockquote{margin:14px 0;padding:12px 16px;background:#fffbeb;border-left:3px solid #f59e0b;
+ border-radius:0 8px 8px 0;color:#78350f;font-size:14px}
+table{width:100%;border-collapse:collapse;margin:16px 0;font-size:13.5px;background:#fff;
+ border:1px solid #e5e7eb;border-radius:10px;overflow:hidden;box-shadow:0 1px 3px rgba(16,24,40,.05)}
+th{background:#f0fdfa;color:#115e59;font-weight:600;text-align:left;padding:10px 12px;
+ border-bottom:2px solid #99f6e4;font-size:13px;white-space:nowrap}
+td{padding:10px 12px;border-bottom:1px solid #f1f5f9;vertical-align:top}
+tr:last-child td{border-bottom:none}
+tbody tr:hover{background:#fafeff}
+table.wide td:first-child{white-space:nowrap}
+hr{border:none;border-top:1px solid #e5e7eb;margin:34px 0}
+code{background:#f1f5f9;padding:1px 5px;border-radius:4px;font-size:12.5px}
+footer{margin-top:56px;padding-top:20px;border-top:1px solid #e5e7eb;color:#6b7280;font-size:12.5px;text-align:center}
+@media(max-width:820px){nav.toc{columns:1}header h1{font-size:22px}table{font-size:12.5px;display:block;overflow-x:auto}}
+</style>
+<style>
+.stat{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px;margin:18px 0}
+.stat div{background:#fff;border:1px solid #e5e7eb;border-left:4px solid #0f766e;border-radius:10px;padding:12px 14px;box-shadow:0 1px 3px rgba(16,24,40,.05)}
+.stat b{display:block;font-size:20px;color:#0f766e;line-height:1.3}
+.stat span{font-size:12.5px;color:#6b7280}
+</style>
+</head><body>
+<header><div class="inner">
+<h1>销售板块话术库 · 修复与补充报告</h1>
+<div class="sub">改写 322 条 · 新增 12 条 · 删除 63 条 · 槽位 1101→1045 · 空洞 5→0 · 重复 77→0 · 硬红线 7→0</div>
+<div class="meta"><span>修复日期 2026-09-21</span><span>对象 beauty.html › scriptLibraryData</span><span>补丁 _apply_scriptlib_fix_20260921.py（已挂构建链）</span><span>构建 exit 0 · 幂等 Δ+0</span></div>
+</div></header>
+<div class="wrap">
+<nav class="toc"><a href="#s1">销售板块话术库 · 修复与补充报告</a><a href="#s2">一、修复总览（前后对比）</a><a href="#s3">二、逐阶段修复清单</a><a href="#s4">三、根因修复：5 处数组空洞的来源</a><a href="#s5">修复前</a><a href="#s6">四、根治性措施</a><a href="#s7">五、审查报告的自我修正</a><a href="#s8">六、待业务确认事项</a><a href="#s9">七、验证与构建</a><a href="#s10">八、产出文件</a></nav>
+<h1 id="s1">销售板块话术库 · 修复与补充报告</h1>
+<blockquote>对应审查：<code>销售板块话术库审查报告_20260921.md</code></blockquote>
+<blockquote>修复补丁：<code>_apply_scriptlib_fix_20260921.py</code>（已挂入 <code>_build_all.py</code> 构建链，幂等可自愈）</blockquote>
+<blockquote>目标文件：<code>beauty.html</code> › <code>scriptLibraryData</code></blockquote>
+<blockquote>备份：<code>_bak_scriptlib_fix_20260921.html</code>（修复前）</blockquote>
+<blockquote>完成时间：2026-09-21</blockquote>
+<hr>
+<h2 id="s2">一、修复总览（前后对比）</h2>
+<p>| 指标 | 修复前 | 修复后 | 变化 |</p>
+<p>|---|---|---|---|</p>
+<p>| 栏目数 | 28 | 28 | — |</p>
+<p>| 数组槽位 | 1101 | 1045 | −56 |</p>
+<p>| <strong>数组空洞（elision）</strong> | <strong>5</strong> | <strong>0</strong> | ✅ 清零 |</p>
+<p>| 实有条目 | 1096 | 1045 | −51 |</p>
+<p>| 改写条目 | — | <strong>322</strong> | — |</p>
+<p>| 新增条目 | — | <strong>12</strong> | — |</p>
+<p>| 删除条目 | — | <strong>63</strong> | — |</p>
+<p>| 完全重复组 | 13 | <strong>0</strong> | ✅ 清零 |</p>
+<p>| 参与重复条目 | 77（7.0%） | <strong>0</strong> | ✅ 清零 |</p>
+<table><thead><tr><th>内容冗余率</th><th>5.8%</th><th><strong>0%</strong></th><th>✅ 清零</th></tr></thead><tbody>
+</tbody></table>
+<h3>合规体检对比（同一套扫描脚本 <code>_spec_scan_20260921.js</code>）</h3>
+<p>| 扫描项 | 修复前 | 修复后 | 说明 |</p>
+<p>|---|---|---|---|</p>
+<p>| SPEC 硬红线 | 7 | <strong>0</strong> | 排毒 / 医美 / 治愈 / 承诺 全部清除 |</p>
+<p>| 竞品与渠道贬低 | 6 | <strong>0</strong> | 塑料玩具、比机场、同类最高 全清 |</p>
+<p>| 伪科学机理 | 5 | <strong>0</strong> | 血液循环 / 黄金时间 / 排毒期 全清 |</p>
+<p>| 年龄称谓 | 9 | <strong>0</strong> | 「阿姨/叔叔」全清 |</p>
+<p>| 占位符残留 | 1 | <strong>0</strong> | <code>还有X份</code> 已清 |</p>
+<p>| 数据与功效承诺 | 21 | 2 | 余 2 条为<strong>真实成分/工艺数据</strong>（修丽可 15% VC、獭祭精米步合 39%），判定为非违规，保留 |</p>
+<p>| 评判旅客外貌 | 3 | 1 | 余 1 条为<strong>产品功效描述</strong>（遮瑕霜「黑眼圈痘印被柔化」），非评判旅客，保留 |</p>
+<p>| 儿童/孕妇适用 | 11 | 5 | 余 5 条为场景中「宝宝」称呼（妈妈带娃语境），<strong>非产品适用宣称</strong>，保留 |</p>
+<p>| 软绝对化（第一/最好） | 40 | 33 | 余项全为「第一次坐飞机 / 第一步 / 第一时间」<strong>词组误报</strong>，保留 |</p>
+<table><thead><tr><th>固定尾句重复</th><th>42 次</th><th><strong>4 次</strong></th><th>改为 10 条池轮换</th></tr></thead><tbody>
+</tbody></table>
+<hr>
+<h2 id="s3">二、逐阶段修复清单</h2>
+<h3>Phase A · 结构修复</h3>
+<p>| # | 问题 | 处置 |</p>
+<p>|---|---|---|</p>
+<p>| A1 | 5 处 <code>},,</code> 双逗号 → 数组空洞（<code>beauty.html:8833/8854/8875/8891/8909</code>） | 删除多余逗号，5 处空洞清零；并修复<strong>源头补丁</strong>（见第五节） |</p>
+<p>| A2 | <code>su8</code> 占位符残留「这款目前机上还有<strong>X份</strong>」 | 改写为「让我帮您查一下这趟航班带了多少，能订的话我马上帮您留一份…」 |</p>
+<p>| A3 | <code>priceObjection_163</code> 内部检索过程泄漏：「官方人民币单买价<strong>未查到</strong>，按官网<strong>美元折算</strong>225ml约四百三…」 | 整条重写，删除全部元信息与折算价 |</p>
+<p>| A4 | 41 条生成器句式故障「您问的这款是X。<strong>是X</strong>，…」 | 单 content 字段内正则收敛为主语单次提及 |</p>
+<table><thead><tr><th>A5</th><th>22 条尾句语法错误「您平时更在意<strong>干燥缺水肌肤</strong>还是<strong>换季不稳定肌肤</strong>？」</th><th>逐条改为旅客可回答的诉求二选一（如「您更想要日常补水，还是换季维稳？」）</th></tr></thead><tbody>
+</tbody></table>
+<h3>Phase B · 红线治理</h3>
+<p><strong>安全引导（最高风险，会诱使旅客在皮肤受损时继续使用）</strong></p>
+<p>| ID | 原文 | 改后 |</p>
+<p>|---|---|---|</p>
+<p>| <code>ps7</code> | 用了之后有<strong>轻微刺痛是正常的，说明活性成分在起作用</strong> | 出现明显刺痛/发红/持续发热请<strong>立即停用</strong>…刺痛不是「见效」的信号，别硬扛 |</p>
+<p>| <code>ps8</code> | 长痘可能是因为<strong>排浊反应</strong>，建议减少用量…一周后通常会好转 | 原因很多…建议先减量或暂停，观察三五天，不缓解就换更清爽的质地 |</p>
+<p>| <code>ps13</code> | 使用后出现脱皮，可能是<strong>角质层在代谢更新</strong>，建议搭配保湿产品一起使用 | 多半是这款对当前状态偏强了，<strong>请先停用</strong>，改用温和保湿修护 |</p>
+<p>| <code>ps27</code> | 产品用了一周皮肤反而更差了，这是正常的<strong>&quot;排毒期&quot;</strong>，通常3-7天后会好转 | <strong>请立即停用</strong>，用清水洗净并停掉其他功效型产品；明显红肿瘙痒建议尽快就医 |</p>
+<table><thead><tr><th><code>ps22</code></th><th>用了之后皮肤变黑了，可能是没有做好防晒</th><th>常见原因是防晒没跟上，也可能是提亮节奏和预期不一致…先确认白天防晒，并减到隔天用观察</th></tr></thead><tbody>
+</tbody></table>
+<p><strong>SPEC 硬红线与用户评价</strong></p>
+<p>| ID | 原文 | 改后 |</p>
+<p>|---|---|---|</p>
+<p>| <code>ed21</code> | 朋友都问她是不是<strong>去做了医美</strong> | 「身边人会问最近状态是不是变好了」＋「护肤品的作用是慢慢把皮肤状态养回来」 |</p>
+<p>| <code>sp7</code> | 延续初代的<strong>治愈</strong>造型 | 「暖心造型」 |</p>
+<p>| <code>dg20</code> | 看您<strong>有些黑眼圈</strong>，我帮您看看眼霜 | 去掉外貌评述，改为需求导向 |</p>
+<p>| <code>dg1</code> | 今天<strong>气色真好</strong> | 「新的一天开始啦」 |</p>
+<table><thead><tr><th><code>es20</code></th><th>觉得您<strong>越来越美</strong></th><th>改为对「坚持护肤」这一习惯的肯定</th></tr></thead><tbody>
+</tbody></table>
+<p><strong>医疗 / 儿童 / 特殊人群宣称</strong></p>
+<p>| ID | 原文 | 改后 |</p>
+<p>|---|---|---|</p>
+<p>| <code>iq14</code> | 安全有保障，<strong>孕妇也可以使用</strong> | 删除安全性宣称，改为「按肤质先做耳后测试」 |</p>
+<p>| <code>iq20</code> | 通过了<strong>欧盟CE认证和美国FDA审核</strong> | 事实纠错（CE 不适用于化妆品，FDA 对化妆品不做「审核」） |</p>
+<p>| <code>sg9</code> | <strong>医用级</strong>…<strong>术后修护</strong>都能用 | 改为「透明质酸钠修护贴…成分简单，敏感肌日常敷也比较稳妥」 |</p>
+<p>| <code>sg2</code> | <strong>医用级品质</strong> | 删除 |</p>
+<p>| <code>fc3</code> | 通过了<strong>婴幼儿接触测试</strong> | 删除编造检测 |</p>
+<p>| <code>fc8</code> | （<strong>6个月以上可用</strong>） | 删除月龄界定 |</p>
+<p>| <code>fc16</code> | <strong>纯植物提取的</strong> | 删除绝对化 |</p>
+<table><thead><tr><th><code>fc10</code></th><th><strong>妈妈的美貌是给孩子最好的礼物</strong></th><th>「照顾好自己，才更有精力陪孩子」</th></tr></thead><tbody>
+<tr><td><code>ms9</code></td><td>护手霜<strong>含有抗菌成分</strong></td><td>删除抗菌宣称</td></tr>
+<tr><td><code>ps19</code></td><td><strong>不能</strong>和烟酰胺一起用，会产生<strong>排斥反应</strong></td><td>纠正机理与用词（移植术语误用）</td></tr>
+<tr><td><code>ps1</code></td><td>我们的产品<strong>都是安全的</strong></td><td>去绝对化</td></tr>
+</tbody></table>
+<h3>Phase C · 口径对齐</h3>
+<p><strong>统一到主流程已取证的口径</strong>（假一赔四 / 7天无理由 / 落地前下单3-7天到家 / 机上专享价）</p>
+<p>| 冲突主题 | 修复前 | 修复后 |</p>
+<p>|---|---|---|</p>
+<p>| 赔付倍数 | <code>tb7</code>「假一赔<strong>十</strong>」 vs 官方 36 处「假一赔四」 | 统一「假一赔四」 |</p>
+<p>| 退货期限 | <code>po10/tb2/hh6</code>「<strong>14天</strong>无理由」 vs <code>rs4/nr6</code>「7天」 | 统一 <strong>7 天</strong> |</p>
+<p>| 退款时效 | <code>rs14</code> 48小时 / <code>rs5</code> 3-5工作日 / <code>rs7</code> 7-15工作日 | 统一「按平台流程，进度订单可查」＋跨境退回 7-15 工作日 |</p>
+<p>| 开封后使用期 | <code>iq6</code> 6个月 vs <code>ps17</code> 12个月 | 统一「以瓶身标注的开封后使用期为准」 |</p>
+<p>| 定金保留期 | <code>hh12</code> 三天 vs <code>po27</code> 一周 | 统一 <strong>三天</strong> |</p>
+<p>| 折扣体系 | 全场八折 / 85折 / 9折 / 95折 / 再减10% / VIP便宜15%（<strong>7 处</strong>） | 全部收敛为「机上跨境专享价」，与 <code>pn4/pn15</code>「统一价、无降价权限」一致 |</p>
+<p>| 会员等级 | 金卡 / 银卡 / VIP / 专属候机室 / 优先购物权（<strong>无体系支撑</strong>） | 收敛为「常旅客老朋友」，删除虚构权益 |</p>
+<p>| 虚构促销 | 会员日双倍积分 / 买二送一 / 感谢礼包 / 新客专享价 / 美妆专场 / 分期免息 | 全部下线或软化为「组合优惠」「随货小样」 |</p>
+<p>| 复购·好评率 | 85% / 87% / 90% / 96% 四个互斥数字（<strong>6 处</strong>） | 统一为不可量化的软表述（「回头客多」「评价区反馈正面」） |</p>
+<table><thead><tr><th>退货率</th><th><code>rs16</code>「不到2%」</th><th>软表述</th></tr></thead><tbody>
+</tbody></table>
+<h3>Phase D · 事实收敛</h3>
+<p>| 类别 | 修复前 | 处置 |</p>
+<p>|---|---|---|</p>
+<p>| 编造认证与报告 | 诺贝尔奖级成果 / 皮肤科医生满分报告 / 欧盟化妆品协会认证 / 1000+人临床98% | 全部删除，改为可查证的成分机理表述 |</p>
+<p>| 量化对比 | 吸收率提升3倍 / 浓度是行业2倍 / 同类中最高 / 竞品只有一半 / 效果翻倍 | 全部删除量化，改为质地与配方描述 |</p>
+<p>| 无源销量 | 机模 45 万个 / 毛绒 2.5 万个 / 积木 2.4 万套 | 全部删除数字（三者量级本身互不成比例） |</p>
+<p>| 虚构资历 | 做顾问 6 年、服务上千位顾客 / 品牌 100 多年历史 / 全球 50 多国 | 改为不可证伪的表述 |</p>
+<p>| 产品参数矛盾 | <code>sm3</code>「1:100 是 <strong>35.8 厘米</strong>」 vs <code>sm13</code>「1:100 接近 <strong>40 厘米</strong>」 | 删除硬编码尺寸 |</p>
+<p>| 事实错误 | <code>sm6</code>「每一架都按照真实飞机 <strong>1:1 还原</strong>」 | 改为「按真实客机的涂装与比例<strong>微缩复刻</strong>」 |</p>
+<p>| 价格暗示 | <code>ep3</code>「一天才<strong>几毛钱</strong>」 / <code>st14</code>「三样加起来<strong>不到一百五</strong>」 / <code>sm11</code>「价格也亲民」 / <code>sm13</code>「把<strong>预算</strong>告诉我」 | 全部去金额与价格暗示 |</p>
+<table><thead><tr><th>HTTP 伪科学</th><th><code>ms3/ms5/ms7/ms8/ms16</code>（饭后吸收营养最好 / 血液循环加快 / 排水肿 / 黄金时间效果翻倍 / 油脂全被吸走）</th><th>全部重写为中性场景描述</th></tr></thead><tbody>
+</tbody></table>
+<h3>Phase E · 冗余去重</h3>
+<p>| 项 | 修复前 | 修复后 |</p>
+<p>|---|---|---|</p>
+<p>| <code>authenticityGuarantee_088~_129</code> 同句 | <strong>42 条完全相同</strong> | 保留 <strong>8 条差异化</strong>，其余删除 |</p>
+<p>| <code>priceObjection</code> 固定尾句 | <strong>42 次</strong>「…您可以先带<strong>一支</strong>回去试试」（散粉/浴盐/套装量词错配） | 改为 <strong>10 条池轮换</strong>，并去掉不适配量词 |</p>
+<p>| <code>priceObjection</code> 中句变体 | 4 变体 ×29 次 | 统一收敛 |</p>
+<p>| <code>nr15</code> 与 <code>ag2</code> 完全重复 | 2 条同句 | 差异化改写 |</p>
+<table><thead><tr><th>全局精确去重</th><th>13 组 77 条</th><th><strong>0 组 0 条</strong></th></tr></thead><tbody>
+</tbody></table>
+<h3>Phase F · 补充：酒类推荐栏目补齐</h3>
+<p><code>liquorSales</code> 原仅 8 条、覆盖 6 款 SKU；产品库有 <strong>22 款酒</strong>，<strong>12 款无任何话术</strong>。已补齐：</p>
+<p>| 新增 ID | 对应 SKU | 要点 |</p>
+<p>|---|---|---|</p>
+<p>| <code>lq9</code> | sake-003 加贺鸢纯米大吟酿 | 石川县福光屋、三种酒米混酿、余味净爽 |</p>
+<p>| <code>lq10</code> | sake-004 日本酒精选品鉴装 | 300ml×3、薰爽醇三风格横评、入门优选 |</p>
+<p>| <code>lq11</code> | spir-003 泸州老窖紫砂大曲87版 | 52度浓香、百年老窖池、紫砂陶瓶、编号出品 |</p>
+<p>| <code>lq12</code> | spir-004 泸州老窖红陶500ml | 52度、多粮酿造、红陶瓶贮、宴客送礼 |</p>
+<p>| <code>lq13</code> | spir-005 泸州老窖紫砂大曲礼盒 | 双瓶装附酒具、饮后尤香 |</p>
+<p>| <code>lq14</code> | spir-006 松井白兰地梅酒 | 鸟取、14度、SFWSC 银牌、加冰或苏打 |</p>
+<p>| <code>lq15</code> | spir-007 松井威士忌梅酒 | 14度、酸甜平衡、威士忌尾韵 |</p>
+<p>| <code>lq16</code> | spir-008 山阴调和威士忌 | 无年份、40度、SFWSC2025 金奖 |</p>
+<p>| <code>lq17</code> | spir-009 仓吉纯麦威士忌8年 | 43度、陈酿8年、WWA 获奖 |</p>
+<p>| <code>lq18</code> | spir-010 三得利山崎 | 单一麦芽、水楢桶、果香层次 |</p>
+<p>| <code>lq19</code> | spir-011 三得利响 / spir-012 波摩15年 | 调和标杆＋艾雷岛泥煤 |</p>
+<table><thead><tr><th><code>lq20</code></th><th><strong>酒类合规通用条（新增）</strong></th><th>正规渠道入境、清关可查；<strong>适量饮用；未成年人、孕妇不建议饮用；酒后请勿驾车</strong></th></tr></thead><tbody>
+</tbody></table>
+<h3>Phase G · 报价收敛</h3>
+<p>删除对客话术中的<strong>具体报价与第三方渠道比价</strong>，共改写 <strong>38 条</strong>。</p>
+<p>依据三条：① 引擎自身声明的能力边界「不承诺功效、<strong>不报具体价格</strong>」；② <code>products[]</code> <strong>没有 price 字段</strong>，报价无数据源；③ <code>pn9</code>「价格经海关备案、与跨境商城一致」——引用外部渠道价即构成渠道比价。</p>
+<p>| 典型原文 | 处置 |</p>
+<p>|---|---|</p>
+<p>| <code>_162</code> 50ml<strong>丝芙兰八百七</strong>、大促能到<strong>三百九</strong>，100ml<strong>一千出头</strong> | 删渠道与金额 |</p>
+<p>| <code>_171</code> 12g官方定价<strong>五百九</strong>，<strong>京东五百二、天猫券后四百五</strong> | 删渠道与金额 |</p>
+<p>| <code>_185</code> 这盒安睡宁<strong>常卖二百九十九</strong> | 删金额 |</p>
+<table><thead><tr><th><code>_152</code> 300ml<strong>单买价未查到官方报价</strong>，按同渠道同类规格<strong>参考</strong>一百多起…</th><th>删元信息泄漏（审查阶段遗漏的第 2 处）</th></tr></thead><tbody>
+</tbody></table>
+<h3>Phase H · 场景对齐与库外商品</h3>
+<p><strong>H1 地面店铺/电商语境 → 客舱语境（12 条）</strong></p>
+<p>| ID | 原文 | 改后 |</p>
+<p>|---|---|---|</p>
+<p>| <code>dg2</code> | 欢迎来到我们的<strong>美妆空间</strong> | 欢迎搭乘春秋航空，我是本次航班的服务人员 |</p>
+<p>| <code>dg5</code> | 进来<strong>吹吹空调</strong>慢慢看 | 旅途还顺利吧？机上这几款您可以慢慢看 |</p>
+<p>| <code>dg19</code> | 今天<strong>店里</strong>人不多 | 这会儿正好有时间 |</p>
+<p>| <code>dg22</code> | 快<strong>进来</strong>歇会儿，喝杯<strong>温水</strong> | 先坐舒服点，我给您拿几款好物慢慢看 |</p>
+<p>| <code>dg25</code> | 看您在<strong>精华区</strong>停留了一会儿 | 看您对这几款精华挺感兴趣 |</p>
+<p>| <code>hh10</code> | 您先坐下来<strong>喝杯茶</strong> | 您先坐舒服了慢慢看 |</p>
+<p>| <code>hh19</code> | 先把产品<strong>加到购物车</strong>，等活动开始时<strong>系统会自动提醒</strong> | 落地后在绿翼商城也能找到同款，活动期下单也一样 |</p>
+<p>| <code>tb9</code> | 我们店铺是<strong>天猫国际/京东国际</strong>的认证商家 | 春秋航空绿翼商城的官方渠道 |</p>
+<table><thead><tr><th><code>tb26</code></th><th>每年参加国际美妆展会，是<strong>行业内有影响力的渠道商</strong></th><th>删不可证的行业定位</th></tr></thead><tbody>
+</tbody></table>
+<p><strong>H2 库外商品（14 条）</strong></p>
+<p>审查发现话术引用了产品库中<strong>不存在</strong>的商品。处置：</p>
+<p>| 处置 | 条目 | 说明 |</p>
+<p>|---|---|---|</p>
+<p>| <strong>改写为库内真实款</strong> | <code>sm2</code>（奶龙联名→马年限定）、<code>sm5</code>（飞黄腾达→第四代彩绘）、<code>sc3</code>/<code>sc6</code>（机坪特种车→塔台积木/梦想启航）、<code>sg3</code>（桦树汁面膜→养生堂白桦新肌修护套装）、<code>sg7</code>（去掉雪花膏/剃须刀）、<code>st1</code>/<code>st5</code>（去掉「三件含眼罩」）、<code>st2</code>（去掉 TAC/UV400） | 9 条 |</p>
+<table><thead><tr><th><strong>删除（无对应款）</strong></th><th><code>sg1</code> <code>sg8</code>（上海女人雪花膏）、<code>sg4</code> <code>sg6</code>（雷瓦/起慢剃须刀）、<code>sg5</code> <code>sg10</code>（迪士尼草莓熊玩偶书包）</th><th>6 条</th></tr></thead><tbody>
+</tbody></table>
+<blockquote>⚠️ 删除的 6 条需<strong>业务确认</strong>：若这些商品确在售，应先在产品库建条目，再回填话术（切勿反向操作）。</blockquote>
+<p><strong>H3 残留红线</strong>：<code>ed1/ed7/ed8/tb7/ag3</code>（「承诺」词组）、<code>ps5/nr4/sm12/hh24/sc9/lq9</code>（真实绝对化）、<code>es9</code>（效果时间）、<code>fc1/fc11/fc14</code>、<code>_178</code>（「老人」→「长辈」）共 16 条收口。</p>
+<hr>
+<h2 id="s4">三、根因修复：5 处数组空洞的来源</h2>
+<p><code>beauty.html</code> 里 5 处 <code>},,</code> 并非手误，而是 <strong><code>_apply_souvenir_20260916.py</code> 的 <code>append_scripts()</code> 缺陷</strong>：</p>
+<p>```python</p>
+<h1 id="s5">修复前</h1>
+<p>add = &#x27;&#x27;.join(&quot;,\n                    { id: &#x27;%s&#x27;, ... }&quot; % ...)   # ← 无条件前置逗号</p>
+<p>src = src[:j] + add + src[j:]</p>
+<p>```</p>
+<p>锚点 <code>j</code> 指向数组收尾 <code>]</code>，而 <code>src[:j]</code> 的最后一个字符<strong>已经是逗号</strong>（数组末项的尾逗号），插入后形成 <code>},,</code> → JS <strong>数组 elision（空洞）</strong>：<code>.length</code> 虚增 1、<code>filter/map/forEach</code> 静默跳过、任何 <code>scripts[i]</code> 直取都会读到 <code>undefined</code>。</p>
+<p><strong>两处一并修复</strong>（该补丁命中 souvenirModel / souvenirTravel / souvenirGift / souvenirPlush / souvenirCreative 五个栏目，恰好等于 5 处空洞，验证了因果）：</p>
+<ol><li><code>beauty.html</code> 中 5 处 <code>},,</code> → <code>},</code></li><li><code>_apply_souvenir_20260916.py</code>：插入前回看锚点前第一个非空白字符，已是逗号则不再前置；同时把原本依赖 ASCII 巧合的幂等判断（<code>chr(len+48)</code>）改为直接检查 id 是否存在</li></ol>
+<hr>
+<h2 id="s6">四、根治性措施</h2>
+<p>按审查报告 <strong>P0-7</strong> 落实（性价比最高的一项）：</p>
+<ol><li><strong>入库/渲染合规闸仍未落地</strong> —— 本轮的 322 条改写是<strong>一次性数据修复</strong>。若不补 <code>scriptLibGuard()</code>，下一批批量生成仍会重新引入同类问题。<strong>建议下一步实施</strong>（把本轮 <code>_spec_scan_20260921.js</code> 的规则集 + SPEC 红线表 + 引擎 <code>TS_FORBIDDEN</code> 合成一个闸，在保存话术与渲染话术库两处执行）。</li><li><strong>已新增商品存在性校验思路</strong> —— 本轮 14 处库外商品靠人工比对发现。<code>_apply_scripts.js</code> 应加写入前校验：话术中的品牌/商品名必须在 <code>products[]</code> 命中，否则拒写。</li><li><strong>新补丁已挂入构建链</strong> —— <code>_build_all.py</code> STEPS 中加入</li></ol>
+<p><code>(u&#x27;销售板块话术库修复+补充(…幂等)&#x27;, u&#x27;python _apply_scriptlib_fix_20260921.py&#x27;)</code>，</p>
+<p>位于 <code>_gzip_build</code> / <code>_build_4in1</code> / <code>_build_hosted</code> 之前；<strong>重复执行 Δ=0、全项 skip</strong>（已实测），并自带 <code>node --check</code> 语法闸，失败不落盘。</p>
+<hr>
+<h2 id="s7">五、审查报告的自我修正</h2>
+<p>修复过程中核对产品库全文，发现原审查报告有 <strong>4 处结论需要修正</strong>（话术其实有依据）：</p>
+<p>| 原报告结论 | 实际情况 |</p>
+<p>|---|---|</p>
+<p>| <code>st11</code>「14厘米大帽檐/防风绳无产品依据」 | ❌ <strong>误判</strong>。<code>sou-015</code> 描述明确含「14CM大帽檐」「附赠防风绳」，仅字段级比对漏看了 description |</p>
+<p>| <code>st12</code>「四色配色无依据」 | ❌ <strong>误判</strong>。<code>sou-016</code> 描述含「米白色/碳灰/牛油果绿/闺蜜粉」四色 |</p>
+<p>| <code>sm12</code>「配了展示支架无依据」 | ❌ <strong>误判</strong>。<code>sou-013</code> 的 <code>coreBenefits</code> 含「合金机身+展示支架」 |</p>
+<table><thead><tr><th>—</th><th>➕ <strong>遗漏</strong>：<code>sc4</code>「和市面上那种千篇一律的旅游冰箱贴完全不同」属竞品贬低，原报告未收（本轮已补齐）</th></tr></thead><tbody>
+</tbody></table>
+<p><strong>方法学教训</strong>：产品契合度比对必须覆盖 <code>name + description + coreBenefits + tags</code> <strong>全部字段</strong>，只比 <code>name + description</code> 会漏判；同时应把该比对固化为断言脚本，而非人工抽查。</p>
+<p>另，<code>priceObjection_152</code>（「300ml 单买价未查到官方报价…」）是<strong>第二处元信息泄漏</strong>，原报告只找到 <code>_163</code> 一处，本轮一并修复。</p>
+<hr>
+<h2 id="s8">六、待业务确认事项</h2>
+<p>| # | 事项 | 影响 | 建议 |</p>
+<p>|---|---|---|---|</p>
+<p>| 1 | 6 条库外商品已<strong>删除</strong>（雪花膏×2、剃须刀×2、草莓熊书包×2） | 若确在售，话术缺失 | 确认在售 → 先建产品条目 → 回填话术 |</p>
+<p>| 2 | 酒类合规提示条 <code>lq20</code>（适量饮用/未成年人孕妇禁饮/酒后勿驾车）为<strong>新增</strong> | 客舱销售酒类的合规兜底 | 请法务确认表述可直接对客使用 |</p>
+<table><thead><tr><th>3</th><th>促销/会员类话术已<strong>全部下线具体折扣</strong></th><th>若业务确有活动机制，需重新配置</th><th>建议给产品库加 <code>price</code> 字段、给活动加配置源，报价与促销从数据取数</th></tr></thead><tbody>
+</tbody></table>
+<hr>
+<h2 id="s9">七、验证与构建</h2>
+<p>| 步骤 | 结果 |</p>
+<p>|---|---|</p>
+<p>| 补丁幂等复跑 | <strong>Δ+0</strong>，248 项全部 skip ✅ |</p>
+<p>| <code>node --check</code>（scriptLibraryData 段） | 通过 ✅ |</p>
+<p>| <code>python -m py_compile</code>（补丁与源头补丁） | 通过 ✅ |</p>
+<p>| <code>_build_all.py build</code> | <strong>exit 0</strong>，37s，spring 22.71MB / 4in1 23.36MB / kb-admin 3.63MB ✅ |</p>
+<p>| 产物内验证（<code>在线版/mods/beauty.gz</code>） | <code>lq20</code> 命中 1 ／「假一赔四，说到就做到」命中 1 ／「阿姨您看」0 ／「排毒期」0 ／「假一赔十」0 ／「全场八折」0 ／「还有X份」0 ／固定尾句 42→4 ✅ |</p>
+<table><thead><tr><th><code>_build_all.py verify</code></th><th>见 <code>_verify_scriptlib_20260921.log</code></th></tr></thead><tbody>
+</tbody></table>
+<blockquote>⚠️ <strong>APK 未重新打包</strong>（按约定需用户明确通知才执行）。<code>_check_apk_sync.py</code> 会因此报「APK 内 assets/www 落后于源」，属预期，待 APK 重打后即可消除。</blockquote>
+<h2 id="s10">八、产出文件</h2>
+<p>| 文件 | 说明 |</p>
+<p>|---|---|</p>
+<p>| <code>_apply_scriptlib_fix_20260921.py</code> | 修复补丁（幂等，已挂构建链） |</p>
+<p>| <code>_bak_scriptlib_fix_20260921.html</code> | 修复前备份 |</p>
+<p>| <code>_apply_souvenir_20260916.py</code> | 空洞根因补丁（已修） |</p>
+<p>| <code>_scriptlib_dump_20260921.json</code> | 修复后全量结构化导出 |</p>
+<p>| <code>_diff_scriptlib_20260921.js</code> | 前后对比统计脚本 |</p>
+<table><thead><tr><th><code>_audit_scriptlib_20260921.js</code> / <code>_spec_scan_20260921.js</code></th><th>结构体检 / 红线扫描（可复用为发布前体检）</th></tr></thead><tbody>
+</tbody></table>
+<footer>本报告对应《销售板块话术库审查报告_20260921》<br>
+可复用脚本：_audit_scriptlib_20260921.js · _spec_scan_20260921.js · _diff_scriptlib_20260921.js</footer>
+</div></body></html>

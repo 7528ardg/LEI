@@ -552,7 +552,7 @@ input:focus,select:focus,textarea:focus{border-color:var(--color-brand);box-shad
 .api-badge:hover{color:var(--color-brand);border-color:var(--color-brand)}
 .api-badge.off{color:var(--color-text-disabled)}
 .api-badge.busy{color:var(--color-risk-medium);animation:pulse 1s infinite}
-.api-badge .tooltip{position:absolute;bottom:calc(100% + 6px);left:50%;transform:translateX(-50%);background:var(--color-bg-elevated);border:1px solid var(--color-border);border-radius:var(--radius-sm);padding:4px 10px;font-size:11px;white-space:nowrap;color:var(--color-text-primary);box-shadow:var(--shadow-overlay);opacity:0;pointer-events:none;transition:opacity .2s}
+.api-badge .tooltip{position:absolute;bottom:calc(100% + 6px);left:0;right:auto;background:var(--color-bg-elevated);border:1px solid var(--color-border);border-radius:var(--radius-sm);padding:4px 10px;font-size:11px;white-space:nowrap;color:var(--color-text-primary);box-shadow:var(--shadow-overlay);opacity:0;pointer-events:none;transition:opacity .2s;max-width:min(70vw,240px);overflow:hidden;text-overflow:ellipsis}
 .api-badge:hover .tooltip{opacity:1}
 
 /* ========== 浮动导航栏（右侧板块快速切换 + 滚动高亮） ========== */
@@ -2284,11 +2284,6 @@ function calcCrewFatigue(crew){
 }
 
 // 兼容旧调用名：代码里已有的 calcFatigue(crew) → 转发到合规版
-function calcFatigueCompat(crew){
-  const r = calcCrewFatigue(crew);
-  // 旧接口只返回 {idx, level, color}（basis不返回以节省内存）
-  return { idx:r.idx, level:r.level, color:r.color };
-}
 
 // 基地名称映射
 const BASE_NAMES = {
@@ -2956,15 +2951,6 @@ function closeFirstTimeGuide(){
   if(overlay) overlay.remove();
 }
 // 【P2-8】空状态友好提示
-function showEmptyStateHint(containerId, hint, actionText, actionFn){
-  const el=document.getElementById(containerId);
-  if(!el) return;
-  el.innerHTML=`<div style="text-align:center;padding:32px 16px;color:var(--color-text-secondary);background:var(--color-bg-surface);border-radius:var(--radius-md);border:1px dashed var(--color-border)">
-    <div style="font-size:36px;margin-bottom:8px;opacity:0.6">📭</div>
-    <div style="font:var(--font-body);margin-bottom:12px">${hint||'当前无数据'}</div>
-    ${actionText?`<button onclick="${actionFn||''}" style="padding:6px 16px;border-radius:var(--radius-sm);border:1px solid var(--color-brand);background:rgba(20,132,83,.1);color:var(--color-brand);cursor:pointer;font:var(--font-body);font-weight:600">${actionText}</button>`:''}
-  </div>`;
-}
 
 // ============ 加载风险评分列表 ============
 async function loadRiskScores(baseId){
@@ -3276,10 +3262,6 @@ function _startMeasureAutoRefresh(){
   if(_measureRefreshTimer){ clearInterval(_measureRefreshTimer); _measureRefreshTimer=null; }
 }
 
-async function refreshMeasureCards(){
-  // 【需求6】占位：已删除刷新按钮 DOM，此处不执行；调用直接静默返回
-  try{ await loadRiskScores(STATE.currentBase); }catch(e){ /* 静默 */ }
-}
 
 // ============ 加载今日简报 ============
 async function loadBriefing(baseId){
@@ -3408,14 +3390,6 @@ async function notApplicableMeasure(btn,measureId){
 }
 
 // ============ 推送简报（飞书用户 828cd2ef） ============
-async function pushBriefing(){
-  try{
-    const res=await CabinAPI.briefing.pushToUser('828cd2ef',STATE.currentBase);
-    toast('已向飞书用户 828cd2ef 推送晨间简报（'+res.data.top_risk_count+' 条高风险）','success');
-  }catch(e){
-    toast('推送失败：'+e.message,'error');
-  }
-}
 
 // ============ 报告导出 ============
 async function exportReport(type){
@@ -7959,32 +7933,6 @@ function buildSmartInsightPanel(d, curTrend, timeRangeLabel){
 }
 
 // ----------- 操作台辅助：统计总览胶囊（总分队/需关注/严重/稳定 + 总触发件数） -----------
-function generateOpsStatsBar(d, divBd){
-  try{
-    const allDivs = divBd || (d && d.division_breakdown) || [];
-    const total = allDivs.length;
-    // 计算 focus / critical / stable
-    let focus=0, critical=0, stable=0, totalEvents=0;
-    const coreDimIds = ['RD01','RD02','RD03','RD04','RD05','RD07','RD06'];
-    allDivs.forEach(b=>{
-      const monthTotal = Number(b.month_total)||0;
-      totalEvents += monthTotal;
-      const dimSum = coreDimIds.reduce((s,id)=>s+(Number((b.dimensions||{})[id]||0)||0),0);
-      if (dimSum >= 5) { critical++; focus++; }
-      else if (dimSum >= 1) { focus++; }
-      else { stable++; }
-    });
-    const focusPct = total > 0 ? Math.round(focus/total*100) : 0;
-    return `<div style="display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-bottom:14px;padding:10px 14px;background:var(--color-bg-primary);border-radius:10px;border:1px solid var(--color-border)">
-      <span style="font-size:13px;color:var(--color-text-secondary);font-weight:600">📊 全局统计：</span>
-      <span style="padding:3px 12px;border-radius:999px;background:rgba(20,132,83,.10);color:var(--color-brand);font-weight:700;font-size:13px;border:1px solid rgba(20,132,83,.25)">总分队 ${total}</span>
-      <span style="padding:3px 12px;border-radius:999px;background:rgba(250,140,22,.10);color:var(--color-risk-high);font-weight:700;font-size:13px;border:1px solid rgba(250,140,22,.25)">需关注 ${focus}（${focusPct}%）</span>
-      <span style="padding:3px 12px;border-radius:999px;background:rgba(245,34,45,.10);color:var(--color-risk-critical);font-weight:700;font-size:13px;border:1px solid rgba(245,34,45,.25)">🔴 严重 ${critical}</span>
-      <span style="padding:3px 12px;border-radius:999px;background:rgba(82,196,26,.10);color:var(--color-success);font-weight:700;font-size:13px;border:1px solid rgba(82,196,26,.25)">✅ 稳定 ${stable}</span>
-      <span style="padding:3px 12px;border-radius:999px;background:rgba(20,132,83,.08);color:var(--color-text-primary);font-weight:700;font-size:13px;border:1px solid var(--color-border)">${totalEvents} 件（总触发）</span>
-    </div>`;
-  }catch(e){ return ''; }
-}
 
 // ----------- 操作台辅助：构建趋势总结卡（7维度方向 + 上升项分队事件 + 行动建议） -----------
 function buildTrendSummaryCard(d, curTrend){
@@ -9951,20 +9899,6 @@ window._SQUAD_RISK_COLLAPSE = (function(){
 })();
 function _saveSquadCollapse(){ localStorage.setItem('squad_risk_collapse', JSON.stringify(window._SQUAD_RISK_COLLAPSE)); }
 
-function toggleSquadDimEvents(anchorId){
-  const box = document.getElementById(anchorId+'_box');
-  const btn = document.getElementById(anchorId+'_btn');
-  if(!box) return;
-  const open = box.style.display !== 'block';
-  box.style.display = open ? 'block' : 'none';
-  if(btn){
-    const m = btn.textContent.match(/^(.+?)展开(\d+)条$/);
-    const n = m ? m[2] : '';
-    btn.textContent = (m?m[1]:' ') + (open ? '▴ 收起' + n + '条' : `▾ 展开${n}条`);
-  }
-  window._SQUAD_RISK_COLLAPSE[anchorId] = open;
-  _saveSquadCollapse();
-}
 
 // 展开 / 收起全部（面板顶部两个按钮）
 function squadRiskExpandAll(open){
@@ -12036,34 +11970,6 @@ async function _renderBaseAirportWeather(weatherContent){
 }
 
 // ============ 行业基准数据动态填充 ============
-function populateIndustryBenchmark(summary){
-  const el=document.getElementById('industryBenchmarkContent');
-  if(!el) return;
-  const perMilleRate=summary.per_mille_rate!==null&&summary.per_mille_rate!==undefined
-    ?summary.per_mille_rate
-    :(summary.this_year_total||0)>0?(summary.this_year_total/3.2).toFixed(1):'—';
-  const criticalPct=summary.critical_pct!==null&&summary.critical_pct!==undefined?summary.critical_pct:'—';
-  const closureRate=summary.closure_rate!==null&&summary.closure_rate!==undefined?summary.closure_rate:'—';
-  const rateColor=(summary.this_year_total||0)>0 && +perMilleRate>1.8?'var(--color-risk-medium)':'var(--color-risk-low)';
-  const criticalColor=(summary.this_year_total||0)>0 && +criticalPct>10?'var(--color-risk-medium)':'var(--color-risk-low)';
-  const closureColor=+closureRate>=95?'var(--color-risk-low)':'var(--color-risk-medium)';
-  el.innerHTML=`
-    <div style="background:var(--color-bg-primary);border-radius:var(--radius-sm);padding:10px;border:1px solid var(--color-border)">
-      <div style="color:var(--color-text-secondary);margin-bottom:4px">千人事故率（本基地）</div>
-      <div style="font:var(--font-data);font-size:20px;color:${rateColor}">${perMilleRate}</div>
-      <div style="font-size:11px;color:var(--color-text-disabled);margin-top:2px">行业均值：1.8（IATA 2025年亚太区）</div>
-    </div>
-    <div style="background:var(--color-bg-primary);border-radius:var(--radius-sm);padding:10px;border:1px solid var(--color-border)">
-      <div style="color:var(--color-text-secondary);margin-bottom:4px">严重占比</div>
-      <div style="font:var(--font-data);font-size:20px;color:${criticalColor}">${criticalPct}${criticalPct!=='—'?'%':''}</div>
-      <div style="font-size:11px;color:var(--color-text-disabled);margin-top:2px">行业基准：≤10%（CAAC 要求）</div>
-    </div>
-    <div style="background:var(--color-bg-primary);border-radius:var(--radius-sm);padding:10px;border:1px solid var(--color-border)">
-      <div style="color:var(--color-text-secondary);margin-bottom:4px">案例闭环率</div>
-      <div style="font:var(--font-data);font-size:20px;color:${closureColor}">${closureRate}${closureRate!=='—'?'%':''}</div>
-      <div style="font-size:11px;color:var(--color-text-disabled);margin-top:2px">行业目标：≥95%（SMS 标准）</div>
-    </div>`;
-}
 
 // ============ 年度对比自由选择 ============
 async function refreshYearComparison(){
@@ -12111,71 +12017,6 @@ function addCustomYearCompare(){
 }
 
 // 导出总部全景总览表（CSV）
-async function exportHqOverview(){
-  try{
-    if(!_hqOverviewData){ toast('请先加载总览数据','error'); return; }
-    const d=_hqOverviewData;
-    const dims=d.dimensions||[];
-    const lines=[];
-    // 摘要
-    lines.push('【总部全景 · 总览】');
-    lines.push(`本年总案例,${d.summary?.this_year_total||0}`);
-    lines.push(`去年总案例,${d.summary?.last_year_total||0}`);
-    lines.push(`同比变化,${d.summary?.yoy_change||0},${d.summary?.yoy_percent!==null&&d.summary?.yoy_percent!==undefined?d.summary?.yoy_percent+'%':''}`);
-    lines.push('');
-    // 1) 每月数量与占比
-    lines.push('【7大维度每月具体数量与占比】');
-    lines.push('风险维度,全年,'+Array.from({length:12},(_,i)=>(i+1)+'月数量,'+(i+1)+'月占比').join(','));
-    dims.forEach(dim=>{
-      const row=[`${dim.icon} ${dim.dimension_name}`,dim.year_total];
-      dim.monthly.forEach(m=>{ row.push(m.count); row.push(m.percent+'%'); });
-      lines.push(row.map(c=>`"${String(c).replace(/"/g,'""')}"`).join(','));
-    });
-    lines.push('');
-    // 2) 季度对比
-    lines.push('【季度对比】');
-    lines.push('季度,合计,'+dims.map(d=>d.dimension_name).join(','));
-    (d.quarterly_comparison||[]).forEach(q=>{
-      const row=[q.quarter,q.total];
-      dims.forEach(dim=>row.push(q.dimensions[dim.dimension_id]||0));
-      lines.push(row.map(c=>`"${String(c).replace(/"/g,'""')}"`).join(','));
-    });
-    lines.push('');
-    // 3) 年度对比
-    lines.push('【年度对比】');
-    lines.push('年份,合计,'+dims.map(d=>d.dimension_name).join(','));
-    (d.yearly_comparison||[]).forEach(y=>{
-      const row=[y.year,y.total];
-      dims.forEach(dim=>row.push(y.dimensions[dim.dimension_id]||0));
-      lines.push(row.map(c=>`"${String(c).replace(/"/g,'""')}"`).join(','));
-    });
-    lines.push('');
-    // 4) 各分队对比（按虹桥/浦东分组）
-    lines.push('【各分队占比明细】');
-    lines.push('分队,所属基地,本月总数,占比,'+dims.map(d=>d.dimension_name).join(','));
-    const divTotalSumExport=(d.division_breakdown||[]).reduce((s,b)=>s+(b.month_total||0),0)||1;
-    (d.division_breakdown||[]).forEach(b=>{
-      const percent=divTotalSumExport>0?Number((b.month_total/divTotalSumExport*100).toFixed(1)):0;
-      const baseName=b.base_id==='SHA'?'虹桥基地':b.base_id==='PVG'?'浦东基地':(b.base_id||'');
-      const row=[b.division_name,baseName,b.month_total,percent+'%'];
-      dims.forEach(dim=>row.push(b.dimensions[dim.dimension_id]||0));
-      lines.push(row.map(c=>`"${String(c).replace(/"/g,'""')}"`).join(','));
-    });
-    const csv='\uFEFF'+lines.join('\n');
-    const blob=new Blob([csv],{type:'text/csv;charset=utf-8'});
-    const url=URL.createObjectURL(blob);
-    const a=document.createElement('a');
-    a.href=url;
-    a.download=`hq_overview_${new Date().toISOString().slice(0,10)}.csv`;
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-    URL.revokeObjectURL(url);
-    toast('总览表已导出','success');
-  }catch(e){
-    toast('导出失败：'+e.message,'error');
-  }
-}
 
 // ============ 一级基地：加载子级基地列表（各大基地航线特点） ============
 async function loadRouteFeaturesForLevel1(baseId){
@@ -12613,9 +12454,6 @@ async function loadBaseMultiDimProfile(baseId){
 }
 
 // 保留广州专属面板兼容（委托给通用函数）
-async function loadGuangzhouMultiDimProfile(){
-  await loadBaseMultiDimProfile('Z1-CAN');
-}
 
 // ============ 一级基地：展示各大安全风险的具体事件 ============
 async function loadBaseRiskEvents(baseId){
@@ -14195,158 +14033,9 @@ async function downloadEventTemplate(){
   }catch(e){ toast('下载失败：'+e.message,'error'); }
 }
 
-async function exportAllEvents(){
-  try{
-    const params={};
-    if(STATE.currentBase) params.base_id=STATE.currentBase;
-    const res=await CabinAPI.events.export(params);
-    const data=res.data;
-    const blob=new Blob([data.content],{type:data.mime_type});
-    const url=URL.createObjectURL(blob);
-    const a=document.createElement('a');
-    a.href=url; a.download=data.filename; a.click();
-    URL.revokeObjectURL(url);
-    toast(`已导出 ${data.count} 条事件`,'success');
-  }catch(e){ toast('导出失败：'+e.message,'error'); }
-}
 
 // 按维度导出事件（从维度弹窗工具栏触发）
-async function exportDimEvents(dimId){
-  try{
-    const params={dimension_id:dimId};
-    if(CURRENT_DIM_BASE_ID) params.base_id=CURRENT_DIM_BASE_ID;
-    const res=await CabinAPI.events.export(params);
-    const data=res.data;
-    const blob=new Blob([data.content],{type:data.mime_type});
-    const url=URL.createObjectURL(blob);
-    const a=document.createElement('a');
-    a.href=url; a.download=data.filename; a.click();
-    URL.revokeObjectURL(url);
-    toast(`已导出该维度 ${data.count} 条事件`,'success');
-  }catch(e){ toast('导出失败：'+e.message,'error'); }
-}
 
-function importEventDialog(){
-  const existing=document.querySelector('.import-modal-overlay');
-  if(existing) existing.remove();
-  const overlay=document.createElement('div');
-  overlay.className='import-modal-overlay';
-  overlay.innerHTML=`<div class="import-modal" style="max-width:800px">
-    <div class="head">
-      <div class="title">📥 批量导入事件（Excel/CSV）</div>
-      <button class="btn-close-modal" onclick="this.closest('.import-modal-overlay').remove()">×</button>
-    </div>
-    <!-- 【第6项】Tab切换：上传数据 / 待复核池 -->
-    <div style="display:flex;border-bottom:1px solid var(--color-border);margin-bottom:12px">
-      <div id="tabUpload" class="tab" style="padding:8px 16px;cursor:pointer;border-bottom:2px solid var(--color-brand);color:var(--color-brand);font-weight:600" onclick="switchImportTab('upload')">上传数据</div>
-      <div id="tabReject" class="tab" style="padding:8px 16px;cursor:pointer;border-bottom:2px solid transparent;color:var(--color-text-secondary)" onclick="switchImportTab('reject')">
-        待复核池 <span id="rejectCountBadge" style="background:var(--color-risk-high);color:#fff;border-radius:10px;padding:1px 6px;font-size:11px;margin-left:4px">0</span>
-      </div>
-    </div>
-    <!-- Tab1: 上传数据 -->
-    <div id="uploadTab">
-      <div class="hint" style="margin-bottom:12px">支持 .xlsx / .csv 文件拖拽上传，兼容「数据-控制清单」格式。列名映射：时间→日期, 一级风险主标签→风险维度, 二级分类→子分类, 责任人→当事人, 分队→基地, 问题描述→事件描述</div>
-      <div class="import-drop-zone" id="importDropZone" style="border:2px dashed var(--color-border);border-radius:var(--radius-lg);padding:40px 20px;text-align:center;background:var(--color-bg-primary);cursor:pointer;transition:all .3s;margin-bottom:12px">
-        <div style="font-size:36px;margin-bottom:8px">📂</div>
-        <div style="font:var(--font-body);color:var(--color-text-primary);margin-bottom:4px">拖拽文件到此处，或点击选择文件</div>
-        <div style="font:var(--font-caption);color:var(--color-text-secondary)">支持 .xlsx / .csv 格式</div>
-        <input type="file" id="importFileInput" accept=".xlsx,.csv" style="display:none" onchange="handleImportFileSelect(event)">
-      </div>
-      <div id="importPreviewArea" style="display:none">
-        <div style="font:var(--font-body);font-weight:600;color:var(--color-text-primary);margin-bottom:8px">📋 数据预览（共 <span id="importPreviewCount">0</span> 条）</div>
-        <div style="max-height:300px;overflow-y:auto;border:1px solid var(--color-border);border-radius:var(--radius-sm);margin-bottom:12px">
-          <table style="width:100%;border-collapse:collapse;font:var(--font-caption);font-size:11px" id="importPreviewTable">
-            <thead><tr style="background:var(--color-bg-primary);position:sticky;top:0"></tr></thead>
-            <tbody></tbody>
-          </table>
-        </div>
-        <div style="display:flex;gap:8px;margin-bottom:8px;flex-wrap:wrap">
-          <label style="font:var(--font-caption);color:var(--color-text-secondary);display:flex;align-items:center;gap:4px">
-            默认基地：<select id="importDefaultBase" style="padding:4px 8px;border-radius:var(--radius-sm);border:1px solid var(--color-border);background:var(--color-bg-surface);color:var(--color-text-primary);font:var(--font-caption)">
-              ${getGzBaseOptionsHtml(STATE.currentBase)}
-            </select>
-          </label>
-          <label style="font:var(--font-caption);color:var(--color-text-secondary);display:flex;align-items:center;gap:4px">
-            默认维度：<select id="importDefaultDim" style="padding:4px 8px;border-radius:var(--radius-sm);border:1px solid var(--color-border);background:var(--color-bg-surface);color:var(--color-text-primary);font:var(--font-caption)">
-              <option value="">自动识别</option>
-              <option value="RD01">💨 空中伤人</option>
-              <option value="RD02">😴 疲劳管理</option>
-              <option value="RD03">📋 证照管控</option>
-              <option value="RD04">🔥 起火冒烟</option>
-              <option value="RD05">🚪 舱门管控</option>
-              <option value="RD06">⚠️ 偏离程序</option>
-            </select>
-          </label>
-        </div>
-      </div>
-      <div class="actions">
-        <button class="btn-cancel" onclick="downloadEventTemplate()">📥 下载模板</button>
-        <button class="btn-import" id="btnDoImport" onclick="doImportExcelEvents()" disabled style="opacity:0.5">确认导入</button>
-      </div>
-      <div class="result" id="importResult" style="display:none"></div>
-    </div>
-    <!-- Tab2: 待复核池（第6项） -->
-    <div id="rejectTab" style="display:none">
-      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;flex-wrap:wrap;gap:8px">
-        <div style="font:var(--font-body);font-weight:600;color:var(--color-text-primary)">🔍 人工复核池（被拒/失败的导入记录）</div>
-        <div style="display:flex;gap:6px;align-items:center;flex-wrap:wrap">
-          <label style="font:var(--font-caption);color:var(--color-text-secondary);display:flex;align-items:center;gap:4px">
-            筛选状态：<select id="rejectStatusFilter" onchange="loadRejectPool()" style="padding:4px 8px;border-radius:var(--radius-sm);border:1px solid var(--color-border);background:var(--color-bg-surface);color:var(--color-text-primary);font:var(--font-caption)">
-              <option value="PENDING">待处理</option>
-              <option value="ALL">全部</option>
-              <option value="APPROVED">已放行</option>
-              <option value="DELETED">已删除</option>
-            </select>
-          </label>
-          <button onclick="batchProcessRejects('approve')" style="padding:4px 10px;border-radius:var(--radius-sm);border:1px solid var(--color-success);background:rgba(82,196,26,.1);color:var(--color-success);cursor:pointer;font:var(--font-caption);font-weight:600">✅ 批量放行勾选</button>
-          <button onclick="batchProcessRejects('delete')" style="padding:4px 10px;border-radius:var(--radius-sm);border:1px solid var(--color-risk-critical);background:rgba(245,34,45,.1);color:var(--color-risk-critical);cursor:pointer;font:var(--font-caption);font-weight:600">🗑️ 批量删除勾选</button>
-          <button onclick="loadRejectPool()" style="padding:4px 10px;border-radius:var(--radius-sm);border:1px solid var(--color-border);background:var(--color-bg-elevated);color:var(--color-text-secondary);cursor:pointer;font:var(--font-caption)">🔄 刷新</button>
-        </div>
-      </div>
-      <div style="border:1px solid var(--color-border);border-radius:var(--radius-sm);max-height:420px;overflow-y:auto">
-        <table style="width:100%;border-collapse:collapse;font:var(--font-caption);font-size:11px">
-          <thead style="position:sticky;top:0;background:var(--color-bg-primary);z-index:1">
-            <tr>
-              <th style="padding:6px 8px;border-bottom:2px solid var(--color-border);width:30px"><input type="checkbox" id="rejectSelectAll" onchange="rejectToggleAll(this.checked)"></th>
-              <th style="padding:6px 8px;border-bottom:2px solid var(--color-border);text-align:left;white-space:nowrap">行号</th>
-              <th style="padding:6px 8px;border-bottom:2px solid var(--color-border);text-align:left">拒绝原因</th>
-              <th style="padding:6px 8px;border-bottom:2px solid var(--color-border);text-align:left;white-space:nowrap">核心信息</th>
-              <th style="padding:6px 8px;border-bottom:2px solid var(--color-border);text-align:center;white-space:nowrap">可放行?</th>
-              <th style="padding:6px 8px;border-bottom:2px solid var(--color-border);text-align:center;white-space:nowrap">状态</th>
-              <th style="padding:6px 8px;border-bottom:2px solid var(--color-border);text-align:center;white-space:nowrap">操作</th>
-            </tr>
-          </thead>
-          <tbody id="rejectPoolTable">
-            <tr><td colspan="7" style="padding:20px;text-align:center;color:var(--color-text-disabled)">加载中...</td></tr>
-          </tbody>
-        </table>
-      </div>
-      <div style="margin-top:8px;display:flex;justify-content:space-between;align-items:center;font:var(--font-caption);color:var(--color-text-secondary)">
-        <div id="rejectPoolSummary">共 0 条记录</div>
-        <div>💡 可放行规则：缺失严重程度(默认轻) / 未知维度(默认RD06偏离程序) / 轻微格式问题</div>
-      </div>
-    </div>
-  </div>`;
-  document.body.appendChild(overlay);
-  overlay.addEventListener('click',e=>{ if(e.target===overlay) overlay.remove(); });
-  // 刷新待复核数量
-  try{ CabinAPI.rejectPool?.count().then(r=>{ const b=document.getElementById('rejectCountBadge'); if(b) b.textContent=(r.data?.count ?? r.data ?? 0); }).catch(err=>{ console.warn('[pool] rejectPool.count 失败:', err); }); }catch(err){ console.warn('[pool] rejectPool 调用异常:', err); }
-  // 设置拖拽事件
-  setTimeout(()=>{
-    const dropZone=document.getElementById('importDropZone');
-    if(!dropZone) return;
-    dropZone.addEventListener('click',()=>{ document.getElementById('importFileInput').click(); });
-    dropZone.addEventListener('dragover',e=>{ e.preventDefault(); e.stopPropagation(); dropZone.style.borderColor='var(--color-brand)'; dropZone.style.background='rgba(20,132,83,.05)'; });
-    dropZone.addEventListener('dragleave',e=>{ e.preventDefault(); e.stopPropagation(); dropZone.style.borderColor='var(--color-border)'; dropZone.style.background='var(--color-bg-primary)'; });
-    dropZone.addEventListener('drop',e=>{
-      e.preventDefault(); e.stopPropagation();
-      dropZone.style.borderColor='var(--color-border)';
-      dropZone.style.background='var(--color-bg-primary)';
-      const file=e.dataTransfer.files[0];
-      if(file) parseImportFile(file);
-    });
-  },100);
-}
 
 // ===== 【第6项】Tab切换 & 待复核池相关函数 =====
 function switchImportTab(tab){
@@ -15964,18 +15653,6 @@ function getTurbulenceCssColor(idx){
 /**
  * 【P2-4 颠簸等级中文文字描述（含ICAO对齐）】用于地图 Tooltip
  */
-function turbulenceLabel(idx){
-  if (idx <= 0) return '无颠簸 (ICAO L0)';
-  if (idx <= 2) return '轻微 (ICAO LGT- · 0~1)';
-  if (idx <= 5) return '轻度 (ICAO LGT · 1~2)';
-  if (idx <= 8) return '轻-中度 (ICAO MOD- · 2~3)';
-  if (idx <= 11) return '中度 (ICAO MOD · 3~4)';
-  if (idx <= 14) return '中-重度 (ICAO MOD+ · 4~5)';
-  if (idx <= 17) return '重度 (ICAO SEV- · 5~6)';
-  if (idx <= 20) return '强重度 (ICAO SEV · 6~7)';
-  if (idx <= 23) return '极重 (ICAO SEV+ · 7~8)';
-  return '极端 (ICAO EXTRM · ≥8)';
-}
 
 // ============ Leaflet 全景实际地图（联网更新 + IndexedDB 离线缓存） ============
 // STATE.leafletMap/STATE.tileLayer/STATE.mapOnline/STATE.mapMarkersLayer/STATE.mapRoutesLayer/STATE.mapWeatherLayer 已迁移至 STATE
@@ -17310,7 +16987,7 @@ async function geolocateAndSelectBase(){
 // 所有实际的"高风险提醒"将在操作台的 focusBanner / 趋势总结卡中展示。
 let _notifications = []; // 空数组，不再聚合
 let _notifFilter = 'all';
-async function _loadNotifications(baseId) { return []; }
+
 function _renderNotificationsList() {
   return `<div style="padding:40px;text-align:center;color:var(--color-text-secondary)">
     <div style="font-size:32px;margin-bottom:8px">🎯</div>
@@ -17319,11 +16996,11 @@ function _renderNotificationsList() {
     <button onclick="this.closest('.notif-overlay')&&this.closest('.notif-overlay').remove();scrollToFocusBanner()" style="margin-top:14px;padding:6px 14px;border-radius:8px;border:none;background:var(--color-brand);color:#fff;cursor:pointer;font-weight:600">前往操作台</button>
   </div>`;
 }
-function _updateNotifBadge() { /* 空实现：不再使用 bell 徽章表示未读通知 */ }
-function _markNotifRead(id) {}
-function _markAllNotifRead() {}
-function _gotoNotif(id) {}
-function _updateNotifCounts() {}
+
+
+
+
+
 async function openNotificationsPanel(){
   // 旧入口被替换为：滚动到操作台本月事件聚焦
   const overlay=document.createElement('div');
@@ -18077,43 +17754,6 @@ async function sendBriefingFromReport(){
   }
 }
 
-async function confirmAndSendBriefing(){
-  try{
-    const title=document.getElementById('briefingTitle')?.value||'';
-    const summary=document.getElementById('briefingSummary')?.value||'';
-    const targetUser=document.getElementById('briefingTargetUser')?.value||'828cd2ef';
-    const weather=document.getElementById('briefingWeather')?.value||'';
-    // 收集编辑后的风险项
-    const riskEdits=Array.from(document.querySelectorAll('.risk-edit')).map(t=>({note:t.value,idx:parseInt(t.dataset.idx,10)}));
-    const reviewedContent={
-      briefing_date:new Date().toISOString().slice(0,10),
-      title,
-      summary,
-      weather_alerts:weather?weather.split('\n').map(line=>{const [station,alert]=line.split(':');return {station:station?.trim(),alert:alert?.trim()};}):[],
-      top_risks:riskEdits.map(re=>({note:re.note}))
-    };
-    const overlay=document.querySelector('.briefing-review-overlay');
-    if(overlay){
-      const btn=overlay.querySelector('.btn-save');
-      if(btn){ btn.disabled=true; btn.textContent='发送中...'; }
-    }
-    const res=await CabinAPI.briefingReview.send({
-      base_id:STATE.currentBase,
-      target_user_id:targetUser,
-      channel:'feishu',
-      reviewed_content:reviewedContent
-    });
-    toast('✅ 简报已审核并发送：'+res.data.message,'success');
-    document.querySelector('.briefing-review-overlay')?.remove();
-  }catch(e){
-    toast('发送失败：'+e.message,'error');
-    const overlay=document.querySelector('.briefing-review-overlay');
-    if(overlay){
-      const btn=overlay.querySelector('.btn-save');
-      if(btn){ btn.disabled=false; btn.textContent='✅ 确认提交发送'; }
-    }
-  }
-}
 
 function escapeHtml(str){
   if(str==null) return '';
@@ -18133,24 +17773,6 @@ const CHECKLIST_ITEMS = {
 };
 
 // 风险维度与检查项目的关联映射（用于显示关联维度）
-function getChecklistDimMapping(){
-  const dims={};
-  // 获取风险维度数据
-  const dimPanel=document.getElementById('dimStatsGrid');
-  if(dimPanel){
-    const cards=dimPanel.querySelectorAll('.dim-stat-card');
-    cards.forEach(card=>{
-      const nameEl=card.querySelector('.name');
-      const iconEl=card.querySelector('.icon');
-      if(nameEl&&iconEl){
-        const name=nameEl.textContent.trim();
-        const icon=iconEl.textContent.trim();
-        dims[name]=icon;
-      }
-    });
-  }
-  return dims;
-}
 
 async function openChecklistModal(){
   // 移除已有弹窗
@@ -19537,9 +19159,6 @@ async function saveCrewProfile(crewId){
   renderCrewProfilesEnhanced();
 }
 
-function toggleCrewCard(el){
-  el.classList.toggle('expanded');
-}
 
 // ============ 历史数据面板 ============
 let _historyState={
@@ -21033,23 +20652,6 @@ function squadToBase(squad){
 }
 
 // 自动识别基地：根据航线或航班号匹配系统内航线数据
-function autoDetectBase(routePair, flightNo){
-  if(!routePair&&!flightNo) return '';
-  // 从系统航线数据中匹配
-  const routes=CabinAPI._routesCache||[];
-  // 清理route_pair中的中文，提取IATA代码
-  const cleanRoute=(routePair||'').replace(/[^\w-]/g,'');
-  for(const r of routes){
-    // 按航班号匹配
-    if(flightNo&&r.id===flightNo) return r.base_id;
-    // 按 route_path 匹配
-    if(routePair&&r.route_path&&r.route_path.includes(cleanRoute)) return r.base_id;
-    // 按 dep-arr 匹配
-    const parts=cleanRoute.split('-');
-    if(parts.length>=2&&r.dep===parts[0]&&r.arr===parts[parts.length-1]) return r.base_id;
-  }
-  return '';
-}
 
 function handleHistImportFileSelect(e){
   const file=e.target.files[0];

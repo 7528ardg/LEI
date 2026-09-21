@@ -67,13 +67,15 @@ def build():
         print('{:<8} {:>8.1f} KB'.format(key, len(data) / 1024))
     print('images total: {:.2f} MB'.format(total / 1048576.0))
 
-    t = io.open(TPL, 'r', encoding='utf-8').read()
+    t = io.open(TPL, 'r', encoding='utf-8', newline='').read()   # 2026-09-21：读取也禁换行转换，保持 LF 一致
     placeholder = '__IMG_DATA__'
     assert placeholder in t, 'placeholder missing!'
     repl = json.dumps(imgs, ensure_ascii=False)
     t = t.replace(placeholder, repl)
-    with io.open(OUT, 'w', encoding='utf-8') as f:
+    tmp = OUT + '.tmp_write'
+    with io.open(tmp, 'w', encoding='utf-8', newline='') as f:   # 原子写 + 固定 LF
         f.write(t)
+    os.replace(tmp, OUT)
     print('写出', OUT, '{:.2f} MB'.format(os.path.getsize(OUT) / 1048576.0))
 
 if __name__ == '__main__':
