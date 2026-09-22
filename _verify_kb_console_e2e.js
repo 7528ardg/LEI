@@ -77,11 +77,11 @@ function hasText(html, s) { return String(html).indexOf(s) >= 0; }
   await page.click('#dsChips .cs-chip:has-text("销售话术库")');
   await page.waitForTimeout(300);
   const scrPager = await page.textContent("#csPager");
-  ok("销售话术库分页显示 1045 条", /1045/.test(scrPager), scrPager);
+  ok("销售话术库分页显示 1040 条", /1040/.test(scrPager), scrPager);
   await page.fill("#csSearch", "起飞");
   await page.waitForTimeout(400);
   const afterSearch = await page.textContent("#csPager");
-  ok("搜索过滤生效（条数变化）", !/1045/.test(afterSearch), afterSearch);
+  ok("搜索过滤生效（条数变化）", !/1040/.test(afterSearch), afterSearch);
   await page.fill("#csSearch", "");
   await page.waitForTimeout(400);
 

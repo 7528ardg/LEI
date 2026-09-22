@@ -66,6 +66,7 @@ cbt_截图样例/
 ppt_images/
 processed_image_*.png
 *.bak_*.html
+*.bak_2*
 err.log
 抢先版.ipa
 

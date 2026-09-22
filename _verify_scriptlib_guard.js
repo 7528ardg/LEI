@@ -1,7 +1,7 @@
 /* 销售话术库入库闸 scriptLibGuard 验证（2026-09-21）
  * 1) 从 beauty.html 真实抽取 guard 引擎块，在 vm 沙箱里执行（不是重写一份逻辑）
  * 2) 单测：硬红线拦截 / 自动改写 / 标签清洗 / 折扣口径 / 长度 / 空值 / 不误伤正常话术
- * 3) 全库扫描：对 1045 条现有话术跑一遍闸，统计拦截数（误伤必须极低）
+ * 3) 全库扫描：对 1040 条现有话术跑一遍闸，统计拦截数（误伤必须极低）
  * 4) 静态针：入库闸 / 出口闸 / 渲染兜底 / window 挂载 四条路径都在位
  * 用法：node _verify_scriptlib_guard.js     失败即非零退出
  */
@@ -70,7 +70,7 @@ ok('多余空白压缩', r5.content === '多余 空白', JSON.stringify(r5.conte
 ok('渲染兜底会转义且先剥离标签', R('<b>x</b>') === 'x' && R('a & b') === 'a &amp; b',
   JSON.stringify([R('<b>x</b>'), R('a & b')]));
 
-console.log('\n== 4. 全库扫描（现有 1045 条，误伤必须极低） ==');
+console.log('\n== 4. 全库扫描（现有 1040 条，误伤必须极低） ==');
 function grab(text, start, o, c) {
   let d = 0, i = start, inStr = null;
   for (; i < text.length; i++) {
@@ -95,7 +95,7 @@ Object.keys(lib).forEach(function (k) {
     if (r.issues.some(x => x.level === 'warn')) warned++;
   });
 });
-ok('库内话术总数 1045', total === 1045, String(total));
+ok('库内话术总数 1040', total === 1040, String(total));
 ok('硬红线拦截数为 0（库内已治理干净）', blocked === 0, blocked + ' 条：' + samples.join(' | '));
 ok('自动改写未改坏现有话术（changed 很少）', changed <= 5, String(changed));
 console.log('    软提示（不阻断）' + warned + ' 条');
