@@ -1615,6 +1615,7 @@ button:disabled:active{transform:none;}
 
 
 
+
 <div class="livery-stripe" data-page-node-id="mtousEj7ZN4Xi2uM9vjLkB"></div>
 
 <header class="topbar" data-page-node-id="nEnHIwBZCdN9arpgAxqVcb">
@@ -1957,13 +1958,34 @@ function switchModule(id){
   if(!_loaded[id]){
     const loader = document.getElementById('loader-'+id);
     const frame = document.getElementById('frame-'+id);
+    /* __STRESSFIX_20260923__ 导航失败时 Chromium 同样会触发 iframe 的 load 事件（加载错误页），
+       旧实现仅凭 onload 就置 _loaded[id]=true → 15s 超时与镜像切换被永久绕过，
+       该模块也再不会重试（实测 45s 无提示、qa.html 仅被请求 1 次），只能重启应用。
+       现改为「内容就绪」判据：失败一律不置位，保留镜像切换与点击重试。 */
+    if(loader && loader.__origText == null){
+      const _t0 = loader.querySelector('.sl-text');
+      loader.__origText = _t0 ? _t0.textContent : '';
+    }
+    const frameReadyFlag = function(){
+      try{
+        const d = frame.contentDocument;
+        if(!d || !d.body) return false;                       // 空文档 = 导航失败
+        return d.body.innerText.trim().length > 20
+          || !!d.querySelector('main,header,nav,.appbar,.main-scroll-container');
+      }catch(e){ return true; }                               // 跨域读不到就不阻断，放行更安全
+    };
     if(loader) loader.classList.remove('hidden');
     // 加载保护：超时自动切换镜像线路，避免弱网下"一直等待"；双线路都失败则给出可点击重试
     let triedMirror = false;
     const doLoad = function(){
       if(frame._lt) clearTimeout(frame._lt);
+      if(loader && loader.__origText != null){
+        const t = loader.querySelector('.sl-text');
+        if(t) t.textContent = loader.__origText;
+      }
       frame.onload = function(){
         if(frame._lt) clearTimeout(frame._lt);
+        if(!frameReadyFlag()){ onLoadFail(); return; }         // 误触发的 load（导航失败）走失败分支
         _loaded[id] = true;
         if(loader){ loader.classList.add('hidden'); loader.onclick = null; loader.style.cursor = ''; }
         injectEmbedCss(id, frame);
@@ -1974,8 +1996,16 @@ function switchModule(id){
       frame._lt = setTimeout(onLoadFail, 15000); // 15s 无响应视为卡住
     };
     const onLoadFail = function(){
+      if(frame._lt) clearTimeout(frame._lt);
+      _loaded[id] = false;                 // 关键：失败绝不置为已加载，切走再切回仍会重试
       if(triedMirror){
-        if(loader){ loader.querySelector('.sl-text').textContent = '加载失败，点击此处重试'; loader.style.cursor = 'pointer'; loader.onclick = function(){ doLoad(); }; }
+        if(loader){
+          const t = loader.querySelector('.sl-text');
+          if(t) t.textContent = '加载失败，点击此处重试';
+          loader.classList.remove('hidden');
+          loader.style.cursor = 'pointer';
+          loader.onclick = function(){ triedMirror = false; doLoad(); };
+        }
         return;
       }
       triedMirror = true;

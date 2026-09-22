@@ -2289,6 +2289,7 @@ html[data-theme="dark"] .dc-card{background:#162420;border-color:#1E3A2C;color:#
 
 
 
+
 <div class="livery-stripe"></div>
 
 <header class="topbar">
@@ -2560,10 +2561,46 @@ const SpringAI = (function(){
   var AI_FALLBACK_MODELS = ['glm-4-flash-250414', 'glm-4-flash'];
   var AI_RATE_UNTIL = {};
   var AI_RATE_COOLDOWN = 60000;
+  /* __STRESSFIX_20260923__ 并发保护：同一模型同时最多 AI_MAX_INFLIGHT 个请求在飞。
+     旧实现无在途去重，10 路并发会在熔断标记写入前同时轰击链首
+     （实测：已限流的模型被尝试 10 次、请求总数 20 次，熔断形同虚设）。 */
+  var AI_INFLIGHT = {};
+  var AI_SLOT_WAIT = {};
+  var AI_MAX_INFLIGHT = 2;
+  function aiSlotTry(m){
+    var n = AI_INFLIGHT[m] || 0;
+    if (n >= AI_MAX_INFLIGHT) return false;
+    AI_INFLIGHT[m] = n + 1; return true;
+  }
+  function aiSlotRelease(m){
+    var n = (AI_INFLIGHT[m] || 1) - 1;
+    AI_INFLIGHT[m] = n < 0 ? 0 : n;
+    var ws = AI_SLOT_WAIT[m] || [];
+    AI_SLOT_WAIT[m] = [];
+    for (var i = 0; i < ws.length; i++){ try{ ws[i](); }catch(e){} }
+  }
+  function aiSlotWait(m){
+    return new Promise(function(res){ (AI_SLOT_WAIT[m] = AI_SLOT_WAIT[m] || []).push(res); });
+  }
+  /* 取名额：返回 'ok' | 'cooldown' | 'busy'。
+     非链尾等待 budget 短（快速换下一个模型），链尾给足预算（保底模型仍要能服务）。 */
+  async function aiSlotAcquire(m, budgetMs){
+    var t0 = Date.now();
+    while (true){
+      if (aiInCooldown(m)) return 'cooldown';
+      if (aiSlotTry(m)) return 'ok';
+      if (Date.now() - t0 > budgetMs) return 'busy';
+      await aiSlotWait(m);
+    }
+  }
   function aiRetryable(e){
     var s = String((e && e.message) || e || '');
+    /* __STRESSFIX_20260923__ 时延/连接类错误此前不在白名单 → 一次超时即整链失败、
+       两个备用模型完全没机会顶上（实测：注入 8s 超时后请求序列只有 1 个模型）。 */
+    var _st = (e && e.status) || 0;
+    if (_st >= 500 || _st === 408 || _st === 429) return true;
     /* BAD_RESPONSE（2026-09-22）：网关返回 HTML 错误页 / 非 JSON 正文时也应换模型重试 */
-    return /1305|429|访问量过大|速率限制|限流|频率|too many|rate.?limit|系统繁忙|繁忙|EMPTY_CONTENT|BAD_RESPONSE/i.test(s);
+    return /1305|429|访问量过大|速率限制|限流|频率|too many|rate.?limit|系统繁忙|繁忙|EMPTY_CONTENT|BAD_RESPONSE|超时|timeout|timed ?out|AbortError|aborted|abort|Failed to fetch|NetworkError|network error|ERR_NETWORK|ERR_INTERNET|ERR_CONNECTION|ERR_TIMED_OUT|网络异常|网络错误|网络不稳|断网|Gateway Timeout|Bad Gateway|Service Unavailable|502|503|504/i.test(s);
   }
   function aiRateLimited(e){
     var s = String((e && e.message) || e || '');
@@ -2582,10 +2619,20 @@ const SpringAI = (function(){
     var onZhipu = String(resolve(getCfg()).base || '').indexOf('bigmodel.cn') >= 0;
     // 链首 = 用户配置的主模型（默认 glm-4-flash-250414），其后为两个稳定的免费 Flash 备用模型
     var chain = onZhipu ? [null].concat(AI_FALLBACK_MODELS) : [null, null, null];
-    for(var _i = 0; _i < chain.length; _i++){
+    for (var _i = 0; _i < chain.length; _i++){
       var o = chain[_i] ? Object.assign({}, opts, { _model: chain[_i] }) : opts;
-      // 熔断中的模型直接跳过（保留链尾模型兜底，避免整条链被跳空）
-      if(_i < chain.length - 1 && aiInCooldown(aiModelOf(o))) continue;
+      var _m = aiModelOf(o);
+      var _tail = (_i === chain.length - 1);
+      /* __STRESSFIX_20260923__ 链尾同样参与冷却检查：旧实现只跳过链首，
+         导致链首被熔断后流量单点压向链尾；链尾再被打爆则整链不可用。
+         全部模型都在冷却时快速失败并给出明确文案，而不是空等 25s 超时。 */
+      var _acq = await aiSlotAcquire(_m, _tail ? 20000 : 1200);
+      if (_acq !== 'ok'){
+        lastErr = lastErr || new Error(_acq === 'cooldown'
+          ? 'ALL_MODELS_COOLDOWN 全部模型处于限流冷却中，请稍后再试'
+          : 'ALL_MODELS_BUSY 模型并发已满，请稍后再试');
+        continue;
+      }
       var _retry = true;
       try {
         var out = await chatLLMOnce(messages, o);
@@ -2596,9 +2643,11 @@ const SpringAI = (function(){
       } catch(e){
         lastErr = e;
         _retry = aiRetryable(e);
-        if(aiRateLimited(e)) AI_RATE_UNTIL[aiModelOf(o)] = Date.now() + AI_RATE_COOLDOWN;
+        if(aiRateLimited(e)) AI_RATE_UNTIL[_m] = Date.now() + AI_RATE_COOLDOWN;
+      } finally {
+        aiSlotRelease(_m);
       }
-      if(!_retry || _i === chain.length - 1) break;
+      if(!_retry || _tail) break;
       await new Promise(function(r){ setTimeout(r, AI_RETRY_BACKOFF[_i] || 1500); });
     }
     throw lastErr;
@@ -2626,7 +2675,8 @@ const SpringAI = (function(){
       if(!res.ok){
         let msg = 'HTTP ' + res.status;
         try{ const d = await res.json(); msg = (d.error && (d.error.message || d.error.code)) || msg; }catch(e){}
-        throw new Error(msg);
+        /* __STRESSFIX_20260923__ 保留 HTTP 状态码，供 aiRetryable 判定 5xx 可重试 */
+        const _httpErr = new Error(msg); _httpErr.status = res.status; throw _httpErr;
       }
       /* 2026-09-22 审查修复：正文不一定是 JSON（网关/代理错误页会返回 HTML），
          此前直接 await res.json() 抛 SyntaxError 且不被判定为可重试 → 整链直接失败。

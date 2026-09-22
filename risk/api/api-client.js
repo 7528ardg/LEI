@@ -66,9 +66,51 @@
     cache.clear();
   }
 
-  function getToken() {
+  /* __STRESSFIX_20260923__ risk 会话自动补建。
+     主登录流程只写 cabin_session_v1，risk 专属会话键（cabin_risk_session_v1）从不写入，
+     而 mock 服务的 requireAuth 直接读该键 → quiz / kbadmin 模块恒报
+     「未登录或会话已过期」，天气与风险因子能力静默失效。
+     这里在主会话存在而 risk 会话缺失时，用 mock 的 user_id 备用登录路径补建会话。
+     补建失败不影响原请求（与修复前行为一致，只是不再必然 401）。 */
+  var _riskProvisioning = null;
+  function readRiskSession() {
     try {
       const s = JSON.parse(localStorage.getItem('cabin_risk_session_v1') || 'null');
+      return (s && s.token) ? s : null;
+    } catch { return null; }
+  }
+  function readMainSession() {
+    try {
+      const m = JSON.parse(localStorage.getItem('cabin_session_v1') || 'null');
+      return (m && typeof m === 'object') ? m : null;
+    } catch { return null; }
+  }
+  async function ensureRiskSession() {
+    if (readRiskSession()) return true;
+    const m = readMainSession();
+    if (!m) return false;
+    const uid = m['工号'] || m.user_id || m.user || m.account || '';
+    if (!uid || !global.CabinMockServer) return false;
+    if (_riskProvisioning) return _riskProvisioning;
+    _riskProvisioning = (async () => {
+      try {
+        const res = await global.CabinMockServer.handle('POST', '/api/v1/auth/login', {
+          query: {},
+          body: {
+            user_id: String(uid),
+            user_name: m['姓名'] || m.user_name || '管理员',
+            base_id: m.base_id || 'Z1'
+          }
+        });
+        return !!(res && res.ok && readRiskSession());
+      } catch (e) { return false; }
+      finally { _riskProvisioning = null; }
+    })();
+    return _riskProvisioning;
+  }
+  function getToken() {
+    try {
+      const s = readRiskSession();
       return s?.token || null;
     } catch { return null; }
   }
@@ -97,6 +139,7 @@
       emit('request', { method, path: fullPath, body, ts: Date.now() });
 
       // 调用 Mock 服务端
+      await ensureRiskSession();
       const token = getToken();
       const headers = { 'Authorization': token ? `Bearer ${token}` : '' };
       const res = await global.CabinMockServer.handle(method, path, { query: query || {}, body });

@@ -77,11 +77,18 @@ function hasText(html, s) { return String(html).indexOf(s) >= 0; }
   await page.click('#dsChips .cs-chip:has-text("销售话术库")');
   await page.waitForTimeout(300);
   const scrPager = await page.textContent("#csPager");
-  ok("销售话术库分页显示 1040 条", /1040/.test(scrPager), scrPager);
+  /* 2026-09-23：话术库已扩容（1040 → 1237 条），硬编码期望值会随数据漂移而假失败。
+     改为「分页自洽」断言：页数 == ceil(总条数 / 每页 50 行)，校验的是分页算法而非某个具体数字。 */
+  const parseTotal = (t) => parseInt(((/共\s*(\d+)\s*条/.exec(t) || [])[1]) || "0", 10);
+  const parsePages = (t) => parseInt(((/第\s*\d+\s*\/\s*(\d+)\s*页/.exec(t) || [])[1]) || "0", 10);
+  const scrTotal = parseTotal(scrPager), scrPages = parsePages(scrPager);
+  ok("销售话术库分页自洽（页数 = ceil(总条数/50)）",
+    scrTotal > 0 && scrPages === Math.ceil(scrTotal / 50), `${scrPager} → 总${scrTotal}条 / ${scrPages}页`);
   await page.fill("#csSearch", "起飞");
   await page.waitForTimeout(400);
   const afterSearch = await page.textContent("#csPager");
-  ok("搜索过滤生效（条数变化）", !/1040/.test(afterSearch), afterSearch);
+  ok("搜索过滤生效（条数减少）", parseTotal(afterSearch) > 0 && parseTotal(afterSearch) < scrTotal,
+    `${afterSearch} → 过滤后 ${parseTotal(afterSearch)} < ${scrTotal}`);
   await page.fill("#csSearch", "");
   await page.waitForTimeout(400);
 

@@ -70,6 +70,14 @@ BUILD_STEPS = [
     # ===== 2026-09-19 设计审核 P0-C：标题层级与 skip-link（必须在打包产物之前）=====
     (u'可访问性·标题层级+skip-link(幂等)', u'python _apply_a11y_20260919.py'),
     (u'壳层设计审核修复·顶栏对比度/字号/触控44px+平板档(幂等)', u'python _apply_shell_sync_20260919.py'),
+    # ===== 2026-09-23 三端压测缺陷修复（必须排在所有产物生成之前）=====
+    #   A) index.html switchModule：导航失败时 iframe 仍会触发 load，旧实现据此置 _loaded → 超时与镜像
+    #      切换被绕过、模块永久空白且不再重试；改为「内容就绪」判据。
+    #   B) qa.html aiRetryable：补齐超时/AbortError/Failed to fetch/5xx，否则一次超时即整链失败。
+    #   C) qa.html 熔断器：单模型并发上限 + 链尾冷却检查（旧实现 10 路并发把限流模型轰 10 次）。
+    #   D) risk/api/api-client.js：主会话可自动补建 risk 会话（否则天气/风险因子恒 401）。
+    #   E) PWA 构建脚本 Service Worker 缓存版本化（PWA 包另由 _build_pwa.py 生成）。
+    (u'三端压测缺陷修复(模块自愈/重试白名单/熔断并发/risk会话/PWA缓存,幂等)', u'python _apply_stressfix_20260923.py'),
     # 2026-09-21 补入：cc-home.html / daily.html 的唯一生成器原先不在链里，
     # 改了模板跑一键构建会「成功」却发布陈旧模块且全程不报错。必须排在打包步骤之前。
     (u'构建 CC之家模块', u'python _build_home.py'),
@@ -164,6 +172,11 @@ VERIFY_SCRIPTS = [
     u'python _check_apk_sync.py',                           # APK 内 assets/www 与源同步（落后即失败，防「改了源没装配」）
     # 2026-09-22 安全审查 M1/M2 守护：明文口令/答案清零 + ADMIN 种子自洽 + 两套 SHA-256 实现同源 + 行为 + 会话口令不落盘
     u'node _verify_pwd_hash_20260922.js',
+    # 2026-09-23 三端压测修复（对应 _apply_stressfix_20260923.py）：
+    #   模块加载失败自愈 / AI 重试白名单补超时与网络错误 / 熔断器并发保护 + 链尾冷却 /
+    #   risk 会话自动补建 / PWA Service Worker 缓存版本化
+    u'python _apply_stressfix_20260923.py --check',
+    u'node _verify_stressfix_20260923.js',
 ]
 
 # 全量语法检查覆盖：全部模块源 + 三外壳/产物（排除 .tmp_ 调试文件）
