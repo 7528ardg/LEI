@@ -136,7 +136,12 @@ def _sync_tree(src, dst, ignore_files=(), ignore_dirs=()):
         for f in fs:
             if any(fnmatch.fnmatch(f, p) for p in ignore_files):
                 continue
-            shutil.copyfile(os.path.join(r, f), os.path.join(out, f))
+            # 2026-09-22 审查 L12：改为「写临时文件 + os.replace」原子落盘，
+            # 避免中断/磁盘满时在在线部署包里留下半截文件（与项目落盘铁律一致）。
+            _src, _dst = os.path.join(r, f), os.path.join(out, f)
+            _tmp = _dst + '.tmp_write'
+            shutil.copyfile(_src, _tmp)
+            os.replace(_tmp, _dst)
             n += 1
     return n
 
@@ -169,7 +174,7 @@ def main():
     os.makedirs(OUT_DIR, exist_ok=True)
 
     # 2) spring-assistant.html -> 9 模块瘦壳
-    shell = io.open(os.path.join(BASE, u'spring-assistant.html'), encoding='utf-8').read()
+    shell = io.open(os.path.join(BASE, u'spring-assistant.html'), encoding='utf-8', newline='').read()
     hosted = strip_modules(shell)
     out9 = os.path.join(OUT_DIR, u'客舱小助手（在线版）.html')
     # 瘦壳必须真的被置空：B64_LINE 依赖「base64 独占一行」，若上游产物格式变了会静默不替换

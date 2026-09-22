@@ -28035,6 +28035,10 @@ window.setComplianceMode = function(v){ state.complianceMode = v; try{ localStor
                 if (n) n.scrollLeft = scrollLeft;
             });
         };
+        // 2026-09-22 审查 L3：switchTab 是函数作用域内的 const，此前未挂 window，
+        // 深跳桥（NAV_BRIDGE）只能靠「找到 switchTab('x') 按钮再 click()」的兜底。
+        // 这里显式导出，桥接可直接调用；同时彻底移除桥里那处 window.eval 代码异味。
+        window.switchTab = switchTab;
 
         const renderTab = (id, label, icon) => {
             const count = id === 'recommend' ? state.matchedProducts.length : id === 'history' ? state.recentScripts.length : id === 'selected' ? state.selectedProductIds.length : id === 'custom' ? state.customScripts.length : 0;
@@ -29700,7 +29704,7 @@ window.setComplianceMode = function(v){ state.complianceMode = v; try{ localStor
                 // Search and filter bar
                 html += `<div class="flex gap-2 mb-4 flex-wrap">
                     <div class="flex-1 relative min-w-[200px]"><span class="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400">🔍</span>
-                        <input type="text" placeholder="搜索话术内容..." value="${state.scriptLibSearch}" oninput="state.scriptLibSearch=this.value;render()" class="w-full pl-9 pr-3 py-2 bg-gray-50 border border-gray-200 rounded-lg text-sm focus:border-emerald-300 focus:outline-none focus:ring-2 focus:ring-purple-100">
+                        <input type="text" placeholder="搜索话术内容..." value="${state.scriptLibSearch}" oninput="state.scriptLibSearch=this.value;clearTimeout(window.__slSearchT);window.__slSearchT=setTimeout(function(){render();},180)" class="w-full pl-9 pr-3 py-2 bg-gray-50 border border-gray-200 rounded-lg text-sm focus:border-emerald-300 focus:outline-none focus:ring-2 focus:ring-purple-100">
                     </div>
                     <select onchange="state.scriptLibEmotionFilter=this.value;render()" class="px-3 py-2 bg-gray-50 border border-gray-200 rounded-lg text-sm whitespace-nowrap">
                         <option value="all" ${state.scriptLibEmotionFilter==='all'?'selected':''}>全部情绪响应</option>
@@ -29734,6 +29738,14 @@ window.setComplianceMode = function(v){ state.complianceMode = v; try{ localStor
 
                 const filteredCats = state.scriptLibFilter === 'all' ? libCategories : [state.scriptLibFilter];
                 let hasResults = false;
+                /* 2026-09-22 审查 M8：1000+ 条话术一次性拼进 innerHTML 代价过大（搜索/切换栏目整页重渲）。
+                   改为「渐进式渲染」：每屏先渲染 SL_PAGE 条，其余按需「显示更多」展开；
+                   过滤条件（栏目/搜索词/情绪）变化时自动重置回第一屏。 */
+                const SL_PAGE = 40;
+                const _slKey = String(state.scriptLibFilter) + '|' + String(state.scriptLibSearch || '') + '|' + String(state.scriptLibEmotionFilter || '');
+                if (state._slKey !== _slKey) { state._slKey = _slKey; state.scriptLibShown = SL_PAGE; }
+                let slBudget = Math.max(SL_PAGE, Number(state.scriptLibShown) || SL_PAGE);
+                let slHidden = 0;
                 filteredCats.forEach(function(catKey) {
                     const cat = scriptLibraryData[catKey];
                     let scripts = cat.scripts.slice(); // copy
@@ -29754,14 +29766,20 @@ window.setComplianceMode = function(v){ state.complianceMode = v; try{ localStor
                     if (scripts.length === 0) return;
                     hasResults = true;
 
+                    const catTotal = scripts.length;
+                    if (slBudget <= 0) { slHidden += catTotal; return; }
+                    const shown = scripts.slice(0, slBudget);
+                    slHidden += catTotal - shown.length;
+                    slBudget -= shown.length;
+
                     html += `<div class="mb-6">
                         <div class="flex items-center gap-2 mb-3">
                             <div class="h-6 w-1.5 rounded-full bg-gradient-to-b ${cat.color}"></div>
                             <h3 class="font-semibold text-gray-800 text-base">${cat.icon} ${cat.label}</h3>
-                            <span class="text-xs text-gray-400">${scripts.length} 条话术</span>
+                            <span class="text-xs text-gray-400">${catTotal} 条话术</span>
                         </div>
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-3">`;
-                    scripts.forEach(function(script, idx) {
+                    shown.forEach(function(script, idx) {
                         const isUserScript = script.id && script.id.startsWith('usr_');
                         html += `<div class="bg-white rounded-xl border border-gray-100 p-4 hover:shadow-md hover:border-emerald-200 transition-all group relative">
                             ${isUserScript ? '<div class="absolute top-2 right-2"><span class="px-1.5 py-0.5 bg-violet-100 text-violet-600 rounded text-xs">自定义</span></div>' : ''}
@@ -29770,20 +29788,30 @@ window.setComplianceMode = function(v){ state.complianceMode = v; try{ localStor
                                     <p class="text-sm text-gray-800 leading-relaxed break-words">${window.slRender(script.content)}</p>
                                     <div class="flex items-center gap-1 mt-2 flex-wrap">`;
                         (script.tags || []).forEach(function(tag) {
-                            html += `<span class="px-2 py-0.5 bg-emerald-50 text-emerald-600 rounded text-xs">${tag}</span>`;
+                            /* 2026-09-22 安全审查修复 H1：tags 由用户录入且可经 kb-admin 导入，
+                               原先未转义直拼 innerHTML → 存储型 XSS（可跨用户触发）。 */
+                            html += `<span class="px-2 py-0.5 bg-emerald-50 text-emerald-600 rounded text-xs">${escHtml(tag)}</span>`;
                         });
                         html += `</div>
                                 </div>
                                 <div class="flex items-center gap-1.5 flex-shrink-0">
-                                    <button onclick="editScriptLib('${catKey}','${script.id}')" class="px-2.5 py-1.5 bg-emerald-50 text-emerald-600 hover:bg-emerald-100 rounded-lg transition-colors text-xs font-medium" title="编辑话术">✏️ 编辑</button>
-                                    <button onclick="copyScriptById('${catKey}','${script.id}')" class="px-2.5 py-1.5 bg-emerald-50 text-emerald-600 hover:bg-emerald-100 rounded-lg transition-colors text-xs font-medium" title="复制话术">📋</button>
-                                    <button onclick="deleteScriptLib('${catKey}','${script.id}')" class="px-2.5 py-1.5 bg-red-50 text-red-500 hover:bg-red-100 rounded-lg transition-colors text-xs font-medium" title="删除话术">🗑️</button>
+                                    <button onclick="editScriptLib('${escHtml(catKey)}','${escHtml(script.id)}')" class="px-2.5 py-1.5 bg-emerald-50 text-emerald-600 hover:bg-emerald-100 rounded-lg transition-colors text-xs font-medium" title="编辑话术">✏️ 编辑</button>
+                                    <button onclick="copyScriptById('${escHtml(catKey)}','${escHtml(script.id)}')" class="px-2.5 py-1.5 bg-emerald-50 text-emerald-600 hover:bg-emerald-100 rounded-lg transition-colors text-xs font-medium" title="复制话术">📋</button>
+                                    <button onclick="deleteScriptLib('${escHtml(catKey)}','${escHtml(script.id)}')" class="px-2.5 py-1.5 bg-red-50 text-red-500 hover:bg-red-100 rounded-lg transition-colors text-xs font-medium" title="删除话术">🗑️</button>
                                 </div>
                             </div>
                         </div>`;
                     });
                     html += `</div></div>`;
                 });
+
+                // M8：还有未渲染的话术 → 提供「显示更多」（每点一次多展开 60 条）
+                if (slHidden > 0) {
+                    const _next = (Number(state.scriptLibShown) || SL_PAGE) + 60;
+                    html += `<div class="text-center py-4">
+                        <button onclick="state.scriptLibShown=${_next};render()" class="px-5 py-2.5 rounded-xl bg-gray-100 text-gray-700 hover:bg-gray-200 transition-colors text-sm font-medium">显示更多（还有 ${slHidden} 条）</button>
+                    </div>`;
+                }
 
                 if (!hasResults) {
                     html += `<div class="p-12 text-center text-gray-400"><span class="text-6xl">🔍</span><p class="mt-3 text-lg">未找到匹配的话术</p><p class="text-sm mt-1">请尝试其他搜索关键词或分类</p></div>`;
@@ -29813,10 +29841,10 @@ window.setComplianceMode = function(v){ state.complianceMode = v; try{ localStor
                     });
                     html += `</select></div>
                                 <div><label class="text-sm text-gray-800 mb-1 block">话术内容</label>
-                                    <textarea id="scriptlib-content" placeholder="请输入话术内容..." class="w-full px-3 py-2 bg-white border border-gray-200 rounded-lg text-sm focus:border-emerald-300 focus:outline-none focus:ring-2 focus:ring-purple-100 whitespace-pre-wrap leading-relaxed resize-y" style="min-height:${contentMinH}px;max-height:50vh;">${state.scriptLibFormContent}</textarea>
+                                    <textarea id="scriptlib-content" placeholder="请输入话术内容..." class="w-full px-3 py-2 bg-white border border-gray-200 rounded-lg text-sm focus:border-emerald-300 focus:outline-none focus:ring-2 focus:ring-purple-100 whitespace-pre-wrap leading-relaxed resize-y" style="min-height:${contentMinH}px;max-height:50vh;">${escHtml(state.scriptLibFormContent)}</textarea>
                                 </div>
                                 <div><label class="text-sm text-gray-800 mb-1 block">标签（逗号分隔）</label>
-                                    <input type="text" id="scriptlib-tags" value="${state.scriptLibFormTags.join(',')}" placeholder="如：热情,专业,关怀" class="w-full px-3 py-2 bg-white border border-gray-200 rounded-lg text-sm focus:border-emerald-300 focus:outline-none focus:ring-2 focus:ring-purple-100">
+                                    <input type="text" id="scriptlib-tags" value="${escHtml(state.scriptLibFormTags.join(','))}" placeholder="如：热情,专业,关怀" class="w-full px-3 py-2 bg-white border border-gray-200 rounded-lg text-sm focus:border-emerald-300 focus:outline-none focus:ring-2 focus:ring-purple-100">
                                 </div>
                             </div>
                             <div class="px-4 pb-4">
@@ -31844,7 +31872,13 @@ html += `<div class="mb-6"><div class="flex items-center justify-between mb-3"><
         const saveScriptLib = (scriptId) => {
             const _raw = (document.getElementById('scriptlib-content')?.value || '').trim();
             if (!_raw) { showAlert('提示', '请输入话术内容'); return; }
-            const _g = window.scriptLibGuard ? window.scriptLibGuard(_raw) : { ok: true, content: _raw, issues: [] };
+            /* 2026-09-22 安全审查修复（fail-closed）：此前闸缺失时走 `{ok:true}` 静默放行，
+               违禁话术可直接入库。现要求闸必须就绪，否则拒绝保存。 */
+            if (!window.scriptLibGuard) {
+                showAlert('合规校验未加载', '入库闸未就绪，为安全起见本次保存已阻止。请刷新页面后重试。');
+                return;
+            }
+            const _g = window.scriptLibGuard(_raw);
             if (!_g.ok) {
                 showAlert('话术未通过合规校验', (_g.blocks || []).map(function (x) {
                     return '· ' + x.rule + '：命中「' + x.hit + '」' + (x.suggest ? '，建议：' + x.suggest : '');
@@ -31920,18 +31954,21 @@ html += `<div class="mb-6"><div class="flex items-center justify-between mb-3"><
             if (!s && state.userScripts) s = state.userScripts.find(function (x) { return x.id === scriptId; }) || null;
             if (!s) { showAlert('提示', '未找到该话术'); return; }
             copyScriptContent(s.content);
+        };
 
-        /* 话术库函数挂 window：模板串里的 onclick 走全局作用域，块级 const 调用不到（2026-09-21 修复） */
-        window.copyScriptById = copyScriptById;
-        window.copyScriptContent = copyScriptContent;
-        window.saveScriptLib = saveScriptLib;
-        window.editScriptLib = editScriptLib;
-        window.deleteScriptLib = deleteScriptLib;
-        window.openScriptLibForm = openScriptLibForm;
-        window.closeScriptLibForm = closeScriptLibForm;        };
+        /* 话术库函数挂 window（2026-09-21 修复 + 2026-09-22 结构修正）
+           —— 模板串里的 onclick 走全局作用域，块级 const 调用不到，必须显式挂 window。
+           2026-09-22 审查发现：此前这段导出被插进了 copyScriptById 的函数体内部，
+           而它自身又没挂 window → 导出永不执行，话术库「新增/编辑/删除/复制」全部
+           ReferenceError（前端点按钮毫无反应）。现移到顶层、并在所有 const 声明之后。 */
         /*__SL_GUARD_HOOK_20260921__*/
         const copyScriptContent = (content) => {
-            const _g = window.scriptLibGuard ? window.scriptLibGuard(content) : { ok: true, content: content, issues: [] };
+            /* 2026-09-22 安全审查修复（fail-closed）：出口闸缺失时不再放行（复制出去的就是对客话术） */
+            if (!window.scriptLibGuard) {
+                showAlert('合规校验未加载', '出口闸未就绪，为避免复制未过闸话术，本次复制已阻止。请刷新页面后重试。');
+                return;
+            }
+            const _g = window.scriptLibGuard(content);
             const _text = _g.content;
             if (_g.issues && _g.issues.length) { try { console.warn('[话术库闸] 复制出口已清洗', _g.issues); } catch (_e) {} }
             if (navigator.clipboard) {
@@ -31948,6 +31985,17 @@ html += `<div class="mb-6"><div class="flex items-center justify-between mb-3"><
                 });
             }
         };
+
+        /* 话术库函数挂 window：模板串里的 onclick 走全局作用域，块级 const 调用不到（2026-09-21 修复）
+           —— 2026-09-22 审查修复：此块原先被误插进 copyScriptById 函数体（永不执行），现放回顶层；
+           位置必须在 copyScriptContent 声明之后，否则 const 的 TDZ 会在加载期抛 ReferenceError。 */
+        window.copyScriptById = copyScriptById;
+        window.copyScriptContent = copyScriptContent;
+        window.saveScriptLib = saveScriptLib;
+        window.editScriptLib = editScriptLib;
+        window.deleteScriptLib = deleteScriptLib;
+        window.openScriptLibForm = openScriptLibForm;
+        window.closeScriptLibForm = closeScriptLibForm;
 
         const insertEmotionResponse = (emotionKey) => {
             const emData = emotionResponseScripts[emotionKey];

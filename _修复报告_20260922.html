@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>修复报告 · 2026-09-22（P0 + P1 + P2 全量）</title>
+<style>
+:root{
+  --bg:#F6F8F7; --card:#FFFFFF; --text:#10231A; --text2:#4E6459; --text3:#8CA096;
+  --border:#E2EAE6; --accent:#148453; --accent-soft:#E8F3EE;
+  --warn:#B45309; --warn-soft:#FEF3C7; --danger:#C2410C; --danger-soft:#FEE7DE;
+  --code-bg:#F2F5F3; --shadow:0 1px 3px rgba(16,35,26,.06),0 8px 24px rgba(16,35,26,.05);
+}
+@media (prefers-color-scheme: dark){
+  :root{
+    --bg:#0E1713; --card:#151F1A; --text:#E6F0EA; --text2:#9FB5A9; --text3:#6B8076;
+    --border:#20302A; --accent:#4CC38A; --accent-soft:#152A20;
+    --warn:#F0B429; --warn-soft:#2C2410; --danger:#F87171; --danger-soft:#331914;
+    --code-bg:#111B16; --shadow:0 1px 3px rgba(0,0,0,.4),0 8px 24px rgba(0,0,0,.35);
+  }
+}
+*{box-sizing:border-box;}
+body{margin:0;background:var(--bg);color:var(--text);
+  font:15px/1.75 -apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei",sans-serif;}
+.wrap{max-width:1080px;margin:0 auto;padding:32px 20px 72px;}
+header.hero{background:var(--card);border:1px solid var(--border);border-radius:16px;
+  padding:26px 28px;box-shadow:var(--shadow);margin-bottom:24px;}
+header.hero h1{margin:0 0 6px;font-size:26px;letter-spacing:.2px;}
+header.hero .sub{color:var(--text2);font-size:14px;}
+main{background:var(--card);border:1px solid var(--border);border-radius:16px;
+  padding:8px 28px 32px;box-shadow:var(--shadow);}
+h1,h2,h3,h4{line-height:1.35;}
+main h1{font-size:24px;margin:26px 0 12px;}
+main h2{font-size:20px;margin:32px 0 12px;padding-bottom:8px;border-bottom:1px solid var(--border);}
+main h3{font-size:17px;margin:24px 0 10px;}
+main h4{font-size:15px;margin:18px 0 8px;color:var(--text2);}
+p{margin:10px 0;}
+a{color:var(--accent);}
+ul,ol{margin:10px 0;padding-left:24px;}
+li{margin:5px 0;}
+li>ul,li>ol{margin:5px 0;}
+code{background:var(--code-bg);border:1px solid var(--border);border-radius:5px;
+  padding:1px 5px;font:13px/1.5 ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+  word-break:break-word;}
+pre{background:var(--code-bg);border:1px solid var(--border);border-radius:10px;
+  padding:14px 16px;overflow:auto;}
+pre code{background:none;border:none;padding:0;font-size:13px;white-space:pre;}
+blockquote{margin:14px 0;padding:10px 16px;border-left:3px solid var(--accent);
+  background:var(--accent-soft);border-radius:0 10px 10px 0;color:var(--text2);}
+hr{border:none;border-top:1px solid var(--border);margin:28px 0;}
+.tablewrap{overflow-x:auto;margin:14px 0;}
+table{border-collapse:collapse;width:100%;font-size:14px;}
+th,td{border:1px solid var(--border);padding:8px 11px;text-align:left;vertical-align:top;}
+th{background:var(--accent-soft);font-weight:600;white-space:nowrap;}
+tbody tr:nth-child(even){background:rgba(128,128,128,.04);}
+strong{font-weight:600;}
+.toc{background:var(--card);border:1px solid var(--border);border-radius:16px;
+  padding:16px 24px;box-shadow:var(--shadow);margin-bottom:24px;}
+.toc h2{margin:0 0 8px;font-size:15px;color:var(--text2);border:none;padding:0;}
+.toc ol{margin:0;padding-left:20px;columns:2;column-gap:28px;}
+.toc a{text-decoration:none;font-size:14px;color:var(--text);}
+.toc a:hover{color:var(--accent);}
+@media(max-width:640px){.toc ol{columns:1;}main{padding:4px 18px 24px;}.wrap{padding:20px 12px 56px;}}
+</style>
+</head>
+<body>
+<div class="wrap">
+<header class="hero"><h1>修复报告 · 2026-09-22（P0 + P1 + P2 全量）</h1><div class="sub">上游：系统性代码审查报告（2026-09-22）· 3 高危 / 11 中危 / 16 低危｜范围：P0+P1+P2 全量｜站点重建 + APK 重打｜全量回归 65/65 通过</div></div>
+<nav class="toc"><h2>目录</h2><ol><li><a href="#h-一-执行摘要">一、执行摘要</a></li><li><a href="#h-二-p0-立即修-3-3">二、P0（立即修）· 3/3</a></li><li><a href="#h-三-p1-本周内-5-5">三、P1（本周内）· 5/5</a></li><li><a href="#h-四-p2-排期优化-8-8">四、P2（排期优化）· 8/8</a></li><li><a href="#h-五-修复过程中新发现并处置的-4-个缺陷-审查报告之外">五、修复过程中新发现并处置的 4 个缺陷（审查报告之外）</a></li><li><a href="#h-六-验证证据">六、验证证据</a></li><li><a href="#h-七-未处置项-附理由-需专项排期">七、未处置项（附理由，需专项排期）</a></li></ol></nav><main>
+<h1 id="h-修复报告-2026-09-22-p0-p1-p2-全量">修复报告 · 2026-09-22（P0 + P1 + P2 全量）</h1>
+<blockquote>上游：《系统性代码审查报告（2026-09-22）》共 <strong>3 高危 / 11 中危 / 16 低危</strong><br>本次范围：<strong>全部（P0+P1+P2）</strong>；打包档位：<strong>站点重建 + APK 重打</strong><br>结论：<strong>全部处置完毕</strong>，全量回归 <strong>65/65 套通过（exit=0）</strong>，APK/PWA 已重装配。</blockquote>
+<hr>
+<h2 id="h-一-执行摘要">一、执行摘要</h2>
+<div class="tablewrap"><table><thead><tr><th>项</th><th>结果</th></tr></thead><tbody>
+<tr><td>处置发现</td><td>30 / 30（30 = 3 高 + 11 中 + 16 低）</td></tr>
+<tr><td>其中「审查报告之外、修复过程中实测新发现」的缺陷</td><td><strong>4 个</strong>（含 1 个实战级功能瘫痪）</td></tr>
+<tr><td>站点重建</td><td>✅ <code>_build_all.py build</code> exit=0（spring 7.99MB / 离线完整版 24.28MB / kb-admin 6.38MB）</td></tr>
+<tr><td>APK 重打</td><td>✅ 36.03MB（37,777,842 B）／签名指纹未变／<code>_check_apk_sync</code> 13 份 HTML 一致／<code>_e2e_apk_www_test</code> <strong>30/30</strong></td></tr>
+<tr><td>PWA 重建</td><td>✅ 10/10 结构校验通过</td></tr>
+<tr><td>全量回归</td><td>✅ 语法 OK + 逻辑 <strong>0 套失败 / 共 65 套</strong></td></tr>
+<tr><td>新增守护</td><td><code>_verify_pwd_hash_20260922.js</code>（41 项，已挂入构建链）</td></tr>
+</tbody></table></div>
+<hr>
+<h2 id="h-二-p0-立即修-3-3">二、P0（立即修）· 3/3</h2>
+<h3 id="h-h1-beauty-html-存储型-xss-标签-分类-脚本-id-三处未转义">H1 · beauty.html 存储型 XSS（标签 / 分类 / 脚本 id 三处未转义）</h3>
+<ul><li><strong>改法</strong>：三处插值全部走 <code>escHtml()</code>：<code>escHtml(tag)</code>、<code>escHtml(state.scriptLibFormContent)</code>、<code>escHtml(state.scriptLibFormTags.join(','))</code>、<code>escHtml(catKey)</code> + <code>escHtml(script.id)</code>（3 个 onclick 按钮）。</li><li><strong>新增回归</strong>：<code>_verify_scriptlib_xss_20260922.js</code>（真实浏览器）<strong>21/21</strong>——注入串不落地、CRUD 正常挂载、闸缺失时拒绝写入、正常保存可用。</li></ul>
+<h3 id="h-h2-qa-html-聊天区-o-n²-全量重写-无限增长">H2 · qa.html 聊天区 O(n²) 全量重写 + 无限增长</h3>
+<ul><li><strong>改法</strong>：① <code>CHAT_MAX_MSGS = 200</code>，容量裁剪集中到一处；② 新增 <code>msgHtml(m)</code> / <code>stampMsgIds()</code>，<code>renderChat</code> 改为<strong>纯增量 append</strong>（<code>data-cc-rendered</code> + 首条 id 游标），不再整段重写；③ 清空 / 变更走同一条路径。</li><li><strong>新增回归</strong>：<code>_verify_qa_chat_render_20260922.js</code>（真实浏览器）<strong>14/14</strong>——不整段重写、上限 200、末条变更仍重绘、清空后重建、无页面级报错。</li></ul>
+<h3 id="h-h3-_sync_shell_js-py-非原子写核心构建脚本">H3 · <code>_sync_shell_js.py</code> 非原子写核心构建脚本</h3>
+<ul><li><strong>改法</strong>：<code>write()</code> → <code>.tmp_write + os.replace</code>；补 <code>if __name__ == '__main__':</code> 守卫；删除 28 行死代码。</li><li><strong>验证</strong>：连跑两次 → 第二次 <code>[skip] 无需变更</code>（幂等）。</li></ul>
+<hr>
+<h2 id="h-三-p1-本周内-5-5">三、P1（本周内）· 5/5</h2>
+<h3 id="h-m1-管理员口令-3-位明文-值已在下文掩去-硬编码-源码-构建产物-apk-pwa">M1 · 管理员口令（3 位明文，值已在下文掩去）硬编码（源码 + 构建产物 + APK/PWA）</h3>
+<ul><li><strong>改法</strong>：新增<strong>口令哈希层</strong>（纯 JS 同步 SHA-256，因 <code>file://</code> 下 <code>crypto.subtle</code> 不可用）＋ 每用户随机盐 ＋ <strong>800 轮迭代</strong>。</li><ul><li><code>_shell_enhance.js</code>（spring / 4in1 两模板的单一来源）与 <code>index.html</code> 各自植入同构实现；</li><li><code>ADMIN</code> 改为 <code>{ 工号, 姓名, 手机号, 盐, 密码哈希 }</code>，<strong>移除明文字段</strong>；</li><li>注册只写 <code>盐 + 密码哈希</code>；登录走 <code>verifyUserPwd</code>；旧明文记录<strong>首次校验成功后原地升级</strong>。</li></ul><li><strong>验证</strong>：新增 <code>_verify_pwd_hash_20260922.js</code> <strong>41/41</strong>——明文清零（源码 + 4 份产物）、ADMIN 种子哈希与算法自洽、<strong>两套实现摘要逐位一致（防双源漂移）</strong>、行为 13 项、会话口令不落盘 5 项。</li></ul>
+<h3 id="h-m2-口令-安全问题答案明文落盘">M2 · 口令 / 安全问题答案明文落盘</h3>
+<ul><li><strong>shell（`_shell_enhance.js` + index.html）</strong>：口令、安全答案均改为加盐哈希；旧记录命中即升级。</li><li><strong>performance.html</strong>：备份加密口令由 <code>sessionStorage</code> <strong>明文持久化</strong>改为<strong>内存态 `_sessionPwd`</strong>（刷新即失效，安全性优先于便利性）；<code>init()</code> 中一次性清除历史遗留的 sessionStorage 值；三个对外方法签名保持不变（6 处调用点零改动）。</li></ul>
+<h3 id="h-m5-weakbest-死代码-重复检索">M5 · <code>weakBest</code> 死代码 + 重复检索</h3>
+<ul><li><strong>改法</strong>：删除 <code>weakBest</code> 全段；新增 <code>crossPoolScan()</code> <strong>记忆化跨库扫描</strong>，被「无争议领先者判据 / 切库 / AI 上下文」三处复用，<strong>消除 3 次重复扫描</strong>（原每个走知识链的问题约 10+ 次线性扫描 3476 条）。</li></ul>
+<h3 id="h-m6-chatllmonce-主-res-json-未保护">M6 · <code>chatLLMOnce</code> 主 <code>res.json()</code> 未保护</h3>
+<ul><li><strong>改法</strong>：<code>res.json()</code> 包 try，失败抛 <code>BAD_RESPONSE</code> 并纳入 <code>aiRetryable</code> → 走降级链而非直接抛错。</li></ul>
+<h3 id="h-m11-话术库入库闸兜底放行">M11 · 话术库入库闸兜底放行</h3>
+<ul><li><strong>改法</strong>：保存 / 复制前置 <strong>fail-closed</strong>：<code>window.scriptLibGuard</code> 缺失 → <code>showAlert('合规校验未加载')</code> 并中止。</li><li><strong>同步</strong>：<code>_apply_scriptlib_guard_20260921.py</code> 的 NEW_SAVE / NEW_COPY 两道闸同步改为 fail-closed，<code>--check</code> 全在位。</li></ul>
+<hr>
+<h2 id="h-四-p2-排期优化-8-8">四、P2（排期优化）· 8/8</h2>
+<h3 id="h-m7-澄清链竞态-qaclarnone-绕过串行化">M7 · 澄清链竞态（<code>qaClarNone</code> 绕过串行化）</h3>
+<ul><li><strong>改法</strong>：<code>qaClarNone</code> 的 <code>await process(orig)</code> 改走 <code>_qaAskChain</code>，杜绝 AI 生成中点「都不是」并发改写 <code>qaSource</code> 导致<strong>答案错库</strong>。</li></ul>
+<h3 id="h-m8-beauty-话术库全量重渲-1045-条一次拼入-innerhtml">M8 · beauty 话术库全量重渲（1045 条一次拼入 <code>innerHTML</code>）</h3>
+<ul><li><strong>改法</strong>：① 搜索框 <code>oninput</code> 改 <strong>180ms 防抖</strong>（原先每敲一个字整页重绘）；② 列表改<strong>渐进式渲染</strong>：每屏 40 条，底部「显示更多（还有 N 条）」每次 +60；③ 过滤条件（栏目 / 搜索词 / 情绪）变化时自动重置回第一屏（<code>_slKey</code> 比对，无需改各按钮）。</li><li>首屏 DOM 量由「全部 1045 条」降为 <strong>≤40 条</strong>，搜索输入不再逐字重建整页。</li></ul>
+<h3 id="h-m9-csapplyimport-按索引比对-误报-不一致">M9 · <code>csApplyImport</code> 按索引比对 → 误报「不一致」</h3>
+<ul><li><strong>改法</strong>：改为<strong>按 uid 比对</strong>（uid 是条目的稳定身份，与位置无关）。「合并追加」保留包外条目属预期，仅「整包还原」才统计「工作区多出条目」。提示文案同步改为「按 uid 比对」。</li></ul>
+<h3 id="h-m10-l13-静默丢弃无告警-verifypack-不验-version">M10 + L13 · 静默丢弃无告警 / <code>verifyPack</code> 不验 version</h3>
+<ul><li><strong>引擎（单一来源 `docs/_fullpack_engine.js`，经 `_sync_fullpack.py` 注入）</strong>：</li><ul><li>新增 <code>PROTOCOL_VERSION = 1</code>，<code>verifyPack</code> 校验 <code>version</code>（缺失 / 非法 / 高于 / 低于本引擎 → 四级告警并写入 <code>stats.version</code>）；</li><li>逐源统计 <code>dupUid</code>（重复 uid）与 <code>noData</code>（缺 data），<strong>升级为显式告警</strong>，并进入 <code>stats</code>；</li><li><code>applyFullPack</code> 报告新增 <code>droppedNoData</code> / <code>dupUid</code> / <code>dataLoss</code>；</li><li><code>diffToEdits</code> 新增可选 <code>diag</code> 回填「被丢弃条目数 + 原因」。</li></ul><li><strong>kb-admin 界面</strong>：导入预览、导入结果、导出结果三处均新增 <strong>协议版本行 + 告警盒 + 数据丢失计数</strong>；「整包还原」下 <code>dataLoss &gt; 0</code> 即判为不一致。</li><li><strong>验证</strong>：<code>_verify_kb_fullpack.js</code> <strong>51/51</strong>、<code>_verify_kb_console_e2e.js</code> 全绿；<code>_sync_fullpack.py --check</code> 幂等 OK。</li></ul>
+<h3 id="h-m4-kbstrong-口径">M4 · <code>kbStrong</code> 口径</h3>
+<ul><li><strong>改法</strong>：保留现有判据（当前打分数值下功能等效），<strong>补注释说明隐含前提 `sem`</strong>，避免后续改打分时踩坑。</li></ul>
+<h3 id="h-低危-安全项">低危 · 安全项</h3>
+<div class="tablewrap"><table><thead><tr><th>项</th><th>改法</th></tr></thead><tbody>
+<tr><td>origin 校验</td><td><code>index.html</code> 新增 <code>ccMsgTrusted(e)</code>，2 处 <code>message</code> 监听（2356 / 4407）加来源校验；<code>qa.html</code> 新增 <code>ccMsgTrustedQa</code>；<code>_apply_qa_bridge_20260919.py</code> 的深跳监听新增 <code>_ccMsgTrustedQa</code>（同源 / <code>file:</code> / 自身 iframe 三选一）</td></tr>
+<tr><td><code>noopener</code></td><td><code>qa.html</code>×2、<code>quiz.html</code>、<code>risk-lite.html</code>、<code>_apply_pet.py</code>、<code>_apply_qa_bridge_20260919.py</code> 的 <code>window.open</code> 全补</td></tr>
+<tr><td><code>app_base_url</code> 白名单</td><td><code>index.html</code> <code>getModBase()</code> 引入 <code>APP_BASE_ALLOW = ['', APP_MIRROR_BASE]</code>，<strong>拒绝被篡改的镜像基址</strong>（XSS 后无法重定向模块加载）</td></tr>
+<tr><td><code>postMessage</code> 目标收敛</td><td>原先一律 <code>'*'</code> → 现按上下文取值：qa→父窗口用新增 <code>ccParentOrigin()</code>（由 <code>document.referrer</code> 推导父页真实 origin，跨源镜像亦适用，取不到才回退 <code>'*'</code>）；壳层→iframe 用 <code>new URL(f.src).origin</code>。同步到 4 处发送侧与 3 份模板源</td></tr>
+<tr><td><code>new Function</code></td><td><code>risk-lite.html</code> 的 <code>onclick</code> 迁移加<strong>严格白名单</strong>（仅「函数名(字面量参数)」）；不匹配者<strong>保留原生 `onclick` 属性不迁移</strong>——既杜绝任意代码执行，又不丢任何既有交互</td></tr>
+<tr><td><code>window.eval</code></td><td><code>beauty.html</code> 删除 <code>window.eval('switchTab')</code> 代码异味，改用约定式 bare 引用 + <code>typeof</code> 兜底；并<strong>补上 `window.switchTab` 导出</strong>（此前深跳桥只能靠「找按钮再 click」兜底）</td></tr>
+</tbody></table></div>
+<h3 id="h-低危-工程项">低危 · 工程项</h3>
+<div class="tablewrap"><table><thead><tr><th>项</th><th>改法</th></tr></thead><tbody>
+<tr><td><code>newline=''</code> 缺失</td><td><code>_build_kbadmin.py</code> / <code>_build_hosted.py</code> / <code>_build_home.py</code> 全部补齐</td></tr>
+<tr><td><code>_check_needles.py</code> 静默丢字节</td><td>解压后 <code>.decode('utf-8','ignore')</code> → 严格 UTF-8，失败计入 fail</td></tr>
+<tr><td><code>_normalize_lf</code> 双倍 IO</td><td>单字节读缓存；并排除 <code>*_tmp*.js</code> / <code>*.tmp_write</code>（含 24MB 临时文件）</td></tr>
+<tr><td><code>_build_hosted.py</code> 非原子写</td><td>产物拷贝改 <code>.tmp_write + os.replace</code>（L12）</td></tr>
+<tr><td><code>_sync_fullpack.py</code> 回滚非原子</td><td>同上（M3）</td></tr>
+<tr><td><code>esc()</code> 死代码 / 工号正则不一致</td><td>删除；<code>^\d{4,8}$</code> → <code>^\d{4,10}$</code>（与 <code>maxlength=10</code> 对齐）</td></tr>
+</tbody></table></div>
+<hr>
+<h2 id="h-五-修复过程中新发现并处置的-4-个缺陷-审查报告之外">五、修复过程中新发现并处置的 4 个缺陷（审查报告之外）</h2>
+<h3 id="h-1-beauty-html-话术库全部-crud-按钮-referenceerror-实战级功能">★ 1. beauty.html 话术库全部 CRUD 按钮 <code>ReferenceError</code>（实战级功能瘫痪）</h3>
+<ul><li><strong>现象</strong>：真实浏览器探针实测 <code>window.saveScriptLib === undefined</code>（页面加载后）。</li><li><strong>根因</strong>：补丁把 <code>window.copyScriptById / editScriptLib / deleteScriptLib / saveScriptLib</code> 的 <strong>EXPORTS 块嵌进了 `copyScriptById` 函数体内部</strong>，且 <code>copyScriptById</code> 自身从未挂到 <code>window</code> → 四个入口一个都不存在，点按钮即 <code>ReferenceError</code>。</li><li><strong>排查手段</strong>：花括号配平不可靠（模板字符串干扰）→ 改用 AST（acorn）作出权威判定。</li><li><strong>改法</strong>：EXPORTS 迁到顶层（<code>const insertEmotionResponse</code> 之前，所有 <code>const</code> 声明之后）；<code>_apply_scriptlib_guard_20260921.py</code> 的锚点同步迁移。<strong>21/21 回归验证 CRUD 已挂载。</strong></li></ul>
+<h3 id="h-2-构建链-互踩-单一来源同步-vs-图片外置-导致整链在第-5-步硬停">★ 2. 构建链「互踩」：单一来源同步 vs 图片外置，导致整链在第 5 步硬停</h3>
+<ul><li><strong>现象</strong>：<code>_build_all.py build</code> 在第 5 步 <code>_sync_dache.py --check</code> 硬停：<code>quiz.html 与单一来源不一致</code>。</li><li><strong>根因</strong>：<code>_sync_dache.py</code>（构建第 5 步）把 <code>__DACHE_IMG_*__</code> 占位符替换为 <strong>内联 data URI</strong>；而 <code>_extract_inline_images_20260921.py</code>（第 20 步）又把这些大图抽成 <code>assets/img/*</code>。两者<strong>互为逆操作</strong> → 每轮构建必留漂移。此前只能「手工跑 <code>_sync_dache.py</code> 绕开」，漂移每轮复现（大撤 4 张长图共 2.07MB）。</li><li><strong>改法</strong>：让 <code>_sync_dache.py</code> <strong>直接产出已外置形态</strong>：<code>assets/img/&lt;md5(base64)[:8]&gt;.jpg</code>（与抽取器同口径，内容寻址、按需落盘、幂等）。现在 check 稳定通过、抽取器无事可做。</li><li><strong>验证</strong>：<code>_sync_dache.py --check</code> → <code>qa.html / quiz.html</code> 双 UP-TO-DATE；四张长图 md5 对应关系实测 <code>85893b92 / 8a07c3fe / c3640803 / 68d6307b</code> 全部命中。</li></ul>
+<h3 id="h-3-apk-装配自检判据过期-明明正常也报-fail">★ 3. APK 装配自检判据过期 → 明明正常也报 <code>[FAIL]</code></h3>
+<ul><li><strong>现象</strong>：<code>_apply_apk_fix_20260918b.py</code>（v3）自检 <code>[FAIL] v2 预热收敛保留</code>。</li><li><strong>根因</strong>：v2 的自检判据早已随壳层「预取门控」改为 <code>('APK_PREWARM_V2' in out) or ('function _pwEnv' in out)</code>，<strong>但 v3 的同名判据没跟着改</strong>，仍只看 <code>APK_PREWARM_V2</code>。产物实际含 <code>_pwEnv</code>，功能正常。</li><li><strong>改法</strong>：v3 判据与 v2 对齐。复跑后 28 项自检全 OK。</li><li><strong>风险提示</strong>：该 FAIL 出现在装配链末端，若被忽略会掩盖真正的 A 阶段失败（A 阶段失败时 <code>www</code> 不更新、APK 字节数与旧包完全相同，极易误判为「打包成功」）。</li></ul>
+<h3 id="h-4-apk-pwa-内-index-html-仍带明文口令">★ 4. APK / PWA 内 <code>index.html</code> 仍带明文口令</h3>
+<ul><li><strong>改法</strong>：由 APK 重装配 + PWA 重建自动修复（源头是已修复的 <code>_shell_enhance.js</code>）。现将 4 份产物纳入 <code>_verify_pwd_hash_20260922.js</code> 的<strong>强断言</strong>，再出现即失败。</li></ul>
+<hr>
+<h2 id="h-六-验证证据">六、验证证据</h2>
+<pre><code>语法检查  16 份源/产物  SYNTAX_OK 全部通过
+逻辑回归  65 套 / 0 套失败 / exit=0
+关键套件  _verify_kb_fullpack.js        51/51     （引擎往返 + M10/L13）
+          _verify_kb_console_e2e.js      全绿      （kb-admin 真实浏览器端到端）
+          _verify_scriptlib_guard.js     34 项     （入库闸四道闸）
+          _verify_scriptlib_xss_20260922.js  21/21  （新增·H1 XSS）
+          _verify_qa_chat_render_20260922.js 14/14  （新增·H2 增量渲染）
+          _verify_pwd_hash_20260922.js   41/41     （新增·M1/M2 守护）
+          _verify_embed_gap_20260922.js  11/11     （嵌入态死带空白）
+          _e2e_apk_www_test.js           30/30     （APK 真实载荷）
+          _check_apk_sync.py             13 份一致
+          _check_needles.py / _verify_nokey_all.py  通过（源码零内置密钥红线成立）</code></pre>
+<p><strong>分发版</strong></p>
+<div class="tablewrap"><table><thead><tr><th>产物</th><th>结果</th></tr></thead><tbody>
+<tr><td><code>spring-assistant.html</code></td><td>7.99 MB，<code>ADMIN</code> 已哈希、0 处明文</td></tr>
+<tr><td><code>客舱小助手（离线完整版）.html</code></td><td>24.28 MB，0 处明文；<code>assets/img</code> 已回填 data URI（单文件自包含断言通过）</td></tr>
+<tr><td><code>kb-admin.html</code></td><td>6.38 MB</td></tr>
+<tr><td><code>APK封装/CabinAssistant/客舱小助手.apk</code></td><td><strong>37,777,842 B（36.03 MB）</strong>；含 <code>assets/img</code> 127 / <code>ccmodels</code> 52 / glb 24 / 12 模块；签名 SHA-256 <code>23e8f485…23e9f9</code> 未变</td></tr>
+<tr><td><code>PWA封装/客舱小助手/</code></td><td>index 392,161 B；manifest / sw / 4 图标 10/10 通过</td></tr>
+</tbody></table></div>
+<hr>
+<h2 id="h-七-未处置项-附理由-需专项排期">七、未处置项（附理由，需专项排期）</h2>
+<ol><li><strong>L14 · `qa.html` `process()` 约 230 行超长函数 / 六库决策散落 5 处</strong>：纯重构，行为面广、回归成本高；当前判据已由回归全覆盖，<strong>建议专项做</strong>。</li><li><strong>L16 · `var/let` 混用、`==` 宽松比较、魔法数字未集中</strong>（熔断 60s、<code>s&gt;=4</code>、<code>+15</code>）：量大且无功能影响，改动会在 diff 里淹没本次安全修复，<strong>建议独立提交</strong>。</li><li><strong>M8 的进阶形态 · beauty 事件委托化 / 虚拟滚动</strong>：本次已用「防抖 + 渐进渲染」把首屏 DOM 从 1045 条降到 ≤40 条；再往下需重写列表渲染范式，收益递减而回归面大。</li><li><strong>L6 / L7 · 隐私告知文案</strong>（联网搜索把查询词发第三方；用户自带 AI Key 明文存 <code>localStorage</code> 属设计内）：需产品口径确认，代码侧无可改。</li><li><strong>M1 的根因面 · 前端门禁本身可绕过</strong>：本项目门禁定位为「本机 UX 门禁」而非安全边界。真正要防越权需服务端校验 —— 与 <strong>AI Key 策略（推荐「丙·自建中转」）</strong> 一并待决。</li><li><strong>仓库卫生（新发现）</strong>：<code>/_*</code> 规则把 <code>_shell_enhance.js</code>、<code>_sync_dache.py</code>、<code>_apply_pet.py</code>、<code>_apply_qa_bridge_20260919.py</code> 等<strong>构建链必需脚本</strong>挡在 git 之外，新克隆无法完整重建。本次新增的 <code>_verify_pwd_hash_20260922.js</code> 已按既有惯例 <code>git add -f</code> 入库；其余历史脚本是否补入库，<strong>建议单独决策</strong>（会影响仓库体积与公开面）。</li></ol>
+<hr>
+<p>*报告生成于 2026-09-22 · 全部结论均以「构建链实跑 + 真实浏览器回归 + APK 真实载荷实测」为依据，未采用静态推断代替验证。*</p>
+</main>
+</div>
+</body>
+</html>

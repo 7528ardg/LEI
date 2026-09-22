@@ -1613,6 +1613,7 @@ button:disabled:active{transform:none;}
 
 
 
+
 <div class="livery-stripe" data-page-node-id="mtousEj7ZN4Xi2uM9vjLkB"></div>
 
 <header class="topbar" data-page-node-id="nEnHIwBZCdN9arpgAxqVcb">
@@ -1814,8 +1815,22 @@ let currentMod = null;
 // ===== 模块加载线路：默认同源；本地 localStorage('app_base_url') 可覆盖为大陆加速镜像 =====
 const APP_MIRROR_BASE = 'https://cdn.jsdelivr.net/gh/7528ardg/LEI@main/';
 const APP_BASE_KEY = 'app_base_url';
+/* 线路基址白名单（2026-09-22 安全修复）：此前任意 localStorage 值都会被直接拼进模块 URL，
+   一旦 localStorage 被篡改（XSS/人工编辑），整站模块会被重定向到第三方托管执行。
+   现只接受内置两档线路（同源 '' / 内置镜像），异常值一律忽略并清除。 */
+const APP_BASE_ALLOW = ['', APP_MIRROR_BASE];
 function getModBase(){
-  try{ const b = localStorage.getItem(APP_BASE_KEY); if(b) return b; }catch(e){}
+  try{
+    const b = localStorage.getItem(APP_BASE_KEY);
+    if(b){
+      if(APP_BASE_ALLOW.indexOf(b) === -1){
+        console.warn('[线路] 忽略非内置线路基址（防模块重定向到第三方）：', b);
+        try{ localStorage.removeItem(APP_BASE_KEY); }catch(e2){}
+        return '';
+      }
+      return b;
+    }
+  }catch(e){}
   return '';
 }
 function setModBase(b){
@@ -2353,7 +2368,20 @@ function updateNetworkStatus(){
 }
 
 /* ===================== 模块间跳转（你问我答板块内跳转到其他板块） ===================== */
+/* postMessage 来源校验（2026-09-22 安全修复）：此前对任意来源都执行 spring-switch，
+   跨源嵌入时父页可随意驱动本页切模块。现只接受「同源」或「本页自有 iframe」的消息，
+   并兼容 file:// / APK 虚拟域下 origin 为 null 的场景。 */
+function ccMsgTrusted(e){
+  try{
+    if(e.origin && e.origin !== 'null') return e.origin === location.origin;
+    if(location.protocol === 'file:') return true;   /* 本地文件/离线包：origin 恒为 null */
+    const fr = document.querySelectorAll('iframe');
+    for(let i=0;i<fr.length;i++){ if(fr[i].contentWindow === e.source) return true; }
+  }catch(err){}
+  return false;
+}
 window.addEventListener('message', function(e){
+  if(!ccMsgTrusted(e)) return;
   const d = e.data;
   if(d && d.type === 'spring-switch' && MOD_SRC[d.module]){
     switchModule(d.module);
@@ -2601,10 +2629,128 @@ var KEY_USERS = 'cabin_users_v1';
 var KEY_SESSION = 'cabin_session_v1';
 var KEY_TUTORIAL = 'cabin_tutorial_seen';
 var USERS_MAGIC = 'cabin-users-v1';
-var ADMIN = { 工号:'028981', 姓名:'管理员', 手机号:'', 密码:'LWH' };
+/* 管理员种子账号：只留哈希（明文不再出现在源码里）。固定盐 + 800 轮迭代。
+   注意：本门禁是「本机 UX 级」而非服务端安全边界（纯前端可绕过），已在报告标注。 */
+var ADMIN = { 工号:'028981', 姓名:'管理员', 手机号:'', 盐:'c0ffee20260922admin', 密码哈希:'2d09bcb204a71cff2934f51db3972f4f268f90c0d6f63a8612d55ffb8972a702' };
 var SESSION_MS_SHORT = 12 * 3600 * 1000;      /* 不勾免登录：12 小时 */
 var SESSION_MS_WEEK  = 7 * 24 * 3600 * 1000;  /* 7 天免登录 */
 var SEC_QUESTIONS = ['母亲的名字', '第一所就读的学校', '入职前的岗位', '最爱的城市', '手机尾号后四位'];
+
+/* ===================== 口令哈希层（2026-09-22 安全审查修复）=====================
+   问题：口令与安全问题答案此前以明文存 localStorage(cabin_users_v1)，登录用明文比对。
+        同机他人或任一 XSS 即可读走全部账号口令。
+   方案：纯 JS 同步 SHA-256（file:// 下 crypto.subtle 不可用，故不使用异步 WebCrypto）
+        + 每用户随机盐 + 800 轮迭代；新增记录只存 密码哈希/盐，不再落明文。
+   兼容：旧数据（明文 密码/安全答案 字段）在**首次校验成功后原地升级**为哈希，
+        既不锁死存量用户，也保证升级后本机不再留存明文。
+============================================================================== */
+function _utf8Bytes(str){
+  var out=[], i, c;
+  for(i=0;i<str.length;i++){
+    c = str.charCodeAt(i);
+    if(c < 0x80) out.push(c);
+    else if(c < 0x800){ out.push(0xC0 | (c>>6), 0x80 | (c & 0x3F)); }
+    else if(c >= 0xD800 && c <= 0xDBFF && i+1 < str.length){
+      var c2 = str.charCodeAt(i+1);
+      if(c2 >= 0xDC00 && c2 <= 0xDFFF){
+        var cp = 0x10000 + ((c - 0xD800) << 10) + (c2 - 0xDC00);
+        out.push(0xF0 | (cp>>18), 0x80 | ((cp>>12)&0x3F), 0x80 | ((cp>>6)&0x3F), 0x80 | (cp & 0x3F));
+        i++; continue;
+      }
+      out.push(0xEF,0xBF,0xBD); continue;
+    }
+    else if(c >= 0xDC00 && c <= 0xDFFF){ out.push(0xEF,0xBF,0xBD); continue; }
+    else { out.push(0xE0 | (c>>12), 0x80 | ((c>>6)&0x3F), 0x80 | (c & 0x3F)); }
+  }
+  return out;
+}
+function _ror(x,n){ return ((x>>>n) | (x<<(32-n)))>>>0; }
+function _sha256Hex(str){
+  var K=[0x428a2f98,0x71374491,0xb5c0fbcf,0xe9b5dba5,0x3956c25b,0x59f111f1,0x923f82a4,0xab1c5ed5,
+         0xd807aa98,0x12835b01,0x243185be,0x550c7dc3,0x72be5d74,0x80deb1fe,0x9bdc06a7,0xc19bf174,
+         0xe49b69c1,0xefbe4786,0x0fc19dc6,0x240ca1cc,0x2de92c6f,0x4a7484aa,0x5cb0a9dc,0x76f988da,
+         0x983e5152,0xa831c66d,0xb00327c8,0xbf597fc7,0xc6e00bf3,0xd5a79147,0x06ca6351,0x14292967,
+         0x27b70a85,0x2e1b2138,0x4d2c6dfc,0x53380d13,0x650a7354,0x766a0abb,0x81c2c92e,0x92722c85,
+         0xa2bfe8a1,0xa81a664b,0xc24b8b70,0xc76c51a3,0xd192e819,0xd6990624,0xf40e3585,0x106aa070,
+         0x19a4c116,0x1e376c08,0x2748774c,0x34b0bcb5,0x391c0cb3,0x4ed8aa4a,0x5b9cca4f,0x682e6ff3,
+         0x748f82ee,0x78a5636f,0x84c87814,0x8cc70208,0x90befffa,0xa4506ceb,0xbef9a3f7,0xc67178f2];
+  var H=[0x6a09e667,0xbb67ae85,0x3c6ef372,0xa54ff53a,0x510e527f,0x9b05688c,0x1f83d9ab,0x5be0cd19];
+  var bytes=_utf8Bytes(str), l=bytes.length;
+  var buf = bytes.slice(); buf.push(0x80);
+  while(buf.length % 64 !== 56) buf.push(0);
+  var bits = l*8, hi = Math.floor(bits/4294967296), lo = bits >>> 0;
+  buf.push((hi>>>24)&255,(hi>>>16)&255,(hi>>>8)&255,hi&255,(lo>>>24)&255,(lo>>>16)&255,(lo>>>8)&255,lo&255);
+  var w=new Array(64), off, i2;
+  for(off=0; off<buf.length; off+=64){
+    for(i2=0;i2<16;i2++){
+      w[i2]=((buf[off+i2*4]<<24)|(buf[off+i2*4+1]<<16)|(buf[off+i2*4+2]<<8)|(buf[off+i2*4+3]))>>>0;
+    }
+    for(i2=16;i2<64;i2++){
+      var s0=(_ror(w[i2-15],7)^_ror(w[i2-15],18)^(w[i2-15]>>>3))>>>0;
+      var s1=(_ror(w[i2-2],17)^_ror(w[i2-2],19)^(w[i2-2]>>>10))>>>0;
+      w[i2]=(w[i2-16]+s0+w[i2-7]+s1)>>>0;
+    }
+    var a=H[0],b=H[1],c=H[2],d=H[3],e=H[4],f=H[5],g=H[6],h=H[7];
+    for(i2=0;i2<64;i2++){
+      var S1=(_ror(e,6)^_ror(e,11)^_ror(e,25))>>>0;
+      var ch=((e&f)^((~e)&g))>>>0;
+      var t1=(h+S1+ch+K[i2]+w[i2])>>>0;
+      var S0=(_ror(a,2)^_ror(a,13)^_ror(a,22))>>>0;
+      var maj=((a&b)^(a&c)^(b&c))>>>0;
+      var t2=(S0+maj)>>>0;
+      h=g; g=f; f=e; e=(d+t1)>>>0; d=c; c=b; b=a; a=(t1+t2)>>>0;
+    }
+    H[0]=(H[0]+a)>>>0; H[1]=(H[1]+b)>>>0; H[2]=(H[2]+c)>>>0; H[3]=(H[3]+d)>>>0;
+    H[4]=(H[4]+e)>>>0; H[5]=(H[5]+f)>>>0; H[6]=(H[6]+g)>>>0; H[7]=(H[7]+h)>>>0;
+  }
+  var out='';
+  for(var j=0;j<8;j++) out += ('00000000'+H[j].toString(16)).slice(-8);
+  return out;
+}
+function _pwdHash(pwd, salt){
+  var x = String(salt) + '|' + String(pwd);
+  for(var i=0;i<800;i++) x = _sha256Hex(x);
+  return x;
+}
+function _randSalt(){
+  try{
+    var a = new Uint8Array(16);
+    (window.crypto || window.msCrypto).getRandomValues(a);
+    var s=''; for(var i=0;i<a.length;i++) s += ('0'+a[i].toString(16)).slice(-2);
+    return s;
+  }catch(e){}
+  return 'f' + Date.now().toString(16) + Math.random().toString(16).slice(2, 10);
+}
+/* 写入/升级口令（只存哈希） */
+function setUserPwd(u, pwd){
+  u.盐 = _randSalt();
+  u.密码哈希 = _pwdHash(pwd, u.盐);
+  try{ delete u.密码; }catch(e){ u.密码 = undefined; }
+}
+/* 校验口令；旧明文数据在命中后立即就地升级为哈希 */
+function verifyUserPwd(u, pwd, users){
+  if(!u) return false;
+  if(u.盐 && u.密码哈希) return _pwdHash(pwd, u.盐) === u.密码哈希;
+  if(typeof u.密码 === 'string' && u.密码 === pwd){
+    setUserPwd(u, pwd);
+    if(Array.isArray(users)) saveUsers(users);
+    return true;
+  }
+  return false;
+}
+/* 校验安全问题答案；同样支持旧明文数据升级 */
+function verifyUserAnswer(u, ans, users){
+  if(!u) return false;
+  if(u.答案盐 && u.安全答案哈希) return _pwdHash(ans, u.答案盐) === u.安全答案哈希;
+  if(typeof u.安全答案 === 'string' && u.安全答案 === ans){
+    u.答案盐 = _randSalt();
+    u.安全答案哈希 = _pwdHash(ans, u.答案盐);
+    try{ delete u.安全答案; }catch(e){ u.安全答案 = undefined; }
+    if(Array.isArray(users)) saveUsers(users);
+    return true;
+  }
+  return false;
+}
 
 function lsGet(k){ try{ return localStorage.getItem(k); }catch(e){ return null; } }
 function lsSet(k,v){ try{ localStorage.setItem(k, v); }catch(e){} }
@@ -2806,7 +2952,7 @@ window.shellAuthSubmit = function(){
         phone = (el('afPhone') || {}).value || '', pwd = (el('afPwd') || {}).value || '', pwd2 = (el('afPwd2') || {}).value || '';
     var q = (el('afQ') || {}).value || '', ans = (el('afA') || {}).value || '';
     if(!id.trim()) return showErr('请输入工号');
-    if(!/^\d{4,8}$/.test(id.trim())) return showErr('工号应为 4-8 位数字');
+    if(!/^\d{4,10}$/.test(id.trim())) return showErr('工号应为 4-10 位数字');
     if(!name.trim()) return showErr('请输入姓名');
     if(!/^1\d{10}$/.test(phone)) return showErr('请输入正确的 11 位手机号');
     if(pwd.length < 6) return showErr('密码至少 6 位');
@@ -2814,7 +2960,10 @@ window.shellAuthSubmit = function(){
     if(!ans.trim()) return showErr('请填写安全问题答案（忘记密码时凭它找回）');
     var dup = users.some(function(u){ return u.工号 === id.trim(); });
     if(dup) return showErr('该工号已注册，请直接登录');
-    var user = { 工号: id.trim(), 姓名: name.trim(), 手机号: phone, 密码: pwd, 安全问题: q, 安全答案: ans.trim() };
+    var user = { 工号: id.trim(), 姓名: name.trim(), 手机号: phone, 安全问题: q };
+    setUserPwd(user, pwd);                       /* 只存 盐 + 密码哈希（2026-09-22 去明文） */
+    user.答案盐 = _randSalt();
+    user.安全答案哈希 = _pwdHash(ans.trim(), user.答案盐);
     users.push(user);
     saveUsers(users);
     finishAuth(user, true);
@@ -2822,7 +2971,7 @@ window.shellAuthSubmit = function(){
     var acc = (el('afId') || {}).value || '', pwd = (el('afPwd') || {}).value || '';
     if(!acc.trim() || !pwd) return showErr('请输入工号/手机号和密码');
     var found = users.filter(function(u){
-      return (u.工号 === acc.trim() || u.手机号 === acc.trim()) && u.密码 === pwd;
+      return (u.工号 === acc.trim() || u.手机号 === acc.trim()) && verifyUserPwd(u, pwd, users);
     })[0];
     if(!found) return showErr('账号或密码错误');
     var remember = !!(el('afRemember') && el('afRemember').checked);
@@ -2841,7 +2990,7 @@ window.shellForgotNext = function(){
   var u = readUsers().filter(function(x){ return x.工号 === acc || x.手机号 === acc; })[0];
   if(!u) return showErr('未找到该账号');
   if(u.工号 === ADMIN.工号) return showErr('管理员账号请走「管理员重置」或直接登录');
-  if(!u.安全答案) return showErr('该账号未设置安全问题，请联系管理员重置');
+  if(!u.安全答案哈希 && !u.安全答案) return showErr('该账号未设置安全问题，请联系管理员重置');
   forgotAcc = u;
   var s2 = authOverlay.querySelector('#fgStep2');
   authOverlay.querySelector('#fgStep1').style.display = 'none';
@@ -2879,9 +3028,9 @@ window.shellForgotReset = function(){
     if(!ans) return showErr('请输入安全问题答案');
     if(p1.length < 6) return showErr('密码至少 6 位');
     if(p1 !== p2) return showErr('两次输入的密码不一致');
-    if(ans !== forgotAcc.安全答案) return showErr('答案不正确');
+    if(!verifyUserAnswer(forgotAcc, ans, users)) return showErr('答案不正确');
     for(var i = 0; i < users.length; i++){
-      if(users[i].工号 === forgotAcc.工号){ users[i].密码 = p1; break; }
+      if(users[i].工号 === forgotAcc.工号){ setUserPwd(users[i], p1); break; }
     }
     saveUsers(users);
     var me = users.filter(function(x){ return x.工号 === forgotAcc.工号; })[0];
@@ -2892,14 +3041,14 @@ window.shellForgotReset = function(){
     var adm = ((el('fgAdm') || {}).value || '').trim(), admPwd = (el('fgAdmPwd') || {}).value || '';
     var acc = ((el('fgAcc2') || {}).value || '').trim(), p1 = (el('fgP1') || {}).value || '';
     if(!adm || !admPwd) return showErr('请输入管理员账号和密码');
-    var admin = users.filter(function(x){ return x.工号 === adm && x.密码 === admPwd; })[0];
+    var admin = users.filter(function(x){ return x.工号 === adm && verifyUserPwd(x, admPwd, users); })[0];
     if(!admin || admin.工号 !== ADMIN.工号) return showErr('管理员账号或密码错误');
     if(!acc) return showErr('请输入要重置的账号');
     var target = users.filter(function(x){ return x.工号 === acc || x.手机号 === acc; })[0];
     if(!target) return showErr('未找到该账号');
     if(p1.length < 6) return showErr('密码至少 6 位');
     for(var j = 0; j < users.length; j++){
-      if(users[j].工号 === target.工号){ users[j].密码 = p1; break; }
+      if(users[j].工号 === target.工号){ setUserPwd(users[j], p1); break; }
     }
     saveUsers(users);
     err.style.display = 'none';
@@ -4276,7 +4425,8 @@ function navJumpTo(mod, view){
     tries++;
     var f = null; try{ f = document.getElementById('frame-' + mod); }catch(e){}
     if(f && f.contentWindow){
-      try{ f.contentWindow.postMessage({type:'cc:nav-jump', view:view, mod:mod}, '*'); }catch(e){}
+      var _tgt='*'; try{ var _u=new URL(f.src||'', location.href); if(_u.origin && _u.origin!=='null') _tgt=_u.origin; }catch(e){}
+      try{ f.contentWindow.postMessage({type:'cc:nav-jump', view:view, mod:mod}, _tgt); }catch(e){}
       if(tries < 3) setTimeout(fire, 500);   /* 模块脚本可能晚就绪，补发 */
     } else if(tries < 20){ setTimeout(fire, 400); }
   })();

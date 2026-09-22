@@ -162,6 +162,8 @@ VERIFY_SCRIPTS = [
     u'python _check_needles.py --quiet',                        # 最终产物针检查（移动端加固针/3D 针/反向针/壳内载荷取证）
     u'node _verify_embed_gap_20260922.js',                      # 嵌入态「死带空白」回归：5 视口 × 切 tab 后 + 独立打开，main 底边须贴合 iframe 底边
     u'python _check_apk_sync.py',                           # APK 内 assets/www 与源同步（落后即失败，防「改了源没装配」）
+    # 2026-09-22 安全审查 M1/M2 守护：明文口令/答案清零 + ADMIN 种子自洽 + 两套 SHA-256 实现同源 + 行为 + 会话口令不落盘
+    u'node _verify_pwd_hash_20260922.js',
 ]
 
 # 全量语法检查覆盖：全部模块源 + 三外壳/产物（排除 .tmp_ 调试文件）

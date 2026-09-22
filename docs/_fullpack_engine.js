@@ -34,6 +34,10 @@
 
   var MAGIC = 'cabin-fullpack-v1';
   var EDIT_MAGIC = 'cabin-console-edit-v1';
+  /* 本引擎能完整解析的最高包协议版本。
+     导入时若包 version 更高，说明是更新版引擎导出的包，可能存在本版未知字段，
+     verifyPack 会给出告警（而非直接拒绝），让运维可见地知情。 */
+  var PROTOCOL_VERSION = 1;
   var KIND_KB = 'kb';
   var KIND_SCRIPT = 'script';
   var KIND_PRODUCT = 'product';
@@ -190,31 +194,50 @@
       return { ok: false, errors: errors, warnings: warnings, stats: null };
     }
     if (pack.kind && pack.kind !== 'full') warnings.push('kind 为 ' + pack.kind + '（期望 full），已按全量包解析');
+    // 协议版本核验（2026-09-22 审查 L13）：原先只验 magic/kind，包版本漂移完全不可见。
+    if (pack.version === undefined || pack.version === null || pack.version === '') {
+      warnings.push('包内缺少 version 字段，已按 v' + PROTOCOL_VERSION + ' 解析');
+    } else if (typeof pack.version !== 'number' || !isFinite(pack.version) || pack.version < 1) {
+      warnings.push('包内 version 非法（' + String(pack.version) + '），已按 v' + PROTOCOL_VERSION + ' 解析');
+    } else if (pack.version > PROTOCOL_VERSION) {
+      warnings.push('包协议版本 v' + pack.version + ' 高于本引擎 v' + PROTOCOL_VERSION + '，可能含未知字段（已按已知字段解析）');
+    } else if (pack.version < PROTOCOL_VERSION) {
+      warnings.push('包协议版本 v' + pack.version + ' 低于本引擎 v' + PROTOCOL_VERSION + '（按升级兼容路径解析）');
+    }
     if (!Array.isArray(pack.sources)) { errors.push('缺少 sources 数组'); return { ok: false, errors: errors, warnings: warnings, stats: null }; }
     if (!pack.sources.length) errors.push('包内没有任何数据源');
 
-    var total = 0, sums = [];
+    var total = 0, sums = [], totalDup = 0, totalNoData = 0;
     for (var i = 0; i < pack.sources.length; i++) {
       var s = pack.sources[i] || {};
       var sid = String(s.id || ('#' + i));
       if (KINDS.indexOf(s.kind) < 0) warnings.push('数据源 ' + sid + ' 的 kind 未知（' + String(s.kind) + '），按 kb 处理');
       if (!Array.isArray(s.items)) { errors.push('数据源 ' + sid + ' 缺少 items 数组'); continue; }
-      var fps = [], badFp = 0, badUid = 0;
+      var fps = [], badFp = 0, badUid = 0, dupUid = 0, noData = 0, seenUid = {};
       for (var j = 0; j < s.items.length; j++) {
         var it = s.items[j] || {};
         if (!it.uid) { badUid++; continue; }
+        var uKey = String(it.uid);
+        if (seenUid.hasOwnProperty(uKey)) dupUid++; else seenUid[uKey] = true;
+        // 缺 data 的条目还原时会被丢弃（2026-09-22 审查 M10：原先静默丢弃，无任何告警）
+        if (it.data === undefined || it.data === null) noData++;
         var fp = fingerprint(it.data);
         fps.push(it.uid + ':' + fp);
         if (it.fp && it.fp !== fp) badFp++;
       }
       if (badUid) errors.push('数据源 ' + sid + ' 有 ' + badUid + ' 条缺少 uid');
       if (badFp) errors.push('数据源 ' + sid + ' 有 ' + badFp + ' 条指纹与内容不符（内容被改动或传输损坏）');
+      // M10：重复 uid / 缺 data 属「会丢数据」的软错误，一律显式告知（不阻断，但不再静默）
+      if (dupUid) warnings.push('数据源 ' + sid + ' 有 ' + dupUid + ' 条 uid 重复（按 uid 归并时仅保留首条，其余被丢弃）');
+      if (noData) warnings.push('数据源 ' + sid + ' 有 ' + noData + ' 条缺少 data（还原时将被丢弃）');
       var checksum = hashStr(fps.join('|'));
       if (s.checksum && s.checksum !== checksum) errors.push('数据源 ' + sid + ' 校验和不一致（期望 ' + s.checksum + '，实算 ' + checksum + '）');
       if (s.count != null && s.count !== s.items.length) errors.push('数据源 ' + sid + ' 声明 ' + s.count + ' 条，实际 ' + s.items.length + ' 条');
       sums.push(sid + ':' + checksum);
       total += s.items.length;
-      bySource.push({ id: sid, kind: s.kind, name: s.name || sid, count: s.items.length, checksum: checksum, fpMismatch: badFp });
+      totalDup += dupUid;
+      totalNoData += noData;
+      bySource.push({ id: sid, kind: s.kind, name: s.name || sid, count: s.items.length, checksum: checksum, fpMismatch: badFp, dupUid: dupUid, noData: noData });
     }
     var sum = hashStr(sums.join('|'));
     if (pack.summary) {
@@ -235,7 +258,13 @@
       ok: errors.length === 0,
       errors: errors,
       warnings: warnings,
-      stats: { sources: bySource.length, items: total, checksum: sum, bySource: bySource }
+      stats: {
+        sources: bySource.length, items: total, checksum: sum,
+        version: (typeof pack.version === 'number' && isFinite(pack.version) && pack.version >= 1) ? pack.version : PROTOCOL_VERSION,
+        protocolVersion: PROTOCOL_VERSION,
+        dupUid: totalDup, noData: totalNoData,
+        bySource: bySource
+      }
     };
   }
 
@@ -258,10 +287,14 @@
       var s = pack.sources[i] || {};
       var sid = String(s.id || ('#' + i));
       var packItems = [];
+      var droppedNoData = 0, dupUid = 0, seenPackUid = {};
       var items = Array.isArray(s.items) ? s.items : [];
       for (var j = 0; j < items.length; j++) {
         var it = items[j] || {};
-        if (!it.data) continue;
+        // M10：缺 data 的条目会被丢弃 —— 计数后明示，不再静默
+        if (it.data === undefined || it.data === null) { droppedNoData++; continue; }
+        var uu = String(it.uid != null ? it.uid : (it.data[META_KEY] != null ? it.data[META_KEY] : ''));
+        if (uu) { if (seenPackUid.hasOwnProperty(uu)) dupUid++; else seenPackUid[uu] = true; }
         packItems.push(it.data);
       }
       var base = Array.isArray(current[sid]) ? current[sid] : [];
@@ -319,6 +352,8 @@
         packCount: items.length, outCount: out.length, baseCount: base.length,
         matched: matched, updated: updated, added: added, removed: removed,
         fpMismatch: fpMismatch,
+        droppedNoData: droppedNoData, dupUid: dupUid,
+        dataLoss: (droppedNoData + dupUid) > 0,
         ok: (out.length === items.length) && fpMismatch === 0
       });
     }
@@ -360,11 +395,13 @@
   }
 
   /* 把「目标条目集合」相对「基线」的差异转成编辑层 —— 导入完整包后用它落盘，
-     使工作区 == 包内数据，而基线仍保持内嵌原值（不改动源文件即可完成还原）。 */
-  function diffToEdits(baseItems, targetItems, src) {
+     使工作区 == 包内数据，而基线仍保持内嵌原值（不改动源文件即可完成还原）。
+     diag（可选）：{ dupUid:N, nullTarget:N } 回填「被丢弃条目数 + 原因」（2026-09-22 审查 M10）。 */
+  function diffToEdits(baseItems, targetItems, src, diag) {
     baseItems = Array.isArray(baseItems) ? baseItems : [];
     targetItems = Array.isArray(targetItems) ? targetItems : [];
     var e = emptyEdits();
+    if (diag) { diag.dupUid = 0; diag.nullTarget = 0; }
     var baseByUid = {}, baseUids = {};
     for (var i = 0; i < baseItems.length; i++) {
       var bu = (baseItems[i] && baseItems[i][META_KEY]) ? String(baseItems[i][META_KEY]) : makeUid(src || { id: 'x', kind: KIND_KB }, baseItems[i], i);
@@ -373,9 +410,9 @@
     var targetUids = {};
     for (var j = 0; j < targetItems.length; j++) {
       var t = targetItems[j];
-      if (!t) continue;
+      if (!t) { if (diag) diag.nullTarget++; continue; }
       var tu = (t && t[META_KEY]) ? String(t[META_KEY]) : makeUid(src || { id: 'x', kind: KIND_KB }, t, j);
-      if (targetUids.hasOwnProperty(tu)) continue;   // 包内重复 uid：保留首条
+      if (targetUids.hasOwnProperty(tu)) { if (diag) diag.dupUid++; continue; }   // 包内重复 uid：保留首条
       targetUids[tu] = true;
       if (baseByUid.hasOwnProperty(tu)) {
         // 只多/少了 _uid 元字段不算内容改动（否则导入一份未改动的包会把全库标成「已改」）
@@ -468,6 +505,7 @@
   var FULLPACK = {
     MAGIC: MAGIC,
     EDIT_MAGIC: EDIT_MAGIC,
+    PROTOCOL_VERSION: PROTOCOL_VERSION,
     META_KEY: META_KEY,
     KINDS: KINDS,
     stableStringify: stableStringify,

@@ -76,14 +76,14 @@ def build():
         raise ValueError('scriptLibraryData not found in ' + BEAUTY)
     arrays[u'__BASE_SCRIPT_OBJ__'] = extract_bracket(beauty_src, m_script.end() - 1, u'{', u'}')
 
-    tpl = io.open(os.path.join(BASE, TPL), encoding='utf-8').read()
+    tpl = io.open(os.path.join(BASE, TPL), encoding='utf-8', newline='').read()
     for ph, arr in arrays.items():
         assert ph in tpl, 'placeholder missing ' + ph
         # 占位符只允许出现一次且独立为注入点
         assert tpl.count(ph) == 1, 'placeholder not unique: ' + ph
         tpl = tpl.replace(ph, safe_inline(arr))
 
-    pdfjs_src = io.open(os.path.join(BASE, LIBS[u'pdfjs']), encoding='utf-8').read()
+    pdfjs_src = io.open(os.path.join(BASE, LIBS[u'pdfjs']), encoding='utf-8', newline='').read()
     worker_raw = io.open(os.path.join(BASE, LIBS[u'worker']), 'rb').read().decode('utf-8')
     assert '__PDFJS_SRC__' in tpl, 'placeholder missing __PDFJS_SRC__'
     assert tpl.count('__PDFJS_SRC__') == 1, 'placeholder not unique: __PDFJS_SRC__'

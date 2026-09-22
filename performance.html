@@ -13082,7 +13082,7 @@ async clearAll() {
             };
 
             // ========== 数据保护中心 (DataGuard) ==========
-            // 持久化策略：IndexedDB（主数据）+ localStorage（指纹/设置/备份索引镜像）+ sessionStorage（加密密码）
+            // 持久化策略：IndexedDB（主数据）+ localStorage（指纹/设置/备份索引镜像）+ 内存态（加密密码，不落盘）
             // 作用：数据丢失检测、定时自动备份、AES-GCM 加密导出、存储状态展示、数据恢复引导
             const DataGuard = {
                 FINGERPRINT_KEY: 'gz_perf_data_fingerprint',
@@ -13103,9 +13103,12 @@ async clearAll() {
                 settings: null,
                 _periodicTimer: null,
                 _fingerprintTimer: null,
+                _sessionPwd: null,          // 加密口令：仅内存态，不持久化
 
                 async init() {
                     this.settings = { ...this.DEFAULTS, ...this._loadSettings() };
+                    // 迁移清理：历史版本曾把加密口令明文写入 sessionStorage，此处一次性抹除
+                    try { sessionStorage.removeItem(this.SESSION_PWD_KEY); } catch (e) { /* ignore */ }
                     // 数据丢失检测（在 Storage/AppState 就绪后）
                     try {
                         await this.checkDataLoss();
@@ -13131,18 +13134,16 @@ async clearAll() {
                     catch (e) { /* ignore */ }
                 },
 
-                /* sessionStorage：加密密码仅当前标签页有效（关闭即清除，比 localStorage 更安全） */
+                /* 加密口令仅保存在当前页面内存中（既不落 localStorage 也不落 sessionStorage，避免明文持久化）；
+                   刷新/关闭页面即失效，需重新输入 —— 安全性优先于便利性 */
                 setSessionPassword(pwd) {
-                    try { sessionStorage.setItem(this.SESSION_PWD_KEY, pwd); }
-                    catch (e) { /* ignore */ }
+                    this._sessionPwd = (pwd === undefined || pwd === null) ? null : String(pwd);
                 },
                 getSessionPassword() {
-                    try { return sessionStorage.getItem(this.SESSION_PWD_KEY); }
-                    catch (e) { return null; }
+                    return this._sessionPwd || null;
                 },
                 clearSessionPassword() {
-                    try { sessionStorage.removeItem(this.SESSION_PWD_KEY); }
-                    catch (e) { /* ignore */ }
+                    this._sessionPwd = null;
                 },
 
                 async _hashString(str) {

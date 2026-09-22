@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>系统性代码审查报告（融合版）</title>
+<style>
+:root{
+  --bg:#F6F8F7; --card:#FFFFFF; --text:#10231A; --text2:#4E6459; --text3:#8CA096;
+  --border:#E2EAE6; --accent:#148453; --accent-soft:#E8F3EE;
+  --warn:#B45309; --warn-soft:#FEF3C7; --danger:#C2410C; --danger-soft:#FEE7DE;
+  --code-bg:#F2F5F3; --shadow:0 1px 3px rgba(16,35,26,.06),0 8px 24px rgba(16,35,26,.05);
+}
+@media (prefers-color-scheme: dark){
+  :root{
+    --bg:#0E1713; --card:#151F1A; --text:#E6F0EA; --text2:#9FB5A9; --text3:#6B8076;
+    --border:#20302A; --accent:#4CC38A; --accent-soft:#152A20;
+    --warn:#F0B429; --warn-soft:#2C2410; --danger:#F87171; --danger-soft:#331914;
+    --code-bg:#111B16; --shadow:0 1px 3px rgba(0,0,0,.4),0 8px 24px rgba(0,0,0,.35);
+  }
+}
+*{box-sizing:border-box;}
+body{margin:0;background:var(--bg);color:var(--text);
+  font:15px/1.75 -apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei",sans-serif;}
+.wrap{max-width:1080px;margin:0 auto;padding:32px 20px 72px;}
+header.hero{background:var(--card);border:1px solid var(--border);border-radius:16px;
+  padding:26px 28px;box-shadow:var(--shadow);margin-bottom:24px;}
+header.hero h1{margin:0 0 6px;font-size:26px;letter-spacing:.2px;}
+header.hero .sub{color:var(--text2);font-size:14px;}
+main{background:var(--card);border:1px solid var(--border);border-radius:16px;
+  padding:8px 28px 32px;box-shadow:var(--shadow);}
+h1,h2,h3,h4{line-height:1.35;}
+main h1{font-size:24px;margin:26px 0 12px;}
+main h2{font-size:20px;margin:32px 0 12px;padding-bottom:8px;border-bottom:1px solid var(--border);}
+main h3{font-size:17px;margin:24px 0 10px;}
+main h4{font-size:15px;margin:18px 0 8px;color:var(--text2);}
+p{margin:10px 0;}
+a{color:var(--accent);}
+ul,ol{margin:10px 0;padding-left:24px;}
+li{margin:5px 0;}
+li>ul,li>ol{margin:5px 0;}
+code{background:var(--code-bg);border:1px solid var(--border);border-radius:5px;
+  padding:1px 5px;font:13px/1.5 ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+  word-break:break-word;}
+pre{background:var(--code-bg);border:1px solid var(--border);border-radius:10px;
+  padding:14px 16px;overflow:auto;}
+pre code{background:none;border:none;padding:0;font-size:13px;white-space:pre;}
+blockquote{margin:14px 0;padding:10px 16px;border-left:3px solid var(--accent);
+  background:var(--accent-soft);border-radius:0 10px 10px 0;color:var(--text2);}
+hr{border:none;border-top:1px solid var(--border);margin:28px 0;}
+.tablewrap{overflow-x:auto;margin:14px 0;}
+table{border-collapse:collapse;width:100%;font-size:14px;}
+th,td{border:1px solid var(--border);padding:8px 11px;text-align:left;vertical-align:top;}
+th{background:var(--accent-soft);font-weight:600;white-space:nowrap;}
+tbody tr:nth-child(even){background:rgba(128,128,128,.04);}
+strong{font-weight:600;}
+.toc{background:var(--card);border:1px solid var(--border);border-radius:16px;
+  padding:16px 24px;box-shadow:var(--shadow);margin-bottom:24px;}
+.toc h2{margin:0 0 8px;font-size:15px;color:var(--text2);border:none;padding:0;}
+.toc ol{margin:0;padding-left:20px;columns:2;column-gap:28px;}
+.toc a{text-decoration:none;font-size:14px;color:var(--text);}
+.toc a:hover{color:var(--accent);}
+@media(max-width:640px){.toc ol{columns:1;}main{padding:4px 18px 24px;}.wrap{padding:20px 12px 56px;}}
+</style>
+</head>
+<body>
+<div class="wrap">
+<header class="hero"><h1>系统性代码审查报告（融合版）</h1></div>
+<nav class="toc"><h2>目录</h2><ol><li><a href="#h-一-总体评价">一、总体评价</a></li><li><a href="#h-二-高危问题-3-项">二、高危问题（3 项）</a></li><li><a href="#h-三-中危问题-11-项">三、中危问题（11 项）</a></li><li><a href="#h-四-低危问题-16-项-合并简述">四、低危问题（16 项，合并简述）</a></li><li><a href="#h-五-各维度-未发现问题-清单-负向结论-同样重要">五、各维度"未发现问题"清单（负向结论，同样重要）</a></li><li><a href="#h-六-优先修复清单">六、优先修复清单</a></li></ol></nav><main>
+<h1 id="h-系统性代码审查报告-融合版">系统性代码审查报告（融合版）</h1>
+<ul><li><strong>审查日期</strong>：2026-09-22</li><li><strong>审查范围</strong>：生产代码约 24 万行 —— 12 个站点模块（index / qa / beauty / kb-admin / cc-home / daily / performance / quiz / manual / medical / risk-lite / spring-assistant）、3 个 JS 引擎（docs/_fullpack_engine.js、_talkshow_engine_v2.js、_shell_enhance.js）、12 个 Python 构建/维护脚本</li><li><strong>排除</strong>：<code>_bak_*</code> 备份、<code>*_tmp*</code> 临时文件、一次性审计脚本、<code>__pycache__</code></li><li><strong>方法</strong>：4 路专项并行审查（安全 / Python 构建链 / 前端模块 A / 前端模块 B）+ 主审查人对全部高危及关键中危发现逐条回源验证（行号与代码上下文均已核实）</li><li><strong>维度</strong>：逻辑正确性与边界、安全性、性能与资源、异常处理、可读性与可维护性、编码规范</li></ul>
+<hr>
+<h2 id="h-一-总体评价">一、总体评价</h2>
+<p>项目整体工程质量<strong>中上</strong>：安全红线（源码零内置 AI 密钥）成立，AI 渲染主链路有转义保护，Python 构建链无 <code>shell=True</code>/<code>rmtree</code> 等危险调用，幂等注入机制健全，绩效敏感数据有 AES-GCM 加密。<strong>但存在 1 个确凿的存储型 XSS（可被跨用户触发）、凭据管理整体薄弱（管理员口令硬编码 + 用户口令明文落盘）、构建维护脚本两处非原子写可截断关键文件、qa 聊天渲染长会话 O(n²) 内存泄漏</strong>。</p>
+<ul><li>高危 3 项 ｜ 中危 11 项 ｜ 低危 16 项（合并后）</li><li>最优先：修复 beauty.html 存储型 XSS（P0）</li></ul>
+<hr>
+<h2 id="h-二-高危问题-3-项">二、高危问题（3 项）</h2>
+<h3 id="h-h1-beauty-html-存储型-xss-话术标签与表单回填未转义">H1. beauty.html 存储型 XSS —— 话术标签与表单回填未转义</h3>
+<ul><li><strong>位置</strong>：<code>beauty.html:29773</code>（<code>${tag}</code> 直接拼接）、<code>29816</code>（textarea 回填 <code>${state.scriptLibFormContent}</code>）、<code>29819</code>（value 属性回填 <code>${state.scriptLibFormTags.join(',')}</code>）</li><li><strong>影响</strong>：tags 由用户在新增表单录入（31888），且脚本库可经 kb-admin 导入，属<strong>存储型 XSS、可跨用户触发</strong>。构造 <code>&lt;/textarea&gt;&lt;img src=x onerror=...&gt;</code> 或含 <code>"</code> 的属性逃逸即可执行任意脚本，进而读取 localStorage 中的用户口令、AI Key 等全部数据</li><li><strong>触发条件</strong>：录入/导入含恶意标签的话术 → 打开话术库列表或编辑表单即触发</li><li><strong>佐证</strong>：话术正文渲染经 <code>slRender→esc</code>（879）是安全的，问题恰在"正文以外"的三个拼接点</li><li><strong>修复</strong>：三处统一走 <code>esc()/escHtml()</code>；textarea 回填改用 <code>textContent</code> 赋值；新增回归断言（可挂 <code>_verify_scriptlib_guard.js</code>）</li></ul>
+<h3 id="h-h2-qa-html-聊天渲染全量重建-消息数组无上限-内存泄漏与-o-n²-卡顿">H2. qa.html 聊天渲染全量重建 + 消息数组无上限 —— 内存泄漏与 O(n²) 卡顿</h3>
+<ul><li><strong>位置</strong>：<code>qa.html:7167</code>（<code>wrap.innerHTML = chat.msgs.map(...)</code>）、<code>6799</code> / <code>9988</code> / <code>10020</code>（msgs 只增不减，无容量上限）</li><li><strong>影响</strong>：长会话下 ① <code>chat.msgs</code> 无限增长（含大段 HTML/天气卡）→ 内存持续泄漏；② 每条新消息重建全部气泡并重跑 <code>qaWrapBetterAnswer/qaFbBar</code>（7170-7171）→ 单条 O(n)、整体 O(n²)，数百条消息后明显掉帧甚至页面卡死</li><li><strong>触发条件</strong>：单会话累计数百条问答（培训/练习场景极易达到）</li><li><strong>修复</strong>：<code>chat.msgs</code> 设上限滚动裁剪（如保留最近 200 条）；<code>renderChat</code> 改增量 append 新节点而非全量重写</li></ul>
+<h3 id="h-h3-_sync_shell_js-py-非原子写关键构建脚本-中断可截断-_gzip_buil">H3. _sync_shell_js.py 非原子写关键构建脚本 —— 中断可截断 _gzip_build.py / _build_4in1.py</h3>
+<ul><li><strong>位置</strong>：<code>_sync_shell_js.py:27-30</code>（<code>write()</code> 直接 <code>io.open(p,'w').write(s)</code> 覆盖写）；且模块顶层执行、无 <code>__main__</code> 守卫</li><li><strong>影响</strong>：违背项目"落盘原子写"铁律。Ctrl-C / 进程被 kill / 磁盘满时，两个核心构建脚本被截成半截，整条构建链崩溃且不易察觉（下次跑链才爆）</li><li><strong>触发条件</strong>：同步执行期间中断</li><li><strong>修复</strong>：改 <code>.tmp_write + os.replace</code>；补 <code>if __name__=='__main__':</code> 守卫；删除 28 行死代码 <code>s.encode('utf-8')</code></li></ul>
+<hr>
+<h2 id="h-三-中危问题-11-项">三、中危问题（11 项）</h2>
+<div class="tablewrap"><table><thead><tr><th>#</th><th>位置</th><th>问题</th><th>影响与触发条件</th><th>修复建议</th></tr></thead><tbody>
+<tr><td>M1</td><td><code>index.html:2604</code>、<code>spring-assistant.html:1850</code>、<code>_shell_enhance.js:12</code></td><td>管理员口令（3 位明文，值已在下文掩去）硬编码</td><td>任何取得静态文件者可管理员登录、重置他人密码；门禁纯前端本身可绕过（UX 级）</td><td>口令移出源码，首次运行强制设置并加盐哈希存储；文档明确"本机 UX 门禁"定位</td></tr>
+<tr><td>M2</td><td><code>index.html:2817/2825</code>（localStorage <code>cabin_users_v1</code>）、<code>_shell_enhance.js:19-28</code>、<code>performance.html:13136</code>（sessionStorage 明文口令）</td><td>用户口令、安全问题答案<strong>明文落盘</strong></td><td>同机他人或任一 XSS 可读取全部账户口令</td><td>加盐哈希（SHA-256+salt 或 PBKDF2）后存储；sessionStorage 口令改内存态</td></tr>
+<tr><td>M3</td><td><code>_sync_fullpack.py:126</code></td><td>回滚写 <code>kb-admin.template.html</code> 非原子</td><td>中断即损坏模板</td><td>同 H3，tmp+os.replace</td></tr>
+<tr><td>M4</td><td><code>qa.html:7992</code></td><td><code>kbStrong</code> 多了未文档化的 <code>sem</code> 门槛，与约定 `s&gt;=4 &amp;&amp; (s&gt;=8</td><td></td><td>sim&gt;=0.25</td><td></td><td>ev&gt;=2)` 不一致</td><td>当前打分下功能等效，但后续改打分极易踩坑</td><td>对齐约定或补注释说明隐含前提</td></tr>
+<tr><td>M5</td><td><code>qa.html:8433-8444</code> + <code>8498-8505</code></td><td><code>weakBest</code> 计算后<strong>从未被消费</strong>（死代码，已全文件验证仅赋值无读取）；且每个走知识链的问题在 8434 与 8498 两段各对 5 库做 <code>kbSearch</code>，约 10+ 次线性扫描 3476 条</td><td>CPU 浪费，连续快问掉帧</td><td>删除 weakBest 死代码；AI 上下文复用第一段检索结果</td></tr>
+<tr><td>M6</td><td><code>qa.html:2628</code></td><td><code>chatLLMOnce</code> 主 <code>res.json()</code> 未 try</td><td>代理返回 HTML 错误页时抛 SyntaxError，且不计入 <code>aiRetryable</code> → 不降级直接抛错</td><td>try 包裹并视为可重试错误走降级链</td></tr>
+<tr><td>M7</td><td><code>qa.html:8164</code> vs <code>7307</code></td><td><code>qaClarNone</code> 内 <code>await process(orig)</code> 绕过 <code>_qaAskChain</code> 串行化</td><td>AI 生成中点"都不是"会并发改写 <code>qaSource</code>，答案错库</td><td>改走 <code>_qaAskChain</code></td></tr>
+<tr><td>M8</td><td><code>beauty.html:30662</code> + <code>29764</code></td><td><code>render()</code> 整页 <code>innerHTML</code> 重建；1045 条话术一次全量拼入、内联 onclick 无事件委托</td><td>搜索/翻页即全量重渲，话术库继续增长后卡顿</td><td>列表分页或虚拟滚动；改事件委托局部更新</td></tr>
+<tr><td>M9</td><td><code>kb-admin.html:96104-96119</code></td><td><code>csApplyImport</code> 按<strong>索引</strong>逐条比对工作区与包内容</td><td>replace 模式不还原顺序时误报"不一致"（false positive），误导运维</td><td>按 uid 比对</td></tr>
+<tr><td>M10</td><td><code>kb-admin.html</code>（applyFullPack / diffToEdits）、<code>docs/_fullpack_engine.js</code></td><td>包内<strong>重复 uid</strong> 或条目<strong>缺 data</strong> 时静默丢弃、无告警</td><td>数据丢失不可见，4914 条全量包场景难排查</td><td>导入报告增加"丢弃条目数+原因"明示</td></tr>
+<tr><td>M11</td><td><code>beauty.html:31847</code></td><td>入库闸兜底放行：<code>window.scriptLibGuard</code> 缺失时 <code>ok:true</code> 静默通过（已修正此前"入库不调闸"的误判——闸实际会被调用，但存在此软缺口）</td><td>闸脚本未加载/被绕过版本漂移时，违禁词话术直接落库</td><td>闸缺失时 fail-closed（拒绝入库并提示），或在保存前断言 <code>scriptLibGuard</code> 存在</td></tr>
+</tbody></table></div>
+<hr>
+<h2 id="h-四-低危问题-16-项-合并简述">四、低危问题（16 项，合并简述）</h2>
+<p><strong>安全类</strong></p>
+<ol><li><code>index.html:2356</code>、<code>qa.html:10275/10374</code> message 监听未校验 <code>event.origin</code>；<code>qa.html:2771/10299/13631</code> postMessage 目标 <code>'*'</code> —— 当前仅触发 UI 切换，跨源嵌入场景需补白名单</li><li><code>qa.html:2776/10437/13635</code>、<code>quiz.html:10981</code>、<code>risk-lite.html:17958</code> <code>window.open</code> 未带 <code>noopener</code></li><li><code>risk-lite.html:21384</code> <code>new Function('event', code)</code> 转换 onclick 属性 —— 当前 code 来自开发者属性，若未来 innerHTML 注入外部 onclick 即升级为代码执行</li><li><code>beauty.html:33111</code> <code>window.eval('switchTab')</code> 常量求值，代码异味</li><li><code>index.html:1814</code> <code>app_base_url</code> 可由 localStorage 覆盖为任意镜像基址 —— XSS 后可重定向模块加载，建议白名单校验</li><li><code>beauty.html:32614/32637</code> 联网搜索把查询词发第三方（tavily/firecrawl），建议隐私告知</li><li><code>qa.html:2533/2719</code> 用户自带 AI Key 明文存 localStorage（设计内），建议界面提示风险</li></ol>
+<p><strong>Python 构建链</strong></p>
+<ol><li><code>_check_needles.py:165</code> 解压后 <code>.decode('utf-8','ignore')</code> 与本文件 <code>rd()</code>"禁止 ignore"口径自相矛盾，可能静默丢字节漏检</li><li><code>_build_kbadmin.py:62-63/79/86/87</code>、<code>_build_hosted.py:172/184</code>、<code>_build_home.py:2386</code> 读文本缺 <code>newline=''</code>（靠 <code>_normalize_lf</code> 兜底，属隐患）</li><li><code>_sync_shell_js.py:48-68</code> <code>grab_fn</code> 花括号配平不跳过字符串/正则/模板字面量，函数体含 <code>"{"</code> 时会误切</li><li><code>_normalize_lf_20260921.py:60-91</code> 每文件 scan/normalize 双读，且未排除 24MB 临时 js，双倍 IO</li><li><code>_build_hosted.py:139</code> <code>shutil.copyfile</code> 等非原子产物写（重跑可覆盖，危害低）</li></ol>
+<p><strong>前端逻辑/规范</strong></p>
+<ol><li><code>docs/_fullpack_engine.js:631</code> <code>verifyPack</code> 只验 magic/kind 未验 version；引擎与 kb-admin 内嵌副本（447-944）双源漂移风险</li><li><code>qa.html:7979</code> 同分裁决用 sem 布尔而非 ev 计数，极端边界仍可能选错条目；<code>8312-8541</code> <code>process</code> 函数约 230 行超长，六库决策散落 5 处</li><li><code>_shell_enhance.js:119</code> <code>esc()</code> 死代码；注册工号正则 <code>^\d{4,8}$</code> 与 input <code>maxlength=10</code> 不一致</li><li>跨文件：<code>var/let</code> 混用、<code>==</code> 宽松比较（如 qa.html:2146）、魔法数字未集中（熔断 60s、s&gt;=4、+15）</li></ol>
+<hr>
+<h2 id="h-五-各维度-未发现问题-清单-负向结论-同样重要">五、各维度"未发现问题"清单（负向结论，同样重要）</h2>
+<ul><li><strong>硬编码 AI 密钥</strong>：未发现。<code>_3d_token.txt</code> 未被任何生产代码引用/打入产物；<code>__QA_BUILTIN_AI__</code> 在构建链中不被赋值，"源码零内置密钥"红线成立</li><li><strong>AI 回答渲染 XSS</strong>：qa <code>mdToHtml</code>（8664）先 <code>esc()</code> 再生成 HTML、用户问句 <code>addMsg(esc(q))</code>，安全；beauty 竞品渲染 <code>escHtml</code>（32207）已有修复记录</li><li><strong>动态代码执行</strong>：无 <code>eval(用户输入)</code> / <code>setTimeout(字符串)</code></li><li><strong>Python 危险调用</strong>：无 <code>shell=True</code> / <code>os.system</code> / <code>shutil.rmtree</code> / <code>eval</code>；subprocess 均列表形式</li><li><strong>幂等注入</strong>：未发现 strip 不净 / 重复注入 / 漏匹配；各大标记块（CC_AI_COMPANION_v1 等）幂等守卫齐全</li><li><strong>嵌入态/首屏约定</strong>：max-height <code>!important</code>、MutationObserver 防重绑、<code>QA_SHOW_WELCOME=false</code>、常问条不自动显示，均符合</li><li><strong>正则注入</strong>：用户输入未进入 RegExp 构造器；唯一 <code>new RegExp</code>（beauty 31103）来自静态关键词表</li><li><strong>绩效数据安全</strong>：AES-GCM 加密落 IndexedDB，localStorage 仅存密文，密钥管理得当（正向实践）</li></ul>
+<hr>
+<h2 id="h-六-优先修复清单">六、优先修复清单</h2>
+<p><strong>P0（立即修）</strong></p>
+<ol><li>H1 beauty.html 三处未转义拼接（29773 / 29816 / 29819）→ 走 esc</li><li>H3 + M3 <code>_sync_shell_js.py</code> / <code>_sync_fullpack.py</code> 原子写改造 + <code>__main__</code> 守卫</li></ol>
+<p><strong>P1（本周内）</strong></p>
+<ol><li>H2 qa renderChat 增量渲染 + msgs 容量上限</li><li>M1/M2 凭据治理：管理员口令移出源码、用户口令哈希化</li><li>M5 删除 weakBest 死代码、复用检索结果</li><li>M6 chatLLMOnce JSON 解析保护</li><li>M11 入库闸 fail-closed</li></ol>
+<p><strong>P2（排期优化）</strong></p>
+<ol><li>M7 澄清链竞态、M8 beauty 渲染性能、M9/M10 kb-admin 导入健壮性（uid 比对/丢弃告警/version 校验）</li><li>M4 kbStrong 口径对齐；低危安全项（origin 校验 / noopener / app_base_url 白名单）</li><li>低危工程项（newline='' 补齐、_normalize_lf 双读、死代码清理、常量集中）</li></ol>
+<hr>
+<p>*审查方式说明：本报告由 4 路并行专项审查产出初稿，全部高危及关键中危发现已经主审查人回源逐条验证（含一处代理误判修正：M11 入库闸实际会被调用，问题修正为"闸缺失静默放行"）。*</p>
+</main>
+</div>
+</body>
+</html>

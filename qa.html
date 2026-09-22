@@ -2287,6 +2287,7 @@ html[data-theme="dark"] .dc-card{background:#162420;border-color:#1E3A2C;color:#
 
 
 
+
 <div class="livery-stripe"></div>
 
 <header class="topbar">
@@ -2560,7 +2561,8 @@ const SpringAI = (function(){
   var AI_RATE_COOLDOWN = 60000;
   function aiRetryable(e){
     var s = String((e && e.message) || e || '');
-    return /1305|429|访问量过大|速率限制|限流|频率|too many|rate.?limit|系统繁忙|繁忙|EMPTY_CONTENT/i.test(s);
+    /* BAD_RESPONSE（2026-09-22）：网关返回 HTML 错误页 / 非 JSON 正文时也应换模型重试 */
+    return /1305|429|访问量过大|速率限制|限流|频率|too many|rate.?limit|系统繁忙|繁忙|EMPTY_CONTENT|BAD_RESPONSE/i.test(s);
   }
   function aiRateLimited(e){
     var s = String((e && e.message) || e || '');
@@ -2625,7 +2627,15 @@ const SpringAI = (function(){
         try{ const d = await res.json(); msg = (d.error && (d.error.message || d.error.code)) || msg; }catch(e){}
         throw new Error(msg);
       }
-      const data = await res.json();
+      /* 2026-09-22 审查修复：正文不一定是 JSON（网关/代理错误页会返回 HTML），
+         此前直接 await res.json() 抛 SyntaxError 且不被判定为可重试 → 整链直接失败。
+         现统一转为 BAD_RESPONSE（aiRetryable 命中）走换模型重试。 */
+      let data;
+      try{
+        data = await res.json();
+      }catch(pe){
+        throw new Error('BAD_RESPONSE 响应不是合法 JSON（HTTP ' + res.status + '，疑似网关错误页）');
+      }
       const _msg = (data.choices && data.choices[0] && data.choices[0].message) || {};
       // 推理型模型（如 glm-4.5-flash）正文可能为空、内容全在 reasoning_content；正文优先，回退推理内容
       const text = _msg.content || _msg.reasoning_content || '';
@@ -2768,12 +2778,12 @@ function openAiSettings(){ SpringAI.openSettings(); }
 function jumpTo(mod){
   try{
     if(window.parent && window.parent !== window){
-      window.parent.postMessage({ type:'spring-switch', module:mod }, '*');
+      window.parent.postMessage({ type:'spring-switch', module:mod }, (typeof ccParentOrigin === 'function' ? ccParentOrigin() : '*'));
       return;
     }
   }catch(e){}
   const map = { quiz:'quiz.html', performance:'performance.html', beauty:'beauty.html', manual:'manual.html', daily:'daily.html', risk:'risk-lite.html', medical:'medical.html', report:'report.html', kbadmin:'kb-admin.html' };
-  window.open(map[mod] || (mod + '.html'), '_blank');
+  window.open(map[mod] || (mod + '.html'), '_blank', 'noopener');   /* 2026-09-22：补 noopener，避免新窗口持有 window.opener */
 }
 
 /* ===================== 知识库（手册奖惩精华 + 病假流程 + 销售知识，摘自《客舱服务部管理手册》01.14 与 OJT 资料） ===================== */
@@ -7150,13 +7160,38 @@ function esc(s){ return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;')
 /* 时间戳 */
 function nowTs(){ const d=new Date(); const p=n=>String(n).padStart(2,'0'); return p(d.getHours())+':'+p(d.getMinutes()); }
 
+/* 会话容量上限（2026-09-22 审查修复）：
+   此前 chat.msgs 只增不减（含大段 HTML/天气卡），且每次渲染都重建全部气泡 ——
+   长会话内存持续增长，单条 O(n)、整体 O(n²)。现设上限并改为「纯追加时只建新节点」。 */
+const CHAT_MAX_MSGS = 200;
 function addMsg(role, html, opts){
   opts = opts || {};
   chat.msgs.push({ role:role, html:html, raw:html, ts: nowTs(), answer:!!opts.answer, q:opts.q || '' });
+  /* 容量上限统一在 renderChat 内兜底（所有入队路径都过渲染，含补丁块里的 pushMsg） */
   renderChat(role === 'bot' && opts.answer ? {reveal:true} : {});
 }
 /* 形象IP：CC（数字乘务员）头像，base64 内嵌以保持单文件自包含 */
 let CC_AVATAR = 'assets/img/fe878423.png';
+/* 单条消息 → HTML 片段（渲染与增量追加共用同一模板，避免两处漂移） */
+function msgHtml(m){
+  if (m.role === 'bot'){
+    // 有本机改良答案时优先展示用户版本（可展开对比系统原文）；一问一答案气泡底部附 👍/👎 反馈条
+    const inner = (m.answer && m.q) ? qaWrapBetterAnswer(m.raw, m.q) : m.html;
+    const fb = (m.answer && m.q) ? qaFbBar(m.q) : '';
+    return `<div class="msg bot"><div class="avatar bot"><img src="${CC_AVATAR}" alt="CC"></div><div class="bubble"><div class="bubble-inner">${inner}</div>${fb}<span class="ts">${esc(m.ts)}</span></div></div>`;
+  }
+  return `<div class="msg user"><div class="avatar user">我</div><div class="bubble"><div class="bubble-inner">${m.html}</div><span class="ts">${esc(m.ts)}</span></div></div>`;
+}
+/* 给每条消息补稳定 id（用于判断"是否只是在尾部追加"，持久化恢复的数据同样补齐） */
+function stampMsgIds(){
+  for(let i=0;i<chat.msgs.length;i++){
+    if(!chat.msgs[i].id) chat.msgs[i].id = 'm' + (chat._seq = (chat._seq || 0) + 1);
+  }
+}
+function markWelcome(root){
+  if(!root) return;
+  root.querySelectorAll('.msg.bot').forEach(function(mEl){ if (mEl.querySelector('.welcome')) mEl.classList.add('msg-welcome'); });
+}
 function renderChat(opts){
   opts = opts || {};
   const wrap = el('chatWrap');
@@ -7164,18 +7199,35 @@ function renderChat(opts){
   // 在重写内容【前】记录用户是否贴近底部：新消息插入会改变 scrollHeight，
   // 若在插入后才测量会把"新消息撑出的高度"误判为"用户上翻"而拒绝滚动（答案需手动滑的根因）
   const nearBottom = !sc || (sc.scrollHeight - sc.scrollTop - sc.clientHeight < 140);
-  wrap.innerHTML = chat.msgs.map(m => {
-    if (m.role === 'bot'){
-      // 有本机改良答案时优先展示用户版本（可展开对比系统原文）；一问一答案气泡底部附 👍/👎 反馈条
-      const inner = (m.answer && m.q) ? qaWrapBetterAnswer(m.raw, m.q) : m.html;
-      const fb = (m.answer && m.q) ? qaFbBar(m.q) : '';
-      return `<div class="msg bot"><div class="avatar bot"><img src="${CC_AVATAR}" alt="CC"></div><div class="bubble"><div class="bubble-inner">${inner}</div>${fb}<span class="ts">${esc(m.ts)}</span></div></div>`;
+  stampMsgIds();
+  /* 容量上限集中兜底（2026-09-22）：任何入队路径（addMsg / 补丁块 pushMsg / 恢复会话）
+     都不会让 msgs 无限增长；裁剪后首条 id 变化 → 自动走整体重绘，DOM 与数据保持一致。 */
+  if(chat.msgs.length > CHAT_MAX_MSGS) chat.msgs.splice(0, chat.msgs.length - CHAT_MAX_MSGS);
+  /* 增量判定（2026-09-22）：仅当「DOM 里的消息数 = 上次渲染数」「首条 id 未变」
+     且「消息变多了」时，只追加新节点；其余情况（裁剪、恢复、就地改写、被外部清空）
+     一律整体重绘 —— 保证不会出现"内容变了但 DOM 没更新"的假渲染。 */
+  const prevRendered = parseInt(wrap.getAttribute('data-cc-rendered') || '-1', 10);
+  const prevFirstId = wrap.getAttribute('data-cc-first-id') || '';
+  const domCount = wrap.querySelectorAll('.msg').length;
+  const pureAppend = prevRendered > 0
+    && chat.msgs.length > prevRendered
+    && domCount === prevRendered
+    && prevFirstId === String(chat.msgs[0] && chat.msgs[0].id);
+  if(pureAppend){
+    const frag = document.createDocumentFragment();
+    for(let i = prevRendered; i < chat.msgs.length; i++){
+      const t = document.createElement('div');
+      t.innerHTML = msgHtml(chat.msgs[i]);
+      if(t.firstElementChild) frag.appendChild(t.firstElementChild);
     }
-    return `<div class="msg user"><div class="avatar user">我</div><div class="bubble"><div class="bubble-inner">${m.html}</div><span class="ts">${esc(m.ts)}</span></div></div>`;
-  }).join('');
-  // 欢迎卡在手机上会被 74% 气泡宽度挤成 ~200px 细长条（用户 2026-09-15：手机打开后排版不正确）
-  // → 给包含欢迎卡的消息打标记，交给 CSS 在手机档放开为整行、去掉头像与气泡壳
-  wrap.querySelectorAll('.msg.bot').forEach(function(mEl){ if (mEl.querySelector('.welcome')) mEl.classList.add('msg-welcome'); });
+    wrap.appendChild(frag);
+    markWelcome(wrap);                       /* 幂等，只影响新节点上的欢迎卡标记 */
+  } else {
+    wrap.innerHTML = chat.msgs.map(msgHtml).join('');
+    markWelcome(wrap);
+  }
+  wrap.setAttribute('data-cc-rendered', String(chat.msgs.length));
+  wrap.setAttribute('data-cc-first-id', String((chat.msgs[0] && chat.msgs[0].id) || ''));
   // 新消息自动露出：新答案到达(reveal)或用户原本就在底部时——
   // 「我这句提问 + 这一条回答」整块装得下 → 滚到底部；
   // 装不下 → 把我的提问对齐可视区顶部，保证「我问的那句」一定看得见
@@ -7982,13 +8034,17 @@ function kbSearch(text, n, pool){
 /* 2026-09-13 优化：知识命中分级判据（4828 问审计结论）
  * ——kbStrong：强证据（s≥8 / 标题相似≥0.25 / 证据≥2），当前库直答与跨库切换的唯一门槛；
  * ——"无争议领先者"（比第二名高 ≥3 分的非强命中）不切库：实测 959 次领先者切换 440 对 516 错，
- *   弊大于利；改为把跨库最佳候选并入 AI 兜底上下文（见 process 内 weakBest 合并逻辑），
+ *   弊大于利；改为把跨库最佳候选并入 AI 兜底上下文（见 process 内的跨库候选并入逻辑），
  *   让正确资料以"参考上下文"形式交给 AI，而不是冒险直接展示。
  * 根因：语义保底 4 分后，单个 3~7 字标签命中（s=4、ev=1）永远达不到强门槛；而旧当前库门槛
  * （top1 是语义命中就答）又太宽，日常库弱命中会把跨库问题截胡在错误答案上。 */
 function kbStrong(hits){
   if (!hits || !hits.length) return false;
   const h0 = hits[0];
+  /* 口径补充（2026-09-22 审查）：文档串写作 s>=4 && (s>=8||sim>=0.25||ev>=2)，
+     实现里另有未写进文档的前置条件 sem（语义命中）。当前打分下非语义命中封顶 6 分
+     （正文/标题兜底），故 s>=8 / sim>=0.25 / ev>=2 三条都隐含 sem，功能等效；
+     这里显式保留该门槛并写明前提，避免后续调整打分时误判。 */
   return !!h0.sem && h0.s >= 4 && (h0.s >= 8 || (h0.sim || 0) >= 0.25 || (h0.ev || 0) >= 2);
 }
 /* ===== QA_ASSOC_BEGIN（候选追问 + 联想记忆，2026-09-15）=====
@@ -8161,7 +8217,15 @@ async function qaClarNone(origB64){
   addMsg('user', esc('都不是'));
   await typing(''); clearTyping();
   addMsg('bot', '好的，CC 不猜了——换个说法、换个库再问；也可以直接说产品名（如「雅诗兰黛小棕瓶」）出话术。');
-  if (orig && typeof process === 'function') await process(orig);
+  if (orig && typeof process === 'function'){
+    /* 2026-09-22 审查修复 M7：此前直接 await process(orig)，绕过了 ask() 的串行队列——
+       用户在 AI 正在生成时点「都不是」，会与在途 process 并发执行并互相改写全局 qaSource
+       （答案可能落到错误的库）。现统一入队，与发送入口共用同一条串行链。 */
+    _qaAskChain = _qaAskChain.then(function(){ return process(orig); }).catch(function(e){
+      try{ console.error('[qa] 澄清后重问失败', e); }catch(_){}
+    });
+    await _qaAskChain;
+  }
 }
 function qaAssocUndo(keyB64){
   const key = _qaUnB64(keyB64);
@@ -8404,6 +8468,22 @@ async function process(text){
   // 相同/相似提问直接命中作答，不再重复追问；匹配错了可在回复下撤销该条记忆。
   if (await qaAssocAnswer(text)) return;
   const pool = currentKbPool();
+  /* 跨库检索结果复用（2026-09-22 审查修复 M5）：
+     同一个问题此前在「决定性更优判定 → 强证据切库 → AI 兜底上下文」三处各扫一遍全部库
+     （对 3476 条库合计 10+ 次线性扫描，连续快问会掉帧）。现统一走一个记忆化扫描器，
+     每次提问每库只扫一次。qaSource 在扫描后不会变（唯一切库分支已 return），text 全程不变。 */
+  let _crossPoolMemo = null;
+  function crossPoolScan(){
+    if (_crossPoolMemo) return _crossPoolMemo;
+    const POOLS = { daily: KB, ccm: window.KB_CCM_RAW, mgm: window.KB_MGM_RAW, svc: window.KB_SVC_RAW, dc: (window.DC_KB && window.DC_KB.length) ? window.DC_KB : null };
+    const out = {};
+    for (const p of ['daily','ccm','mgm','svc','dc']){
+      if (p === qaSource || !POOLS[p] || !POOLS[p].length) continue;
+      out[p] = kbSearch(text, 3, POOLS[p]);
+    }
+    _crossPoolMemo = out;
+    return out;
+  }
   // 2026-09-09 审查修复：兜底命中（正文反向匹配）证据弱，长文条目常被顶成 top1（实测"备份任务"串出酒测、
   // "颠簸处置"串出基本要求）。只有 top1 是语义命中（标签/同义/标题前缀）才直接展示知识库条目；
   // 纯兜底命中或零命中 → 继续往下走跨库检索 / AI 自由问答（兜底条目会作为 AI 的参考上下文）。
@@ -8415,10 +8495,9 @@ async function process(text){
          （实测 s=104 的目标条目被挡在门外），4828 问审计中该类占剩余失败的最大一块。
          判据：他库强命中且比分高出 ≥15 分（"明显更优"）才切；否则维持"用户所选库优先"。 */
       let decisive = null;
-      const P2 = { daily: KB, ccm: window.KB_CCM_RAW, mgm: window.KB_MGM_RAW, svc: window.KB_SVC_RAW, dc: (window.DC_KB && window.DC_KB.length) ? window.DC_KB : null };
-      for (const p of ['daily','ccm','mgm','svc','dc']){
-        if (p === qaSource || !P2[p] || !P2[p].length) continue;
-        const h = kbSearch(text, 3, P2[p]);
+      const _cross = crossPoolScan();          /* 记忆化：与下方切库/AI 上下文共用同一批检索结果 */
+      for (const p of Object.keys(_cross)){
+        const h = _cross[p];
         if (kbStrong(h) && h[0].s >= hits[0].s + 15 && (!decisive || h[0].s > decisive.s)) decisive = { pool: p, s: h[0].s };
       }
       if (!decisive){ await typing(''); clearTyping(); kbReply(hits, text); return; }
@@ -8430,24 +8509,23 @@ async function process(text){
   // 2026-09-12 核查收紧：s≥4 只是单条短标签的保底分，"不开心"（含标签"开心"子串）、"压力好大"
   // （命中灭火瓶"压力"标签）这类子串弱命中也会凑够——现要求**强证据**才切库：
   // 总分 ≥8，或标题相似度 ≥0.25，或 ≥2 条精确/同义标签命中（ev 字段，错字模糊命中不计入）。
-  let weakBest = null;  // 未达强证据的最佳跨库候选：不切库，但供 AI 兜底作上下文（2026-09-13 审计新增）
+  /* 2026-09-22 审查修复 M5：原 `weakBest`（未达强证据的最佳跨库候选）计算后从未被任何代码读取
+     —— 属死代码（AI 兜底上下文在下方自行取各库候选）。此处删除该变量；若日后确实需要
+     「弱候选并入 AI 上下文」，请直接复用下面的 _cross 结果，不要再新增重复扫描。 */
+  const _crossPools = crossPoolScan();
   {
-    const KB_POOLS = { daily: KB, ccm: window.KB_CCM_RAW, mgm: window.KB_MGM_RAW, svc: window.KB_SVC_RAW, dc: (window.DC_KB && window.DC_KB.length) ? window.DC_KB : null };
-    const otherPools = ['daily','ccm','mgm','svc','dc'].filter(p => p !== qaSource && KB_POOLS[p] && KB_POOLS[p].length);
     let best = null;
-    for (const p of otherPools){
-      const h = kbSearch(text, 3, KB_POOLS[p]);
+    for (const p of Object.keys(_crossPools)){
+      const h = _crossPools[p];
       const strongEnough = kbStrong(h);   // 2026-09-13：直答与切库统一为强证据门槛（领先者不再切库，进 AI 上下文）
       if (strongEnough && (!best || h[0].s > best.s)) best = { pool: p, s: h[0].s };
-      /* 2026-09-13 优化：weakBest 平分时按标题相似度决胜——多库并列 s=4 时原来按库顺序取第一个，
-         常常选错库导致 AI 上下文缺正确条目（4828 问审计追踪实锤） */
-      if (h.length && h[0].s >= 3 && (!weakBest || h[0].s > weakBest.s || (h[0].s === weakBest.s && (h[0].sim || 0) > (weakBest.sim || 0)))) weakBest = { pool: p, s: h[0].s, sim: h[0].sim || 0 };
     }
     if (best){
       // 静默切库（不弹提示气泡），在该库内取完整命中后按正常格式回答
       qaSource = best.pool;
       document.querySelectorAll('.src-tab').forEach(b => b.classList.toggle('active', b.dataset.src === best.pool));
-      const hits2 = kbSearch(text, 3, KB_POOLS[best.pool]);
+      const _bp = { daily: KB, ccm: window.KB_CCM_RAW, mgm: window.KB_MGM_RAW, svc: window.KB_SVC_RAW, dc: (window.DC_KB && window.DC_KB.length) ? window.DC_KB : null };
+      const hits2 = kbSearch(text, 3, _bp[best.pool]);
       await typing(''); clearTyping();
       addMsg('bot', '<div class="kbox">🔀 当前库未直接命中，已在 <b>' + (SRC_CFG[best.pool] ? SRC_CFG[best.pool].name : best.pool) + '</b> 中为你找到：</div>');
       kbReply(hits2, text);
@@ -8496,11 +8574,11 @@ async function process(text){
       // 根因：原来只带"最佳库+同分库"，比最佳库略低 1~3 分但正确的条目会被丢掉
       //（4828 问审计中 76 条因此落到"AI 上下文无正确条目"）；各库都带候选后正确资料基本不丢。
       {
-        const KB_POOLS2 = { daily: KB, ccm: window.KB_CCM_RAW, mgm: window.KB_MGM_RAW, svc: window.KB_SVC_RAW, dc: (window.DC_KB && window.DC_KB.length) ? window.DC_KB : null };
         const seen = new Set(kbCtx.map(h => h.k));
-        for (const p2 of ['daily','ccm','mgm','svc','dc']){
-          if (p2 === qaSource || !KB_POOLS2[p2] || !KB_POOLS2[p2].length) continue;
-          const h2 = kbSearch(text, 3, KB_POOLS2[p2]);
+        /* 2026-09-22：复用 crossPoolScan() 的结果（同一 text/同一 n/同一池集合），不再重复检索 */
+        const _cross = crossPoolScan();
+        for (const p2 of Object.keys(_cross)){
+          const h2 = _cross[p2];
           h2.forEach(h => { if (h.s >= 3 && !seen.has(h.k) && kbCtx.length < 12){ kbCtx.push(h); seen.add(h.k); } });
         }
       }
@@ -10272,7 +10350,20 @@ qaInput.addEventListener('input', () => {
   qaInput.style.height='auto';
   qaInput.style.height=Math.min(qaInput.scrollHeight,124)+'px';
 });
+/* postMessage 来源校验（2026-09-22 安全审查修复）：
+   此前对任意来源的消息都直接执行（主题刷新 / 后续的深跳上下文注入）。
+   现统一只接受「同源壳层」或「file:// 本地文档」的消息，与 index.html 的口径一致。 */
+function ccMsgTrustedQa(e){
+  try{
+    if(e.origin && e.origin !== 'null') return e.origin === location.origin;
+    if(location.protocol === 'file:') return true;
+    var fr = document.querySelectorAll('iframe');
+    for(var i=0;i<fr.length;i++){ if(fr[i].contentWindow === e.source) return true; }
+  }catch(err){}
+  return false;
+}
 window.addEventListener('message', function(e){
+  if(!ccMsgTrustedQa(e)) return;   /* 来源校验（2026-09-22 安全修复） */
   const d = e.data;
   if(d && d.type === 'theme-changed') updateAiStatus();
 });
@@ -10296,7 +10387,7 @@ window.addEventListener('message', function(e){
       if(!(window.parent && window.parent !== window)) return;
       var lbl = '';
       try{ lbl = (typeof currentPoolLabel === 'function') ? currentPoolLabel() : ''; }catch(e){}
-      window.parent.postMessage({ type:'cc:crumb', mod:'qa', text: lbl ? ('你问我答 › ' + lbl) : '你问我答' }, '*');
+      window.parent.postMessage({ type:'cc:crumb', mod:'qa', text: lbl ? ('你问我答 › ' + lbl) : '你问我答' }, (typeof ccParentOrigin === 'function' ? ccParentOrigin() : '*'));
     }catch(e){}
   }
 
@@ -10371,7 +10462,19 @@ window.addEventListener('message', function(e){
   }
 
   /* ---- A1：接收壳层深跳 ---- */
+  /* 2026-09-22 安全审查修复：深跳消息此前不校验来源，跨源父页可注入上下文驱动本模块切库/预置问题。
+     现只接受同源（http/https）或 file:// 本地文档发来的消息，与 index.html 的 ccMsgTrusted 同口径。 */
+  function _ccMsgTrustedQa(e){
+    try{
+      if(e.origin && e.origin !== 'null') return e.origin === location.origin;
+      if(location.protocol === 'file:') return true;
+      var fr = document.querySelectorAll('iframe');
+      for(var i=0;i<fr.length;i++){ if(fr[i].contentWindow === e.source) return true; }
+    }catch(err){}
+    return false;
+  }
   window.addEventListener('message', function(e){
+    if(!_ccMsgTrustedQa(e)) return;
     var d = e.data || {};
     if(d.type !== 'cc:nav-jump') return;
     if(d.mod && d.mod !== 'qa') return;
@@ -10434,7 +10537,7 @@ window.addEventListener('message', function(e){
           try{
             var standalone = !(window.parent && window.parent !== window);
             if(standalone && mod && q && JUMP_FILES[mod]){
-              window.open(JUMP_FILES[mod] + '?from=qa&q=' + encodeURIComponent(q), '_blank');
+              window.open(JUMP_FILES[mod] + '?from=qa&q=' + encodeURIComponent(q), '_blank', 'noopener');
               return;
             }
           }catch(e){}
@@ -11315,6 +11418,21 @@ window.addEventListener('message', function(e){
 
 
 
+/* postMessage 发送目标收敛（2026-09-22 安全审查修复 L1）：
+   此前一律用 '*' 广播，任何持有父窗口引用的页面都能收到我们的内部消息。
+   现优先用 document.referrer 推导父页真实 origin（嵌入态/跨源镜像同样适用），
+   取不到时才回退 '*'（例如 file:// 直开、referrer 被策略抹掉）。
+   调用方一律写 `(typeof ccParentOrigin === 'function' ? ccParentOrigin() : '*')`，
+   保证即使本函数因补丁重排而暂时缺失，也不会抛 ReferenceError。 */
+function ccParentOrigin(){
+  try{
+    if(document.referrer){
+      var o = new URL(document.referrer).origin;
+      if(o && o !== 'null') return o;
+    }
+  }catch(err){}
+  return '*';
+}
 /*__QA_QUICKSTART_BEGIN__*/
 /* ===================== 快捷提问 · 聊天框弹出面板 v2（2026-09-19） =====================
    v1 是消息流顶部的 chip 行；用户要求改「置于聊天框弹出」：
@@ -13628,11 +13746,11 @@ window.QA_I18N=(function(){
     try{ localStorage.setItem('cc_home_enter_chat', String(cur)); }catch(e){}
     try{
       if (window.parent && window.parent !== window){
-        window.parent.postMessage({ type:'spring-switch', module:'home' }, '*');
+        window.parent.postMessage({ type:'spring-switch', module:'home' }, (typeof ccParentOrigin === 'function' ? ccParentOrigin() : '*'));
         return;
       }
     }catch(e){}
-    try{ window.open('cc-home.html', '_blank'); }catch(e){}
+    try{ window.open('cc-home.html', '_blank', 'noopener'); }catch(e){}
   }
   window.petGoHome = goHome;
 

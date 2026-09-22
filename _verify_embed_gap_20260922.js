@@ -89,6 +89,7 @@ function judge(name, gap, extra) {
 
     let m = await measure();
     judge(vp.label + ' · 产品浏览', m.gap, `iframeH=${m.iframeH} main=${m.mainTop}->${m.mainTop + m.mainH} eb=${m.eb} et=${m.et} data-embed=${m.de} iframe∩TabBar=${m.overlap}px`);
+    await page.screenshot({ path: `_verify_gap_${vp.w}x${vp.h}_browse.png` });
 
     // 切到「肤质筛选」（render 会重建容器）后重新量测
     await page.evaluate(() => {

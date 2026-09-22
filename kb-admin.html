@@ -483,6 +483,10 @@ label.lbl{font-size:.74rem;color:var(--text2);display:block;margin-bottom:4px;}
 
   var MAGIC = 'cabin-fullpack-v1';
   var EDIT_MAGIC = 'cabin-console-edit-v1';
+  /* 本引擎能完整解析的最高包协议版本。
+     导入时若包 version 更高，说明是更新版引擎导出的包，可能存在本版未知字段，
+     verifyPack 会给出告警（而非直接拒绝），让运维可见地知情。 */
+  var PROTOCOL_VERSION = 1;
   var KIND_KB = 'kb';
   var KIND_SCRIPT = 'script';
   var KIND_PRODUCT = 'product';
@@ -639,31 +643,50 @@ label.lbl{font-size:.74rem;color:var(--text2);display:block;margin-bottom:4px;}
       return { ok: false, errors: errors, warnings: warnings, stats: null };
     }
     if (pack.kind && pack.kind !== 'full') warnings.push('kind 为 ' + pack.kind + '（期望 full），已按全量包解析');
+    // 协议版本核验（2026-09-22 审查 L13）：原先只验 magic/kind，包版本漂移完全不可见。
+    if (pack.version === undefined || pack.version === null || pack.version === '') {
+      warnings.push('包内缺少 version 字段，已按 v' + PROTOCOL_VERSION + ' 解析');
+    } else if (typeof pack.version !== 'number' || !isFinite(pack.version) || pack.version < 1) {
+      warnings.push('包内 version 非法（' + String(pack.version) + '），已按 v' + PROTOCOL_VERSION + ' 解析');
+    } else if (pack.version > PROTOCOL_VERSION) {
+      warnings.push('包协议版本 v' + pack.version + ' 高于本引擎 v' + PROTOCOL_VERSION + '，可能含未知字段（已按已知字段解析）');
+    } else if (pack.version < PROTOCOL_VERSION) {
+      warnings.push('包协议版本 v' + pack.version + ' 低于本引擎 v' + PROTOCOL_VERSION + '（按升级兼容路径解析）');
+    }
     if (!Array.isArray(pack.sources)) { errors.push('缺少 sources 数组'); return { ok: false, errors: errors, warnings: warnings, stats: null }; }
     if (!pack.sources.length) errors.push('包内没有任何数据源');
 
-    var total = 0, sums = [];
+    var total = 0, sums = [], totalDup = 0, totalNoData = 0;
     for (var i = 0; i < pack.sources.length; i++) {
       var s = pack.sources[i] || {};
       var sid = String(s.id || ('#' + i));
       if (KINDS.indexOf(s.kind) < 0) warnings.push('数据源 ' + sid + ' 的 kind 未知（' + String(s.kind) + '），按 kb 处理');
       if (!Array.isArray(s.items)) { errors.push('数据源 ' + sid + ' 缺少 items 数组'); continue; }
-      var fps = [], badFp = 0, badUid = 0;
+      var fps = [], badFp = 0, badUid = 0, dupUid = 0, noData = 0, seenUid = {};
       for (var j = 0; j < s.items.length; j++) {
         var it = s.items[j] || {};
         if (!it.uid) { badUid++; continue; }
+        var uKey = String(it.uid);
+        if (seenUid.hasOwnProperty(uKey)) dupUid++; else seenUid[uKey] = true;
+        // 缺 data 的条目还原时会被丢弃（2026-09-22 审查 M10：原先静默丢弃，无任何告警）
+        if (it.data === undefined || it.data === null) noData++;
         var fp = fingerprint(it.data);
         fps.push(it.uid + ':' + fp);
         if (it.fp && it.fp !== fp) badFp++;
       }
       if (badUid) errors.push('数据源 ' + sid + ' 有 ' + badUid + ' 条缺少 uid');
       if (badFp) errors.push('数据源 ' + sid + ' 有 ' + badFp + ' 条指纹与内容不符（内容被改动或传输损坏）');
+      // M10：重复 uid / 缺 data 属「会丢数据」的软错误，一律显式告知（不阻断，但不再静默）
+      if (dupUid) warnings.push('数据源 ' + sid + ' 有 ' + dupUid + ' 条 uid 重复（按 uid 归并时仅保留首条，其余被丢弃）');
+      if (noData) warnings.push('数据源 ' + sid + ' 有 ' + noData + ' 条缺少 data（还原时将被丢弃）');
       var checksum = hashStr(fps.join('|'));
       if (s.checksum && s.checksum !== checksum) errors.push('数据源 ' + sid + ' 校验和不一致（期望 ' + s.checksum + '，实算 ' + checksum + '）');
       if (s.count != null && s.count !== s.items.length) errors.push('数据源 ' + sid + ' 声明 ' + s.count + ' 条，实际 ' + s.items.length + ' 条');
       sums.push(sid + ':' + checksum);
       total += s.items.length;
-      bySource.push({ id: sid, kind: s.kind, name: s.name || sid, count: s.items.length, checksum: checksum, fpMismatch: badFp });
+      totalDup += dupUid;
+      totalNoData += noData;
+      bySource.push({ id: sid, kind: s.kind, name: s.name || sid, count: s.items.length, checksum: checksum, fpMismatch: badFp, dupUid: dupUid, noData: noData });
     }
     var sum = hashStr(sums.join('|'));
     if (pack.summary) {
@@ -684,7 +707,13 @@ label.lbl{font-size:.74rem;color:var(--text2);display:block;margin-bottom:4px;}
       ok: errors.length === 0,
       errors: errors,
       warnings: warnings,
-      stats: { sources: bySource.length, items: total, checksum: sum, bySource: bySource }
+      stats: {
+        sources: bySource.length, items: total, checksum: sum,
+        version: (typeof pack.version === 'number' && isFinite(pack.version) && pack.version >= 1) ? pack.version : PROTOCOL_VERSION,
+        protocolVersion: PROTOCOL_VERSION,
+        dupUid: totalDup, noData: totalNoData,
+        bySource: bySource
+      }
     };
   }
 
@@ -707,10 +736,14 @@ label.lbl{font-size:.74rem;color:var(--text2);display:block;margin-bottom:4px;}
       var s = pack.sources[i] || {};
       var sid = String(s.id || ('#' + i));
       var packItems = [];
+      var droppedNoData = 0, dupUid = 0, seenPackUid = {};
       var items = Array.isArray(s.items) ? s.items : [];
       for (var j = 0; j < items.length; j++) {
         var it = items[j] || {};
-        if (!it.data) continue;
+        // M10：缺 data 的条目会被丢弃 —— 计数后明示，不再静默
+        if (it.data === undefined || it.data === null) { droppedNoData++; continue; }
+        var uu = String(it.uid != null ? it.uid : (it.data[META_KEY] != null ? it.data[META_KEY] : ''));
+        if (uu) { if (seenPackUid.hasOwnProperty(uu)) dupUid++; else seenPackUid[uu] = true; }
         packItems.push(it.data);
       }
       var base = Array.isArray(current[sid]) ? current[sid] : [];
@@ -768,6 +801,8 @@ label.lbl{font-size:.74rem;color:var(--text2);display:block;margin-bottom:4px;}
         packCount: items.length, outCount: out.length, baseCount: base.length,
         matched: matched, updated: updated, added: added, removed: removed,
         fpMismatch: fpMismatch,
+        droppedNoData: droppedNoData, dupUid: dupUid,
+        dataLoss: (droppedNoData + dupUid) > 0,
         ok: (out.length === items.length) && fpMismatch === 0
       });
     }
@@ -809,11 +844,13 @@ label.lbl{font-size:.74rem;color:var(--text2);display:block;margin-bottom:4px;}
   }
 
   /* 把「目标条目集合」相对「基线」的差异转成编辑层 —— 导入完整包后用它落盘，
-     使工作区 == 包内数据，而基线仍保持内嵌原值（不改动源文件即可完成还原）。 */
-  function diffToEdits(baseItems, targetItems, src) {
+     使工作区 == 包内数据，而基线仍保持内嵌原值（不改动源文件即可完成还原）。
+     diag（可选）：{ dupUid:N, nullTarget:N } 回填「被丢弃条目数 + 原因」（2026-09-22 审查 M10）。 */
+  function diffToEdits(baseItems, targetItems, src, diag) {
     baseItems = Array.isArray(baseItems) ? baseItems : [];
     targetItems = Array.isArray(targetItems) ? targetItems : [];
     var e = emptyEdits();
+    if (diag) { diag.dupUid = 0; diag.nullTarget = 0; }
     var baseByUid = {}, baseUids = {};
     for (var i = 0; i < baseItems.length; i++) {
       var bu = (baseItems[i] && baseItems[i][META_KEY]) ? String(baseItems[i][META_KEY]) : makeUid(src || { id: 'x', kind: KIND_KB }, baseItems[i], i);
@@ -822,9 +859,9 @@ label.lbl{font-size:.74rem;color:var(--text2);display:block;margin-bottom:4px;}
     var targetUids = {};
     for (var j = 0; j < targetItems.length; j++) {
       var t = targetItems[j];
-      if (!t) continue;
+      if (!t) { if (diag) diag.nullTarget++; continue; }
       var tu = (t && t[META_KEY]) ? String(t[META_KEY]) : makeUid(src || { id: 'x', kind: KIND_KB }, t, j);
-      if (targetUids.hasOwnProperty(tu)) continue;   // 包内重复 uid：保留首条
+      if (targetUids.hasOwnProperty(tu)) { if (diag) diag.dupUid++; continue; }   // 包内重复 uid：保留首条
       targetUids[tu] = true;
       if (baseByUid.hasOwnProperty(tu)) {
         // 只多/少了 _uid 元字段不算内容改动（否则导入一份未改动的包会把全库标成「已改」）
@@ -917,6 +954,7 @@ label.lbl{font-size:.74rem;color:var(--text2);display:block;margin-bottom:4px;}
   var FULLPACK = {
     MAGIC: MAGIC,
     EDIT_MAGIC: EDIT_MAGIC,
+    PROTOCOL_VERSION: PROTOCOL_VERSION,
     META_KEY: META_KEY,
     KINDS: KINDS,
     stableStringify: stableStringify,
@@ -943,6 +981,7 @@ label.lbl{font-size:.74rem;color:var(--text2);display:block;margin-bottom:4px;}
 })(typeof window !== 'undefined' ? window : (typeof globalThis !== 'undefined' ? globalThis : this));
 //__FULLPACK_ENGINE_END__
 </script>
+
 
 <!--__A11Y_20260919__BEGIN__-->
 <style id="a11y20260919">
@@ -1044,6 +1083,7 @@ html[data-theme="dark"] .border-slate-200{ border-color:var(--border)!important;
 <!--__A11Y_20260919__BEGIN__-->
 <h1 class="a11y-sr">知识库管理</h1>
 <!--__A11Y_20260919__END__-->
+
 
 
 
@@ -96046,6 +96086,8 @@ function csExportAll(){
   csDownload('客舱小助手_库管理完整数据包_' + d + '.json', JSON.stringify(pack));
   const lines = ['已导出完整数据包：' + v.stats.sources + ' 个数据源 / ' + v.stats.items + ' 条', '包级校验和：<b>' + v.stats.checksum + '</b>'];
   v.stats.bySource.forEach(function(s){ lines.push('· ' + esc(s.name) + '：' + s.count + ' 条（' + s.checksum + '）'); });
+  // 2026-09-22 审查 M10：导出侧同样把「会丢数据」的告警讲清楚，避免运维拿到一个静默残缺的包
+  if(v.warnings && v.warnings.length) lines.push('<span style="color:var(--warn);">告警：' + v.warnings.map(esc).join('；') + '</span>');
   openModal('✅ 导出完成（已通过自检）', lines.join('<br>'), [{ label:'知道了', fn(){ closeModal(); } }]);
   toast('已导出 ' + v.stats.items + ' 条');
 }
@@ -96072,9 +96114,18 @@ function csPreviewImport(pack){
     const cur = csItems(s.id).length;
     return '<tr><td>' + esc(s.name) + '</td><td>' + s.count + '</td><td>' + cur + '</td><td>' + (s.count === cur ? '<span class="ok">一致</span>' : '<span style="color:var(--warn);">将变为 ' + s.count + '</span>') + '</td></tr>';
   }).join('');
+  // 2026-09-22 审查 M10/L13：把「协议版本」与校验告警（版本漂移 / uid 重复 / 缺 data）显式摆到导入前，不再静默
+  const verLine = '协议版本：<b>v' + (v.stats.version || 1) + '</b>（本引擎 v' + (v.stats.protocolVersion || 1) + '）'
+    + (v.stats.dupUid ? '｜uid 重复 <b>' + v.stats.dupUid + '</b> 条' : '')
+    + (v.stats.noData ? '｜缺 data <b>' + v.stats.noData + '</b> 条' : '') + '<br>';
+  const warnBox = (v.warnings && v.warnings.length)
+    ? '<div class="kbox" style="border-left-color:var(--warn);margin-top:8px;">包校验告警：<br>· ' + v.warnings.map(esc).join('<br>· ') + '</div>'
+    : '';
   const body = '识别结果：<b>' + esc(pack.title || pack.packId) + '</b> · ' + v.stats.sources + ' 个数据源 / ' + v.stats.items + ' 条<br>'
+    + verLine
     + '包级校验和：<b>' + v.stats.checksum + '</b><br>'
     + '<table class="cs-tbl cs-rpt" style="margin-top:8px;"><tr><th>数据源</th><th>包内</th><th>当前</th><th>差异</th></tr>' + rows + '</table>'
+    + warnBox
     + '<div class="kv" style="margin-top:8px;">「整包还原」= 以包内内容为准（包里没有的条目会被移除）；「合并追加」= 只覆盖/补充相同标识的条目，保留其余。</div>';
   openModal('数据包校验通过', body, [
     { label:'取消', fn(){ closeModal(); } },
@@ -96087,11 +96138,15 @@ function csApplyImport(pack, mode){
   CS_SOURCES.forEach(function(s){ current[s.id] = csItems(s.id); });
   const res = FULLPACK.applyFullPack(pack, { mode: mode, current: current });
   const touched = [];
+  let editLoss = 0;
   (pack.sources || []).forEach(function(ps){
     const src = csSrc(ps.id);
     if(!src || !res.state[ps.id]) return;
     const target = res.state[ps.id];
-    const e = FULLPACK.diffToEdits(csBase(ps.id), target, src);
+    // diag：回填 diffToEdits 内部因「包内 uid 重复 / 空条目」被丢弃的条数（M10 可见化）
+    const diag = {};
+    const e = FULLPACK.diffToEdits(csBase(ps.id), target, src, diag);
+    editLoss += (diag.dupUid || 0) + (diag.nullTarget || 0);
     CS_EDITS[ps.id] = (mode === 'merge') ? FULLPACK.mergeEdits(csEdits(ps.id), e) : e;
     touched.push(ps.id);
     csInvalidate(ps.id);
@@ -96099,29 +96154,56 @@ function csApplyImport(pack, mode){
   csSaveEdits();
   csRenderAll();
   // 还原一致性复核：逐条比对「工作区」与「包内容」（忽略 uid 元字段）
+  // 2026-09-22 审查 M9：原先按**索引**逐条比 ——「合并追加」并不还原包内顺序，
+  // 顺序不同就会把「同一条内容换个位置」误报成「第 N 条内容不一致」，误导运维。
+  // 改为按 uid 比对（uid 是条目的稳定身份，与位置无关）。
   const rows = [];
-  let bad = 0;
+  let bad = 0, lossTotal = editLoss;
   (pack.sources || []).forEach(function(ps){
     const cur = csItems(ps.id);
     const want = (ps.items || []).map(function(x){ return x.data; });
-    const n = Math.max(cur.length, want.length);
+    const keyOf = function(it, i){
+      const u = it ? it[FULLPACK.META_KEY] : '';
+      return (u === undefined || u === null || u === '') ? ('#idx:' + i) : ('uid ' + String(u));
+    };
+    const curMap = Object.create(null), wantMap = Object.create(null);
+    cur.forEach(function(it, i){ const k = keyOf(it, i); if(!(k in curMap)) curMap[k] = it; });
+    want.forEach(function(it, i){ const k = keyOf(it, i); if(!(k in wantMap)) wantMap[k] = it; });
     let diff = 0, first = '';
-    for(let i = 0; i < n; i++){
-      const a = cur[i], b = want[i];
-      if(!a || !b){ diff++; if(!first) first = '第 ' + (i + 1) + ' 条缺失'; continue; }
+    Object.keys(wantMap).forEach(function(k){
+      const b = wantMap[k], a = curMap[k];
+      if(a === undefined){ diff++; if(!first) first = '缺少 ' + k; return; }
       if(FULLPACK.stableStringify(FULLPACK.stripMeta(a)) !== FULLPACK.stableStringify(FULLPACK.stripMeta(b))){
-        diff++; if(!first) first = '第 ' + (i + 1) + ' 条内容不一致';
+        diff++; if(!first) first = '内容不一致（' + k + '）';
       }
+    });
+    // 「整包还原」下工作区应严格等于包内容；「合并追加」保留包外条目属预期，不计为差异
+    if(mode === 'replace'){
+      Object.keys(curMap).forEach(function(k){
+        if(k in wantMap) return;
+        diff++; if(!first) first = '多出 ' + k;
+      });
     }
+    // 包自身的数据丢失（缺 data / uid 重复）——来自 applyFullPack 的逐源报告
+    const rep = (res.report || []).filter(function(r){ return r.id === ps.id; })[0];
+    if(rep && rep.dataLoss) lossTotal += (rep.droppedNoData + rep.dupUid);
     if(diff) bad++;
     rows.push('<tr><td>' + esc(ps.name || ps.id) + '</td><td>' + want.length + '</td><td>' + cur.length + '</td>'
       + '<td class="' + (diff ? 'bad' : 'ok') + '">' + (diff ? diff + ' 条不符（' + esc(first) + '）' : '✓ 完全一致') + '</td></tr>');
   });
-  const okAll = bad === 0 && res.ok;
+  const okAll = bad === 0 && res.ok && lossTotal === 0;
+  const warns = (res.verify && res.verify.warnings) || [];
+  const lossLine = lossTotal
+    ? '<div class="kbox" style="border-left-color:var(--danger);">⚠️ 包内有 ' + lossTotal + ' 条被丢弃（缺 data / uid 重复），详见上方各源报告。</div>'
+    : '';
+  const warnLine = warns.length
+    ? '<div class="kbox" style="border-left-color:var(--warn);">包校验告警：<br>· ' + warns.map(esc).join('<br>· ') + '</div>'
+    : '';
   openModal(okAll ? '✅ 导入完成 · 还原校验全部通过' : '⚠️ 导入完成 · 存在不一致',
     '模式：<b>' + (mode === 'merge' ? '合并追加' : '整包还原') + '</b>｜涉及数据源 ' + touched.length + ' 个<br>'
-    + '逐条复核（工作区 vs 包内容）：<br>'
+    + '逐条复核（工作区 vs 包内容，按 uid 比对）：<br>'
     + '<table class="cs-tbl cs-rpt" style="margin-top:8px;"><tr><th>数据源</th><th>包内</th><th>当前</th><th>复核</th></tr>' + rows.join('') + '</table>'
+    + lossLine + warnLine
     + (okAll ? '<div class="kbox">数据包已被正确识别，且内容逐条还原一致。</div>' : '<div class="kbox" style="border-left-color:var(--danger);">存在不一致，请查看上方明细（可「撤销本源改动」回到基线后重试）。</div>'),
     [{ label:'知道了', fn(){ closeModal(); } }]);
   toast(okAll ? '导入完成，还原校验通过' : '导入完成，但存在不一致', !okAll);

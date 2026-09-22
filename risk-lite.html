@@ -17955,7 +17955,7 @@ function closeChecklistModal(){
 function printChecklist(){
   const modal=document.querySelector('.checklist-modal');
   if(!modal) return;
-  const win=window.open('','_blank','width=700,height=800');
+  const win=window.open('','_blank','width=700,height=800,noopener');
   const styles=document.querySelector('style').outerHTML;
   win.document.write(`<!DOCTYPE html><html><head><meta charset="UTF-8"><title>出港检查单</title>${styles}</head><body style="background:#fff;color:#000;padding:20px;overflow:auto;max-height:none">`);
   win.document.write(modal.outerHTML);
@@ -21376,13 +21376,80 @@ async function doHistImportExcelEvents(){
   if (window.__onclickMigrated) return;
   window.__onclickMigrated = true;
 
+  // 【安全加固·白名单 + 2026-09-22 审查修复】
+  // 原实现直接 new Function('event', code) 把 onclick 属性内容当作代码执行；一旦页面存在
+  // innerHTML 注入外部内容，就会把属性里的任意代码升级为执行（XSS → 任意代码执行）。
+  // 现收紧入口：仅允许「函数名(字面量参数)」形式的表达式转换为事件监听，其余一律不执行并 warn，
+  // 从根上消除属性注入带来的动态代码执行面，同时保留原有 this/event/return false 语义。
+  function __isSafeOnclick(code) {
+    if (typeof code !== 'string') return false;
+    var s = code.trim();
+    if (!s) return false;
+    // 拒绝任何试图闭合或注入 script 标签的内容（含脚本闭合串的注入）
+    if (/<\/?script/i.test(s)) return false;
+    // 整体必须形如：函数名(参数)
+    var m = /^([A-Za-z_$][\w$.]*)\s*\(([\s\S]*)\)$/.exec(s);
+    if (!m) return false;
+    var argsStr = m[2].trim();
+    if (argsStr === '') return true;
+    var args = __splitArgs(argsStr);
+    if (!args) return false; // 字符串未闭合等非法结构
+    for (var i = 0; i < args.length; i++) {
+      if (!__isSafeLiteral(args[i].trim())) return false;
+    }
+    return true;
+  }
+
+  // 按逗号切分参数，但字符串字面量内部的逗号不切分
+  function __splitArgs(str) {
+    var args = [], cur = '', inStr = null;
+    for (var i = 0; i < str.length; i++) {
+      var ch = str[i];
+      if (inStr) {
+        cur += ch;
+        if (ch === '\\') { cur += str[i + 1] || ''; i++; continue; }
+        if (ch === inStr) inStr = null;
+        continue;
+      }
+      if (ch === "'" || ch === '"') { inStr = ch; cur += ch; continue; }
+      if (ch === ',') { args.push(cur); cur = ''; continue; }
+      cur += ch;
+    }
+    if (inStr) return null; // 字符串未闭合 → 非法
+    args.push(cur);
+    return args;
+  }
+
+  // 参数字面量仅允许：数字 / 单引号字符串 / 双引号字符串 / true / false / null
+  function __isSafeLiteral(a) {
+    if (a === '') return false;
+    if (/^-?\d+(\.\d+)?$/.test(a)) return true;            // 数字
+    if (/^'([^'\\]|\\.)*'$/.test(a)) return true;          // 单引号字符串
+    if (/^"([^"\\]|\\.)*"$/.test(a)) return true;          // 双引号字符串
+    if (/^(true|false|null)$/.test(a)) return true;        // 布尔 / 空
+    return false;
+  }
+
   function convert(el) {
     var code = el.getAttribute('onclick');
     if (!code || typeof code !== 'string') return;
-    el.removeAttribute('onclick');
+    // 严格白名单校验：不匹配者【保留原生 onclick 属性、不做迁移】（2026-09-22 审查修复）。
+    // 原因：原生内联 onclick 本就能工作，迁移是「可维护性改造」而非功能前提；把复杂表达式
+    // 摘掉属性又不建监听会直接丢功能，因此这里改为「只迁移白名单内的简单表达式」，
+    // 既保住全部既有交互，又杜绝任意代码经 new Function 执行。
+    if (!__isSafeOnclick(code)) {
+      if (!window.__skippedOnclick) window.__skippedOnclick = {};
+      if (!window.__skippedOnclick[code]) {
+        window.__skippedOnclick[code] = true;
+        console.info('[事件委托化] 跳过复杂内联表达式（保留浏览器原生 onclick 行为）：', code);
+      }
+      return;
+    }
+    // 先解析成功再摘属性：解析失败时属性仍在，交互不受影响
     var handler;
     try { handler = new Function('event', code); }
-    catch (e) { console.warn('[事件委托化] 无法解析 onclick 表达式：', code, e); return; }
+    catch (e) { console.warn('[事件委托化] 无法解析 onclick 表达式（保留原生行为）：', code, e); return; }
+    el.removeAttribute('onclick');
     el.addEventListener('click', function (ev) {
       var ret;
       try { ret = handler.call(this, ev); }
