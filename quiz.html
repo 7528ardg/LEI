@@ -392,6 +392,7 @@ a{color:var(--primary);text-decoration:none;}
 .bp-feedback.show{display:block;animation:fadeIn .3s;}
 .bp-feedback.fb-correct{background:var(--success-soft);color:var(--success);border-left:4px solid var(--success);}
 .bp-feedback.fb-wrong{background:var(--danger-soft);color:var(--danger);border-left:4px solid var(--danger);}
+.bp-feedback.fb-neutral{background:var(--bg);color:var(--text2);border-left:4px solid var(--border);}
 /* 答对/答错后内嵌"下一题"提示 */
 .bp-next-hint{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:12px 16px;border-radius:10px;margin-bottom:18px;font-size:.88rem;animation:fadeIn .4s;flex-wrap:wrap;}
 .bp-next-hint.is-correct{background:linear-gradient(90deg,var(--success-soft),rgba(20,132,83,.06));color:var(--success);border-left:4px solid var(--success);}
@@ -8889,7 +8890,9 @@ function renderQuiz(){
         <span class="qt-progress">第 <b>${cur+1}</b> / ${total} 题</span>
         <span class="qt-meta">${isStudy
           ? `标记 <b style="color:var(--gold)">${stats.flagged}</b>`
-          : `已答 <b>${stats.answered}</b> · 正确 <b style="color:var(--success)">${stats.correct}</b>${stats.flagged?` · 标记 <b style="color:var(--gold)">${stats.flagged}</b>`:''}`}</span>
+          : ((isExam||isMock)
+            ? `已答 <b>${stats.answered}</b>${stats.flagged?` · 标记 <b style="color:var(--gold)">${stats.flagged}</b>`:''}`
+            : `已答 <b>${stats.answered}</b> · 正确 <b style="color:var(--success)">${stats.correct}</b>${stats.flagged?` · 标记 <b style="color:var(--gold)">${stats.flagged}</b>`:''}`)}</span>
       </div>
       <div class="qt-actions">
         <button class="qt-icon-btn" onclick="toggleAnswerCard()" title="答题卡 (C)">📋</button>
@@ -8966,8 +8969,8 @@ function renderQuiz(){
         <div class="bp-body">
           <!-- 激励横条（已去除重复进度与统计） -->
           <div class="motivation-bar">
-            <div class="mb-icon">${motivation.icon}</div>
-            <div class="mb-text">${motivation.text}</div>
+            <div class="mb-icon">${(isExam||isMock)?'📝':motivation.icon}</div>
+            <div class="mb-text">${(isExam||isMock)?'认真作答，诚信应考':motivation.text}</div>
           </div>
 
           <div class="bp-question">
@@ -9011,8 +9014,8 @@ function renderQuiz(){
           <div class="bp-confirm-multi">
             <button onclick="confirmMultiAnswer()">确认多选答案</button>
           </div>` : ''}
-          <div class="bp-feedback ${isAnswered?(isCorrect?'show fb-correct':'show fb-wrong'):''}" id="feedback">
-            ${isAnswered?(isCorrect?'✅ 回答正确！':'❌ 回答错误，正确答案：'+q.ans.replace(/\|/g,'、')):''}
+          <div class="bp-feedback ${isAnswered?((isExam||isMock)?'show fb-neutral':(isCorrect?'show fb-correct':'show fb-wrong')):''}" id="feedback">
+            ${isAnswered?((isExam||isMock)?'📝 已作答':(isCorrect?'✅ 回答正确！':'❌ 回答错误，正确答案：'+q.ans.replace(/\|/g,'、'))):''}
           </div>
           ${isAnswered && !isStudy && !isExam && !isMock && !qz.submitted && cur < total - 1 ? `
           <div class="bp-next-hint ${isCorrect?'is-correct':'is-wrong'}" id="nextHint">
@@ -9207,6 +9210,12 @@ function getOptClass(q, myAns, i, isAnswered, isCorrect){
     }
     return myAns===i?'selected':'';
   }
+  // 考试/模拟考试模式：交卷前不判定对错（正确选项不高亮、无✓/✗徽章），仅保留已选标记
+  const _qz = APP.quiz;
+  if(_qz && !_qz.submitted && (_qz.mode==='exam' || _qz.mode==='mock_exam')){
+    const isMyOpt = q.type==='多选' ? (myAns && myAns.includes(i)) : myAns===i;
+    return isMyOpt?'selected':'';
+  }
   const ansArr = splitAnswer(q.ans);
   const optText = q.opts[i];
   // 兼容多种答案格式："B" / "B. xxx" / "xxx"
@@ -9390,7 +9399,7 @@ function updateOptState(qi, clickedIdx){
   const qz = APP.quiz;
   const q = APP.questions[qi];
   const myAns = qz.answers[qi];
-  const isExamOrMock = qz.isExam || qz.isMock;
+  const isExamOrMock = qz.mode==='exam' || qz.mode==='mock_exam';
   const isAnswered = q.type==='多选' ? (myAns && myAns.length>0) : myAns!==null;
 
   if(q.type!=='多选' && isAnswered){
@@ -9420,11 +9429,16 @@ function updateOptState(qi, clickedIdx){
         badge.textContent = '✗';
       } else if(badge){ badge.remove(); }
     });
-    // 显示反馈
+    // 显示反馈（考试/模拟考试模式：纯考试流程，仅中性确认，不判定对错、不泄露答案）
     const fb = document.getElementById('feedback');
     if(fb){
-      fb.className = `bp-feedback show ${isCorrect?'fb-correct':'fb-wrong'}`;
-      fb.textContent = isCorrect ? '✅ 回答正确！' : '❌ 回答错误，正确答案：' + q.ans.replace(/\|/g,'、');
+      if(isExamOrMock){
+        fb.className = 'bp-feedback show fb-neutral';
+        fb.textContent = '📝 已作答';
+      } else {
+        fb.className = `bp-feedback show ${isCorrect?'fb-correct':'fb-wrong'}`;
+        fb.textContent = isCorrect ? '✅ 回答正确！' : '❌ 回答错误，正确答案：' + q.ans.replace(/\|/g,'、');
+      }
     }
     // 答题解析：答对与答错均展示，考试/模拟考试模式不展示
     if(!isExamOrMock) showQuestionExplain(qi, q, isCorrect);
@@ -9468,30 +9482,37 @@ function pickOpt(i){
     // 多选模式：仅局部更新选中状态
     updateOptState(qi, i);
   } else {
+    // 考试模式（noBack）：单选/判断已作答即锁定，防止快捷键绕过 UI 的 pointer-events 锁定
+    const curAns = qz.answers[qi];
+    if(qz.mode==='exam' && qz.noBack && curAns!==undefined && curAns!==null) return;
     qz.answers[qi] = i;
     // 单选/判断：局部更新
     updateOptState(qi, i);
     // 答题反馈（仅单选/判断立即判定时）
     const isCorrect = checkAnswer(q, i);
-    pulseQuiz(isCorrect ? 'correct' : 'wrong');
-    // 维护连击
-    qz._combo = qz._combo || 0;
-    if(isCorrect){
-      qz._combo++;
-      if(qz._combo >= 3) showCombo(qz._combo);
-    } else {
-      qz._combo = 0;
+    // 考试/模拟考试模式：纯考试流程——无对错脉冲、无连击、无里程碑弹窗
+    const _isExamOrMock = qz.mode==='exam' || qz.mode==='mock_exam';
+    if(!_isExamOrMock){
+      pulseQuiz(isCorrect ? 'correct' : 'wrong');
+      // 维护连击
+      qz._combo = qz._combo || 0;
+      if(isCorrect){
+        qz._combo++;
+        if(qz._combo >= 3) showCombo(qz._combo);
+      } else {
+        qz._combo = 0;
+      }
+      // 触发里程碑（按已答题数 + 百分比）
+      const answered = qz.indices.filter(idx=>{
+        const a = qz.answers[idx];
+        return a!==undefined && (Array.isArray(a)?a.length>0:a!==null);
+      }).length;
+      showMilestone(answered, qz.indices.length);
+      const pctDone = answered / qz.indices.length;
+      if(Math.abs(pctDone - 0.25) < 0.01) showMilestone(0.25, 0);
+      else if(Math.abs(pctDone - 0.5) < 0.01) showMilestone(0.5, 0);
+      else if(Math.abs(pctDone - 0.75) < 0.01) showMilestone(0.75, 0);
     }
-    // 触发里程碑（按已答题数 + 百分比）
-    const answered = qz.indices.filter(idx=>{
-      const a = qz.answers[idx];
-      return a!==undefined && (Array.isArray(a)?a.length>0:a!==null);
-    }).length;
-    showMilestone(answered, qz.indices.length);
-    const pctDone = answered / qz.indices.length;
-    if(Math.abs(pctDone - 0.25) < 0.01) showMilestone(0.25, 0);
-    else if(Math.abs(pctDone - 0.5) < 0.01) showMilestone(0.5, 0);
-    else if(Math.abs(pctDone - 0.75) < 0.01) showMilestone(0.75, 0);
     // 更新顶部倒计时条已答数
     updateExamBarAnswered();
     // 答错题直接归为错题本（即时入库，背题模式不计入）
@@ -9562,7 +9583,8 @@ function confirmMultiAnswer(){
     toast('请至少选择一个选项','warning');
     return;
   }
-  // 标记为已答，判定对错
+  // 标记为已答，判定对错（考试/模拟考试模式：交卷前不判定、不泄露对错）
+  const isExamOrMock = qz.mode==='exam' || qz.mode==='mock_exam';
   const isCorrect = checkAnswer(q, myAns);
   const letters = 'ABCDEFGH';
   q.opts.forEach((o,i)=>{
@@ -9580,11 +9602,15 @@ function confirmMultiAnswer(){
   });
   const fb = document.getElementById('feedback');
   if(fb){
-    fb.className = `bp-feedback show ${isCorrect?'fb-correct':'fb-wrong'}`;
-    fb.textContent = isCorrect ? '✅ 回答正确！' : '❌ 回答错误，正确答案：' + q.ans.replace(/\|/g,'、');
+    if(isExamOrMock){
+      fb.className = 'bp-feedback show fb-neutral';
+      fb.textContent = '📝 已作答';
+    } else {
+      fb.className = `bp-feedback show ${isCorrect?'fb-correct':'fb-wrong'}`;
+      fb.textContent = isCorrect ? '✅ 回答正确！' : '❌ 回答错误，正确答案：' + q.ans.replace(/\|/g,'、');
+    }
   }
   // 错题解析（仅在非考试/非模拟考试模式显示）
-  const isExamOrMock = qz.isExam || qz.isMock;
   // 答题解析：答对与答错均展示（出处 + 原始内容），考试/模拟考试模式不展示
   if(!isExamOrMock) showQuestionExplain(qi, q, isCorrect);
   // 考试/模拟考试模式：清除可能残留的解析
