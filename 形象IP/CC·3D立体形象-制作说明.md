@@ -154,7 +154,60 @@ echo -n "<token>" | python _3d_worker.py --reset --slots 2 --max-minutes 400
 - 重掷后再次收尾：`_glb_pack` / `_build_home` / `_apply_pet` / `_build_hosted` / `_check_needles` 全 exit=0（**42 checked / 0 fail**）；`_build_all` 仍 exit=1，语法 **16/16 全过**，唯一失败套件 `_e2e_apk_www_test.js` **27/29**，2 条断言与 09-20 基线逐字一致（既存，APK www 副本未动）。
 - 一致性核验：`形象IP/models/cc08.glb`(14:21) → `js/cc08.js`(14:28) → `cc-home.html`(14:28) → `在线版/`(14:31)，**md5 源与在线版完全一致**；cc10 同理。重掷版已进入全部交付物。
 
+### R5 明细（2026-09-22 00:20–00:43，cc15 换优化源重掷）
+
+- 源侧先出优化图 `形象IP/cutouts/3d-cc15-opt.png`（1.02 MB，00:31 落盘），`_3d_jobs.json` 中 cc15 的 `src` 同步指向该图、态置 pending；
+- 工作器本批次仅 1 个作业（23/24 → 24/24），00:20 前后提交、00:43:44 完成：**cc15 0.52 MB（原始 10.6 MB，压缩率 ~4.9%）**，全程 11 分钟；
+- 日志末行 `结束：24 完成 / 0 失败 / 0 排队`，当日配额仅用 1/5；
+- 注：本批次由另一条自动化（`f51c625d`）驱动，非本流水线。
+
+### 2026-09-24 复核（本自动化执行）—— 无待办，重跑收尾复验
+
+- `_3d_jobs.json`：**done 24 / fail 0 / pending 0 / hold 0**，无新增作业、**未消耗任何每日额度**（未提交 3D 任务）；`_3d_worker.log` 末次记录即 R5 批次的 `结束：24 完成 / 0 失败 / 0 排队`（09-22 00:43）；
+- 按 24/24 就绪条件重跑 `_finalize_3d.py`（3 分 50 秒，**6 步全 exit=0**）：`_glb_pack` exit=0（ready.js 覆盖 1–24）→ `_build_home` exit=0（**cc-home.html 7.36 MB，3D 24/24**）→ `_apply_pet --replace` exit=0（qa.html 3D 24/24 + 底部形象条 + 顶栏「🐾 形象」入口）→ `_build_all` exit=0（**16 文件语法全过**；注：09-21 曾报的 APK www e2e 2 条断言本次未复现，退出码为 0）→ `_build_hosted` exit=0（14 个在线版页面同步，`在线版/形象IP/models/cc*.glb` **24/24**）→ `_check_needles` exit=0（**42 checked / 0 fail**）；
+- 产物核对：`形象IP/models/` 24 GLB + 24 preview；`cc-home.html` / `qa.html` 已刷至最新（19:00 / 19:04）；本地与在线版各 24 GLB 齐备；
+- **结论：3D 形象主线 24/24 稳定就绪，本自动化已达终态**，再触发只需复核（或按需重跑 `_finalize_3d.py`）；APK / PWA 打包仍待用户明确通知。
+
+### 2026-09-25 复核（本自动化执行）—— 无待办，重跑收尾复验
+
+- `_3d_jobs.json`：**done 24 / fail 0 / pending 0 / hold 0**（键 1–24 全 done，缺号 0）→ **未走提交步骤、未调用 3D 服务、未消耗任何每日额度**；`_3d_worker.log` 末次记录仍为 R5 批次的 `结束：24 完成 / 0 失败 / 0 排队`（09-22 00:43），说明 09-22 之后无新作业；
+- 按 24/24 就绪条件重跑 `_finalize_3d.py`（**6 分 40 秒，6 步全 exit=0**）：`_glb_pack` exit=0（ready.js 覆盖 1–24）→ `_build_home` exit=0（**cc-home.html，3D 24/24**；形态 24 ｜ 互动剧场 18 段 ｜ 精灵 24 张）→ `_apply_pet` exit=0（qa.html 3D 24/24 + 底部形象条 + 顶栏「🐾 形象」入口）→ `_build_all` exit=0（**16 文件语法全过（node --check 通过）**，壳层模板同步/桥接/会话记忆注入均 +0 或 ±1 字符，无实质漂移）→ `_build_hosted` exit=0（14 个页面同步，`在线版/形象IP/models/cc*.glb` **24/24**）→ `_check_needles` exit=0（**42 checked / 0 fail**，含 `ASSET 在线版/形象IP/models/cc*.glb(24) OK`）；收尾汇总：`3D 模型：24/24`、`失败：无`；
+- 产物核对：`cc-home.html` 10:10、`qa.html` 10:17、`在线版/形象IP/models/` 10:17 均为本次刷新；抽样 `cc15.glb` 本地 → 在线版 **md5 完全一致**（`6937c193…`）；`形象IP/models/` = 24 GLB + 24 preview；
+- 注：仓库根 `__build_all_out.txt`（09-23 03:33）末尾「逻辑：3 套失败 / 共 65 套」系**旧的手工 verify 跑产物**，非本次 finalize 输出（finalize 内 `_build_all` 退出码 0），不可作为本次结论；
+- **结论：3D 形象主线 24/24 稳定就绪、本自动化已达终态**，再触发只需只读复核（或按需重跑 `_finalize_3d.py`）；APK / PWA 打包仍待用户明确通知。
+
+### 2026-09-26 复核（本自动化执行）—— 无待办，只读复核 + 重跑收尾复验
+
+- `_3d_jobs.json`：**done 24 / fail 0 / pending 0 / hold 0**（键 1–24 全 done，`state` 计数 `{'done': 24}`）→ **未调用 3D 服务、未提交任何任务、未消耗每日额度**；`_3d_worker.log` 末次记录仍为 R5 批次 `结束：24 完成 / 0 失败 / 0 排队`（09-22 00:43），说明 09-22 之后无新作业；`形象IP/models/` = 24 GLB + 24 preview（合计 33 MB）
+- 按 24/24 就绪条件重跑 `_finalize_3d.py`（**4 分 13 秒，6 步全 exit=0**）：`_glb_pack` exit=0（ready.js 覆盖 1–24）→ `_build_home` exit=0（**cc-home.html 7.36 MB，3D 24/24**；形态 24 ｜ 互动剧场 18 段 ｜ 精灵 24 张）→ `_apply_pet --replace` exit=0（qa.html 3D 24/24 + 底部形象条 + 顶栏「🐾 形象」入口）→ `_build_all` exit=0（**16 文件语法全过（node --check 通过）**，壳层模板同步/桥接/会话记忆注入均 0~±3 字符，无实质漂移）→ `_build_hosted` exit=0（14 个页面同步，`在线版/形象IP/models/cc*.glb` **24/24**）→ `_check_needles` exit=0（**42 checked / 0 fail**，含 `ASSET 在线版/形象IP/models/cc*.glb(24) OK`）；收尾汇总：`3D 模型：24/24`、`失败：无`
+- 产物核对：`cc-home.html` 10:22、`qa.html` 10:26、`在线版/` 10:26 均为本次刷新；抽样 `cc15.glb`、`cc24.glb` 本地 → 在线版 **md5 完全一致**（`6937c193…` / `dd851632…`）；`_pet_models.json` 24 条齐全
+- **结论：3D 形象主线 24/24 稳定就绪、本自动化已达终态**，再触发只需只读复核（或按需重跑 `_finalize_3d.py`）；APK / PWA 打包仍待用户明确通知。
+
+### 2026-09-27 复核（本自动化执行）—— 无待办，只读复核 + 重跑收尾复验
+
+- `_3d_jobs.json`：**done 24 / fail 0 / pending 0 / hold 0**（键 1–24 全 done，`state` 计数 `{'done': 24}`）→ **未调用 3D 服务、未提交任何任务、未消耗每日额度**；`_3d_worker.log` 末次记录仍为 R5 批次 `结束：24 完成 / 0 失败 / 0 排队`（09-22 00:43），说明 09-22 之后无新作业；`形象IP/models/` = 24 GLB + 24 preview
+- 按 24/24 就绪条件重跑 `_finalize_3d.py`（**4 分 16 秒，6 步全 exit=0**）：`_glb_pack` exit=0（ready.js 覆盖 1–24）→ `_build_home` exit=0（**cc-home.html 7.36 MB，3D 24/24**；形态 24 ｜ 互动剧场 18 段 ｜ 精灵 24 张 ｜ 离线小知识 4 条）→ `_apply_pet` exit=0（qa.html 3D 24/24 + 底部形象条 + 顶栏「🐾 形象」入口）→ `_build_all` exit=0（**16 文件语法全过（node --check 通过）**，壳层模板同步/桥接/会话记忆注入均 0~±3 字符，无实质漂移）→ `_build_hosted` exit=0（14 个页面同步，`在线版/形象IP/models/cc*.glb` **24/24**）→ `_check_needles` exit=0（**42 checked / 0 fail**，含 `ASSET 在线版/形象IP/models/cc*.glb(24) OK`）；收尾汇总：`3D 模型：24/24`、`失败：无`
+- 产物核对：`cc-home.html` 13:07、`qa.html` 13:10、`在线版/` 13:10 均为本次刷新；抽样 `cc15.glb`、`cc24.glb` 本地 → 在线版 **md5 完全一致**（`6937c193…` / `dd851632…`）；`_pet_models.json` 24 条齐全
+- **结论：3D 形象主线 24/24 稳定就绪、本自动化已达终态**，再触发只需只读复核（或按需重跑 `_finalize_3d.py`）；APK / PWA 打包仍待用户明确通知。
+
+### 2026-09-28 复核（本自动化执行）—— 无待办，只读复核 + 重跑收尾复验
+
+- `_3d_jobs.json`：**done 24 / fail 0 / pending 0 / hold 0**（键 1–24 全 done，`state` 计数 `{'done': 24}`）→ **未调用 3D 服务、未提交任何任务、未消耗每日额度**；`_3d_worker.log` 末次记录仍为 R5 批次 `结束：24 完成 / 0 失败 / 0 排队`（09-22 00:43），说明 09-22 之后无新作业；`形象IP/models/` = 24 GLB + 24 preview
+- 按 24/24 就绪条件重跑 `_finalize_3d.py`（**4 分 20 秒，6 步全 exit=0**）：`_glb_pack` exit=0（ready.js 覆盖 1–24）→ `_build_home` exit=0（**cc-home.html 7.36 MB，3D 24/24**；房间背景 24 张 base64 ≈4.89 MB ｜ 形态 24 ｜ 互动剧场 18 段 ｜ 精灵 24 张 ｜ 离线小知识 4 条）→ `_apply_pet` exit=0（qa.html 3D 24/24 + 底部形象条 + 顶栏「🐾 形象」入口；精灵 24 张 1.07 MB）→ `_build_all` exit=0（**16 文件语法全过（node --check 通过）**，壳层模板同步/桥接/会话记忆注入均 0~±3 字符，无实质漂移）→ `_build_hosted` exit=0（14 个页面同步，`在线版/形象IP/models/cc*.glb` **24/24**）→ `_check_needles` exit=0（**42 checked / 0 fail**，含 `ASSET 在线版/形象IP/models/cc*.glb(24) OK`）；收尾汇总：`3D 模型：24/24`、`失败：无`
+- 产物核对：`cc-home.html` 18:24、`qa.html` 18:27、`在线版/` 18:27 均为本次刷新；抽样 `cc15.glb`、`cc24.glb` 本地 → 在线版 **md5 完全一致**（`6937c193…` / `dd851632…`）；`_pet_models.json` 24 条齐全
+- **结论：3D 形象主线 24/24 稳定就绪、本自动化已达终态**，再触发只需只读复核（或按需重跑 `_finalize_3d.py`）；APK / PWA 打包仍待用户明确通知。
+
+### 2026-09-29 复核（本自动化执行）—— 无待办，只读复核 + 重跑收尾复验
+
+- `_3d_jobs.json`：**done 24 / fail 0 / pending 0 / hold 0**（键 1–24 全 done，`state` 计数 `{'done': 24}`）→ **未调用 3D 服务、未提交任何任务、未消耗每日额度**；`_3d_worker.log` 末次记录仍为 R5 批次 `结束：24 完成 / 0 失败 / 0 排队`（09-22 00:43），说明 09-22 之后无新作业；`形象IP/models/` = 24 GLB + 24 preview（合计 33 MB），`_pet_models.json` 24 条
+- 按 24/24 就绪条件重跑 `_finalize_3d.py`（**3 分 51 秒，6 步全 exit=0**）：`_glb_pack` exit=0（ready.js 覆盖 1–24）→ `_build_home` exit=0（**3D 24/24**；房间背景原图直出 24 张 base64 ≈4.89 MB ｜ 形态 24 ｜ 互动剧场 18 段 ｜ 精灵 24 张 ｜ 离线小知识 4 条）→ `_apply_pet --replace` exit=0（qa.html 3D 24/24 + 底部形象条 + 顶栏「🐾 形象」入口）→ `_build_all` exit=0（**16 文件语法全过（node --check 通过）**，壳层模板同步/桥接/会话记忆注入均 0~±3 字符，无实质漂移）→ `_build_hosted` exit=0（14 个页面同步，`在线版/形象IP/models/cc*.glb` **24/24**）→ `_check_needles` exit=0（**42 checked / 0 fail**，含 `ASSET 在线版/形象IP/models/cc*.glb(24) OK`）；收尾汇总：`3D 模型：24/24`、`失败：无`
+- 产物核对：`cc-home.html` 10:17（**1 288 502 B，外置形态，49 处 `assets/img/*` 引用**）、`qa.html` 10:21、`在线版/` 10:21 均为本次刷新；`assets/img/` = 127 张 / 12 MB；抽样 `cc08.glb`(`de13cc55…`)、`cc15.glb`(`6937c193…`)、`cc24.glb`(`dd851632…`) 本地 → 在线版 **md5 完全一致**
+- 过程备注：首次收尾后为核对体积，单独跑了一次 `_build_home.py` → cc-home.html 被"养回内联"（7 713 209 B），**已重跑完整 `_finalize_3d.py` 还原**（第二次 3 分 46 秒，同样 6 步全 exit=0、`_check_needles` 42/0），还原后与首次收尾结果**字节数完全一致**（1 288 502 B）
+- **结论：3D 形象主线 24/24 稳定就绪、本自动化已达终态**，再触发只需只读复核；APK / PWA 打包仍待用户明确通知。
+
 ### 运维经验
+
+0. **cc-home.html 的两种形态（别被日志里的 7.36 MB 误导）**：`_build_home.py` 自己产出的是**内联形态**（≈7.7 MB，24 张房间背景等大图全部 base64 内嵌），而**落盘的成品是外置形态**（1 288 502 B，49 处 `assets/img/*.webp|png` 引用，127 张大图 / 12 MB）——外置由 `_build_all.py` 内置的两处「站点图集外置」步骤（`python _extract_inline_images_20260921.py`，位于该脚本第 91 / 102 行）完成，**不在** `_glb_pack` / `_build_home` / `_apply_pet` 里。所以：finalize 日志的 `[out] cc-home.html 7.36 MB` 只是中间体积；**单独跑 `_build_home.py` 做"体检"会把 6 MB 大图重新塞回单文件，之后必须再跑一遍完整 `_finalize_3d.py` 还原**。核对体积请用 `stat cc-home.html` 看落盘字节数。
 
 1. **配额日界不是本地 0 点**：09-20 00:16 已用满 5/5，同日 13:22 又能提交 5 次 → 更接近 UTC 日界（约北京 08:00 后刷新），故「白天补跑」同样能拿到全新额度；09-21 13:29 再提交 2 次也直接通过。
 2. **`_3d_token.txt` 曾遮蔽 stdin 新令牌**：已由 `__TOKEN_STDIN_WINS_20260920__` 修好（stdin 管道有令牌则优先并粘住首读值，无管道才回退文件），本次长跑全程正常。
@@ -162,3 +215,15 @@ echo -n "<token>" | python _3d_worker.py --reset --slots 2 --max-minutes 400
 4. **3D 缺陷先判「源图问题」还是「模型问题」再决定重掷**：把源图裁开放大目检（品红底铺透明区最易看穿），凡是源图里就存在的细长/半透明结构（毛边、虚线状抗锯齿残留、细小道具），重掷只会复现，必须先修源。R4 的 cc10 正是此例——修源后再掷一次即解决。
 
 > 2026-09-21 由自动化工作器生成并更新 · **3D 形象 24/24 重制完成并已收尾**，cc08/cc10 目检重掷已并入
+>
+> 2026-09-24 复核更新 · **24/24 稳定就绪**（done 24 / 0 失败 / 0 排队，未再消耗额度）；已重跑 `_finalize_3d.py` 六步全 exit=0，`_check_needles` **42 checked / 0 fail**，本地与在线版各 24 GLB 齐备
+>
+> 2026-09-25 复核更新 · 仍 **24/24 稳定就绪**（done 24 / 0 失败 / 0 排队 / 0 hold，无新作业、未消耗额度）；再次重跑 `_finalize_3d.py` **六步全 exit=0**（6 分 40 秒），`_check_needles` **42 checked / 0 fail**；cc-home / qa / 在线版 已于 10:10–10:17 全量刷新，本地与在线版 GLB md5 一致
+>
+> 2026-09-26 复核更新 · 仍 **24/24 稳定就绪**（done 24 / 0 失败 / 0 排队 / 0 hold，无新作业、未消耗额度）；重跑 `_finalize_3d.py` **六步全 exit=0**（4 分 13 秒），`_check_needles` **42 checked / 0 fail**；cc-home / qa / 在线版 已于 10:22–10:26 全量刷新，抽样 GLB md5 本地与在线版一致
+>
+> 2026-09-27 复核更新 · 仍 **24/24 稳定就绪**（done 24 / 0 失败 / 0 排队 / 0 hold，无新作业、未消耗额度）；重跑 `_finalize_3d.py` **六步全 exit=0**（4 分 16 秒），`_check_needles` **42 checked / 0 fail**；cc-home / qa / 在线版 已于 13:07–13:10 全量刷新，抽样 GLB md5 本地与在线版一致
+>
+> 2026-09-28 复核更新 · 仍 **24/24 稳定就绪**（done 24 / 0 失败 / 0 排队 / 0 hold，无新作业、未消耗额度）；重跑 `_finalize_3d.py` **六步全 exit=0**（4 分 20 秒），`_check_needles` **42 checked / 0 fail**；cc-home / qa / 在线版 已于 18:24–18:27 全量刷新，抽样 GLB md5 本地与在线版一致
+>
+> 2026-09-29 复核更新 · 仍 **24/24 稳定就绪**（done 24 / 0 失败 / 0 排队 / 0 hold，无新作业、未消耗额度）；重跑 `_finalize_3d.py` **六步全 exit=0**（3 分 51 秒），`_check_needles` **42 checked / 0 fail**；cc-home / qa / 在线版 已于 10:17–10:21 全量刷新，抽样 cc08 / cc15 / cc24 的 GLB md5 本地与在线版一致。**并新增运维经验 0：cc-home.html 落盘为外置形态（1 288 502 B，49 处 `assets/img/*`），日志里的 7.36 MB 只是中间体积，单独跑 `_build_home.py` 会养回内联、需重跑 finalize 还原**

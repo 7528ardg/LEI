@@ -9924,6 +9924,7 @@ button:disabled:active{transform:none;}
                     </li>
                     <li class="nav-item admin-only-nav" id="navTrash"><a class="nav-link" href="#" data-module="trash"><i class="bi bi-trash3"></i><span>回收站</span></a></li>
                     <li class="nav-item admin-only-nav" id="navLogs"><a class="nav-link" href="#" data-module="logs"><i class="bi bi-journal-text"></i><span>操作日志</span></a></li>
+                    <li class="nav-item admin-only-nav" id="navDataWorkshop"><a class="nav-link" href="#" data-module="dataWorkshop"><i class="bi bi-journal-check"></i><span>数据工坊</span></a></li>
                     <li class="nav-item admin-only-nav" id="navBackup"><a class="nav-link" href="#" data-module="backup"><i class="bi bi-hdd-stack"></i><span>备份恢复</span></a></li>
                     <li class="nav-item admin-only-nav" id="navRules"><a class="nav-link" href="#" data-module="rules"><i class="bi bi-info-circle"></i><span>规则</span></a></li>
                 </ul>
@@ -12333,6 +12334,92 @@ button:disabled:active{transform:none;}
             </div>
         </div>
 
+        <!-- 模块：数据工坊（飞行小时 / 绩效 / 销售独立工作表编辑与导入） -->
+        <div class="module-page" id="dataWorkshopModule">
+            <div class="container-xl">
+                <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-3">
+                    <h4 class="mb-0 fw-bold"><i class="bi bi-journal-check text-success me-2"></i>数据工坊</h4>
+                    <div class="d-flex align-items-center gap-2 flex-wrap">
+                        <span class="badge text-bg-light border" id="dwCurrentMonthBadge"><i class="bi bi-clock-history me-1"></i>系统当前月：--</span>
+                        <label class="form-label mb-0 small text-muted">编辑月份</label>
+                        <select id="dwMonthSelect" class="form-select form-select-sm" style="width:150px;"></select>
+                        <span class="badge text-bg-secondary" id="dwDraftStatus">草稿：--</span>
+                    </div>
+                </div>
+
+                <div class="alert alert-info py-2 small mb-3">
+                    <i class="bi bi-info-circle me-1"></i>
+                    三个工作表（飞行小时 / 绩效 / 销售）相互独立，编辑后自动保存为草稿、可长期保留。
+                    打开时会自动识别系统当前月份并载入该月正式数据；确认无误后点击「导入到系统」，数据将写入对应月份，供汇总、绩效、飞行小时、销售等板块使用。导入前自动创建备份。
+                </div>
+
+                <ul class="nav nav-tabs dw-tabs" id="dwSheetTabs" role="tablist">
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link active" type="button" data-dw-sheet="flightHours"><i class="bi bi-airplane me-1"></i>飞行小时</button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link" type="button" data-dw-sheet="performance"><i class="bi bi-bar-chart-steps me-1"></i>绩效</button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link" type="button" data-dw-sheet="sales"><i class="bi bi-coin me-1"></i>销售</button>
+                    </li>
+                </ul>
+
+                <div class="card border-top-0 rounded-bottom-4" style="border-color:var(--bs-border-color);">
+                    <div class="card-header bg-transparent d-flex justify-content-between align-items-center flex-wrap gap-2 py-2">
+                        <div class="d-flex align-items-center gap-2 flex-wrap">
+                            <button class="btn btn-sm btn-outline-primary" id="dwAddRowBtn" type="button"><i class="bi bi-plus-lg me-1"></i>添加行</button>
+                            <button class="btn btn-sm btn-outline-secondary" id="dwResetBtn" type="button" title="丢弃草稿修改，重新载入该月系统数据"><i class="bi bi-arrow-counterclockwise me-1"></i>恢复为系统数据</button>
+                            <button class="btn btn-sm btn-outline-success" id="dwSaveDraftBtn" type="button"><i class="bi bi-save me-1"></i>保存草稿</button>
+                        </div>
+                        <div class="d-flex align-items-center gap-2">
+                            <span class="small text-muted" id="dwSheetStats">--</span>
+                            <button class="btn btn-sm btn-primary" id="dwImportBtn" type="button"><i class="bi bi-box-arrow-in-down me-1"></i>导入到系统</button>
+                        </div>
+                    </div>
+                    <div class="card-body py-2">
+                        <div class="table-responsive table-vh border rounded-3" style="max-height: 56vh;">
+                            <table class="table table-hover table-sticky align-middle mb-0" id="dwTable">
+                                <thead class="table-light" id="dwTableHead"></thead>
+                                <tbody id="dwTableBody"></tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 数据工坊：导入确认 Modal -->
+        <div class="modal fade" id="dwImportModal" tabindex="-1" aria-hidden="true">
+            <div class="modal-dialog modal-lg modal-dialog-scrollable">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title"><i class="bi bi-box-arrow-in-down me-2"></i>导入确认 — <span id="dwImportSheetName">--</span>（<span id="dwImportMonthLabel">--</span>）</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="关闭"></button>
+                    </div>
+                    <div class="modal-body">
+                        <div id="dwImportSummary" class="mb-2 small"></div>
+                        <div class="table-responsive border rounded-2" style="max-height:46vh;">
+                            <table class="table table-sm table-hover align-middle mb-0">
+                                <thead class="table-light"><tr>
+                                    <th>姓名</th><th>班组</th><th>数据项</th><th>系统现值</th><th>导入值</th><th>操作</th>
+                                </tr></thead>
+                                <tbody id="dwImportDiffBody"></tbody>
+                            </table>
+                        </div>
+                        <div class="form-check mt-2">
+                            <input class="form-check-input" type="checkbox" id="dwImportSyncSalesScore" checked>
+                            <label class="form-check-label small" for="dwImportSyncSalesScore">导入销售时同步回填汇总表的销售分（salesScore），保持各板块一致</label>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">取消</button>
+                        <button type="button" class="btn btn-primary" id="dwImportConfirmBtn"><i class="bi bi-check-lg me-1"></i>确认导入</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
         <!-- 模块9：智能预警 -->
         <div class="module-page" id="warningsModule">
             <div class="container-xl">
@@ -14116,7 +14203,7 @@ async clearAll() {
                     // user可见的模块
                     const userVisibleModules = ['summary', 'performance', 'flightHours', 'sales', 'personalAnalysis', 'team', 'gradeTrack'];
                     // admin可见的模块（全部）
-                    const adminOnlyModules = ['comprehensiveAnalysis', 'teamManage', 'trash', 'logs', 'backup', 'rules', 'warnings', 'portrait', 'compare'];
+                    const adminOnlyModules = ['comprehensiveAnalysis', 'teamManage', 'trash', 'logs', 'backup', 'rules', 'warnings', 'portrait', 'compare', 'dataWorkshop'];
 
                     document.querySelectorAll('.admin-only-nav').forEach(el => {
                         el.classList.toggle('show', isAdmin);
@@ -21425,6 +21512,18 @@ async clearAll() {
                     document.getElementById('logsPrevPageBtn')?.addEventListener('click',()=>{ AppState.pagination.logs.page--; Renderer.logs(); });
                     document.getElementById('logsNextPageBtn')?.addEventListener('click',()=>{ AppState.pagination.logs.page++; Renderer.logs(); });
                 },
+                async dataWorkshop() {
+                    try {
+                        if (typeof DataWorkshop === 'undefined') {
+                            console.error('[DataWorkshop] 控制器未加载');
+                            return;
+                        }
+                        await DataWorkshop.render();
+                    } catch (e) {
+                        console.error('[DataWorkshop] 渲染失败:', e);
+                    }
+                },
+
                 async backup() {
                     const months = await Storage.getAllMonths();
                     const allCrew = getAllCrew();
@@ -26827,6 +26926,554 @@ async clearAll() {
             };
             window.SalesLinker = SalesLinker;
 
+            /* ============================================================
+             * 数据工坊（DataWorkshop）
+             * 独立板块：飞行小时 / 绩效 / 销售 三个互相独立的 Excel 式工作表。
+             * - 编辑后自动保存草稿（IndexedDB，按月份隔离，可长期保留）
+             * - 打开时自动识别系统当前月份并载入该月正式数据
+             * - 使用者确认后按工作表导入系统，写入对应月份数据供其他板块使用
+             * 草稿 key 使用 dw_draft_ 前缀（不带 crew_gz_ 前缀，避免污染月份索引）
+             * ============================================================ */
+            const DataWorkshop = {
+                SHEETS: {
+                    flightHours: {
+                        key: 'flightHours', name: '飞行小时', draftKey: m => 'dw_draft_fh_' + m,
+                        icon: 'bi-airplane',
+                        valueLabel: '飞行小时(小时)',
+                        fields: [{ f: 'v1', label: '飞行小时(小时)', type: 'number', step: '0.01' }]
+                    },
+                    performance: {
+                        key: 'performance', name: '绩效', draftKey: m => 'dw_draft_pf_' + m,
+                        icon: 'bi-bar-chart-steps',
+                        valueLabel: '绩效总分',
+                        fields: [{ f: 'v1', label: '绩效总分', type: 'number', step: '0.01' }]
+                    },
+                    sales: {
+                        key: 'sales', name: '销售', draftKey: m => 'dw_draft_sl_' + m,
+                        icon: 'bi-coin',
+                        valueLabel: '个人销售',
+                        fields: [
+                            { f: 'v1', label: '个人销售(元)', type: 'number', step: '0.01' },
+                            { f: 'v2', label: '个人指标(元)', type: 'number', step: '0.01' }
+                        ]
+                    }
+                },
+                state: {
+                    month: null,            // 当前编辑月份（YYYY-MM）
+                    active: 'flightHours',  // 当前工作表
+                    rows: { flightHours: [], performance: [], sales: [] },
+                    dirty: false,
+                    inited: false,
+                    importing: false
+                },
+                _draftSaveTimer: null,
+
+                /** 系统当前月（与 AppState 初始化逻辑一致） */
+                _sysMonth() {
+                    const now = new Date();
+                    return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
+                },
+
+                _num(v, dft = 0) {
+                    const n = parseFloat(v);
+                    return isNaN(n) ? dft : Math.round(n * 100) / 100;
+                },
+
+                /** 板块入口：初始化一次，随后按月份打开 */
+                async render() {
+                    if (!this.state.inited) {
+                        this._buildMonthSelect();
+                        this._bindEvents();
+                        this.state.inited = true;
+                    }
+                    const badge = document.getElementById('dwCurrentMonthBadge');
+                    if (badge) badge.innerHTML = '<i class="bi bi-clock-history me-1"></i>系统当前月：' + this._sysMonth();
+                    // 自动识别当前时间线月份：优先系统当前月；若用户已在本次会话切换过月份则保留
+                    if (!this.state.month) this.state.month = AppState.currentMonth || this._sysMonth();
+                    const sel = document.getElementById('dwMonthSelect');
+                    if (sel) sel.value = this.state.month;
+                    await this.openMonth(this.state.month, { keepDraftIfAny: true });
+                },
+
+                _buildMonthSelect() {
+                    const sel = document.getElementById('dwMonthSelect');
+                    if (!sel) return;
+                    const cur = this._sysMonth();
+                    sel.innerHTML = Utils.months.map(m =>
+                        `<option value="${m.value}" ${m.value === cur ? 'data-sysmonth="1"' : ''}>${m.label}${m.value === cur ? '（当前）' : ''}</option>`
+                    ).join('');
+                },
+
+                /** 从系统月份数据构建三表行（无数据月份 → 花名册空模板） */
+                _rowsFromSystem(month, data) {
+                    const hasData = data && Array.isArray(data.summary) && data.summary.length > 0;
+                    const base = hasData
+                        ? data.summary.filter(p => p && p.name).map(p => ({
+                            name: p.name, team: p.team || '', position: p.position || '乘务员'
+                        }))
+                        : getAllCrew().map(c => ({
+                            name: c.name, team: c.team || '', position: c.isLeader ? '乘务长' : '乘务员'
+                        }));
+                    // 飞行小时 / 绩效：来自 summary
+                    const sumMap = new Map((data && data.summary || []).filter(p => p && p.name).map(p => [p.name, p]));
+                    const saleRows = (data && data.sales && Array.isArray(data.sales.detailRows) ? data.sales.detailRows : [])
+                        .filter(r => r && r.name);
+                    const saleMap = new Map(saleRows.map(r => [r.name, r]));
+
+                    const fh = base.map(b => ({ name: b.name, team: b.team, position: b.position, v1: this._num(sumMap.get(b.name)?.flightHours) }));
+                    const pf = base.map(b => ({ name: b.name, team: b.team, position: b.position, v1: this._num(sumMap.get(b.name)?.performance) }));
+                    const sl = base.map(b => {
+                        const s = saleMap.get(b.name);
+                        return {
+                            name: b.name, team: s?.team || b.team, position: b.position,
+                            v1: this._num(s?.personalSale), v2: this._num(s?.personalTarget)
+                        };
+                    });
+                    // 系统有但花名册之外的销售明细行（如自定义人员），补到表尾
+                    saleRows.forEach(r => {
+                        if (!sl.some(x => x.name === r.name)) {
+                            sl.push({ name: r.name, team: r.team || '', position: r.position || '乘务员', v1: this._num(r.personalSale), v2: this._num(r.personalTarget) });
+                        }
+                    });
+                    return { flightHours: fh, performance: pf, sales: sl };
+                },
+
+                async _loadSystem(month) {
+                    const data = await Storage.loadMonth(month).catch(() => null);
+                    const empty = (!data || !Array.isArray(data.summary) || data.summary.length === 0)
+                        && !(data && data.sales && Array.isArray(data.sales.detailRows) && data.sales.detailRows.length > 0);
+                    return { data, empty };
+                },
+
+                /** 打开月份：草稿优先（保留编辑），否则载入系统数据 */
+                async openMonth(month, opts = {}) {
+                    const { data, empty } = await this._loadSystem(month);
+                    const sysRows = this._rowsFromSystem(month, data);
+                    for (const sheetKey of Object.keys(this.SHEETS)) {
+                        const S = this.SHEETS[sheetKey];
+                        let draft = null;
+                        if (opts.keepDraftIfAny !== false) {
+                            draft = await this._readDraft(S, month);
+                        }
+                        if (draft && Array.isArray(draft.rows) && draft.rows.length > 0) {
+                            this.state.rows[sheetKey] = draft.rows;
+                        } else {
+                            this.state.rows[sheetKey] = sysRows[sheetKey];
+                        }
+                    }
+                    this.state.month = month;
+                    this.state.dirty = false;
+                    // 空月份提示
+                    if (empty) {
+                        showNotification(`📂 ${month} 暂无系统数据，已生成花名册空模板，填写后可导入创建该月数据`, 'info', 5000);
+                    }
+                    this._updateDraftStatus('已载入');
+                    this._renderSheet();
+                },
+
+                async _readDraft(S, month) {
+                    try {
+                        const v = await get(S.draftKey(month));
+                        return (v && typeof v === 'object') ? v : null;
+                    } catch (e) { return null; }
+                },
+
+                async _writeDraft(S, month, rows) {
+                    try {
+                        await set(S.draftKey(month), { month, savedAt: new Date().toISOString(), rows });
+                        return true;
+                    } catch (e) {
+                        console.error('[DataWorkshop] 草稿保存失败:', e);
+                        return false;
+                    }
+                },
+
+                /* ---------- 渲染 ---------- */
+                _renderSheet() {
+                    const S = this.SHEETS[this.state.active];
+                    const head = document.getElementById('dwTableHead');
+                    const body = document.getElementById('dwTableBody');
+                    if (!head || !body) return;
+                    // 工作表 tab 激活态
+                    document.querySelectorAll('#dwSheetTabs [data-dw-sheet]').forEach(btn => {
+                        btn.classList.toggle('active', btn.dataset.dwSheet === this.state.active);
+                    });
+                    const isSales = this.state.active === 'sales';
+                    head.innerHTML = '<tr><th style="width:56px;">#</th><th style="min-width:110px;">姓名</th><th style="min-width:150px;">班组</th><th style="width:96px;">职位</th>'
+                        + S.fields.map(f => `<th style="min-width:130px;">${f.label}</th>`).join('')
+                        + (isSales ? '<th style="min-width:96px;">完成率</th>' : '')
+                        + '<th style="width:70px;">操作</th></tr>';
+                    const teams = AppState.teams || [];
+                    const rows = this.state.rows[this.state.active] || [];
+                    body.innerHTML = rows.map((r, i) => {
+                        const teamOpts = ['<option value="">--</option>'].concat(teams.map(t =>
+                            `<option value="${Utils.escape(t)}" ${t === r.team ? 'selected' : ''}>${Utils.escape(t)}</option>`)).join('');
+                        const valCells = S.fields.map(f => {
+                            const v = r[f.f];
+                            return `<td><input type="number" step="${f.step}" class="form-control form-control-sm dw-cell" data-idx="${i}" data-field="${f.f}" value="${v === undefined || v === null || v === '' ? '' : v}" placeholder="0"></td>`;
+                        }).join('');
+                        const rateCell = isSales ? `<td class="small text-muted" data-dw-rate="${i}">${this._rate(r)}</td>` : '';
+                        return `<tr data-dw-row="${i}">
+                            <td class="text-muted small">${i + 1}</td>
+                            <td><input type="text" class="form-control form-control-sm dw-cell" data-idx="${i}" data-field="name" value="${Utils.escape(r.name || '')}" list="dwNameList" placeholder="姓名"></td>
+                            <td><select class="form-select form-select-sm dw-cell" data-idx="${i}" data-field="team">${teamOpts}</select></td>
+                            <td><select class="form-select form-select-sm dw-cell" data-idx="${i}" data-field="position">
+                                <option value="乘务员" ${r.position !== '乘务长' ? 'selected' : ''}>乘务员</option>
+                                <option value="乘务长" ${r.position === '乘务长' ? 'selected' : ''}>乘务长</option>
+                            </select></td>
+                            ${valCells}${rateCell}
+                            <td><button type="button" class="btn btn-sm btn-outline-danger border-0" data-dw-del="${i}" title="删除该行"><i class="bi bi-x-lg"></i></button></td>
+                        </tr>`;
+                    }).join('');
+                    this._updateStats();
+                },
+
+                _rate(r) {
+                    const t = parseFloat(r.v2);
+                    if (!t || isNaN(t) || t <= 0) return '--';
+                    return (Math.round((parseFloat(r.v1) || 0) / t * 10000) / 100).toFixed(2) + '%';
+                },
+
+                /** 从 DOM 收集编辑值回 state（切表/导入前调用，防止防抖丢失） */
+                _collectEdits() {
+                    const body = document.getElementById('dwTableBody');
+                    if (!body) return;
+                    body.querySelectorAll('.dw-cell').forEach(inp => {
+                        const idx = parseInt(inp.dataset.idx, 10);
+                        const field = inp.dataset.field;
+                        const rows = this.state.rows[this.state.active];
+                        if (!rows || !rows[idx]) return;
+                        if (field === 'name') rows[idx].name = inp.value.trim();
+                        else if (field === 'team' || field === 'position') rows[idx][field] = inp.value;
+                        else rows[idx][field] = inp.value === '' ? '' : parseFloat(inp.value);
+                    });
+                },
+
+                _updateStats() {
+                    const el = document.getElementById('dwSheetStats');
+                    if (!el) return;
+                    const rows = this.state.rows[this.state.active] || [];
+                    const S = this.SHEETS[this.state.active];
+                    let sumInfo = '';
+                    if (this.state.active === 'sales') {
+                        const s = rows.reduce((a, r) => a + (parseFloat(r.v1) || 0), 0);
+                        sumInfo = ` · 销售合计 ¥${(Math.round(s * 100) / 100).toFixed(2)}`;
+                    } else {
+                        const s = rows.reduce((a, r) => a + (parseFloat(r.v1) || 0), 0);
+                        sumInfo = this.state.active === 'flightHours' ? ` · 总小时 ${s.toFixed(2)}h` : ` · 总分 ${s.toFixed(2)}`;
+                    }
+                    el.textContent = `${S.name}表：${rows.length} 行${sumInfo}`;
+                },
+
+                _updateDraftStatus(text) {
+                    const el = document.getElementById('dwDraftStatus');
+                    if (!el) return;
+                    const now = new Date();
+                    const hh = [now.getHours(), now.getMinutes(), now.getSeconds()].map(x => String(x).padStart(2, '0')).join(':');
+                    el.textContent = `草稿：${text} ${hh}`;
+                },
+
+                /* ---------- 事件 ---------- */
+                _bindEvents() {
+                    // 工作表切换
+                    document.getElementById('dwSheetTabs')?.addEventListener('click', async (e) => {
+                        const btn = e.target.closest('[data-dw-sheet]');
+                        if (!btn) return;
+                        const target = btn.dataset.dwSheet;
+                        if (target === this.state.active) return;
+                        // 先收集并留存当前表编辑，再切换
+                        const prev = this.state.active;
+                        this._collectEdits();
+                        await this._writeDraft(this.SHEETS[prev], this.state.month, this.state.rows[prev]);
+                        this.state.active = target;
+                        this._renderSheet();
+                    });
+                    // 单元格编辑（事件委托）
+                    const tbody = document.getElementById('dwTableBody');
+                    tbody?.addEventListener('input', (e) => {
+                        const inp = e.target.closest('.dw-cell');
+                        if (!inp) return;
+                        const idx = parseInt(inp.dataset.idx, 10);
+                        const field = inp.dataset.field;
+                        const rows = this.state.rows[this.state.active];
+                        if (!rows || !rows[idx]) return;
+                        if (field === 'name') rows[idx].name = inp.value.trim();
+                        else if (field === 'team' || field === 'position') rows[idx][field] = inp.value;
+                        else {
+                            rows[idx][field] = inp.value === '' ? '' : parseFloat(inp.value);
+                            // 销售表联动完成率
+                            if (this.state.active === 'sales' && (field === 'v1' || field === 'v2')) {
+                                const rateCell = tbody.querySelector(`[data-dw-rate="${idx}"]`);
+                                if (rateCell) rateCell.textContent = this._rate(rows[idx]);
+                            }
+                        }
+                        this.state.dirty = true;
+                        this._updateStats();
+                        // 防抖自动保存草稿（可保留）
+                        clearTimeout(this._draftSaveTimer);
+                        this._draftSaveTimer = setTimeout(() => this._saveDraftSilent(), 800);
+                    });
+                    // 删除行
+                    tbody?.addEventListener('click', async (e) => {
+                        const del = e.target.closest('[data-dw-del]');
+                        if (!del) return;
+                        const idx = parseInt(del.dataset.dwDel, 10);
+                        const rows = this.state.rows[this.state.active];
+                        if (!rows || !rows[idx]) return;
+                        const name = rows[idx].name || '(未命名)';
+                        if (!confirm(`确定删除「${name}」这一行吗？\n（仅从工坊表格移除，不影响系统数据；保存草稿后生效）`)) return;
+                        rows.splice(idx, 1);
+                        this.state.dirty = true;
+                        this._renderSheet();
+                        await this._saveDraftSilent();
+                    });
+                    // 添加行
+                    document.getElementById('dwAddRowBtn')?.addEventListener('click', () => {
+                        const row = { name: '', team: (AppState.teams || [])[0] || '', position: '乘务员' };
+                        this.SHEETS[this.state.active].fields.forEach(f => row[f.f] = '');
+                        this.state.rows[this.state.active].push(row);
+                        this.state.dirty = true;
+                        this._renderSheet();
+                        // 聚焦新行姓名输入框
+                        const body = document.getElementById('dwTableBody');
+                        const newRow = body?.querySelector(`[data-dw-row="${this.state.rows[this.state.active].length - 1}"] input[data-field="name"]`);
+                        if (newRow) newRow.focus();
+                    });
+                    // 恢复为系统数据
+                    document.getElementById('dwResetBtn')?.addEventListener('click', async () => {
+                        if (!confirm('确定丢弃当前工坊编辑，重新载入该月份的系统数据吗？\n（草稿将被覆盖）')) return;
+                        await this.openMonth(this.state.month, { keepDraftIfAny: false });
+                        for (const sheetKey of Object.keys(this.SHEETS)) {
+                            await this._writeDraft(this.SHEETS[sheetKey], this.state.month, this.state.rows[sheetKey]);
+                        }
+                        showNotification('已恢复为系统数据（草稿已同步更新）', 'success');
+                    });
+                    // 手动保存草稿
+                    document.getElementById('dwSaveDraftBtn')?.addEventListener('click', async () => {
+                        this._collectEdits();
+                        const ok = await this._saveAllDrafts();
+                        showNotification(ok ? '✅ 三个工作表草稿已保存（按月份隔离，长期保留）' : '❌ 草稿保存失败，请重试', ok ? 'success' : 'danger');
+                    });
+                    // 月份切换
+                    document.getElementById('dwMonthSelect')?.addEventListener('change', async (e) => {
+                        this._collectEdits();
+                        await this._saveDraftSilent(); // 切月前留存
+                        await this.openMonth(e.target.value, { keepDraftIfAny: true });
+                    });
+                    // 导入确认弹窗
+                    document.getElementById('dwImportBtn')?.addEventListener('click', () => {
+                        this._collectEdits();
+                        this._showImportModal();
+                    });
+                    document.getElementById('dwImportConfirmBtn')?.addEventListener('click', () => this._doImport());
+                    // 姓名datalist
+                    if (!document.getElementById('dwNameList')) {
+                        const dl = document.createElement('datalist');
+                        dl.id = 'dwNameList';
+                        dl.innerHTML = getAllCrew().map(c => `<option value="${Utils.escape(c.name)}">`).join('');
+                        document.body.appendChild(dl);
+                    }
+                },
+
+                async _saveDraftSilent() {
+                    const ok = await this._writeDraft(this.SHEETS[this.state.active], this.state.month, this.state.rows[this.state.active]);
+                    if (ok) { this._updateDraftStatus('已自动保存'); this.state.dirty = false; }
+                    return ok;
+                },
+
+                async _saveAllDrafts() {
+                    let ok = true;
+                    for (const sheetKey of Object.keys(this.SHEETS)) {
+                        const S = this.SHEETS[sheetKey];
+                        const success = await this._writeDraft(S, this.state.month, this.state.rows[sheetKey]);
+                        if (!success) ok = false;
+                    }
+                    if (ok) this._updateDraftStatus('已保存');
+                    return ok;
+                },
+
+                /* ---------- 导入 ---------- */
+                /** 对比系统数据，生成变更清单 */
+                async _diffSheet(sheetKey) {
+                    const S = this.SHEETS[sheetKey];
+                    const { data } = await this._loadSystem(this.state.month);
+                    const summary = (data && Array.isArray(data.summary)) ? data.summary : [];
+                    const detailRows = (data && data.sales && Array.isArray(data.sales.detailRows)) ? data.sales.detailRows : [];
+                    const sumMap = new Map(summary.filter(p => p && p.name).map(p => [p.name, p]));
+                    const saleMap = new Map(detailRows.filter(r => r && r.name).map(r => [r.name, r]));
+                    const rows = this.state.rows[sheetKey] || [];
+                    const diffs = [];
+                    const seen = new Set();
+                    rows.forEach(r => {
+                        if (!r.name) return;
+                        seen.add(r.name);
+                        const isNew = sheetKey === 'sales' ? !saleMap.has(r.name) && !sumMap.has(r.name) : !sumMap.has(r.name);
+                        if (sheetKey === 'sales') {
+                            const oldS = saleMap.get(r.name);
+                            const oldSale = oldS ? this._num(oldS.personalSale) : null;
+                            const oldTarget = oldS ? this._num(oldS.personalTarget) : null;
+                            const newSale = this._num(r.v1), newTarget = this._num(r.v2);
+                            if (isNew || oldSale !== newSale) diffs.push({ name: r.name, team: r.team, field: '个人销售', oldVal: isNew ? '（新增）' : oldSale, newVal: newSale, op: isNew ? 'add' : 'update' });
+                            if (isNew || oldTarget !== newTarget) diffs.push({ name: r.name, team: r.team, field: '个人指标', oldVal: isNew ? '（新增）' : oldTarget, newVal: newTarget, op: isNew ? 'add' : 'update' });
+                        } else {
+                            const p = sumMap.get(r.name);
+                            const field = sheetKey === 'flightHours' ? '飞行小时' : '绩效总分';
+                            const oldV = p ? (sheetKey === 'flightHours' ? this._num(p.flightHours) : this._num(p.performance)) : null;
+                            const newV = this._num(r.v1);
+                            if (isNew || oldV !== newV) diffs.push({ name: r.name, team: r.team, field, oldVal: isNew ? '（新增）' : oldV, newVal: newV, op: isNew ? 'add' : 'update' });
+                        }
+                    });
+                    return diffs;
+                },
+
+                async _showImportModal() {
+                    const S = this.SHEETS[this.state.active];
+                    const diffs = await this._diffSheet(this.state.active);
+                    const monthLabel = (Utils.months.find(m => m.value === this.state.month) || {}).label || this.state.month;
+                    document.getElementById('dwImportSheetName').textContent = S.name;
+                    document.getElementById('dwImportMonthLabel').textContent = monthLabel;
+                    const summaryEl = document.getElementById('dwImportSummary');
+                    const tbody = document.getElementById('dwImportDiffBody');
+                    if (diffs.length === 0) {
+                        summaryEl.innerHTML = '<div class="alert alert-success py-2 mb-0"><i class="bi bi-check-circle me-1"></i>工坊数据与系统数据一致，无需导入。</div>';
+                        tbody.innerHTML = '';
+                        document.getElementById('dwImportConfirmBtn').disabled = true;
+                    } else {
+                        const addCount = diffs.filter(d => d.op === 'add').length;
+                        const updCount = diffs.length - addCount;
+                        summaryEl.innerHTML = `<div class="alert alert-warning py-2 mb-0">
+                            <i class="bi bi-exclamation-triangle me-1"></i>共 <b>${diffs.length}</b> 项变更：更新 <b>${updCount}</b> 项、新增人员 <b>${addCount}</b> 项。
+                            将写入 <b>${monthLabel}</b> 的系统数据，导入后汇总 / ${S.name}等板块立即生效。导入前自动创建备份。
+                        </div>`;
+                        tbody.innerHTML = diffs.map(d => `<tr class="${d.op === 'add' ? 'table-success' : ''}">
+                            <td>${Utils.escape(d.name)}</td>
+                            <td class="small text-muted">${Utils.escape(d.team || '--')}</td>
+                            <td>${d.field}</td>
+                            <td class="text-muted">${d.oldVal}</td>
+                            <td class="fw-bold">${d.newVal}</td>
+                            <td>${d.op === 'add' ? '<span class="badge text-bg-success">新增</span>' : '<span class="badge text-bg-primary">更新</span>'}</td>
+                        </tr>`).join('');
+                        document.getElementById('dwImportConfirmBtn').disabled = false;
+                    }
+                    // 仅销售表展示联动选项
+                    const syncWrap = document.getElementById('dwImportSyncSalesScore')?.closest('.form-check');
+                    if (syncWrap) syncWrap.style.display = this.state.active === 'sales' ? '' : 'none';
+                    const modalEl = document.getElementById('dwImportModal');
+                    bootstrap.Modal.getOrCreateInstance(modalEl).show();
+                    this._pendingDiffs = diffs;
+                },
+
+                async _doImport() {
+                    if (this.state.importing) return;
+                    const sheetKey = this.state.active;
+                    const S = this.SHEETS[sheetKey];
+                    const month = this.state.month;
+                    const syncSales = document.getElementById('dwImportSyncSalesScore')?.checked !== false;
+                    const btn = document.getElementById('dwImportConfirmBtn');
+                    this.state.importing = true;
+                    btn.disabled = true;
+                    btn.innerHTML = '<span class="spinner-border spinner-border-sm me-1"></span>导入中…';
+                    try {
+                        // 1. 自动备份该月份数据（复用系统备份机制）
+                        let backupId = null;
+                        try {
+                            const backup = {
+                                id: 'data_workshop_' + new Date().toISOString().replace(/[:.]/g, '-'),
+                                createdAt: new Date().toISOString(),
+                                type: 'data_workshop_import',
+                                note: `数据工坊导入前自动备份（${S.name} → ${month}）`,
+                                data: {}
+                            };
+                            const old = await Storage.loadMonth(month).catch(() => null);
+                            if (old) backup.data[month] = old;
+                            const backups = (await Storage.loadBackups()) || [];
+                            backups.unshift(backup);
+                            await Storage.saveBackups(backups.slice(0, 10));
+                            backupId = backup.id;
+                        } catch (e) { console.warn('[DataWorkshop] 自动备份失败:', e); }
+
+                        // 2. 读取并更新月份数据
+                        const data = (await Storage.loadMonth(month).catch(() => null)) || { summary: [], sales: { detailRows: [] } };
+                        if (!Array.isArray(data.summary)) data.summary = [];
+                        if (!data.sales || !Array.isArray(data.sales.detailRows)) data.sales = { detailRows: [] };
+                        const rows = this.state.rows[sheetKey] || [];
+                        let updated = 0, added = 0;
+
+                        const ensureSummaryRow = (name, team, position) => {
+                            let p = data.summary.find(x => x && x.name === name);
+                            if (!p) {
+                                p = {
+                                    id: Utils.genId(), name, position: position || '乘务员', team: team || '',
+                                    safeScore: 0, operationScore: 0, businessScore: 0, comprehensiveScore: 0, workScore: 0,
+                                    salesScore: 0, flightHours: 0, isLeaderSheet: (position === '乘务长'), performance: 0,
+                                    details: { safe: 0, op: 0, bus: 0, comp: 0, work: 0 }
+                                };
+                                data.summary.push(p);
+                                added++;
+                            }
+                            return p;
+                        };
+
+                        rows.forEach(r => {
+                            if (!r.name) return;
+                            const v1 = this._num(r.v1), v2 = this._num(r.v2);
+                            if (sheetKey === 'flightHours') {
+                                const p = ensureSummaryRow(r.name, r.team, r.position);
+                                p.flightHours = v1;
+                                updated++;
+                            } else if (sheetKey === 'performance') {
+                                const p = ensureSummaryRow(r.name, r.team, r.position);
+                                p.performance = v1;
+                                updated++;
+                            } else {
+                                // 销售：写入 sales.detailRows
+                                let dr = data.sales.detailRows.find(x => x && x.name === r.name);
+                                if (!dr) {
+                                    dr = { name: r.name, team: r.team || '', position: r.position || '乘务员', personalSale: 0, personalTarget: 0, completionRate: '' };
+                                    data.sales.detailRows.push(dr);
+                                }
+                                dr.team = r.team || dr.team;
+                                dr.position = r.position || dr.position;
+                                dr.personalSale = v1;
+                                dr.personalTarget = v2;
+                                dr.completionRate = v2 > 0 ? (Math.round(v1 / v2 * 10000) / 100) : '';
+                                // 可选：联动回填 summary.salesScore（保持汇总板块一致）
+                                if (syncSales) {
+                                    const p = ensureSummaryRow(r.name, r.team, r.position);
+                                    p.salesScore = v1;
+                                }
+                                updated++;
+                            }
+                        });
+
+                        // 3. 持久化 + 缓存失效（其他板块读取最新数据）
+                        await Storage.saveMonth(month, data);
+                        if (typeof AggregatedDataCache !== 'undefined') AggregatedDataCache.invalidate();
+                        // 4. 日志
+                        Logger.success('工坊数据导入', '数据工坊', `${S.name}表 → ${month}：更新/写入 ${rows.filter(r => r.name).length} 行（新增人员 ${added}），备份 ${backupId || 'N/A'}`);
+                        // 5. 关闭弹窗 + 仅以系统新基线刷新「已导入的工作表」，其他表未导入的草稿原样保留
+                        bootstrap.Modal.getOrCreateInstance(document.getElementById('dwImportModal')).hide();
+                        const fresh = await this._loadSystem(month);
+                        const freshRows = this._rowsFromSystem(month, fresh.data);
+                        this.state.rows[sheetKey] = freshRows[sheetKey];
+                        await this._writeDraft(S, month, this.state.rows[sheetKey]);
+                        this._updateDraftStatus('已同步');
+                        this._renderSheet();
+                        showNotification(`✅ ${S.name}数据已导入 ${month}：${updated} 行写入（新增人员 ${added}）${backupId ? '，已自动备份' : ''}`, 'success', 6000);
+                        console.log(`[DataWorkshop] 导入完成 ${S.name} → ${month}`, { updated, added, backupId });
+                    } catch (e) {
+                        console.error('[DataWorkshop] 导入失败:', e);
+                        showNotification('❌ 导入失败：' + e.message, 'danger', 6000);
+                        Logger.error('工坊数据导入失败', '数据工坊', S.name + ' → ' + month + '：' + e.message);
+                    } finally {
+                        this.state.importing = false;
+                        btn.disabled = false;
+                        btn.innerHTML = '<i class="bi bi-check-lg me-1"></i>确认导入';
+                    }
+                }
+            };
+            window.DataWorkshop = DataWorkshop;
+
             // ========== 系统验证：端到端自检 ==========
             const SystemValidator = {
                 /**
@@ -29718,6 +30365,9 @@ async clearAll() {
                         case 'backup':
                             await renderWithDelay(() => Renderer.backup(), 100);
                             break;
+                        case 'dataWorkshop':
+                            await renderWithDelay(() => Renderer.dataWorkshop(), 80);
+                            break;
                         case 'warnings':
                             await renderWithDelay(() => Renderer.warnings(), 100);
                             break;
@@ -29771,7 +30421,7 @@ async clearAll() {
                 nav._reordered = true;
                 const items = Array.from(nav.children);
                 // 按新顺序排列
-                const order = ['summary','performance','flightHours','sales','personalAnalysis','team','comprehensiveAnalysis','gradeTrack','decisionAssist','trash','logs','backup','rules','teamManage'];
+                const order = ['summary','performance','flightHours','sales','personalAnalysis','team','comprehensiveAnalysis','gradeTrack','decisionAssist','dataWorkshop','trash','logs','backup','rules','teamManage'];
                 const moduleMap = {};
                 items.forEach(li => {
                     const link = li.querySelector('[data-module]');

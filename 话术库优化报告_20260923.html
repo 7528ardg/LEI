@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>销售话术库系统性核查与优化报告</title>
+<style>
+:root{
+  --bg:#F6F8F7; --card:#FFFFFF; --text:#10231A; --text2:#4E6459; --text3:#8CA096;
+  --border:#E2EAE6; --accent:#148453; --accent-soft:#E8F3EE;
+  --warn:#B45309; --warn-soft:#FEF3C7; --danger:#C2410C; --danger-soft:#FEE7DE;
+  --code-bg:#F2F5F3; --shadow:0 1px 3px rgba(16,35,26,.06),0 8px 24px rgba(16,35,26,.05);
+}
+@media (prefers-color-scheme: dark){
+  :root{
+    --bg:#0E1713; --card:#151F1A; --text:#E6F0EA; --text2:#9FB5A9; --text3:#6B8076;
+    --border:#20302A; --accent:#4CC38A; --accent-soft:#152A20;
+    --warn:#F0B429; --warn-soft:#2C2410; --danger:#F87171; --danger-soft:#331914;
+    --code-bg:#111B16; --shadow:0 1px 3px rgba(0,0,0,.4),0 8px 24px rgba(0,0,0,.35);
+  }
+}
+*{box-sizing:border-box;}
+body{margin:0;background:var(--bg);color:var(--text);
+  font:15px/1.75 -apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei",sans-serif;}
+.wrap{max-width:1080px;margin:0 auto;padding:32px 20px 72px;}
+header.hero{background:var(--card);border:1px solid var(--border);border-radius:16px;
+  padding:26px 28px;box-shadow:var(--shadow);margin-bottom:24px;}
+header.hero h1{margin:0 0 6px;font-size:26px;letter-spacing:.2px;}
+header.hero .sub{color:var(--text2);font-size:14px;}
+main{background:var(--card);border:1px solid var(--border);border-radius:16px;
+  padding:8px 28px 32px;box-shadow:var(--shadow);}
+h1,h2,h3,h4{line-height:1.35;}
+main h1{font-size:24px;margin:26px 0 12px;}
+main h2{font-size:20px;margin:32px 0 12px;padding-bottom:8px;border-bottom:1px solid var(--border);}
+main h3{font-size:17px;margin:24px 0 10px;}
+main h4{font-size:15px;margin:18px 0 8px;color:var(--text2);}
+p{margin:10px 0;}
+a{color:var(--accent);}
+ul,ol{margin:10px 0;padding-left:24px;}
+li{margin:5px 0;}
+li>ul,li>ol{margin:5px 0;}
+code{background:var(--code-bg);border:1px solid var(--border);border-radius:5px;
+  padding:1px 5px;font:13px/1.5 ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+  word-break:break-word;}
+pre{background:var(--code-bg);border:1px solid var(--border);border-radius:10px;
+  padding:14px 16px;overflow:auto;}
+pre code{background:none;border:none;padding:0;font-size:13px;white-space:pre;}
+blockquote{margin:14px 0;padding:10px 16px;border-left:3px solid var(--accent);
+  background:var(--accent-soft);border-radius:0 10px 10px 0;color:var(--text2);}
+hr{border:none;border-top:1px solid var(--border);margin:28px 0;}
+.tablewrap{overflow-x:auto;margin:14px 0;}
+table{border-collapse:collapse;width:100%;font-size:14px;}
+th,td{border:1px solid var(--border);padding:8px 11px;text-align:left;vertical-align:top;}
+th{background:var(--accent-soft);font-weight:600;white-space:nowrap;}
+tbody tr:nth-child(even){background:rgba(128,128,128,.04);}
+strong{font-weight:600;}
+.toc{background:var(--card);border:1px solid var(--border);border-radius:16px;
+  padding:16px 24px;box-shadow:var(--shadow);margin-bottom:24px;}
+.toc h2{margin:0 0 8px;font-size:15px;color:var(--text2);border:none;padding:0;}
+.toc ol{margin:0;padding-left:20px;columns:2;column-gap:28px;}
+.toc a{text-decoration:none;font-size:14px;color:var(--text);}
+.toc a:hover{color:var(--accent);}
+@media(max-width:640px){.toc ol{columns:1;}main{padding:4px 18px 24px;}.wrap{padding:20px 12px 56px;}}
+</style>
+</head>
+<body>
+<div class="wrap">
+<header class="hero"><h1>销售话术库系统性核查与优化报告</h1></div>
+<nav class="toc"><h2>目录</h2><ol><li><a href="#h-一-总体结论">一、总体结论</a></li><li><a href="#h-二-抽样检查-581-条-覆盖-28-栏目">二、抽样检查（581 条，覆盖 28 栏目）</a></li><li><a href="#h-三-需修改清单-标注板块-产品">三、需修改清单（标注板块 / 产品）</a></li><li><a href="#h-四-需新增清单-标注板块-产品">四、需新增清单（标注板块 / 产品）</a></li><li><a href="#h-五-匹配规则-优化话术搭配逻辑">五、匹配规则（优化话术搭配逻辑）</a></li><li><a href="#h-六-最终优化版-对清单二次匹配与筛选后交付">六、最终优化版（对清单二次匹配与筛选后交付）</a></li><li><a href="#h-七-遗留待办-未处理-需业务决策">七、遗留待办（未处理，需业务决策）</a></li><li><a href="#h-附-产出文件">附：产出文件</a></li></ol></nav><main>
+<h1 id="h-销售话术库系统性核查与优化报告">销售话术库系统性核查与优化报告</h1>
+<p><strong>日期</strong>：2026-09-23　<strong>对象</strong>：<code>beauty.html</code> → <code>scriptLibraryData</code>（28 栏目 / 1040 条）＋ 产品主数据 351 个<br><strong>产出</strong>：修改 50 条（另全站口径对齐 31 处）、新增 4 栏目 197 条、匹配规则引擎上线<br><strong>现状</strong>：库内 32 栏目 / <strong>1237 条</strong> / 0 空洞；四项回归全绿</p>
+<hr>
+<h2 id="h-一-总体结论">一、总体结论</h2>
+<div class="tablewrap"><table><thead><tr><th>维度</th><th>风险</th><th>结论</th></tr></thead><tbody>
+<tr><td>结构与完整性</td><td>低</td><td>1040 条零空洞、零占位符、零完全重复，冗余率 0%</td></tr>
+<tr><td>与产品契合度</td><td><strong>中</strong></td><td>真·零话术仅 <strong>2</strong> 个；但 <strong>28 个产品无"点名级"专属话术</strong>，只能靠品类词擦边命中</td></tr>
+<tr><td>与场景匹配度</td><td><strong>高</strong></td><td>缺失三类结构：产品开场白、通用话术、过渡衔接；话术<strong>无任何匹配规则</strong>（仅分类浏览+关键词搜索）</td></tr>
+<tr><td>库内逻辑冲突</td><td><strong>高</strong></td><td>赔付倍数自相矛盾（赔四/赔三并存）、退货口径过时（"7天无理由"）</td></tr>
+<tr><td>合规红线</td><td>中</td><td>闸内话术 0 命中硬红线；但<strong>闸外的第二套语料库有 30 处"假一赔四"</strong></td></tr>
+<tr><td>冗余与重复</td><td>低</td><td>完全重复 0%；但句级重复集中（"机上跨境一价包税，一价全包" 28 次）</td></tr>
+</tbody></table></div>
+<p><strong>一句话根因</strong>：话术库是<strong>多次批量建设叠加</strong>的产物——三类结构性能力（开场/通用/衔接）从未建设，话术与产品之间<strong>没有结构化关联</strong>（条目只有 <code>id/content/tags</code>，无 <code>productId</code>），而合规清洗<strong>只挂在 `scriptLibraryData` 一条路径上</strong>，生成引擎的第二套语料零校验。</p>
+<hr>
+<h2 id="h-二-抽样检查-581-条-覆盖-28-栏目">二、抽样检查（581 条，覆盖 28 栏目）</h2>
+<ul><li><strong>方法</strong>：分层随机抽样（种子 <code>20260923</code>，可复现），小栏目（≤12 条）全抽、大栏目按 55% 抽取，共 <strong>581 条 / 1040（55.9%）</strong>，覆盖全部 28 个栏目、30 个品类、7 个业务板块。</li><li><strong>方式</strong>：脚本预扫（红线/口径/事实）＋ 581 条<strong>逐条人工精读</strong>，四维判定（开场白 / 通用性 / 过渡衔接 / 搭配逻辑）。</li></ul>
+<h3 id="h-抽样暴露的主要问题">抽样暴露的主要问题</h3>
+<div class="tablewrap"><table><thead><tr><th>问题</th><th>量级</th><th>样例</th></tr></thead><tbody>
+<tr><td>无源报价（产品库无 price 字段却写死金额）</td><td><strong>65 条</strong></td><td>"50ml自营官方<strong>八百多</strong>""常卖<strong>一百九十八</strong>，活动两瓶<strong>一百五十八</strong>"</td></tr>
+<tr><td>效果/安全承诺</td><td>6 条</td><td>iq9"持续使用28天<strong>就能看到明显改善</strong>"；ms10"皮肤<strong>立马</strong>清爽"</td></tr>
+<tr><td>承诺超出机上能力边界</td><td>5 条</td><td>ed19"我给您做个<strong>皮肤检测</strong>"；ed25"给您看<strong>顾客视频</strong>"；su2"从后面航班调一批"</td></tr>
+<tr><td>句式故障（人群标签塞进需求槽）</td><td><strong>10 条</strong></td><td>"您平时更在意干燥双手还是<strong>甲缘易干者</strong>？"</td></tr>
+<tr><td>场景不成立（机上无网却引导看社媒/评价）</td><td>4 条</td><td>tb20"去小红书/微博搜一下"；tb13"关注我们的社交媒体"</td></tr>
+<tr><td>变相议价 / 赠品承诺</td><td>5 条</td><td>po19"附赠一套同系列小样"；pn11"买两件以上…组合优惠"</td></tr>
+<tr><td>内部过程泄漏到对客话术</td><td>2 条</td><td>ag133"<strong>本品按罪爱系列风格上架</strong>"；nr9"我们每一季都会盘一次销售和复购情况"</td></tr>
+</tbody></table></div>
+<hr>
+<h2 id="h-三-需修改清单-标注板块-产品">三、需修改清单（标注板块 / 产品）</h2>
+<h3 id="h-p0-口径冲突-已全部修改">P0 口径冲突 —— 已全部修改</h3>
+<blockquote>判据：春秋航空官方答复（黑猫投诉 17379928724）明确「检验为假…按商品金额<strong>假一赔三</strong>」；海关总署 2020 年第 45 号公告明确跨境退货需<strong>与商家协商一致</strong>、申报清单放行 <strong>30 日内</strong>申请。</blockquote>
+<div class="tablewrap"><table><thead><tr><th>条目</th><th>板块</th><th>原文（摘要）</th><th>修改后</th></tr></thead><tbody>
+<tr><td><code>trustBuilding/tb7</code></td><td>信任建立</td><td>假一<strong>赔四</strong>，说到就做到</td><td>假一<strong>赔三</strong>＋送检规则＋商家承担检测费</td></tr>
+<tr><td><code>authenticityGuarantee/ag3</code></td><td>正品保障</td><td>假一<strong>赔四</strong>，海关链路可追溯</td><td>假一<strong>赔三</strong>＋送检路径</td></tr>
+<tr><td><code>priceObjection/po10</code></td><td>价格异议</td><td>支持<strong>7天无理由退换</strong></td><td>跨境下单即申报缴税，非质量问题不支持无理由退换</td></tr>
+<tr><td><code>hesitationHandling/hh6</code></td><td>犹豫处理</td><td>支持<strong>7天无理由退换</strong></td><td>同上＋挑选前先对齐肤质需求</td></tr>
+<tr><td><code>trustBuilding/tb2</code></td><td>信任建立</td><td>支持<strong>7天无理由退换</strong></td><td>同上</td></tr>
+<tr><td><code>effectivenessDoubt/ed8</code></td><td>效果疑虑</td><td>提供<strong>28天试用期</strong>，按条款退款</td><td>删除凭空承诺，改为周期说明</td></tr>
+<tr><td><code>hesitationHandling/hh12</code></td><td>犹豫处理</td><td><strong>先付个定金</strong>…不满意随时退</td><td>删定金；声明统一核定价、无降价权限</td></tr>
+<tr><td><code>hesitationHandling/hh20</code></td><td>犹豫处理</td><td>有完善的<strong>退换货政策</strong>，无后顾之忧</td><td>改为跨境特性告知</td></tr>
+<tr><td><code>priceObjection/po27</code></td><td>价格异议</td><td><strong>先付个定金</strong>，留三天</td><td>同上</td></tr>
+<tr><td><code>authenticityGuarantee_088</code></td><td>正品保障</td><td>来源查得到，<strong>不满意也能退</strong></td><td>删除"能退"承诺</td></tr>
+<tr><td><code>returnShipping/rs12</code></td><td>退货物流</td><td>退多少税就退多少，<strong>一分不会少</strong></td><td>改为海关退货规定（30日/45日、以实际办理为准）</td></tr>
+<tr><td><code>returnShipping/rs3</code>、<code>rs15</code></td><td>退货物流</td><td>综合税<strong>一并退还</strong></td><td>同上口径</td></tr>
+<tr><td><code>priceNegotiation/pn9</code></td><td>价格协商</td><td>机上价与跨境商城<strong>保持一致</strong></td><td>改为统一核定的专享价、无降价权限</td></tr>
+</tbody></table></div>
+<h3 id="h-p0-业务线张冠李戴-跨境商品自称-免税-已修正">P0 业务线张冠李戴：跨境商品自称「免税」—— 已修正</h3>
+<p><strong>事实纠正</strong>：机上免税品 <strong>不含跨境类商品</strong>。两条业务线互斥——<br>机上免税品＝仅限国际航班、机上交付码当场提货；跨境保税＝国内航班可售、保税仓发货到家。</p>
+<p>库内酒类（<code>productId: spir-001…014</code>，品类 酒/梅子酒/红酒）走的是<strong>跨境保税</strong>，却在 <strong>10 条话术</strong>里自称「机上免税价／免税渠道」，另有 1 条「离岛价」，属业务线错配。已全部改为「机上跨境专享价、一价包税」：</p>
+<div class="tablewrap"><table><thead><tr><th>条目</th><th>产品（productId）</th><th>原文（摘要）</th></tr></thead><tbody>
+<tr><td><code>priceObjection_189</code></td><td>spir-001 青花汾酒30年</td><td>机上<strong>免税渠道</strong>的价格也实在些</td></tr>
+<tr><td><code>priceObjection_190</code></td><td>spir-002 杏花村竹叶青</td><td>机上<strong>离岛价</strong>比市区商超友好（另删"整箱更划算"）</td></tr>
+<tr><td><code>priceObjection_191</code></td><td>spir-003 泸州老窖87版</td><td>机上<strong>免税</strong>还省一笔</td></tr>
+<tr><td><code>priceObjection_192</code></td><td>spir-004 泸州老窖红陶</td><td>机上<strong>免税价</strong>更友好</td></tr>
+<tr><td><code>priceObjection_194</code></td><td>spir-006 松井白兰地梅酒</td><td>机上<strong>免税价</strong>比市区代购友好</td></tr>
+<tr><td><code>priceObjection_195</code></td><td>spir-007 松井威士忌梅酒</td><td>机上<strong>免税</strong>和 cdf 都有货</td></tr>
+<tr><td><code>priceObjection_197</code></td><td>spir-009 仓吉8年</td><td>机上<strong>免税价</strong>比市区行货低一截</td></tr>
+<tr><td><code>priceObjection_198</code></td><td>spir-010 山崎</td><td>机上<strong>免税渠道</strong>的价格也有优势</td></tr>
+<tr><td><code>priceObjection_199</code></td><td>spir-011 响</td><td>机上<strong>免税渠道</strong>的价格也有优势</td></tr>
+<tr><td><code>priceObjection_200</code></td><td>spir-012 波摩15年</td><td>机上<strong>免税价</strong>比市区行货友好</td></tr>
+<tr><td><code>priceObjection_202</code></td><td>spir-014 奔富双支</td><td>机上组合<strong>免税价</strong>友好</td></tr>
+</tbody></table></div>
+<p>连带纠正：tags 里的「免税／免税价／免税优势／离岛价」共 11 处 → 「跨境专享」；生成引擎语料中「这款产品是<strong>免税店同款</strong>，但在春秋航班上买价格更优惠」改为「机上跨境专享价、一价包税」。</p>
+<blockquote>保留未改：<code>6366</code>「春秋航空的跨境商品和免税店的有什么区别？区别在于免税店要排队…我们在飞机上慢慢选、送到家」——这条把"我们卖跨境"与"免税店"做了正确区分，是正确示范。全站另有竞品情报数据（<code>platform: '日上免税'</code>/<code>'三亚免税城'</code>），属正常业务数据，不属违规。</blockquote>
+<h3 id="h-p0-价格表述与比价-全量删除">P0 价格表述与比价 —— 全量删除</h3>
+<p><strong>原则</strong>：产品主数据<strong>无 price 字段</strong>，写死金额即无源报价；比价隐含"我们更便宜"且无法证实。一律删除。</p>
+<div class="tablewrap"><table><thead><tr><th>类别</th><th>条数</th><th>典型原文 → 改后</th></tr></thead><tbody>
+<tr><td>写死金额</td><td>45</td><td>"这款三百克才二十九，当日常泡澡去角质用很划算" → "这款当日常泡澡去角质用很合适"</td></tr>
+<tr><td>常卖 / 一天几毛钱</td><td>8</td><td>"常卖一百七十九，四十粒能吃一阵子" → "四十粒能吃一阵子"</td></tr>
+<tr><td>摊到每天</td><td>5</td><td>"摊到每天也就几块钱" → "很经用"</td></tr>
+<tr><td>比价（比单买/比正装/比沙龙/比理发店/比日常入手）</td><td>53</td><td>"比单买省""比正装划算""比沙龙磨砂便宜" → 整句删除</td></tr>
+<tr><td>优惠价 / 亲子优惠套餐 / 赠品</td><td>4</td><td><code>pn3/pn7/pn12</code>、<code>fc13</code> → 统一核定口径</td></tr>
+</tbody></table></div>
+<p><strong>保留</strong>合规的价格政策表述——<code>机上跨境专享价</code>、<code>一价包税</code>、<code>统一核定</code>、<code>无降价权限</code>（防护断言守护，防止误删）。这类不含金额也不构成对比，是"价格异议处理"栏目的立身之本。</p>
+<p><strong>tags 一并清理</strong>：价格类与内部词（<code>参考价</code>、<code>美元折算</code>、<code>黄金时间</code>、<code>性价比</code>、<code>平价</code>、<code>优惠</code>、<code>实惠</code>、<code>专柜同款</code>）共 100+ 处 → 改为中性词。<code>参考价/美元折算</code>属内部概念泄漏，<code>黄金时间</code>是伪科学红线词。替换限定在 <code>tags: [...]</code> 内，避免误伤 UI 文案。</p>
+<blockquote><strong>未用正则批量删除</strong>：实测正则会把「比较实在」当比价删掉、把「平摊下来比单买省。机上…」截成「平摊下来机上…」，破坏句法。故改为<strong>逐条精确替换</strong>（67 条正文 + 词表清 tags）。</blockquote>
+<h3 id="h-p0-大促-活动价-促销-按-覆盖到-1040-条-全量改写">P0 大促 / 活动价 / 促销 —— 按"覆盖到 1040 条"全量改写</h3>
+<p>上一轮只改了抽样命中的部分，本轮对<strong>全部 1040 条原有话术</strong>做全量扫描并逐条改写（不再按抽样）：</p>
+<div class="tablewrap"><table><thead><tr><th>类别</th><th>条数</th><th>处理</th></tr></thead><tbody>
+<tr><td>大促</td><td>6</td><td><code>po21</code>、<code>priceObjection_141/155/159/164/169</code> → 统一核定口径</td></tr>
+<tr><td>活动价 / 活动时候 / 活动期</td><td>5</td><td><code>priceObjection_150/169/178/180</code>、<code>hh19</code> → 同上</td></tr>
+<tr><td>趁活动囤</td><td>4</td><td><code>priceObjection_174/178/181/183</code> → 改为"一次带两瓶"，并删除写死的"常卖 XXX 元"</td></tr>
+<tr><td>促销 / 等促销</td><td>2</td><td><code>priceObjection_212</code>、<code>hh4</code></td></tr>
+<tr><td>tags 残留（券后/满减券/促销/折扣/特价）</td><td>11</td><td>统一改为「跨境专享」</td></tr>
+</tbody></table></div>
+<p>至此话术库内「免税 / 离岛价 / 大促 / 活动价 / 券后 / 满减 / 促销 / 折扣 / 特价」<strong>全部清零</strong>（回归已加断言守护）。</p>
+<h3 id="h-p0-承诺超出机上能力-已修改">P0 承诺超出机上能力 —— 已修改</h3>
+<div class="tablewrap"><table><thead><tr><th>条目</th><th>板块</th><th>问题</th><th>修改方向</th></tr></thead><tbody>
+<tr><td><code>effectivenessDoubt/ed19</code></td><td>效果疑虑</td><td>机上无皮肤检测能力</td><td>改为讲透成分与用法</td></tr>
+<tr><td><code>effectivenessDoubt/ed25</code></td><td>效果疑虑</td><td>机上无网、涉隐私</td><td>改为讲成分与适用场景</td></tr>
+<tr><td><code>trustBuilding/tb13</code>、<code>tb20</code></td><td>信任建立</td><td>机上无网，与"机上无法看评价"栏目自相矛盾</td><td>改为溯源/掌上海关等<strong>当场可验</strong>手段</td></tr>
+<tr><td><code>stockUncertainty/su2</code></td><td>库存</td><td>跨航班调货非乘务员权限</td><td>改为扫码下单、保税仓发货</td></tr>
+<tr><td><code>authenticityGuarantee/ag13</code></td><td>正品保障</td><td>承诺"自有鉴定团队"（官方口径为送外部机构）</td><td>改为送 SGS/中检集团</td></tr>
+</tbody></table></div>
+<h3 id="h-p1-句式故障-表述-场景错配-已修改">P1 句式故障 / 表述 / 场景错配 —— 已修改</h3>
+<ul><li><strong>句式故障 10 条</strong>（人群标签误入需求槽）：<code>informationInquiry_099/106/113/117/118/120/121/125/136/139</code> → 句尾提问全部改写为通顺的二选一。</li><li>语病：<code>priceObjection_029</code>「一价全包<strong>排队</strong>」、<code>chineseLabel/cl5</code>「走的是一般贸易不同的渠道」。</li><li>内部过程泄漏：<code>authenticityGuarantee_133</code>「本品按罪爱系列风格上架」。</li><li>效果/安全承诺：<code>iq9</code>、<code>iq17</code>、<code>iq7</code>、<code>ms10</code>（"立马"）、<code>fc5</code>（"不含任何有害成分"）、<code>ff14</code>（耳闷"是正常的"→改为缓解建议＋提示找乘务员）。</li><li>饥饿营销：<code>sm10</code>（"第二次来就找不到了"）、<code>su17</code>（"最后3份"→改为扫码下单保底）。</li><li>场景错配：<code>ms16</code>（机上敷泥膜 10 分钟）、<code>ms7</code>（精华按小腿 → 改身体护理）。</li><li>变相议价/赠品：<code>po19</code>、<code>po23</code>、<code>fr6</code>、<code>pn11</code>。</li><li>绝对化：<code>authenticityGuarantee_155/152</code>（"假货进不来"）。</li><li>无源数据：<code>nr9</code>、<code>nr1</code>（"好几万条真实评价"）。</li><li>P2：<code>ep6</code>（"回头客最多…之一"语义矛盾）。</li></ul>
+<h3 id="h-全站口径对齐-入库闸够不到的路径">全站口径对齐（入库闸够不到的路径）</h3>
+<p><code>beauty.html</code> 内「假一赔四」共 <strong>30 处</strong>，散落在 <code>vocab.trustBuilders</code>、话术套装、UI 说明及 tags 中。逐处确认<strong>全为正向承诺</strong>（其中 2 处被"不是空话/不是口号"误判为否定），已全部改为<strong>假一赔三</strong>；退货口径保留站内正确的否定说明（"不支持七天无理由退货"）与旅客提问，仅改我方 2 处正向承诺。</p>
+<p><strong>这是本次最高价值的发现</strong>：合规闸只挂在 <code>scriptLibraryData</code> 一条路径，生成引擎语料库是同一批对客口径却零校验——库里清干净了，生成出来照样错。</p>
+<hr>
+<h2 id="h-四-需新增清单-标注板块-产品">四、需新增清单（标注板块 / 产品）</h2>
+<p>新增 <strong>4 个栏目 / 197 条</strong>，覆盖原库三类结构性缺口：</p>
+<div class="tablewrap"><table><thead><tr><th>栏目</th><th>条数</th><th>板块覆盖</th><th>作用</th></tr></thead><tbody>
+<tr><td><code>productOpening</code> 产品开场白</td><td><strong>88</strong></td><td>护肤/彩妆/香水/保健/酒类/纪念品 全线</td><td>补齐"各产品开口话术"，点名产品＋卖点＋互动提问</td></tr>
+<tr><td><code>opening</code> 场景开场白</td><td><strong>42</strong></td><td>全板块 × 12 类场景（时段/回头客/首次乘机/商务/带娃/老年/特殊需求/送礼/机上限定/延误）</td><td>不点名产品，按旅客状态开口</td></tr>
+<tr><td><code>universal</code> 通用话术</td><td><strong>37</strong></td><td>跨场景复用</td><td>正品/价格/物流/售后/成分/用法/效果/评价/库存/积分 通用口径</td></tr>
+<tr><td><code>bridge</code> 过渡衔接</td><td><strong>30</strong></td><td>全板块 × 销售阶段</td><td>开场→需求→推荐→体验→异议→成交→售后 全链路衔接句</td></tr>
+</tbody></table></div>
+<h3 id="h-无话术产品补齐-联网核实资料后生成">无话术产品补齐（联网核实资料后生成）</h3>
+<ul><li><strong>真零话术 2 个</strong>（已联网核实官方资料）：</li><ul><li><code>mmm-002</code> 梅森马吉拉航行物语（香水）→ 官方香调：水生调/杜松子 → 红海藻/龙涎香，木质水生调 EDT，男女皆宜</li><li><code>spa-001</code> SPA 红蛇毒眼膜（眼膜）→ HAS 精华＋类蛇毒肽，60 片/盒，一周 2–3 次（避开网传"立竿见影/肉毒素"等违规表述）</li></ul><li><strong>无点名专属话术 28 个</strong>一并补齐（科颜氏全线、法尔曼、莱珀妮、普拉达口红、安耐晒、蜜丝婷、珂润、IPSA、OLAY、皇后的秘密、桃谷明色、高丝、ASAHI 朝日、和汉刚 SUGI 等）。</li></ul>
+<hr>
+<h2 id="h-五-匹配规则-优化话术搭配逻辑">五、匹配规则（优化话术搭配逻辑）</h2>
+<p>原库<strong>没有任何匹配逻辑</strong>（只按栏目浏览＋关键词搜索）。本次上线 <code>slRecommend</code> 引擎：</p>
+<p><strong>五维打分</strong>：板块 30 ＋ 产品线 25 ＋ 职能 20 ＋ 人群 15 ＋ 阶段 10</p>
+<ul><li><strong>板块</strong>：30 个品类 → 7 个板块（护肤/彩妆/香水/保健/酒类/纪念品/服务）</li><li><strong>产品线</strong>：品类、品牌、产品名点名命中</li><li><strong>职能</strong>：栏目 → <code>open</code>(开场) / <code>bridge</code>(过渡) / <code>universal</code>(通用) / <code>answer</code>(应答)</li><li><strong>人群</strong>：商务/老年/带儿童/首次乘机/常旅客/特殊需求/送礼</li><li><strong>阶段</strong>：open → need → present → object → close → after</li></ul>
+<p><strong>硬闸</strong>：任何话术出闸前必须过 <code>scriptLibGuard</code>，不合规<strong>直接剔除</strong>（闸缺失时 fail-closed 不放行）。</p>
+<p><strong>搭配逻辑</strong> <code>slRecommendSet(ctx)</code>：一次给出「开场白 ×3 ＋ 应答 ×3 ＋ 过渡 ×2」，<strong>开场必配一条</strong>，解决"不知道怎么开口/怎么接下一句"。</p>
+<p><strong>受控 tag 词表</strong>：原库 <strong>1147 个 tag、801 个只出现一次</strong>，词表完全发散无法作为匹配维度 → 新话术统一取用 41 个受控词。</p>
+<hr>
+<h2 id="h-六-最终优化版-对清单二次匹配与筛选后交付">六、最终优化版（对清单二次匹配与筛选后交付）</h2>
+<p>初筛清单 <strong>247 条</strong>（修改 50 ＋ 新增 197）→ 经四道筛选：</p>
+<ol><li><strong>合规硬闸</strong>：剔除 1 条（新增 <code>pop42</code> 命中"干细胞"医疗宣称）→ 改写为"HAS 精华"后通过</li><li><strong>语法闸</strong>：抽出数据段 <code>node --check</code>，未通过<strong>不落盘</strong>（首轮即拦下 1 次切片 bug）</li><li><strong>幂等闸</strong>：二次执行 <code>len(src)</code> 变化 = 0</li><li><strong>回归闸</strong>：四项回归全绿</li></ol>
+<p><strong>最终落地</strong>：修改 <strong>165 条</strong>（首轮 50 ＋ 免税 11 ＋ 大促类 20 ＋ 价格/比价 67 ＋ 复查残留 6 ＋ tags 11）＋ 全站口径 31 处 ＋ 新增 197 条；库内 <strong>1237 条 / 32 栏目 / 0 空洞</strong>。</p>
+<h3 id="h-末轮全量复查-1237-条逐条过">末轮全量复查（1237 条逐条过）</h3>
+<div class="tablewrap"><table><thead><tr><th>检查项</th><th>结果</th></tr></thead><tbody>
+<tr><td>结构（空洞 / null / 空内容）</td><td><strong>0 / 0 / 0</strong></td></tr>
+<tr><td>硬红线 7 类（医疗功效·绝对化·饥饿营销·伪科学·评判旅客·效果承诺·折扣促销）</td><td><strong>全部 0</strong></td></tr>
+<tr><td>占位符残留 / 内部过程泄漏</td><td><strong>0 / 0</strong></td></tr>
+<tr><td>口径（假一赔四 · 7天无理由 · 免税误称 · 大促活动）</td><td><strong>全部 0</strong></td></tr>
+<tr><td>价格 / 比价</td><td><strong>0</strong>（"一套六块"是冰箱贴数量，白名单排除）</td></tr>
+<tr><td>句式故障 / 重复标点</td><td><strong>0 / 0</strong></td></tr>
+<tr><td>完全重复</td><td>重复组 3、冗余条目 6（冗余率 0.5%）</td></tr>
+</tbody></table></div>
+<div class="tablewrap"><table><thead><tr><th>回归脚本</th><th>结果</th></tr></thead><tbody>
+<tr><td><code>_verify_scriptlib_match_20260923.js</code>（新增）</td><td><strong>34 / 34</strong>（含免税/大促/价格比价清零断言）</td></tr>
+<tr><td><code>_verify_scriptlib_guard.js</code></td><td><strong>34 / 34</strong></td></tr>
+<tr><td><code>_verify_scriptlib_redline_20260923.js</code></td><td><strong>P0/P1 全部清零</strong></td></tr>
+<tr><td><code>_verify_scriptlib_xss_20260922.js</code></td><td><strong>21 / 0</strong></td></tr>
+</tbody></table></div>
+<hr>
+<h2 id="h-七-遗留待办-未处理-需业务决策">七、遗留待办（未处理，需业务决策）</h2>
+<ol><li>~~无源报价~~ <strong>已解决</strong>（见第三节）：价格表述与比价已全量删除，回归有断言守护。若后续接入机上实时价，再评估是否恢复"以机上标价为准"的表述。</li><li>~~"免税价/离岛价"表述~~ <strong>已解决</strong>（见第三节）：10 条免税 + 1 条离岛价 + 11 处 tags 已改为跨境专享口径。</li><li><strong>积分话术</strong>：库内已无"积分抵钱"违规表述；建议商城积分规则（150 分=1 元）确认后补一组标准话术。</li><li><strong>tag 收敛</strong>：本轮已清掉价格类与内部词 100+ 处；存量仍有发散 tag（原 1147 个），建议随后续维护逐步收敛到受控词表 <code>SL_TAG_VOCAB</code>。</li></ol>
+<hr>
+<h2 id="h-附-产出文件">附：产出文件</h2>
+<div class="tablewrap"><table><thead><tr><th>文件</th><th>说明</th></tr></thead><tbody>
+<tr><td><code>_apply_scriptlib_opt_20260923.py</code></td><td>主补丁（修改 50 条 ＋ 4 栏目 197 条 ＋ 匹配规则），幂等</td></tr>
+<tr><td><code>_apply_scriptlib_opt2_20260923.py</code></td><td>生成引擎语料库（vocab）口径治理，幂等</td></tr>
+<tr><td><code>_apply_scriptlib_opt3_20260923.py</code></td><td>全站赔付/退货口径对齐（30 处），幂等</td></tr>
+<tr><td><code>_verify_scriptlib_match_20260923.js</code></td><td>新增回归：匹配引擎功能 ＋ 本次修改落盘校验 ＋ 免税/大促清零</td></tr>
+<tr><td><code>_apply_scriptlib_opt4_20260923.py</code></td><td>免税口径纠错 ＋ 大促类全量覆盖（1040 条），幂等</td></tr>
+<tr><td><code>_apply_scriptlib_opt5_20260923.py</code></td><td>删除价格表述 ＋ 禁止比价（67 条逐条精确替换），幂等</td></tr>
+<tr><td><code>_apply_scriptlib_opt6_20260923.py</code></td><td>末轮复查残留：正文 6 条 ＋ tags 价格/内部词清理，幂等</td></tr>
+<tr><td><code>_full_recheck.js</code></td><td>全量复查脚本（1237 条：结构/红线/口径/价格/句式/冗余）</td></tr>
+<tr><td><code>_slib_dump.js</code> / <code>_slib_analyze.js</code> / <code>_coverage2.js</code></td><td>数据导出、覆盖度分析（含测量方法修正）</td></tr>
+<tr><td><code>_sample_readable.txt</code></td><td>581 条抽样可读全文（复核用）</td></tr>
+<tr><td><code>beauty.html.bak_20260923b</code></td><td>改动前备份</td></tr>
+</tbody></table></div>
+</main>
+</div>
+</body>
+</html>
