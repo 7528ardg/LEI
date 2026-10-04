@@ -20,7 +20,7 @@ a:`<strong>动态舱应急撤离（大撤）八个阶段</strong>：<ul>
 <li><strong>⑤ 平飞服务</strong>：灯光变亮、安全带灯熄灭一声铃后恢复服务；</li>
 <li><strong>⑥ 特情处置</strong>：颠簸 / 失火 / 释压（见对应专项条目）；</li>
 <li><strong>⑦ 有准备/有时限的撤离</strong>：乘务长进驾驶舱 → 准备会 → 客舱准备广播与演示 → 防冲击姿势 → 个人最后准备 → 500 英尺口令 → 15 秒撤离流程；</li>
-<li><strong>⑧ 清舱</strong>：手电筒照射、蹲下检查，口令"还有人吗，Anyone else, answer me"反复多次，逐个报告"已完成清舱，请求撤离"。</li></ul>`},
+<li><strong>⑧ 清舱</strong>：手电筒照射、蹲下检查，口令"还有人吗，Anyone else, answer me"反复多次；清舱<strong>无需报告</strong>，各自检查完负责的区域后从就近合适的出口撤离。</li></ul>`},
 {cat:'大撤·流程', icon:'🔦', src:'大撤专项·动态舱应急撤离流程', t:['设备检查','手电筒','SK包','急救箱','ELT','扩音器','号位携带'], rel:['大撤流程'],
 q:'大撤设备检查时各号位分别携带什么设备？',
 a:`<strong>各号位设备清单（检查完 PA 外话报告）</strong>：<ul>
@@ -44,7 +44,7 @@ a:`<strong>个人准备完成后</strong>：坐下口令"系好安全带、肩�
 <li><strong>如机长发布无需撤离</strong>：口令"镇静，听指挥！""我们安全了，请坐在原位，keep calm, we are safe, please remain seated"，2 人站前后服务间、2 人进客舱安抚；</li>
 <li><strong>实施撤离</strong>：飞机完全停稳后 15 秒内完成撤离；</li>
 <li><strong>清舱</strong>：所有号位口令"我已准备好撤离时需要带的应急设备"，拿出手电筒照射、蹲下仔细检查，口令"还有人吗，Anyone else, answer me"反复多次；</li>
-<li><strong>最后报告</strong>：2/3/4 号位依次报告"已完成清舱，请求撤离"，从就近出口撤离（水上：到门口救生衣充气、上船、割断系留绳）。</li></ul>`},
+<li><strong>撤离（无需报告）</strong>：本程序下的撤离<strong>无需报告</strong>，2/3/4 号位各自检查完负责的区域后，直接从<strong>就近合适的出口</strong>撤离（水上：到门口救生衣充气、上船、割断系留绳）。</li></ul>`},
 /* ---------- 大撤·颠簸 ---------- */
 {cat:'大撤·颠簸', icon:'〰', src:'大撤专项·动态舱应急撤离流程', t:['颠簸','铃数','轻度颠簸','中度颠簸','重度颠簸','一声铃'], rel:['颠簸处置'],
 q:'颠簸铃数怎么区分轻重程度？',
@@ -278,7 +278,7 @@ a:`<strong>有准备撤离（时间充裕的迫降）完整流程</strong>：<ol
 <li><strong>选择并指导援助者</strong>：口令<strong>"你、你、你请跟我来！"</strong>带到机门旁交代任务——飞机停稳后挡住旅客直到滑梯完全充气、"到这边来，跳，滑"、<strong>"如果我不能开门，请帮我开门"</strong>、"如果我受伤，请将我带下飞机，我的安全带是这样解开的"；让援助者复述任务，座位没变防冲击姿势不变，回原位坐好；</li>
 <li><strong>个人最后准备</strong>：乘务长<strong>关闭客舱灯光、打开应急灯光</strong>，广播<strong>"全体乘务员做好最后准备。All attendant, prepare yourself"</strong>；检查本号位设备在位、固定松散物品、锁闭洗手间、关闭电器电源；坐下口令<strong>"系好安全带、肩带，静默 30 秒 STS"</strong>；</li>
 <li><strong>驾驶舱口令（手册 6.2.5.13，中英文交替、声音统一响亮）</strong>：下降至 <strong>2000 英尺</strong>，驾驶舱发出<strong>"完成准备！完成准备！Finish preparation！Finish preparation！"</strong>——听到后停止所有准备工作、尽快就位，未完成的工作由乘务长通过 PA 广播告知旅客；下降至 <strong>500 英尺</strong>，驾驶舱发出<strong>"防冲击姿势！防冲击姿势！Brace for impact！Brace for impact！"</strong>，乘务员立即向旅客发布防冲击指令<strong>"低下头！紧迫用力！Heads down brace！"</strong>（中英文交替）；</li>
-<li><strong>撤离实施（手册 6.1 / 6.4.4.5）</strong>：飞机完全停稳后，飞行机组发出<strong>"乘务组各就各位！乘务组各就各位！Cabin crew at stations！Cabin crew at stations！"</strong>，乘务员解开安全带站起来，口令<strong>"镇静！听指挥！Keep calm, follow my direction."</strong>，等待撤离指令；接到<strong>"撤离！撤离！Evacuate！Evacuate！"</strong>后实施 <strong>15 秒撤离流程</strong>；滑梯充气过程中两手抓住门两侧辅助把手挡住出口，口令<strong>"解开安全带！不要带行李！脱下高跟鞋！"</strong>；滑梯充气完毕后引导口令<strong>"到这边来，跳、滑。Come this way, jump slide."</strong>（烟雾环境加"弯下腰，捂住口鼻。Bend over, cover your nose and mouth."；应急电源失效的黑暗环境加"朝灯光方向走。Come to the light."）；清舱口令<strong>"还有人吗，Anyone else, answer me"</strong>反复多次，逐个报告"已完成清舱，请求撤离"。</li></ol>
+<li><strong>撤离实施（手册 6.1 / 6.4.4.5）</strong>：飞机完全停稳后，飞行机组发出<strong>"乘务组各就各位！乘务组各就各位！Cabin crew at stations！Cabin crew at stations！"</strong>，乘务员解开安全带站起来，口令<strong>"镇静！听指挥！Keep calm, follow my direction."</strong>，等待撤离指令；接到<strong>"撤离！撤离！Evacuate！Evacuate！"</strong>后实施 <strong>15 秒撤离流程</strong>；滑梯充气过程中两手抓住门两侧辅助把手挡住出口，口令<strong>"解开安全带！不要带行李！脱下高跟鞋！"</strong>；滑梯充气完毕后引导口令<strong>"到这边来，跳、滑。Come this way, jump slide."</strong>（烟雾环境加"弯下腰，捂住口鼻。Bend over, cover your nose and mouth."；应急电源失效的黑暗环境加"朝灯光方向走。Come to the light."）；清舱口令<strong>"还有人吗，Anyone else, answer me"</strong>反复多次；清舱完成后<strong>无需报告</strong>，各自检查完负责的区域即从就近合适的出口撤离。</li></ol>
 <strong>水上撤离额外要求</strong>：<ul>
 <li><strong>救生衣演示</strong>："请穿上救生衣，但在客舱内不要充气。Please put on your life vest, but do not inflate it while you are in the cabin."（2 遍）；</li>
 <li><strong>脱高跟鞋</strong>：水上<strong>连鞋一起脱</strong>；</li>
@@ -305,7 +305,7 @@ a:`<strong>无准备撤离（起飞关键阶段着火、无准备迫降等）</s
 <li><strong>发生第一次撞击</strong>（有刹车感觉）时，乘务员口令<strong>"低下头！紧迫用力！Heads down brace！"</strong>（中英文交替发布，3 遍，声音统一、响亮）；</li>
 <li>等飞机<strong>完全停稳</strong>后，飞行机组发出<strong>"乘务组各就各位！乘务组各就各位！Cabin crew at stations！Cabin crew at stations！"</strong>；未接到任何指令且呼叫驾驶舱 <strong>30 秒</strong>无应答视为飞行机组失能，乘务组自主评估撤离；接到<strong>"撤离！撤离！Evacuate！Evacuate！"</strong>后实施 <strong>15 秒</strong>紧急撤离；*机外失火时可自行撤离，注意着火侧的门可能不能用，千万要观察；</li>
 <li><strong>开门后口令</strong>："第 1 人，站在我对面，像我一样指挥旅客跳、滑；第 2、3 人跳下滑梯，站在滑梯 2 侧指挥旅客远离飞机！"；引导口令<strong>"解开安全带！不要带行李！脱下高跟鞋！"</strong>、<strong>"到这边来，跳、滑。Come this way, jump slide."</strong>（烟雾环境加"弯下腰，捂住口鼻。Bend over, cover your nose and mouth."）；</li>
-<li><strong>清舱</strong>：手电筒照射、蹲下检查，"还有人吗，Anyone else, answer me"反复多次，依次报告后从就近出口撤离。</li></ol><div class="dc-imgs"><div class="dc-img-cap">📄 无准备撤离完整流程图（防冲击 → 口令 → 撤离判断 → 清舱）</div><img src="__DACHE_IMG_wuzhunbei__" alt="无准备撤离完整流程图（防冲击 → 口令 → 撤离判断 → 清舱）" onclick="dcImgZoom(this)" loading="lazy"><div class="dc-img-tip">🔍 点击图片放大查看完整长图</div></div>`},
+<li><strong>清舱</strong>：手电筒照射、蹲下检查，"还有人吗，Anyone else, answer me"反复多次；<strong>无需报告</strong>，各自检查完负责的区域后从就近合适的出口撤离。</li></ol><div class="dc-imgs"><div class="dc-img-cap">📄 无准备撤离完整流程图（防冲击 → 口令 → 撤离判断 → 清舱）</div><img src="__DACHE_IMG_wuzhunbei__" alt="无准备撤离完整流程图（防冲击 → 口令 → 撤离判断 → 清舱）" onclick="dcImgZoom(this)" loading="lazy"><div class="dc-img-tip">🔍 点击图片放大查看完整长图</div></div>`},
 {cat:'大撤·撤离程序', icon:'🌊', acc:true, src:'大撤专项·动态舱应急撤离流程', t:['水上撤离','水上迫降','救生筏','水面程序'], rel:['撤离','水上撤离'],
 q:'水上撤离（水上迫降）程序有什么特殊要求？',
 a:`<strong>水上撤离特殊要求</strong>：<ol>

@@ -252,6 +252,10 @@ html[data-theme="dark"] .border-slate-200{ border-color:var(--border)!important;
 
 
 
+
+
+
+
 <div class="top">
   <div class="t-title"><span class="logo">🗂</span><span>事件报告 · 完整流程速查</span></div>
   <div class="search">
@@ -313,7 +317,7 @@ const EVENTS = [
       '范围：机组成员因受伤、患病/疑似患病、食物中毒、药物影响或死亡造成<strong>突发失能</strong>或飞行不正常；非值勤期地面突发严重外伤、意识丧失、身体失控、非正常死亡/猝死及突发公共卫生事件。'
     ]},
     {ph:'🤝 交接·报告', items:[
-      '非值勤期：本人或部门领导/当日值班经理<strong>立即报告航空医师</strong>（021-32315893 / 18017321073）。',
+      '非值勤期：本人或部门领导/当日值班经理<strong>立即报告航空医师</strong>（{{DUTY_LANDLINE}} / {{DUTY_MOBILE}}）。',
       '运行中：乘务长<strong>立刻报告机长</strong> → 机长报告<strong>公司AOC</strong> → AOC通过座席系统报告航空医师及总值班领导。',
       '航班结束后，乘务长<strong>第一时间</strong>上报<strong>SQM系统</strong>和航空医师。'
     ]},
@@ -335,7 +339,7 @@ const EVENTS = [
       '按对应应急处置程序先处置并确保安全，同时按 3.6.5.1 上报：乘务员→乘务长→机长，紧急时可越级但事后告知乘务长。'
     ]},
     {ph:'🤝 交接·上报', items:[
-      '发生此类事件，<strong>乘务长填写《春秋航空股份有限公司机上事件报告单》</strong>。',
+      '发生此类事件，<strong>乘务长填写《{{AIRLINE}}股份有限公司机上事件报告单》</strong>。',
       '航班结束后，乘务长<strong>第一时间上报SQM</strong>并报告当日部门值班经理/公司值班手机，同时记录到<strong>“智慧客舱”</strong>。',
       '<strong>航后 24 小时内</strong>将《机上事件报告单》上交<strong>客舱服务部安全保卫质量处</strong>。'
     ]},
@@ -400,7 +404,7 @@ const EVENTS = [
     ]},
     {ph:'🤝 交接·报告渠道', items:[
       '① 春秋之家 app →<strong>“安全报告”</strong>（等同于 SQM）；② 春秋之家 PRO app →<strong>“智慧客舱”→“风险沙盘”</strong>（等同于 SQM）；③ 值班经理电话报告。',
-      '值班电话：客舱部值班 18017321071；安监部值班 17717356347；保卫部值班 18017321082；AOC 021-32315801；航空医师 021-32315893 / 18017321073。'
+      '值班电话：客舱部值班 {{DUTY_MOBILE}}；安监部值班 {{DUTY_MOBILE}}；保卫部值班 {{DUTY_MOBILE}}；AOC {{DUTY_LANDLINE}}；航空医师 {{DUTY_LANDLINE}} / {{DUTY_MOBILE}}。'
     ]},
     {ph:'✅ 闭环·报告要求', items:[
       '报告详细陈述事件、导致原因与采取的措施，注意<strong>时间、地点、旅客姓名/地址、目击者信息、人员受伤情况</strong>。',
@@ -415,12 +419,12 @@ const EVENTS = [
 
 /* ============ 报告渠道 ============ */
 const PHONES = [
-  {d:'客舱部 值班手机', n:'18017321071', tag:'事件/运行上报'},
-  {d:'安监部 值班手机', n:'17717356347', tag:'安全/差错上报'},
-  {d:'保卫部 值班手机', n:'18017321082', tag:'安保/非法干扰'},
-  {d:'AOC 运行中心', n:'021-32315801', tag:'机长上报通道'},
-  {d:'航空医师', n:'021-32315893', tag:'卫生/医学事件'},
-  {d:'航空医师 手机', n:'18017321073', tag:'卫生/医学事件'}
+  {d:'客舱部 值班手机', n:'{{DUTY_MOBILE}}', tag:'事件/运行上报'},
+  {d:'安监部 值班手机', n:'{{DUTY_MOBILE}}', tag:'安全/差错上报'},
+  {d:'保卫部 值班手机', n:'{{DUTY_MOBILE}}', tag:'安保/非法干扰'},
+  {d:'AOC 运行中心', n:'{{DUTY_LANDLINE}}', tag:'机长上报通道'},
+  {d:'航空医师', n:'{{DUTY_LANDLINE}}', tag:'卫生/医学事件'},
+  {d:'航空医师 手机', n:'{{DUTY_MOBILE}}', tag:'卫生/医学事件'}
 ];
 
 /* ============ 渲染 ============ */
@@ -504,7 +508,7 @@ function renderReportForm(){
       '<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:8px">'+
         rpField('事件类型 *','<select id="rf-type" class="ri">'+typeOpts+'</select>')+
         rpField('航班号 *','<input id="rf-flight" class="ri" placeholder="如 9C8921">')+
-        rpField('航段','<input id="rf-sector" class="ri" placeholder="如 广州-上海">')+
+        rpField('航段','<input id="rf-sector" class="ri" placeholder="如 {{BASE}}-上海">')+
         rpField('事件日期 *','<input id="rf-date" class="ri" type="date" value="'+today+'">')+
         rpField('事件时间','<input id="rf-time" class="ri" type="time">')+
         rpField('飞行阶段','<select id="rf-phase" class="ri"><option>巡航</option><option>起飞</option><option>下降/落地</option><option>地面/候机</option></select>')+

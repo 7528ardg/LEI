@@ -44,99 +44,99 @@
   };
 
   // ============ 种子数据 ============
-  // 【广州分队定制版】绩效文件导入的正式人员名单（84人，BASE→base_id='Z1-CAN'，division→班组名）
+  // 【{{BASE}}定制版】绩效文件导入的正式人员名单（84人，BASE→base_id='Z1-CAN'，division→班组名）
   const GZ_CREW_SEED = [
-    { id:'017199', name:'黄子健', base_id:'Z1-CAN', division_id:'广州黄子健班组', key_personnel:false },
-    { id:'00753',  name:'李凯',   base_id:'Z1-CAN', division_id:'广州李凯班组',   key_personnel:false },
-    { id:'016064', name:'李幸宗', base_id:'Z1-CAN', division_id:'广州李凯班组',   key_personnel:false },
-    { id:'006485', name:'张桃',   base_id:'Z1-CAN', division_id:'广州张露班组',   key_personnel:false },
-    { id:'007576', name:'薛军',   base_id:'Z1-CAN', division_id:'广州黄子健班组', key_personnel:false },
-    { id:'016337', name:'许裕扬', base_id:'Z1-CAN', division_id:'广州李凯班组',   key_personnel:false },
-    { id:'011538', name:'刘献波', base_id:'Z1-CAN', division_id:'广州张露班组',   key_personnel:false },
-    { id:'005969', name:'张陆宇', base_id:'Z1-CAN', division_id:'广州黄子健班组', key_personnel:false },
-    { id:'024395', name:'庞然',   base_id:'Z1-CAN', division_id:'广州李凯班组',   key_personnel:false },
-    { id:'019916', name:'张奎宇', base_id:'Z1-CAN', division_id:'广州张露班组',   key_personnel:false },
-    { id:'011623', name:'卢鑫',   base_id:'Z1-CAN', division_id:'广州黄子健班组', key_personnel:false },
-    { id:'030695', name:'程琦淮', base_id:'Z1-CAN', division_id:'广州张露班组',   key_personnel:false },
-    { id:'027957', name:'褚春娜', base_id:'Z1-CAN', division_id:'广州黄子健班组', key_personnel:false },
-    { id:'031207', name:'黄恩豪', base_id:'Z1-CAN', division_id:'广州张露班组',   key_personnel:false },
-    { id:'028199', name:'范力丹', base_id:'Z1-CAN', division_id:'广州黄子健班组', key_personnel:false },
-    { id:'028980', name:'曹晨',   base_id:'Z1-CAN', division_id:'广州李凯班组',   key_personnel:false },
-    { id:'028030', name:'方旋',   base_id:'Z1-CAN', division_id:'广州张露班组',   key_personnel:false },
-    { id:'027959', name:'陈雨晴', base_id:'Z1-CAN', division_id:'广州李凯班组',   key_personnel:false },
-    { id:'028150', name:'古欣冉', base_id:'Z1-CAN', division_id:'广州张露班组',   key_personnel:false },
-    { id:'027030', name:'熊沁垚', base_id:'Z1-CAN', division_id:'广州黄子健班组', key_personnel:false },
-    { id:'028215', name:'管李阳', base_id:'Z1-CAN', division_id:'广州张露班组',   key_personnel:false },
-    { id:'020733', name:'黄艺蕾', base_id:'Z1-CAN', division_id:'广州黄子健班组', key_personnel:false },
-    { id:'028015', name:'冯涵书', base_id:'Z1-CAN', division_id:'广州李凯班组',   key_personnel:false },
-    { id:'030995', name:'黎晓亮', base_id:'Z1-CAN', division_id:'广州张露班组',   key_personnel:false },
-    { id:'027031', name:'李思颖', base_id:'Z1-CAN', division_id:'广州黄子健班组', key_personnel:false },
-    { id:'027039', name:'葛晓楠', base_id:'Z1-CAN', division_id:'广州李凯班组',   key_personnel:false },
-    { id:'028981', name:'雷炜豪', base_id:'Z1-CAN', division_id:'广州张露班组',   key_personnel:false },
-    { id:'027813', name:'黎鑫汝', base_id:'Z1-CAN', division_id:'广州黄子健班组', key_personnel:false },
-    { id:'028989', name:'侯鑫淼', base_id:'Z1-CAN', division_id:'广州李凯班组',   key_personnel:false },
-    { id:'027968', name:'李梦瑶1', base_id:'Z1-CAN', division_id:'广州张露班组',  key_personnel:false },
-    { id:'028982', name:'李贝贝', base_id:'Z1-CAN', division_id:'广州黄子健班组', key_personnel:false },
-    { id:'027947', name:'黄越',   base_id:'Z1-CAN', division_id:'广州李凯班组',   key_personnel:false },
-    { id:'028971', name:'梁馨怡', base_id:'Z1-CAN', division_id:'广州黄子健班组', key_personnel:false },
-    { id:'028218', name:'江欣',   base_id:'Z1-CAN', division_id:'广州李凯班组',   key_personnel:false },
-    { id:'027035', name:'李宇晴', base_id:'Z1-CAN', division_id:'广州张露班组',   key_personnel:false },
-    { id:'027952', name:'梁园',   base_id:'Z1-CAN', division_id:'广州黄子健班组', key_personnel:false },
-    { id:'027043', name:'孔近如', base_id:'Z1-CAN', division_id:'广州李凯班组',   key_personnel:false },
-    { id:'028020', name:'卢艺方', base_id:'Z1-CAN', division_id:'广州张露班组',   key_personnel:false },
-    { id:'027958', name:'李静雯1', base_id:'Z1-CAN', division_id:'广州李凯班组',  key_personnel:false },
-    { id:'027967', name:'骆诚',   base_id:'Z1-CAN', division_id:'广州张露班组',   key_personnel:false },
-    { id:'018804', name:'吕梦琪', base_id:'Z1-CAN', division_id:'广州黄子健班组', key_personnel:false },
-    { id:'027099', name:'李泽彬', base_id:'Z1-CAN', division_id:'广州李凯班组',   key_personnel:false },
-    { id:'027964', name:'田佳鑫', base_id:'Z1-CAN', division_id:'广州张露班组',   key_personnel:false },
-    { id:'027950', name:'齐元捷', base_id:'Z1-CAN', division_id:'广州黄子健班组', key_personnel:false },
-    { id:'027049', name:'王鲁明', base_id:'Z1-CAN', division_id:'广州张露班组',   key_personnel:false },
-    { id:'006700', name:'雷沁璇', base_id:'Z1-CAN', division_id:'广州黄子健班组', key_personnel:false },
-    { id:'028966', name:'汪世强', base_id:'Z1-CAN', division_id:'广州黄子健班组', key_personnel:false },
-    { id:'027949', name:'柳祥龙', base_id:'Z1-CAN', division_id:'广州李凯班组',   key_personnel:false },
-    { id:'027953', name:'杨玉玲', base_id:'Z1-CAN', division_id:'广州张露班组',   key_personnel:false },
-    { id:'017678', name:'邓书娟', base_id:'Z1-CAN', division_id:'广州黄子健班组', key_personnel:false },
-    { id:'028973', name:'卢佳妮', base_id:'Z1-CAN', division_id:'广州李凯班组',   key_personnel:false },
-    { id:'028026', name:'张俊强', base_id:'Z1-CAN', division_id:'广州张露班组',   key_personnel:false },
-    { id:'028045', name:'罗俊',   base_id:'Z1-CAN', division_id:'广州李凯班组',   key_personnel:false },
-    { id:'026631', name:'张萌1', base_id:'Z1-CAN', division_id:'广州张露班组',    key_personnel:false },
-    { id:'026620', name:'王荣',   base_id:'Z1-CAN', division_id:'广州黄子健班组', key_personnel:false },
-    { id:'026628', name:'王俊',   base_id:'Z1-CAN', division_id:'广州李凯班组',   key_personnel:false },
-    { id:'024747', name:'张硕1', base_id:'Z1-CAN', division_id:'广州张露班组',    key_personnel:false },
-    { id:'031060', name:'许文祺', base_id:'Z1-CAN', division_id:'广州黄子健班组', key_personnel:false },
-    { id:'028975', name:'王晓璇', base_id:'Z1-CAN', division_id:'广州李凯班组',   key_personnel:false },
-    { id:'027965', name:'张天乐', base_id:'Z1-CAN', division_id:'广州张露班组',   key_personnel:false },
-    { id:'023831', name:'闫思源', base_id:'Z1-CAN', division_id:'广州黄子健班组', key_personnel:false },
-    { id:'024318', name:'王雪',   base_id:'Z1-CAN', division_id:'广州李凯班组',   key_personnel:false },
-    { id:'028212', name:'张轩霖', base_id:'Z1-CAN', division_id:'广州张露班组',   key_personnel:false },
-    { id:'028979', name:'余浩峰', base_id:'Z1-CAN', division_id:'广州黄子健班组', key_personnel:false },
-    { id:'028214', name:'王晶晶', base_id:'Z1-CAN', division_id:'广州李凯班组',   key_personnel:false },
-    { id:'026624', name:'张扬',   base_id:'Z1-CAN', division_id:'广州张露班组',   key_personnel:false },
-    { id:'026623', name:'苑弘毅', base_id:'Z1-CAN', division_id:'广州黄子健班组', key_personnel:false },
-    { id:'027966', name:'张洋1', base_id:'Z1-CAN', division_id:'广州张露班组',    key_personnel:false },
-    { id:'024022', name:'赵怡雨', base_id:'Z1-CAN', division_id:'广州李凯班组',   key_personnel:false },
-    { id:'027951', name:'赵雅琳', base_id:'Z1-CAN', division_id:'广州黄子健班组', key_personnel:false },
-    { id:'024176', name:'郑庆妮娜', base_id:'Z1-CAN', division_id:'广州李凯班组', key_personnel:false },
-    { id:'030714', name:'钟梅芝', base_id:'Z1-CAN', division_id:'广州张露班组',   key_personnel:false },
-    { id:'029891', name:'赵怡斐', base_id:'Z1-CAN', division_id:'广州黄子健班组', key_personnel:false },
-    { id:'026632', name:'朱希苑', base_id:'Z1-CAN', division_id:'广州李凯班组',   key_personnel:false },
-    { id:'028035', name:'周文婷', base_id:'Z1-CAN', division_id:'广州张露班组',   key_personnel:false },
-    { id:'027956', name:'周新茹', base_id:'Z1-CAN', division_id:'广州黄子健班组', key_personnel:false },
-    { id:'027945', name:'李雅雯', base_id:'Z1-CAN', division_id:'广州张露班组',   key_personnel:false },
-    { id:'028016', name:'周妍蓉', base_id:'Z1-CAN', division_id:'广州黄子健班组', key_personnel:false },
-    { id:'013178', name:'赫美汇', base_id:'Z1-CAN', division_id:'广州张露班组',   key_personnel:false },
-    { id:'017197', name:'于宝康', base_id:'Z1-CAN', division_id:'广州张露班组',   key_personnel:false },
-    { id:'023623', name:'李佳乐', base_id:'Z1-CAN', division_id:'广州李凯班组',   key_personnel:false },
-    { id:'015159', name:'覃文质', base_id:'Z1-CAN', division_id:'广州黄子健班组', key_personnel:false }
+    { id:'017199', name:'黄子健', base_id:'Z1-CAN', division_id:'{{BASE}}黄子健班组', key_personnel:false },
+    { id:'00753',  name:'李凯',   base_id:'Z1-CAN', division_id:'{{BASE}}李凯班组',   key_personnel:false },
+    { id:'016064', name:'李幸宗', base_id:'Z1-CAN', division_id:'{{BASE}}李凯班组',   key_personnel:false },
+    { id:'006485', name:'张桃',   base_id:'Z1-CAN', division_id:'{{BASE}}张露班组',   key_personnel:false },
+    { id:'007576', name:'薛军',   base_id:'Z1-CAN', division_id:'{{BASE}}黄子健班组', key_personnel:false },
+    { id:'016337', name:'许裕扬', base_id:'Z1-CAN', division_id:'{{BASE}}李凯班组',   key_personnel:false },
+    { id:'011538', name:'刘献波', base_id:'Z1-CAN', division_id:'{{BASE}}张露班组',   key_personnel:false },
+    { id:'005969', name:'张陆宇', base_id:'Z1-CAN', division_id:'{{BASE}}黄子健班组', key_personnel:false },
+    { id:'024395', name:'庞然',   base_id:'Z1-CAN', division_id:'{{BASE}}李凯班组',   key_personnel:false },
+    { id:'019916', name:'张奎宇', base_id:'Z1-CAN', division_id:'{{BASE}}张露班组',   key_personnel:false },
+    { id:'011623', name:'卢鑫',   base_id:'Z1-CAN', division_id:'{{BASE}}黄子健班组', key_personnel:false },
+    { id:'030695', name:'程琦淮', base_id:'Z1-CAN', division_id:'{{BASE}}张露班组',   key_personnel:false },
+    { id:'027957', name:'褚春娜', base_id:'Z1-CAN', division_id:'{{BASE}}黄子健班组', key_personnel:false },
+    { id:'031207', name:'黄恩豪', base_id:'Z1-CAN', division_id:'{{BASE}}张露班组',   key_personnel:false },
+    { id:'028199', name:'范力丹', base_id:'Z1-CAN', division_id:'{{BASE}}黄子健班组', key_personnel:false },
+    { id:'028980', name:'曹晨',   base_id:'Z1-CAN', division_id:'{{BASE}}李凯班组',   key_personnel:false },
+    { id:'028030', name:'方旋',   base_id:'Z1-CAN', division_id:'{{BASE}}张露班组',   key_personnel:false },
+    { id:'027959', name:'陈雨晴', base_id:'Z1-CAN', division_id:'{{BASE}}李凯班组',   key_personnel:false },
+    { id:'028150', name:'古欣冉', base_id:'Z1-CAN', division_id:'{{BASE}}张露班组',   key_personnel:false },
+    { id:'027030', name:'熊沁垚', base_id:'Z1-CAN', division_id:'{{BASE}}黄子健班组', key_personnel:false },
+    { id:'028215', name:'管李阳', base_id:'Z1-CAN', division_id:'{{BASE}}张露班组',   key_personnel:false },
+    { id:'020733', name:'黄艺蕾', base_id:'Z1-CAN', division_id:'{{BASE}}黄子健班组', key_personnel:false },
+    { id:'028015', name:'冯涵书', base_id:'Z1-CAN', division_id:'{{BASE}}李凯班组',   key_personnel:false },
+    { id:'030995', name:'黎晓亮', base_id:'Z1-CAN', division_id:'{{BASE}}张露班组',   key_personnel:false },
+    { id:'027031', name:'李思颖', base_id:'Z1-CAN', division_id:'{{BASE}}黄子健班组', key_personnel:false },
+    { id:'027039', name:'葛晓楠', base_id:'Z1-CAN', division_id:'{{BASE}}李凯班组',   key_personnel:false },
+    { id:'028981', name:'雷炜豪', base_id:'Z1-CAN', division_id:'{{BASE}}张露班组',   key_personnel:false },
+    { id:'027813', name:'黎鑫汝', base_id:'Z1-CAN', division_id:'{{BASE}}黄子健班组', key_personnel:false },
+    { id:'028989', name:'侯鑫淼', base_id:'Z1-CAN', division_id:'{{BASE}}李凯班组',   key_personnel:false },
+    { id:'027968', name:'李梦瑶1', base_id:'Z1-CAN', division_id:'{{BASE}}张露班组',  key_personnel:false },
+    { id:'028982', name:'李贝贝', base_id:'Z1-CAN', division_id:'{{BASE}}黄子健班组', key_personnel:false },
+    { id:'027947', name:'黄越',   base_id:'Z1-CAN', division_id:'{{BASE}}李凯班组',   key_personnel:false },
+    { id:'028971', name:'梁馨怡', base_id:'Z1-CAN', division_id:'{{BASE}}黄子健班组', key_personnel:false },
+    { id:'028218', name:'江欣',   base_id:'Z1-CAN', division_id:'{{BASE}}李凯班组',   key_personnel:false },
+    { id:'027035', name:'李宇晴', base_id:'Z1-CAN', division_id:'{{BASE}}张露班组',   key_personnel:false },
+    { id:'027952', name:'梁园',   base_id:'Z1-CAN', division_id:'{{BASE}}黄子健班组', key_personnel:false },
+    { id:'027043', name:'孔近如', base_id:'Z1-CAN', division_id:'{{BASE}}李凯班组',   key_personnel:false },
+    { id:'028020', name:'卢艺方', base_id:'Z1-CAN', division_id:'{{BASE}}张露班组',   key_personnel:false },
+    { id:'027958', name:'李静雯1', base_id:'Z1-CAN', division_id:'{{BASE}}李凯班组',  key_personnel:false },
+    { id:'027967', name:'骆诚',   base_id:'Z1-CAN', division_id:'{{BASE}}张露班组',   key_personnel:false },
+    { id:'018804', name:'吕梦琪', base_id:'Z1-CAN', division_id:'{{BASE}}黄子健班组', key_personnel:false },
+    { id:'027099', name:'李泽彬', base_id:'Z1-CAN', division_id:'{{BASE}}李凯班组',   key_personnel:false },
+    { id:'027964', name:'田佳鑫', base_id:'Z1-CAN', division_id:'{{BASE}}张露班组',   key_personnel:false },
+    { id:'027950', name:'齐元捷', base_id:'Z1-CAN', division_id:'{{BASE}}黄子健班组', key_personnel:false },
+    { id:'027049', name:'王鲁明', base_id:'Z1-CAN', division_id:'{{BASE}}张露班组',   key_personnel:false },
+    { id:'006700', name:'雷沁璇', base_id:'Z1-CAN', division_id:'{{BASE}}黄子健班组', key_personnel:false },
+    { id:'028966', name:'汪世强', base_id:'Z1-CAN', division_id:'{{BASE}}黄子健班组', key_personnel:false },
+    { id:'027949', name:'柳祥龙', base_id:'Z1-CAN', division_id:'{{BASE}}李凯班组',   key_personnel:false },
+    { id:'027953', name:'杨玉玲', base_id:'Z1-CAN', division_id:'{{BASE}}张露班组',   key_personnel:false },
+    { id:'017678', name:'邓书娟', base_id:'Z1-CAN', division_id:'{{BASE}}黄子健班组', key_personnel:false },
+    { id:'028973', name:'卢佳妮', base_id:'Z1-CAN', division_id:'{{BASE}}李凯班组',   key_personnel:false },
+    { id:'028026', name:'张俊强', base_id:'Z1-CAN', division_id:'{{BASE}}张露班组',   key_personnel:false },
+    { id:'028045', name:'罗俊',   base_id:'Z1-CAN', division_id:'{{BASE}}李凯班组',   key_personnel:false },
+    { id:'026631', name:'张萌1', base_id:'Z1-CAN', division_id:'{{BASE}}张露班组',    key_personnel:false },
+    { id:'026620', name:'王荣',   base_id:'Z1-CAN', division_id:'{{BASE}}黄子健班组', key_personnel:false },
+    { id:'026628', name:'王俊',   base_id:'Z1-CAN', division_id:'{{BASE}}李凯班组',   key_personnel:false },
+    { id:'024747', name:'张硕1', base_id:'Z1-CAN', division_id:'{{BASE}}张露班组',    key_personnel:false },
+    { id:'031060', name:'许文祺', base_id:'Z1-CAN', division_id:'{{BASE}}黄子健班组', key_personnel:false },
+    { id:'028975', name:'王晓璇', base_id:'Z1-CAN', division_id:'{{BASE}}李凯班组',   key_personnel:false },
+    { id:'027965', name:'张天乐', base_id:'Z1-CAN', division_id:'{{BASE}}张露班组',   key_personnel:false },
+    { id:'023831', name:'闫思源', base_id:'Z1-CAN', division_id:'{{BASE}}黄子健班组', key_personnel:false },
+    { id:'024318', name:'王雪',   base_id:'Z1-CAN', division_id:'{{BASE}}李凯班组',   key_personnel:false },
+    { id:'028212', name:'张轩霖', base_id:'Z1-CAN', division_id:'{{BASE}}张露班组',   key_personnel:false },
+    { id:'028979', name:'余浩峰', base_id:'Z1-CAN', division_id:'{{BASE}}黄子健班组', key_personnel:false },
+    { id:'028214', name:'王晶晶', base_id:'Z1-CAN', division_id:'{{BASE}}李凯班组',   key_personnel:false },
+    { id:'026624', name:'张扬',   base_id:'Z1-CAN', division_id:'{{BASE}}张露班组',   key_personnel:false },
+    { id:'026623', name:'苑弘毅', base_id:'Z1-CAN', division_id:'{{BASE}}黄子健班组', key_personnel:false },
+    { id:'027966', name:'张洋1', base_id:'Z1-CAN', division_id:'{{BASE}}张露班组',    key_personnel:false },
+    { id:'024022', name:'赵怡雨', base_id:'Z1-CAN', division_id:'{{BASE}}李凯班组',   key_personnel:false },
+    { id:'027951', name:'赵雅琳', base_id:'Z1-CAN', division_id:'{{BASE}}黄子健班组', key_personnel:false },
+    { id:'024176', name:'郑庆妮娜', base_id:'Z1-CAN', division_id:'{{BASE}}李凯班组', key_personnel:false },
+    { id:'030714', name:'钟梅芝', base_id:'Z1-CAN', division_id:'{{BASE}}张露班组',   key_personnel:false },
+    { id:'029891', name:'赵怡斐', base_id:'Z1-CAN', division_id:'{{BASE}}黄子健班组', key_personnel:false },
+    { id:'026632', name:'朱希苑', base_id:'Z1-CAN', division_id:'{{BASE}}李凯班组',   key_personnel:false },
+    { id:'028035', name:'周文婷', base_id:'Z1-CAN', division_id:'{{BASE}}张露班组',   key_personnel:false },
+    { id:'027956', name:'周新茹', base_id:'Z1-CAN', division_id:'{{BASE}}黄子健班组', key_personnel:false },
+    { id:'027945', name:'李雅雯', base_id:'Z1-CAN', division_id:'{{BASE}}张露班组',   key_personnel:false },
+    { id:'028016', name:'周妍蓉', base_id:'Z1-CAN', division_id:'{{BASE}}黄子健班组', key_personnel:false },
+    { id:'013178', name:'赫美汇', base_id:'Z1-CAN', division_id:'{{BASE}}张露班组',   key_personnel:false },
+    { id:'017197', name:'于宝康', base_id:'Z1-CAN', division_id:'{{BASE}}张露班组',   key_personnel:false },
+    { id:'023623', name:'李佳乐', base_id:'Z1-CAN', division_id:'{{BASE}}李凯班组',   key_personnel:false },
+    { id:'015159', name:'覃文质', base_id:'Z1-CAN', division_id:'{{BASE}}黄子健班组', key_personnel:false }
   ];
 
   function seedData() {
     // ==================== 结构元数据：保留（系统识别基地/维度/分队/航线必需）====================
     // 一级基地 + 分队
-    // 【精简版】仅保留 综一基地 + 广州 两级结构
+    // 【精简版】仅保留 综一基地 + {{BASE}} 两级结构
     const bases = [
       { id:'Z1',     name:'综一基地',  base_type:'secondary', iata:'SHA', lat:31.1979, lon:121.3360, parent_id:null },
-      { id:'Z1-CAN', name:'广州',      base_type:'outstation',iata:'CAN', lat:23.3924, lon:113.2988, parent_id:'Z1' }
+      { id:'Z1-CAN', name:'{{BASE}}',      base_type:'outstation',iata:'CAN', lat:23.3924, lon:113.2988, parent_id:'Z1' }
     ];
 
     // 7 大风险维度（二级分类）—— 结构元数据，保留
@@ -150,9 +150,9 @@
       { id:'RD07', name:'紧急情况', icon:'🚨', color:'var(--color-risk-high)',    is_core:true,  chapter:'应急处置' }
     ];
 
-    // 分队 → 【精简版】仅保留广州分队
+    // 分队 → 【精简版】仅保留{{BASE}}
     const divisions = [
-      { id:'Z1-CAN-D1', name:'广州分队', base_id:'Z1-CAN' }
+      { id:'Z1-CAN-D1', name:'{{BASE}}', base_id:'Z1-CAN' }
     ];
 
     // 班组（与分队 1:1 对应）
@@ -161,11 +161,11 @@
       leader: '', members: []
     }));
 
-    // 【广州分队定制版】航线数据：默认不内置示例航线（空），由用户在航线管理中手动添加多段航路
+    // 【{{BASE}}定制版】航线数据：默认不内置示例航线（空），由用户在航线管理中手动添加多段航路
     const routes = [];
 
-    // ==================== 业务数据：事件等为空池（用户通过Excel手动导入）；人员资料内置广州分队正式名单 ====================
-    const crew_profiles = utils.clone(GZ_CREW_SEED); // 【广州分队定制版】绩效文件导入的84人名单
+    // ==================== 业务数据：事件等为空池（用户通过Excel手动导入）；人员资料内置{{BASE}}正式名单 ====================
+    const crew_profiles = utils.clone(GZ_CREW_SEED); // 【{{BASE}}定制版】绩效文件导入的84人名单
     const scores = [];             // 风险评分
     const events = [];             // 历史事件
     const weathers = [];           // 天气缓存
@@ -321,7 +321,7 @@
         if (!db.report_tasks) db.report_tasks = {};
         if (!Array.isArray(db.briefing_log)) db.briefing_log = [];
         if (!Array.isArray(db.op_history)) db.op_history = [];
-        // 【广州分队定制版】空档案自动填充绩效文件导入的广州分队正式名单（84人）
+        // 【{{BASE}}定制版】空档案自动填充绩效文件导入的{{BASE}}正式名单（84人）
         if (!Array.isArray(db.crew_profiles) || db.crew_profiles.length === 0) {
           db.crew_profiles = utils.clone(GZ_CREW_SEED);
         }
@@ -329,7 +329,7 @@
         if (!Array.isArray(db.reject_pool))    db.reject_pool = [];    // 待复核导入数据池
         if (!Array.isArray(db.audit_logs))     db.audit_logs = [];     // 操作审计日志（放行/删除/复核动作）
         // =======================================
-        // 航线数据（广州分队定制版）：seed 不内置示例航线（空），由用户手动添加
+        // 航线数据（{{BASE}}定制版）：seed 不内置示例航线（空），由用户手动添加
         //  - 旧缓存（含示例航线）首次升级时一次性清空（gz_route_cleared 标记）
         //  - 之后不再强制刷新，避免清掉用户在航线管理中手动添加的航线
         if (!db.meta) db.meta = {};
@@ -366,7 +366,7 @@
 
   // 展开父级基地 ID 为包含所有子基地的列表
   // 【修复问题3.1】增加 HQ_BASE_CHILDREN 兜底映射，防止 bases 表 parent_id 缺失时展开失败导致不过滤（综一出现浦东事件根因）
-  // 【精简版】仅保留综一基地 → 广州 的展开映射
+  // 【精简版】仅保留综一基地 → {{BASE}} 的展开映射
   const HQ_BASE_CHILDREN = {
     'Z1': ['Z1-CAN']
   };
@@ -1415,7 +1415,7 @@
       arr_time: body.arr_time || '00:00',
       overnight: !!body.overnight,
       route_path: body.route_path || null,
-      // 【广州分队定制版】多段航路：途经点数组 [{code,lat,lon,name}]
+      // 【{{BASE}}定制版】多段航路：途经点数组 [{code,lat,lon,name}]
       waypoints: Array.isArray(body.waypoints) ? body.waypoints : (body.waypoints_text ? body.waypoints_text : null),
       arr_time_next_day: !!body.arr_time_next_day,
       created_at: utils.now()
@@ -1496,7 +1496,7 @@
     // 【tailtest发现bug修复】移除 HB-1/HB-2 条目：它们和合法基地ID VALID_BASE_IDS 重名。保留石一/石家庄X 等其他映射
     for (let i = 0; i < 2; i++) { SQUAD_TO_DIVISION['石'+(i+1)] = '石'+CN_NUMS[i]+'分队'; SQUAD_TO_DIVISION['石'+CN_NUMS[i]] = '石'+CN_NUMS[i]+'分队'; SQUAD_TO_DIVISION['石家庄'+CN_NUMS[i]] = '石'+CN_NUMS[i]+'分队'; }
     for (let i = 1; i <= 2; i++) { SQUAD_TO_DIVISION['兰州'+i] = '兰州'+i+'分队'; SQUAD_TO_DIVISION['兰'+i] = '兰州'+i+'分队'; }
-    const Z1_CITY = {宁波:'Z1-NBG',扬州:'Z1-YZH',南昌:'Z1-KHN',揭阳:'Z1-SWA',广州:'Z1-CAN',深圳:'Z1-SZX'};
+    const Z1_CITY = {宁波:'Z1-NBG',扬州:'Z1-YZH',南昌:'Z1-KHN',揭阳:'Z1-SWA','{BASE}':'Z1-CAN',深圳:'Z1-SZX'};
     const Z2_CITY = {沈阳:'Z2-SHE',西安:'Z2-XIY',大连:'Z2-DLC',成都:'Z2-CTU'};
     for (const city in Z1_CITY) SQUAD_TO_DIVISION[city] = city+'分队';
     for (const city in Z2_CITY) SQUAD_TO_DIVISION[city] = city+'分队';
@@ -1529,7 +1529,7 @@
     }
     ['石一分队','石二分队'].forEach((k,i)=>{ SQUAD_TO_DIVISION[k]=k; SQUAD_TO_DIV_ID[k] = 'HB-'+(i+1)+'-D1'; });
     ['兰州1分队','兰州2分队'].forEach((k,i)=>{ SQUAD_TO_DIVISION[k]=k; SQUAD_TO_DIV_ID[k] = 'LHW-'+(i+1)+'-D1'; });
-    ['宁波分队','扬州分队','南昌分队','揭阳分队','广州分队','深圳分队'].forEach(k=>{
+    ['宁波分队','扬州分队','南昌分队','揭阳分队','{{BASE}}','深圳分队'].forEach(k=>{
       SQUAD_TO_DIVISION[k]=k;
       // 反查 base_id→div_id
       for (const city in Z1_CITY) if (k === city+'分队') SQUAD_TO_DIV_ID[k] = Z1_CITY[city]+'-D1';
@@ -1562,13 +1562,13 @@
       '河北基地':'HB', '河北':'HB', '石家庄':'HB',
       '双照':'DUO',
       '宁波':'Z1-NBG', '扬州':'Z1-YZH', '南昌':'Z1-KHN',
-      '揭阳':'Z1-SWA', '广州':'Z1-CAN', '深圳':'Z1-SZX',
+      '揭阳':'Z1-SWA', '{{BASE}}':'Z1-CAN', '深圳':'Z1-SZX',
       '沈阳':'Z2-SHE', '西安':'Z2-XIY', '大连':'Z2-DLC', '成都':'Z2-CTU'
     };
     // 扩展：城市名+分队 形式（如"宁波分队"→Z1-NBG）
     const CN_SQUAD_FULL_MAP = {
       '宁波分队':'Z1-NBG','扬州分队':'Z1-YZH','南昌分队':'Z1-KHN',
-      '揭阳分队':'Z1-SWA','广州分队':'Z1-CAN','深圳分队':'Z1-SZX',
+      '揭阳分队':'Z1-SWA','{{BASE}}':'Z1-CAN','深圳分队':'Z1-SZX',
       '沈阳分队':'Z2-SHE','西安分队':'Z2-XIY','大连分队':'Z2-DLC','成都分队':'Z2-CTU',
       '兰州分队':'LHW','河北分队':'HB','石家庄分队':'HB','双照分队':'DUO',
       '虹桥分队':'SHA','浦东分队':'PVG','综一分队':'Z1','综二分队':'Z2'
@@ -1581,7 +1581,7 @@
         { prefix:'扬州', base:'Z1-YZH', div:'Z1-YZH-D1', name:'扬州分队' },
         { prefix:'南昌', base:'Z1-KHN', div:'Z1-KHN-D1', name:'南昌分队' },
         { prefix:'揭阳', base:'Z1-SWA', div:'Z1-SWA-D1', name:'揭阳分队' },
-        { prefix:'广州', base:'Z1-CAN', div:'Z1-CAN-D1', name:'广州分队' },
+        { prefix:'{{BASE}}', base:'Z1-CAN', div:'Z1-CAN-D1', name:'{{BASE}}' },
         { prefix:'深圳', base:'Z1-SZX', div:'Z1-SZX-D1', name:'深圳分队' },
         { prefix:'沈阳', base:'Z2-SHE', div:'Z2-SHE-D1', name:'沈阳分队' },
         { prefix:'西安', base:'Z2-XIY', div:'Z2-XIY-D1', name:'西安分队' },
@@ -3240,7 +3240,7 @@
     'Z1-YTY': { iata:'YTY', lat:32.3923, lon:119.5630, name:'扬州泰州',   isAirport:true },
     'Z1-KHN': { iata:'KHN', lat:28.8649, lon:115.8756, name:'南昌昌北',   isAirport:true },
     'Z1-SWA': { iata:'SWA', lat:23.5535, lon:116.5022, name:'揭阳潮汕',   isAirport:true },
-    'Z1-CAN': { iata:'CAN', lat:23.3924, lon:113.2988, name:'广州白云',   isAirport:true },
+    'Z1-CAN': { iata:'CAN', lat:23.3924, lon:113.2988, name:'{{BASE}}白云',   isAirport:true },
     'Z1-SZX': { iata:'SZX', lat:22.6394, lon:113.8108, name:'深圳宝安',   isAirport:true },
     'Z2-SHE': { iata:'SHE', lat:41.6398, lon:123.4836, name:'沈阳桃仙',   isAirport:true },
     'Z2-XIY': { iata:'XIY', lat:34.4471, lon:108.7517, name:'西安咸阳',   isAirport:true },
@@ -3266,7 +3266,7 @@
     'XMN':{lat:24.5440,lon:118.1274,name:'厦门'},
     'URC':{lat:43.9072,lon:87.4742,name:'乌鲁木齐'},
     'HRB':{lat:45.6234,lon:126.2503,name:'哈尔滨'},
-    'CAN':{lat:23.3924,lon:113.2988,name:'广州'},
+    'CAN':{lat:23.3924,lon:113.2988,name:'{{BASE}}'},
     'KUL':{lat:2.7456,lon:101.7099,name:'吉隆坡'},
     'PEN':{lat:5.2971,lon:100.2656,name:'槟城'},
     'HAN':{lat:21.2212,lon:105.8071,name:'河内'},
@@ -3303,7 +3303,7 @@
     'SZX': 'iata:SZX', 'NBG': 'iata:NGB', 'YZH': 'iata:YTY', 'KHN': 'iata:KHN',
     'SWA': 'iata:SWA', 'SHE': 'iata:SHE', 'XIY': 'iata:XIY', 'DLC': 'iata:DLC',
     'LHW': 'iata:LHW', 'HB': 'iata:SJW',
-    // 【修正14项】春秋航空实际 IATA 代码（WeatherAPI 推荐直接用 iata:XXX 格式，避免城市名拼写/编码/特殊字符问题）
+    // 【修正14项】{{AIRLINE}}实际 IATA 代码（WeatherAPI 推荐直接用 iata:XXX 格式，避免城市名拼写/编码/特殊字符问题）
     'SJW': 'iata:SJW',   // 石家庄正定国际机场（春秋河北基地）
     'YTY': 'iata:YTY'    // 扬州泰州国际机场（春秋扬州基地，IATA=YTY 非 YZH）
   };
@@ -3312,7 +3312,7 @@
   // 【修正14项】HB：石家庄市区 → 正定机场实址；新增 SJW / YTY / NBG / KHN / ... 完整 IATA 坐标
   // 【需求3/4修复】增加复合基地ID别名（Z1-CAN、Z2-SHE等），使台风判断+天气匹配都能命中
   const BASE_ALIAS_COORDS = {
-    'Z1-CAN': { iata: 'CAN', name: '广州' },
+    'Z1-CAN': { iata: 'CAN', name: '{{BASE}}' },
     'Z1-SZX': { iata: 'SZX', name: '深圳' },
     'Z1-NBG': { iata: 'NBG', name: '宁波' },
     'Z1-YZH': { iata: 'YTY', name: '扬州泰州' },   // 真实 IATA=YTY（YZH 是旧码）
@@ -3329,7 +3329,7 @@
   const _RAW_AIRPORT_COORDS = {
     'SHA': { lat: 31.1979, lon: 121.3360, name: '上海虹桥' },
     'PVG': { lat: 31.1443, lon: 121.8083, name: '上海浦东' },
-    'CAN': { lat: 23.3924, lon: 113.2988, name: '广州' },
+    'CAN': { lat: 23.3924, lon: 113.2988, name: '{{BASE}}' },
     'KUL': { lat: 2.7456,  lon: 101.7099, name: '吉隆坡' },
     'PEN': { lat: 5.2971,  lon: 100.2767, name: '槟城' },
     'HAN': { lat: 21.2212, lon: 105.8071, name: '河内' },
@@ -4165,7 +4165,7 @@
     'Z1-YZH':{ name: '扬州', lat: 32.3923, lon: 119.5630, city: '扬州' },
     'Z1-KHN':{ name: '南昌', lat: 28.8649, lon: 115.8756, city: '南昌' },
     'Z1-SWA':{ name: '揭阳', lat: 23.5535, lon: 116.5022, city: '揭阳' },
-    'Z1-CAN':{ name: '广州', lat: 23.3924, lon: 113.2988, city: '广州' },
+    'Z1-CAN':{ name: '{{BASE}}', lat: 23.3924, lon: 113.2988, city: '{{BASE}}' },
     'Z1-SZX':{ name: '深圳', lat: 22.6394, lon: 113.8108, city: '深圳' },
     'Z2':    { name: '综二', lat: 31.2304, lon: 121.4737, city: '上海' },
     'Z2-SHE':{ name: '沈阳', lat: 41.6398, lon: 123.4836, city: '沈阳' },
@@ -4196,7 +4196,7 @@
     'Z1-YZH-D1':{ name: '扬州分队', lat: 32.3923, lon: 119.5630, city: '扬州' },
     'Z1-KHN-D1':{ name: '南昌分队', lat: 28.8649, lon: 115.8756, city: '南昌' },
     'Z1-SWA-D1':{ name: '揭阳分队', lat: 23.5535, lon: 116.5022, city: '揭阳' },
-    'Z1-CAN-D1':{ name: '广州分队', lat: 23.3924, lon: 113.2988, city: '广州' },
+    'Z1-CAN-D1':{ name: '{{BASE}}', lat: 23.3924, lon: 113.2988, city: '{{BASE}}' },
     'Z1-SZX-D1':{ name: '深圳分队', lat: 22.6394, lon: 113.8108, city: '深圳' },
     'Z2-SHE-D1':{ name: '沈阳分队', lat: 41.6398, lon: 123.4836, city: '沈阳' },
     'Z2-XIY-D1':{ name: '西安分队', lat: 34.4471, lon: 108.7517, city: '西安' },
@@ -4257,7 +4257,7 @@
     'URC': '国内长航线，乌鲁木齐冬季严寒，需关注 OHCOS 寒冷天气操作程序',
     'HRB': '国内长航线，哈尔滨冬季严寒积雪，需加强防滑与客舱设备检查',
     'SZX': '国内短程航线，深圳流量管控较多，地面等待需关注旅客服务',
-    'CAN': '国内航线，广州夏季多雷雨，需重点关注颠簸防范与重新落地程序',
+    'CAN': '国内航线，{{BASE}}夏季多雷雨，需重点关注颠簸防范与重新落地程序',
     'SHA': '国内航线，上海虹桥繁忙机场，地面等待时间较长需关注客舱安全',
     'PVG': '国内航线，上海浦东国际枢纽，过站时间紧凑需加强协同配合'
   };
@@ -4433,9 +4433,9 @@
         return order[a.alert_level] - order[b.alert_level];
       });
 
-      // 生成风险维度文字摘要（如：广州💨11😴2）
+      // 生成风险维度文字摘要（如：{{BASE}}💨11😴2）
       const dimSummaryText = alertsArr.map(a => `${a.dimension_icon}${a.event_count}`).join('');
-      // 生成完整提醒文字（如：广州·穗-隆💨11😴2）
+      // 生成完整提醒文字（如：{{BASE}}·穗-隆💨11😴2）
       const alertText = `${baseName}·${route.route_path || route.dep + '-' + route.arr}${dimSummaryText}`;
 
       // 航线整体风险等级
@@ -4655,7 +4655,7 @@
   };
   const BASE_NAMES_V2 = {
     SHA:'虹桥', PVG:'浦东', 'Z1-NBG':'宁波', 'Z1-YZH':'扬州', 'Z1-KHN':'南昌',
-    'Z1-SWA':'揭阳', 'Z1-CAN':'广州', 'Z1-SZX':'深圳', 'Z2-SHE':'沈阳',
+    'Z1-SWA':'揭阳', 'Z1-CAN':'{{BASE}}', 'Z1-SZX':'深圳', 'Z2-SHE':'沈阳',
     'Z2-XIY':'西安', 'Z2-DLC':'大连', 'Z2-CTU':'成都', 'LHW':'兰州', 'LHW-1':'兰州1',
     'LHW-2':'兰州2', 'HB':'河北', 'HB-1':'石一', 'HB-2':'石二', DUO:'双照'
   };
@@ -6204,12 +6204,12 @@
           planned: 12,
           done: 9,
           pending: 3,
-          pending_list: ['证照到期复核（广州）', '锂电池专项检查（广州）', '复飞案例复盘（广州分队）'],
-          follow_up: ['广州/证照到期复核', '广州/锂电池专项', '广州分队/复飞案例复盘']
+          pending_list: ['证照到期复核（{{BASE}}）', '锂电池专项检查（{{BASE}}）', '复飞案例复盘（{{BASE}}）'],
+          follow_up: ['{{BASE}}/证照到期复核', '{{BASE}}/锂电池专项', '{{BASE}}/复飞案例复盘']
         },
         tomorrow_forecast: {
           base_id: 'Z1-CAN',
-          base_name: '广州',
+          base_name: '{{BASE}}',
           risk_type: top1?.dim || 'SOP偏离',
           measure: '航前SOP书面抽查+现场督导'
         }

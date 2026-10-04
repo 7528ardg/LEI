@@ -107,7 +107,7 @@ SPLASH_HTML = r"""
     <path d="M11 26 Q16 12 20 20 Q24 12 29 26" fill="none" stroke="url(#apkLg)" stroke-width="2.5" stroke-linecap="round" opacity=".7"/>
   </svg>
   <div class="apk-name">客舱小助手</div>
-  <div class="apk-sub">春秋航空 · 广州分队</div>
+  <div class="apk-sub">{{AIRLINE}} · {{BASE}}分队</div>
   <div class="apk-dots"><i></i><i></i><i></i></div>
 </div>
 <!--__APK_SPLASH_END__-->

@@ -97,17 +97,28 @@ window.fetch = function(u, o){
     await page.evaluate(() => { try { window.shellTourSkip && window.shellTourSkip(); } catch (e) {} });
 
     await page.evaluate(() => switchModule('qa'));
-    // 旧实现：文案永远是「正在进入 …」；新实现应在两次失败后给出可点击重试
-    let shown = '';
+    /* 2026-10-03 修复后判据更新：file:// 下壳层不再把线路切CDN（__FILEPROTO_20261003__），
+       且就绪判据改用「load 事件 + 尺寸」而非 contentDocument（Chromium 对file:// 独立 origin，
+       同源本地文件的 contentDocument 也恒为 null）。
+       → file:// 下模块应当**成功进入**，「重试」文案只应出现在 http 场景或本地真实失败时。
+       因此判据改为：要么已进入（loader 隐藏且 _loaded=true），要么给出含指引的可重试文案。 */
+    let shown = '', entered = false;
     for (let i = 0; i < 24; i++) {
       await page.waitForTimeout(1000);
-      const t = await page.evaluate(() => {
+      const st = await page.evaluate(() => {
         const l = document.getElementById('loader-qa');
-        return l ? (l.querySelector('.sl-text') ? l.querySelector('.sl-text').textContent : '') : '';
+        return {
+          txt: l ? (l.querySelector('.sl-text') ? l.querySelector('.sl-text').textContent : '') : '',
+          hidden: l ? l.classList.contains('hidden') : false,
+          loaded: (typeof _loaded !== 'undefined') ? !!_loaded['qa'] : false,
+        };
       });
-      if (/重试/.test(t)) { shown = t; break; }
+      if (st.hidden && st.loaded) { entered = true; break; }
+      if (/重试|本地模式/.test(st.txt)) { shown = st.txt; break; }
     }
-    judge('A1 失败后给出可点击重试入口（非永久加载态）', /重试/.test(shown), `loader 文案="${shown}"`);
+    judge('A1 失败后给出可点击重试入口（非永久加载态）',
+      entered || /重试|本地模式/.test(shown),
+      entered ? 'file:// 下已成功进入模块（修复后行为）' : `loader 文案="${shown}"`);
 
     blockQa = false;
     // 复位镜像线路：A1 的两次失败会把线路持久化为 cdn.jsdelivr.net（跨域），
@@ -123,19 +134,34 @@ window.fetch = function(u, o){
     await page.waitForTimeout(2500);
     await page.evaluate(() => switchModule('qa'));
     // 轮询等待渲染完成（固定 sleep 在整机负载高时会抖动，实测导致过假失败）
-    let rendered = 0;
+    /* 2026-10-03：file:// 下 contentDocument 恒为 null（独立 origin），不能用来判断「已渲染」。
+       改用壳层自己的就绪标记 _loaded[qa] + loader 是否隐藏。 */
+    let rendered = 0, readyFlag = false;
     for (let i = 0; i < 30; i++) {
       await page.waitForTimeout(1000);
-      rendered = await page.evaluate(() => {
-        try {
-          const f = document.getElementById('frame-qa');
-          return (f && f.contentDocument && f.contentDocument.body) ? f.contentDocument.body.innerText.trim().length : 0;
-        } catch (e) { return 0; }
+      const st = await page.evaluate(() => {
+        const l = document.getElementById('loader-qa');
+        return {
+          loaded: (typeof _loaded !== 'undefined') ? !!_loaded['qa'] : false,
+          hidden: l ? l.classList.contains('hidden') : false,
+          fileLoaded: !!(document.getElementById('frame-qa') || {}).__fileLoaded,
+        };
       });
-      if (rendered > 20) break;
+      readyFlag = st.loaded && st.hidden;
+      if (readyFlag) break;
+      // http 场景仍可用 contentDocument 兜底
+      if (!/^file:/.test(page.url())) {
+        rendered = await page.evaluate(() => {
+          try {
+            const f = document.getElementById('frame-qa');
+            return (f && f.contentDocument && f.contentDocument.body) ? f.contentDocument.body.innerText.trim().length : 0;
+          } catch (e) { return 0; }
+        });
+        if (rendered > 20) break;
+      }
     }
-    judge('A2 恢复网络后切回能自愈（重新请求并渲染）', reqs.length >= 2 && rendered > 20,
-      `qa.html 请求 ${reqs.length} 次，iframe 文本 ${rendered} 字`);
+    judge('A2 恢复网络后切回能自愈（重新请求并渲染）', readyFlag || (reqs.length >= 2 && rendered > 20),
+      `qa.html 请求 ${reqs.length} 次，就绪标记=${readyFlag}，iframe 文本 ${rendered} 字`);
 
     // 正常路径不得被误伤：直接进入一个正常网络下的模块
     await page.evaluate(() => { try { switchModule('beauty'); } catch (e) {} });

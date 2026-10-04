@@ -8,11 +8,11 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" data-page-node-id="p5edaBm2FLdUYHer1Gjxfx">
 <meta name="apple-mobile-web-app-title" content="客舱小助手" data-page-node-id="itkruqlUaLE0fxuiELjMFW">
 <meta name="mobile-web-app-capable" content="yes" data-page-node-id="WzjeQAXpN85ha75zTVwBwH">
-<meta name="application-name" content="春秋航空广州分队客舱小助手" data-page-node-id="VuNDtgiCs1CfpcHhu8kV7j">
-<meta name="description" content="春秋航空广州分队客舱小助手 - 你问我答·培训考核·绩效管理·美妆话术·医疗急救·风险预警·日常问题·手册奖惩·事件报告（快速拆分版）" data-page-node-id="1WCCikVLof57NinkU5g8ur">
+<meta name="application-name" content="{{AIRLINE}}{{BASE}}分队客舱小助手" data-page-node-id="VuNDtgiCs1CfpcHhu8kV7j">
+<meta name="description" content="{{AIRLINE}}{{BASE}}分队客舱小助手 - 你问我答·培训考核·绩效管理·美妆话术·医疗急救·风险预警·日常问题·手册奖惩·事件报告（快速拆分版）" data-page-node-id="1WCCikVLof57NinkU5g8ur">
 <meta name="format-detection" content="telephone=no" data-page-node-id="WqMPAoAzgtQAK7bIf7L3Rn">
 <meta http-equiv="X-UA-Compatible" content="IE=edge" data-page-node-id="vUVuyOeqgjJsgAaZqaKGKG">
-<title>春秋航空 · 广州分队客舱小助手</title>
+<title>{{AIRLINE}} · {{BASE}}分队客舱小助手</title>
 <style>
 :root{
   --font-sans:-apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei",sans-serif;
@@ -1623,10 +1623,14 @@ button:disabled:active{transform:none;}
 
 
 
+
+
+
+
 <div class="livery-stripe" data-page-node-id="mtousEj7ZN4Xi2uM9vjLkB"></div>
 
 <header class="topbar" data-page-node-id="nEnHIwBZCdN9arpgAxqVcb">
-  <!-- 2026-09-19 顶栏重排：应用户要求移除「春秋航空」logo 与文字，页签成为顶栏主体（品牌保留在登录页/启动封面） -->
+  <!-- 2026-09-19 顶栏重排：应用户要求移除「{{AIRLINE}}」logo 与文字，页签成为顶栏主体（品牌保留在登录页/启动封面） -->
 
   <nav class="shell-crumb" id="shellCrumb" aria-label="当前位置"><span class="cr-item cr-mod" id="crumbMod">你问我答</span><span class="cr-sep" id="crumbSep2" style="display:none">›</span><span class="cr-item cr-sub" id="crumbSub" style="display:none"></span></nav>
   <nav class="module-tabs" id="moduleTabs" data-page-node-id="BsxJNHUQnwWWkzX8mQ7PdA">
@@ -1829,6 +1833,15 @@ const APP_BASE_KEY = 'app_base_url';
    现只接受内置两档线路（同源 '' / 内置镜像），异常值一律忽略并清除。 */
 const APP_BASE_ALLOW = ['', APP_MIRROR_BASE];
 function getModBase(){
+  /* __FILEPROTO_20261003__ 本地模式强制同源：镜像线路仅在 https/http 下有意义。
+     实测污染链：线上 Pages 版（https://7528ardg.github.io/LEI/）的onLoadFail 会把
+     APP_MIRROR_BASE 写进 localStorage；用户随后双击打开本地 file:// 版读到同一个
+     app_base_url → iframe 指向 CDN → 跨域不可读 → 永久「加载失败」。
+     本地模式一律忽略并清除该键，切断污染跨协议流通。 */
+  if(_isFileProto()){
+    try{ if(localStorage.getItem(APP_BASE_KEY)) localStorage.removeItem(APP_BASE_KEY); }catch(e){}
+    return '';
+  }
   try{
     const b = localStorage.getItem(APP_BASE_KEY);
     if(b){
@@ -1844,6 +1857,13 @@ function getModBase(){
 }
 function setModBase(b){
   try{ localStorage.setItem(APP_BASE_KEY, b); }catch(e){}
+}
+/* __FILEPROTO_20261003__ 本地双击（file://）模式判定。
+   file:// 下所有 iframe 只能是本地相对路径，跨域镜像线路天然不可用；
+   若在本地模式切到 https 镜像，会把 contentDocument 变成跨域不可读 → 就绪判据恒失败，
+   且onLoadFail 的「切镜像自愈」会把系统锁进死循环。本函数用于全线禁用该动作。 */
+function _isFileProto(){
+  try{ return location.protocol === 'file:'; }catch(e){ return false; }
 }
 function modUrl(id){
   const base = getModBase();
@@ -1954,6 +1974,8 @@ function switchModule(id){
 
   currentMod = id;
   document.querySelectorAll('.mod-tab').forEach(b => b.classList.toggle('active', b.dataset.mod===id));
+  /* __TOURFIX_20261004__ 切换模块时兜底清掉教程残留高亮，避免旧高亮冒充选中态 */
+  document.querySelectorAll('.tour-target').forEach(function(e){ e.classList.remove('tour-target'); });
   if(typeof syncMTabbar === 'function') syncMTabbar();
   // 页签横向滚动时，把当前激活页签自动滚到可视区中部（手机/平板 9 个页签尤其需要）
   const _ab = document.querySelector('.mod-tab.active');
@@ -1974,23 +1996,47 @@ function switchModule(id){
       loader.__origText = _t0 ? _t0.textContent : '';
     }
     const frameReadyFlag = function(){
+      /* __FILEPROTO_20261003__ file:// 下 contentDocument **对同源本地文件也返回 null**
+         （Chromium 把每个 file:// 文档当作独立 origin，实测 contentWindow.location
+          抛 SecurityError、contentDocument===null，而网络层 qa.html 明明 RESP 200）。
+         因此本地模式不能用「读内容」判就绪，改用「load 事件已触发 + iframe 有实际尺寸」。
+         非本地模式维持原有内容判据（能读到正文/关键节点才算就绪）。 */
+      if(_isFileProto()){
+        // 导航错误页在部分浏览器不触发 load，故以「load 已触发」为主判据，尺寸为辅
+        if(frame.__fileLoaded) return true;
+        try{
+          const r = frame.getBoundingClientRect();
+          if(r.width > 0 && r.height > 0 && frame.contentWindow && frame.contentWindow.location !== undefined){
+            // contentWindow 可访问即说明文档已创建（即便 document 读不到）
+            return !!frame.__fileLoaded;
+          }
+        }catch(e){ /* 读不到就等load 事件 */ }
+        return false;
+      }
       try{
         const d = frame.contentDocument;
         if(!d || !d.body) return false;                       // 空文档 = 导航失败
         return d.body.innerText.trim().length > 20
           || !!d.querySelector('main,header,nav,.appbar,.main-scroll-container');
-      }catch(e){ return true; }                               // 跨域读不到就不阻断，放行更安全
+      }catch(e){
+        // 跨域（本地模式指向了 https 镜像）读不到 → 不阻断，放行更安全
+        return true;
+      }
     };
     if(loader) loader.classList.remove('hidden');
     // 加载保护：超时自动切换镜像线路，避免弱网下"一直等待"；双线路都失败则给出可点击重试
     let triedMirror = false;
     const doLoad = function(){
       if(frame._lt) clearTimeout(frame._lt);
+      /* __FILEPROTO_20261003__ 每次重新加载前清掉「已触发 load」标记，
+         否则重试时会用上一次的旧标记误判为就绪 */
+      frame.__fileLoaded = false;
       if(loader && loader.__origText != null){
         const t = loader.querySelector('.sl-text');
         if(t) t.textContent = loader.__origText;
       }
       frame.onload = function(){
+        frame.__fileLoaded = true;                             // 本地模式就绪判据用
         if(frame._lt) clearTimeout(frame._lt);
         if(!frameReadyFlag()){ onLoadFail(); return; }         // 误触发的 load（导航失败）走失败分支
         _loaded[id] = true;
@@ -2005,6 +2051,20 @@ function switchModule(id){
     const onLoadFail = function(){
       if(frame._lt) clearTimeout(frame._lt);
       _loaded[id] = false;                 // 关键：失败绝不置为已加载，切走再切回仍会重试
+      /* __FILEPROTO_20261003__ 本地模式（file://双击）禁切镜像线路。
+         镜像指向 https:// 会让 iframe 跨域 → contentDocument 恒null → 就绪判据恒 false
+         → 15s 超时 → 再切 → 再失败，永久卡「加载失败，点击此处重试」且重试无效（已实测）。
+         本地模式直接给出可操作出路（与 risk-lite.html 的 file:// 告警文案一致）。 */
+      if(_isFileProto()){
+        if(loader){
+          const t = loader.querySelector('.sl-text');
+          if(t) t.textContent = '本地模式加载失败 —— 请改用本地服务器打开（见「你问我答」页顶部提示），或双击 启动系统.bat';
+          loader.classList.remove('hidden');
+          loader.style.cursor = 'pointer';
+          loader.onclick = function(){ triedMirror = false; doLoad(); };
+        }
+        return;
+      }
       if(triedMirror){
         if(loader){
           const t = loader.querySelector('.sl-text');
@@ -2669,6 +2729,9 @@ var KEY_TUTORIAL = 'cabin_tutorial_seen';
 var USERS_MAGIC = 'cabin-users-v1';
 /* 管理员种子账号：只留哈希（明文不再出现在源码里）。固定盐 + 800 轮迭代。
    注意：本门禁是「本机 UX 级」而非服务端安全边界（纯前端可绕过），已在报告标注。 */
+var SEED_USER_002191 = { 工号:'002191', 姓名:'普通账号', 手机号:'',
+  盐:'a1b2c3d4e5f60718',
+  密码哈希:'1e5530d1abe3cf03c3a20ed3ec5a361043f431ff362e6f351033fa185293a95f' };
 var ADMIN = { 工号:'028981', 姓名:'管理员', 手机号:'', 盐:'c0ffee20260922admin', 密码哈希:'2d09bcb204a71cff2934f51db3972f4f268f90c0d6f63a8612d55ffb8972a702' };
 var SESSION_MS_SHORT = 12 * 3600 * 1000;      /* 不勾免登录：12 小时 */
 var SESSION_MS_WEEK  = 7 * 24 * 3600 * 1000;  /* 7 天免登录 */
@@ -2800,7 +2863,9 @@ function readUsers(){
     var d = JSON.parse(lsGet(KEY_USERS) || 'null');
     if(d && d.magic === USERS_MAGIC && Array.isArray(d.users)) return d.users;
   }catch(e){}
-  var users = [ADMIN];
+  /* 种子账号：管理员 + 内置普通账号。
+     已有设备走上方 if 分支，不会重置用户自建/改密后的账号。 */
+  var users = [ADMIN].concat([SEED_USER_002191]);
   lsSet(KEY_USERS, JSON.stringify({ magic: USERS_MAGIC, users: users }));
   return users;
 }
@@ -2886,7 +2951,7 @@ var css = [
 '.mod-tab:active,.bk-btn:active,.theme-btn:active{transform:scale(.96);}',
 '.logout-btn{margin-left:auto;padding:9px 14px;border:1px solid var(--danger,#E64A19);background:transparent;color:var(--danger,#E64A19);border-radius:12px;font-weight:700;font-size:.84rem;cursor:pointer;transition:all .2s;font-family:var(--font-sans);}',
 '.logout-btn:hover{background:var(--danger-soft,#FEE7DE);}',
-'.is-user .mod-tab[data-mod="risk"],.is-user .m-sheet-item[data-mod="risk"],.is-user [data-mod="risk"],.is-user [onclick*="switchModule(\'risk\')"]{display:none!important}',
+'.is-user .mod-tab[data-mod="risk"],.is-user .m-sheet-item[data-mod="risk"],.is-user [data-mod="risk"],.is-user [onclick*="switchModule(\'risk\')"],.is-user .mod-tab[data-mod="performance"],.is-user .m-tab[data-mod="performance"],.is-user .m-sheet-item[data-mod="performance"],.is-user [data-mod="performance"],.is-user [onclick*="switchModule(\'performance\')"],.is-user [onclick*="mGoMod(\'performance\')"],.is-user [onclick*="mGo(\'performance\')"]{display:none!important}',
 '@media(max-width:720px){.auth-card{padding:24px 20px 20px}.tour-card{padding:22px 18px 18px}}'
 ].join('\n');
 
@@ -2926,7 +2991,7 @@ function showAuth(){
   authOverlay.innerHTML =
     '<div class="auth-aurora"></div><div class="auth-aurora a2"></div>' +
     '<div class="auth-card" id="authCard">' +
-      '<div class="auth-logo"><div class="al-icon">✈️</div><div class="al-name">客舱小助手</div><div class="al-sub">春秋航空 · 广州分队一线工具融合平台</div></div>' +
+      '<div class="auth-logo"><div class="al-icon">✈️</div><div class="al-name">客舱小助手</div><div class="al-sub">{{AIRLINE}} · {{BASE}}分队一线工具融合平台</div></div>' +
       '<button class="auth-back" id="authBack" type="button" onclick="shellAuthSetMode(\'login\')">← 返回登录</button>' +
       '<div class="auth-tabs" id="authTabs"><button class="auth-tab on" data-m="login" onclick="shellAuthSetMode(\'login\')">登 录</button><button class="auth-tab" data-m="register" onclick="shellAuthSetMode(\'register\')">注 册</button></div>' +
       '<div id="authBody"></div>' +
@@ -3104,8 +3169,10 @@ function sessionRole(){
   return (s.role === 'admin' || s.工号 === ADMIN.工号) ? 'admin' : 'user';
 }
 window.shellIsAdmin = function(){ return sessionRole() === 'admin'; };
+/* 管理员专属板块：普通账号既看不到入口（CSS .is-user 隐藏），也进不去（此处门禁拦截） */
+var ADMIN_ONLY_MODS = ['risk', 'performance'];
 window.shellCanMod = function(id){
-  return !(String(id) === 'risk' && !window.shellIsAdmin());
+  return !(ADMIN_ONLY_MODS.indexOf(String(id)) >= 0 && !window.shellIsAdmin());
 };
 function applyPermUI(){
   var isAdmin = window.shellIsAdmin();
@@ -3115,7 +3182,8 @@ function applyPermUI(){
     var _origMod = window.switchModule;
     window.switchModule = function(id){
       if(window.shellCanMod && !window.shellCanMod(id)){
-        try{ if(typeof toast === 'function') toast('⚠️ 风险预警仅管理员可用'); }catch(e){}
+        var _mn = {risk:'风险预警', performance:'绩效管理'}[String(id)] || '该板块';
+        try{ if(typeof toast === 'function') toast('⚠️ ' + _mn + '仅管理员可用'); }catch(e){}
         console.warn('[权限] 非管理员访问受限板块被拦截:', id);
         return;
       }
@@ -3232,6 +3300,9 @@ window.shellTourSkip = function(){ finishTour(); };
 function finishTour(){
   stopCountdown();
   if(tourOverlay) tourOverlay.classList.remove('show');
+  /* __TOURFIX_20261004__ 教程收口必须清掉页签上的 tour-target（金色描边），
+     否则跳过/自动结束时会停在哪一步就永久高亮哪一步 */
+  try{ document.querySelectorAll('.tour-target').forEach(function(e){ e.classList.remove('tour-target'); }); }catch(e){}
   lsSet(KEY_TUTORIAL, '1');
   lsSet('spring_onb_done', '1');   // 覆盖旧版（quiz 模块）引导
   console.log('[教程] 新手教程已完成');

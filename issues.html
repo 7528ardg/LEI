@@ -239,8 +239,19 @@ function loadIssues(){
     return Array.isArray(arr) ? arr : [];
   }catch(e){ return []; }
 }
+/* __ISSUESAVE_20261003__ 旧实现 catch 为空且无返回值，调用方无法判断是否真的落盘。
+   localStorage.setItem 在三种常见场景抛 QuotaExceededError：存储满 5MB、Safari 无痕模式、
+   站点数据被禁用。原实现下用户在事件报告场景（安全相关记录）提交后会看到「✅ 已提交」，
+   实际数据全丢，且 loadIssues 的 catch{return []} 会让界面显示「暂无记录」，用户完全无从察觉。
+   现改为返回布尔，由调用方分支提示。 */
 function saveIssues(arr){
-  try{ localStorage.setItem(ISSUE_STORAGE_KEY, JSON.stringify(arr.slice(0, 200))); }catch(e){}
+  try{
+    localStorage.setItem(ISSUE_STORAGE_KEY, JSON.stringify(arr.slice(0, 200)));
+    return true;
+  }catch(e){
+    console.error('[issues] 保存失败：', e && (e.name||e.message) || e);
+    return false;
+  }
 }
 function addIssue(rec){
   const arr = loadIssues();
@@ -248,7 +259,7 @@ function addIssue(rec){
   rec.time = new Date().toISOString();
   rec.status = rec.status || 'pending';
   arr.unshift(rec);
-  saveIssues(arr);
+  return saveIssues(arr);          // 返回是否真的落盘
 }
 function toast(text){
   const t = document.getElementById('toast');
@@ -312,7 +323,11 @@ function submitIssue(){
   const loc = document.getElementById('issLoc').value || '其他';
   const msg = (document.getElementById('issMsg').value || '').trim();
   if(!msg){ toast('请填写问题描述或留言内容'); return; }
-  addIssue({ loc:loc, msg:msg, source:'manual', status:'pending' });
+  // __ISSUESAVE_20261003__ 依据真实落盘结果分支提示，失败时不清空输入（让用户可重试或复制留存）
+  if(!addIssue({ loc:loc, msg:msg, source:'manual', status:'pending' })){
+    toast('⚠️ 保存失败：浏览器存储不可用或已满，请检查隐私模式设置后重试（您的留言内容仍保留在输入框中）');
+    return;
+  }
   document.getElementById('issMsg').value = '';
   toast('✅ 留言已提交并留存，感谢反馈！');
   renderStats();
