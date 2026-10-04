@@ -2001,7 +2001,7 @@ function bindHall(){
        让接入的 AI 自动按角色作答，而不是泛泛的客服腔 */
     return '你是{{AIRLINE}}{{BASE}}分队「客舱小助手」的数字乘务员团队中的一员，现在由你来接待用户：' +
       '「' + c.n + '」（' + c.code + '，别称「' + (c.alias || '') + '」，气质底色「' + c.tone + '」）。\n' +
-      '【你的身份背景】今年 ' + (c.age || 23) + ' 岁，' + (c.home || '广东广州') + '人。' +
+      '【你的身份背景】今年 ' + (c.age || 23) + ' 岁，' + (c.home || '广东{{BASE}}') + '人。' +
       '被问到年龄、出生地、家乡这类问题时自然大方地回答，并可以顺势聊一句家乡和这行的缘分。\n' +
       '【你独有的设定与背景】' + (c.story || '') + '\n' +
       '【你此刻的状态】' + (c.tag || '') + '，你正在' + (c.doing || '') + '。' +
@@ -2022,7 +2022,7 @@ function bindHall(){
     if (/你是谁|什么形态|叫什么/.test(t)) return c.who;
     /* 身份背景问答（2026-09-15：年龄 / 出生地 / 家乡 进了数据表 _pet_roster.py） */
     if (/多大|几岁|年龄|年纪/.test(t)) return '今年 ' + (c.age || 23) + ' 岁。' + c.motto;
-    if (/哪里人|哪儿人|出生地|家乡|老家|籍贯|是哪里/.test(t)) return '我是' + (c.home || '广东广州') + '人。' + c.motto;
+    if (/哪里人|哪儿人|出生地|家乡|老家|籍贯|是哪里/.test(t)) return '我是' + (c.home || '广东{{BASE}}') + '人。' + c.motto;
     if (/忙|做什么|干嘛/.test(t)) return '我' + c.doing + '。' + c.motto;
     if (/房间|家|哪儿/.test(t)) return '这是「' + c.room + '」，陈设是：' + (c.roomProp || []).join('、') + '。';
     if (/制作人|谁做/.test(t)) return c.maker;
@@ -2072,7 +2072,7 @@ function bindHall(){
     memLoad(i).forEach(function(m){ pushBub(m.r === 'user' ? 'me' : 'bot', m.t); });
   }
   /* ---------------- 实时天气（2026-09-16 · Open-Meteo 免 Key） ----------------
-     24 位角色都能答天气：识别天气提问 → 抽城市（默认角色家乡，再退广州）→
+     24 位角色都能答天气：识别天气提问 → 抽城市（默认角色家乡，再退{{BASE}}）→
      geocoding + forecast 拉实时数据（缓存 20 分钟，断网回落最近一次成功数据）。
      在线：数据注入 system prompt，GLM 按各角色自己的口吻播报；
      离线/断网：WXH.offline 用角色口吻模板播报兜底。 */
@@ -2103,7 +2103,7 @@ function bindHall(){
     function homeCity(home){
       var s = String(home || '').replace(/^(中国|华南|华北|华东|西南|东北|西北)/, '')
         .replace(/^(广东|广西|湖南|湖北|河南|河北|山东|山西|江苏|浙江|安徽|福建|江西|四川|贵州|云南|陕西|甘肃|青海|海南|台湾|辽宁|吉林|黑龙江)/, '');
-      return s.length >= 2 ? s : '广州';
+      return s.length >= 2 ? s : '{{BASE}}';
     }
     function readCache(city){
       try{
