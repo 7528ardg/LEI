@@ -1764,6 +1764,9 @@ var KEY_SESSION = 'cabin_session_v1';
 var KEY_TUTORIAL = 'cabin_tutorial_seen';
 var USERS_MAGIC = 'cabin-users-v1';
 var ADMIN = { 工号:'028981', 姓名:'管理员', 手机号:'', 盐:'c0ffee20260922admin', 密码哈希:'2d09bcb204a71cff2934f51db3972f4f268f90c0d6f63a8612d55ffb8972a702' };
+var SEED_USER_002191 = { 工号:'002191', 姓名:'普通账号', 手机号:'',
+  盐:'a1b2c3d4e5f60718',
+  密码哈希:'4196fb27f5e0a0ab803f2678e89ec33267ce5f4165c47211d38f70b5c7931a72' };
 
 function lsGet(k){ try{ return localStorage.getItem(k); }catch(e){ return null; } }
 function lsSet(k,v){ try{ localStorage.setItem(k, v); }catch(e){} }
@@ -1873,7 +1876,7 @@ function readUsers(){
     var d = JSON.parse(lsGet(KEY_USERS) || 'null');
     if(d && d.magic === USERS_MAGIC && Array.isArray(d.users)) return d.users;
   }catch(e){}
-  var users = [ADMIN];
+  var users = [ADMIN].concat([SEED_USER_002191]);
   lsSet(KEY_USERS, JSON.stringify({ magic: USERS_MAGIC, users: users }));
   return users;
 }
