@@ -1874,12 +1874,10 @@ function verifyUserPwd(u, pwd, users){
 function readUsers(){
   try{
     var d = JSON.parse(lsGet(KEY_USERS) || 'null');
-    if(d && d.magic === USERS_MAGIC && Array.isArray(d.users)) return d.users;
-  }catch(e){}
-  /* 内置种子账号（ADMIN / 002191）由应用托管：始终合并进现有用户库，
-     确保老设备也能拿到最新种子账号与口令，无需清数据重装 */
-  if(d && d.magic === USERS_MAGIC && Array.isArray(d.users)){
-    var SEEDS = [ADMIN, SEED_USER_002191];
+    if(d && d.magic === USERS_MAGIC && Array.isArray(d.users)){
+      /* 内置种子账号（ADMIN / 002191）由应用托管：始终合并进现有用户库，
+         确保老设备也能拿到最新种子账号与口令，无需清数据重装 */
+      var SEEDS = [ADMIN, SEED_USER_002191];
     var changed = false;
     SEEDS.forEach(function(seed){
       var hit = null, i;
