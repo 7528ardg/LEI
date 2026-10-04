@@ -37,6 +37,13 @@ BUILD_STEPS = [
     (u'培训考核题库 = 原题库 + CBT练习独立分类(幂等)', u'python _apply_cbt_bank_20260918.py'),
     (u'注入CBT分区/CBT答题板块(幂等)', u'python _apply_cbt_scene_20260918.py'),
     (u'扩展成就系统(CBT题库,幂等)', u'python _apply_cbt_achv_20260918.py'),
+    # 2026-10-04：CBT 题库源去品牌（春秋航空 → {{AIRLINE}}）。
+    #   背景：去品牌化改造只改了 qa.html 产物，没改生成器输入 _cbt_work/categorized.json
+    #   → HEAD 上 _sync_qa_cbt --check 本就失败；任一次重建都会把 qa.html 的 CBT 块
+    #     回退成「春秋航空」。本步在 sync 之前把源归一，保证源与产物永久一致。
+    # 2026-10-05 移除：CBT题库源去品牌与链尾「品牌注入」互斥（源占位符 vs 产物品牌化
+    #   会让 cbt_bank/sync_qa_cbt 的 --check 永远失败）。统一为品牌版源：categorized.json
+    #   /_kb_cbt_new.js /quiz /qa 的 CBT 块全部含真实品牌，链尾 brandify 仅作兜底闸。
     (u'你问我答·接入CBT题库资源库(幂等)', u'python _sync_qa_cbt.py'),
     (u'你问我答·天气意图误吞手册问法修复', u'python _apply_qa_weather_guard_20260918.py'),
     (u'你问我答·跳转目标修复(CBT/大撤去对应板块,幂等)', u'python _apply_qa_jumpfix_20260919.py'),
@@ -100,6 +107,11 @@ BUILD_STEPS = [
     # 收尾再抽一次：_apply_ux_polish / landing 等最后几步也可能往模块里塞图，
     # 站点根目录的模块必须是「已外置」形态，否则一次 git add 就把 9MB 的 qa.html 推回去。
     (u'站点图集外置·产物收尾(幂等)', u'python _extract_inline_images_20260921.py'),
+    # 2026-10-05 接入：品牌注入必须是链的最后一步——链中段 _apply_cbt_debrand 会把源归一为
+    # {{AIRLINE}} 占位符（去品牌策略），若不在此处注入真实品牌，占位符会原样上线
+    # （2026-10-04 走查实测线上 800+ 处 {{AIRLINE}}/{{BASE}} 直接露给用户，P0 级）。
+    # 幂等：无占位符即跳过。{{DUTY_*}} 待真实号码确认后在 _brandify_20261005.py 的 BRAND_MAP 补上。
+    (u'品牌注入(占位符→真实品牌,幂等,必须最后)', u'python _brandify_20261005.py'),
 ]
 
 # M1-M3 逻辑验证套件（Node 先行、Python 收尾）
@@ -140,6 +152,17 @@ VERIFY_SCRIPTS = [
     u'node _verify_ccsheet_static.js',  # 十种弹窗交互引擎静态守护（index/两模板：CCSheet/动效层/--embed-bottom/深色打通/更多面板走引擎）
     u'node _verify_nav_20260917.js',  # 导航升级守护（三壳一致/12模块元数据/深跳桥/限高内滚+关闭三路径）
     u'python _apply_ux_polish.py --check',  # UX 美化标记块在位（14 个模块/模板）
+    # 2026-10-04：种子账号 002191 产物一致性守护。
+    #   事故根因：源码连修 5 轮，但壳层认证块唯一来源 _shell_enhance.js 未同步、产物从未重建
+    #   → 三个交付物缺 002191，用户实测登录失败。本项强制「源码四处 + 产物三处」同构，
+    #   且禁止残留错误哈希 4196fb27（曾误用 Node 二进制 digest 覆盖源码 hex 迭代算法）。
+    u'node _verify_seed002191_20261004.js',  # 002191 种子账号：源/产物一致性 + 哈希算法自洽（31 项）
+    # 2026-10-04：file:// 本地双击下模块加载可达性守护。
+    #   事故根因：预加载器 _startOnlinePrewarm 覆写 frame.onload，丢掉 __fileLoaded 标记
+    #   且抢先置 _loaded[id]=true → switchModule 走 else 分支后不再挂 onload
+    #   → 就绪判据恒 false → 非首屏模块全部永久停在「正在进入 XXX …」（实测 5 个模块全中）。
+    #   本项锁死：预加载开启 + 普通账号时，12 个板块逐个点击都必须真正进入（36 项）。
+    u'node _verify_modload_20261004.js',  # 模块加载可达性：预加载不覆写 onload / 全板块可进入（36 项）
     u'python _sync_cbt.py --check',         # CBT 练习场景数据 = docs/_cbt_kb.js 单一来源
     u'python _apply_cbt_bank_20260918.py --check',   # 培训考核题库 = 原题库 2181 + CBT练习 785（独立分类）
     u'python _apply_cbt_scene_20260918.py --check',  # 培训考核 CBT练习分区 + 大撤应急 CBT 答题板块
@@ -250,7 +273,16 @@ def syntax_check():
 
 def build_all():
     print(u'===== 构建链 =====')
+    # 2026-10-05：CBT 重建输入守卫——_cbt_work/（bank_orig.json 之外的 categorized.json 生成链
+    # 与 ccm_match.py 匹配引擎）属离线生成物且被 gitignore，换机/清理后缺失。
+    # 此时 quiz.html / qa.html 的 CBT 块已是成品态（785 题在库），跳过重建步骤即可，
+    # 不影响产物正确性；待 _cbt_work 输入恢复（ccm_match.py 归位）后自动恢复重建。
+    cbt_ready = os.path.exists(os.path.join(HERE, u'_cbt_work', u'ccm_match.py'))
+    CBT_STEPS = (u'_sync_qa_cbt', u'_apply_cbt_bank', u'_apply_cbt_scene', u'_apply_cbt_achv', u'_apply_cbt_debrand')
     for label, cmd in BUILD_STEPS:
+        if not cbt_ready and any(k in cmd for k in CBT_STEPS):
+            print(u'==> %s\n    [跳过] _cbt_work 输入缺失（ccm_match.py 不在），CBT 块维持成品态' % label)
+            continue
         run(cmd, label)
     for name in [u'spring-assistant.html', u'客舱小助手（离线完整版）.html', u'kb-admin.html']:
         p = os.path.join(HERE, name)

@@ -256,6 +256,17 @@ html[data-theme="dark"] .border-slate-200{ border-color:var(--border)!important;
 
 
 
+
+
+
+
+
+
+
+
+
+
+
 <div class="top">
   <div class="t-title"><span class="logo">🗂</span><span>事件报告 · 完整流程速查</span></div>
   <div class="search">
@@ -339,7 +350,7 @@ const EVENTS = [
       '按对应应急处置程序先处置并确保安全，同时按 3.6.5.1 上报：乘务员→乘务长→机长，紧急时可越级但事后告知乘务长。'
     ]},
     {ph:'🤝 交接·上报', items:[
-      '发生此类事件，<strong>乘务长填写《{{AIRLINE}}股份有限公司机上事件报告单》</strong>。',
+      '发生此类事件，<strong>乘务长填写《春秋航空股份有限公司机上事件报告单》</strong>。',
       '航班结束后，乘务长<strong>第一时间上报SQM</strong>并报告当日部门值班经理/公司值班手机，同时记录到<strong>“智慧客舱”</strong>。',
       '<strong>航后 24 小时内</strong>将《机上事件报告单》上交<strong>客舱服务部安全保卫质量处</strong>。'
     ]},
@@ -508,7 +519,7 @@ function renderReportForm(){
       '<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:8px">'+
         rpField('事件类型 *','<select id="rf-type" class="ri">'+typeOpts+'</select>')+
         rpField('航班号 *','<input id="rf-flight" class="ri" placeholder="如 9C8921">')+
-        rpField('航段','<input id="rf-sector" class="ri" placeholder="如 {{BASE}}-上海">')+
+        rpField('航段','<input id="rf-sector" class="ri" placeholder="如 南昌-上海">')+
         rpField('事件日期 *','<input id="rf-date" class="ri" type="date" value="'+today+'">')+
         rpField('事件时间','<input id="rf-time" class="ri" type="time">')+
         rpField('飞行阶段','<select id="rf-phase" class="ri"><option>巡航</option><option>起飞</option><option>下降/落地</option><option>地面/候机</option></select>')+

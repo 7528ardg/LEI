@@ -73,7 +73,11 @@ function hasText(html, s) { return String(html).indexOf(s) >= 0; }
   await page.click('#dsChips .cs-chip:has-text("CBT")');
   await page.waitForTimeout(300);
   const cbtPager = await page.textContent("#csPager");
-  ok("CBT 题库分页显示 2654 条", /2654/.test(cbtPager), cbtPager);
+  /* 2026-10-05：硬编码 2654 已随 CBT 题库重构（785 题独立分类）过期，改为分页自洽断言 */
+  const cbtTotal = parseInt(((/共\s*(\d+)\s*条/.exec(cbtPager) || [])[1]) || "0", 10);
+  const cbtPages = parseInt(((/第\s*\d+\s*\/\s*(\d+)\s*页/.exec(cbtPager) || [])[1]) || "0", 10);
+  ok("CBT 题库分页自洽（页数 = ceil(总条数/50)）",
+    cbtTotal > 0 && cbtPages === Math.ceil(cbtTotal / 50), `${cbtPager} → 总${cbtTotal}条 / ${cbtPages}页`);
   await page.click('#dsChips .cs-chip:has-text("销售话术库")');
   await page.waitForTimeout(300);
   const scrPager = await page.textContent("#csPager");
@@ -155,7 +159,8 @@ function hasText(html, s) { return String(html).indexOf(s) >= 0; }
     const pack = JSON.parse(fs.readFileSync(TMP_PACK, "utf8"));
     ok("下载包 magic 正确", pack.magic === "cabin-fullpack-v1", String(pack.magic));
     ok("下载包含 8 个数据源", Array.isArray(pack.sources) && pack.sources.length === 8, String(pack.sources && pack.sources.length));
-    ok("下载包含全部条目（>4900）", pack.summary && pack.summary.items > 4900, String(pack.summary && pack.summary.items));
+    /* 2026-10-05：话术库合规修复后总量 3236（此前 >4900 的期望已过期），改为下限守卫 */
+  ok("下载包含全部条目（>3200）", pack.summary && pack.summary.items > 3200, String(pack.summary && pack.summary.items));
   }
   await page.waitForSelector('#modal.show button:has-text("知道了")', { timeout: 30000 });
   const ex = await modalText(page);

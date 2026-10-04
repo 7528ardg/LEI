@@ -92,7 +92,8 @@ function sources() { return SRC_DEF.map(s => ({ id: s.id, name: s.name, kind: s.
 ok(SRC_DEF.every(s => Array.isArray(BASE[s.id]) && BASE[s.id].length > 0), '8 个数据源全部取到非空条目',
   SRC_DEF.map(s => s.id + ':' + (BASE[s.id] || []).length).join(' '));
 const TOTAL = SRC_DEF.reduce((a, s) => a + BASE[s.id].length, 0);
-ok(TOTAL > 4000, '数据总量覆盖全部话术与手册数据（' + TOTAL + ' 条）');
+/* 2026-10-05：话术库合规修复（删违禁承诺条目）后总量 3236，下限 4000→3000 */
+ok(TOTAL > 3000, '数据总量覆盖全部话术与手册数据（' + TOTAL + ' 条）');
 
 console.log('\n== 2. 导出：全量包自洽 ==');
 const pack = F.buildFullPack(sources(), { packId: 'full-test', exportedAt: '2026-09-21T00:00:00.000Z' });

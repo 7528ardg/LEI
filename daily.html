@@ -325,6 +325,17 @@ html[data-theme="dark"] .border-slate-200{ border-color:var(--border)!important;
 
 
 
+
+
+
+
+
+
+
+
+
+
+
 <div class="livery-stripe"></div>
 
 <header class="topbar">
@@ -368,7 +379,7 @@ html[data-theme="dark"] .border-slate-200{ border-color:var(--border)!important;
 "use strict";
 
 /* ================= 图片资源（构建时注入 base64） ================= */
-const IMG = {"m04z1": "assets/img/c2462a27.jpg", "m04z2": "assets/img/fe3c881b.jpg", "m04b1": "assets/img/f1f113ff.jpg", "m04g1": "assets/img/2e5fcf7b.jpg", "m04g2": "assets/img/62f74bdd.jpg", "m04j1": "assets/img/cff0709e.jpg", "m04x1": "assets/img/08aa2c79.jpg", "m05p1": "assets/img/b9b6c4da.jpg", "m05s1": "assets/img/26b6f815.jpg", "m05x1": "assets/img/0cfc1212.jpg", "m07k1": "assets/img/d68d0c34.jpg", "m07s1": "assets/img/4c3dca90.jpg", "m07s2": "assets/img/8405b0b4.jpg", "m07s3": "assets/img/8b610d53.jpg", "m08t1": "assets/img/28ab2af8.jpg", "m09h1": "assets/img/4943d51d.jpg"};
+const IMG = {"m04z1": "assets/img/c2462a27.jpg", "m04z2": "assets/img/fe3c881b.jpg", "m04b1": "assets/img/f1f113ff.jpg", "m04g1": "assets/img/2e5fcf7b.jpg", "m04g2": "assets/img/62f74bdd.jpg", "m04j1": "assets/img/cff0709e.jpg", "m04x1": "assets/img/08aa2c79.jpg", "m05p1": "assets/img/b9b6c4da.jpg", "m05s1": "assets/img/26b6f815.jpg", "m05x1": "assets/img/0cfc1212.jpg", "m07k1": "assets/img/d68d0c34.jpg", "m07s1": "assets/img/4c3dca90.jpg", "m07s2": "assets/img/8405b0b4.jpg", "m07s3": "assets/img/8b610d53.jpg", "m08t1": "assets/img/28ab2af8.jpg"};
 
 /* ================= 知识库数据 ================= */
 const CATS = [
@@ -398,7 +409,7 @@ const DATA = [
 {id:'s2',cat:'sales',hot:true,src:'4月OJT / 汇总',q:'转账有哪些要求？转账附言格式怎么写？',
  t:['转账','附言','账号','财务','错误'],
  a:`<ul>
-   <li>由<strong>乘务长</strong>或其指定乘务员进行转账，收款户名为<strong>{{AIRLINE}}股份有限公司</strong>。</li>
+   <li>由<strong>乘务长</strong>或其指定乘务员进行转账，收款户名为<strong>春秋航空股份有限公司</strong>。</li>
    <li>发现转账错误，<strong>立即联系销售组</strong>，协调财务处理。</li>
    <li>转账附言需写明<strong>日期 + 航班号 + 金额用途</strong>，示例：<code>3-28 9C8523 补10元</code>。</li>
    <li>转账同样须在降落后 <strong>24 小时内</strong>完成；金额不足或信息不完整扣转账人 2 分，经提醒仍未完成乘务长扣 5 分。</li>
@@ -592,7 +603,7 @@ const DATA = [
    <li><strong>提交时间·特殊情况</strong>：最晚在<strong>每月 30 日</strong>上交上月 26 日–本月 25 日的病假单。</li>
    <li><strong>逾期未交</strong>：扣日常管理分 <strong>10 分</strong>，并按<strong>旷工</strong>处理。</li>
    <li><strong>提交地点</strong>：<strong>虹桥准备室</strong>，或交至<strong>办公二楼客舱部综合处</strong>（现场）；外基地不方便时邮寄，地址见下。</li>
-   <li><strong>邮寄地址</strong>：上海市长宁区<strong>虹桥路 2599 号{{AIRLINE}}总部办公楼 2 楼（永融对面入口）</strong>；<strong>收件人</strong>：客舱服务部综合管理处（收）；<strong>联系电话</strong>：{{DUTY_LANDLINE}}。建议顺丰/挂号信并保留凭证，寄出后致电确认。综合行政专员于工作日收取，月初完成复核。</li>
+   <li><strong>邮寄地址</strong>：上海市长宁区<strong>虹桥路 2599 号春秋航空总部办公楼 2 楼（永融对面入口）</strong>；<strong>收件人</strong>：客舱服务部综合管理处（收）；<strong>联系电话</strong>：{{DUTY_LANDLINE}}。建议顺丰/挂号信并保留凭证，寄出后致电确认。综合行政专员于工作日收取，月初完成复核。</li>
    <li><strong>重要提醒</strong>：地址电话千万不要填错，因快递信息错误导致丢件的，自行承担责任。</li>
    <li>示例：11月6日的病假单，最晚需在 <strong>11月30日</strong> 提交。</li>
    </ul>`},
@@ -649,7 +660,7 @@ const DATA = [
  a:`<ul>
    <li><strong>跨境品暂不支持开具发票</strong>（属境外采购，目前只有税务证明）。</li>
    <li><strong>快递到家、飞亚达、卡西欧、纪念品、现货商品</strong>可开具<strong>增值税普通电子发票（普票）</strong>。</li>
-   <li>途径：「{{AIRLINE}}绿翼商城」公众号 → 机上订单 → 订单列表，登录订单预订人手机号自助开具（<strong>订单完成收货后</strong>才可申请）。</li>
+   <li>途径：「春秋航空绿翼商城」公众号 → 机上订单 → 订单列表，登录订单预订人手机号自助开具（<strong>订单完成收货后</strong>才可申请）。</li>
    </ul>`},
 
 /* ============ 📦 配送系统 / 机供品（常见问题解决20260814） ============ */
@@ -745,7 +756,7 @@ const DATA = [
  t:['补款','银行转账','账号','附言','中国银行','销售做错','补给公司','转错'],
  a:`通过<strong>银行转账</strong>方式，客舱现货销售的公司收款账号：
    <ul>
-   <li>开户行：<strong>中国银行</strong>；户名：<strong>{{AIRLINE}}股份有限公司</strong>；账号：<strong>4468 6792 3492</strong>。</li>
+   <li>开户行：<strong>中国银行</strong>；户名：<strong>春秋航空股份有限公司</strong>；账号：<strong>4468 6792 3492</strong>。</li>
    <li>转账必须填写<strong>附言</strong>，至少包括<strong>日期、航班号</strong>（详见「转账有哪些要求」条目）。</li>
    </ul>`},
 
@@ -844,7 +855,7 @@ const DATA = [
 /* ============ 🛎️ 售后服务（常见问题解决20260814） ============ */
 {id:'a1',cat:'after',hot:true,src:'常见问题解决20260814',q:'旅客售后问题（破损/退换货/订单信息错误/收货地址填错）找谁处理？',
  t:['售后','退换货','收货地址','绿翼商城','公众号','客服'],
- a:`在「<strong>{{AIRLINE}}绿翼商城</strong>」微信公众号上联系商城客服协助处理。
+ a:`在「<strong>春秋航空绿翼商城</strong>」微信公众号上联系商城客服协助处理。
    <ul>
    <li>示例（收货手机号填错）：公众号 → 在线服务 → 联系客服 → 提供填错的手机号查到订单 → 提供正确的收货人手机号、名字、地址，在线客服修改。</li>
    <li>如查询不到订单，需提供<strong>支付凭证详情截图</strong>（点开支付记录中的「更多」，显示「<strong>商家订单号</strong>」，截图给客服）。</li>
@@ -860,10 +871,10 @@ const DATA = [
    <div class="box warn">⚠️ 延迟发货存在最终无法发出的风险（海关挂单导致漏单退单等）。</div>`},
 {id:'a3',cat:'after',hot:false,src:'常见问题解决20260814',q:'微信扫码支付，旅客互相扫错了二维码（付了对方的商品）怎么处理？',
  t:['扫错码','退单','SMP工作证','订单编号','绿翼客服'],
- a:`第一时间提供「<strong>个人 SMP 工作证截图</strong>」及相关<strong>订单编号</strong>，关注「{{AIRLINE}}绿翼商城」公众号 → 在线服务 → 联系客服处理<strong>退单</strong>。`},
+ a:`第一时间提供「<strong>个人 SMP 工作证截图</strong>」及相关<strong>订单编号</strong>，关注「春秋航空绿翼商城」公众号 → 在线服务 → 联系客服处理<strong>退单</strong>。`},
 {id:'a4',cat:'after',hot:false,src:'常见问题解决20260814',q:'怎么协助旅客查询机上订单的物流信息？',
  t:['物流','查询','公众号','SMP截图','订单号'],
- a:`告知旅客关注「{{AIRLINE}}绿翼商城」公众号，右下角「<strong>机上订单</strong>」中用预订人手机号登录查询订单和物流。
+ a:`告知旅客关注「春秋航空绿翼商城」公众号，右下角「<strong>机上订单</strong>」中用预订人手机号登录查询订单和物流。
    <div class="box tip">💡 如乘务员代查，必须直接提供 <strong>SMP 截图 + 订单号</strong>人工速查（避免多个不同账号查同一单的重复工作）。</div>`},
 {id:'a5',cat:'after',hot:false,src:'常见问题解决20260814',q:'商品未收货前旅客不想要了想退货怎么办？',
  t:['退货','未收货','快递到家','跨境','客服'],
@@ -892,7 +903,7 @@ const DATA = [
 {id:'a9',cat:'after',hot:false,src:'常见问题解决20260814',q:'咨询绿翼商城客服有哪些方式？',
  t:['绿翼商城','客服','电话','公众号','工作时间'],
  a:`<ul>
-   <li>微信 →「{{AIRLINE}}绿翼商城」公众号 → 客服，留言等待回复。</li>
+   <li>微信 →「春秋航空绿翼商城」公众号 → 客服，留言等待回复。</li>
    <li>绿翼商城电话：<strong>{{DUTY_LANDLINE}}</strong>（工作日 09:00-20:00；周末及节假日 09:00-17:30）。</li>
    </ul>`},
 {id:'a10',cat:'after',hot:false,src:'常见问题解决20260814',q:'机上跨境商品和快递到家商品有问题（产品描述、无法下单等）找谁？',

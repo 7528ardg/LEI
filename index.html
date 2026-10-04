@@ -8,11 +8,11 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" data-page-node-id="p5edaBm2FLdUYHer1Gjxfx">
 <meta name="apple-mobile-web-app-title" content="客舱小助手" data-page-node-id="itkruqlUaLE0fxuiELjMFW">
 <meta name="mobile-web-app-capable" content="yes" data-page-node-id="WzjeQAXpN85ha75zTVwBwH">
-<meta name="application-name" content="{{AIRLINE}}{{BASE}}分队客舱小助手" data-page-node-id="VuNDtgiCs1CfpcHhu8kV7j">
-<meta name="description" content="{{AIRLINE}}{{BASE}}分队客舱小助手 - 你问我答·培训考核·绩效管理·美妆话术·医疗急救·风险预警·日常问题·手册奖惩·事件报告（快速拆分版）" data-page-node-id="1WCCikVLof57NinkU5g8ur">
+<meta name="application-name" content="春秋航空南昌分队客舱小助手" data-page-node-id="VuNDtgiCs1CfpcHhu8kV7j">
+<meta name="description" content="春秋航空南昌分队客舱小助手 - 你问我答·培训考核·绩效管理·美妆话术·医疗急救·风险预警·日常问题·手册奖惩·事件报告（快速拆分版）" data-page-node-id="1WCCikVLof57NinkU5g8ur">
 <meta name="format-detection" content="telephone=no" data-page-node-id="WqMPAoAzgtQAK7bIf7L3Rn">
 <meta http-equiv="X-UA-Compatible" content="IE=edge" data-page-node-id="vUVuyOeqgjJsgAaZqaKGKG">
-<title>{{AIRLINE}} · {{BASE}}分队客舱小助手</title>
+<title>春秋航空 · 南昌分队客舱小助手</title>
 <style>
 :root{
   --font-sans:-apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei",sans-serif;
@@ -1627,10 +1627,19 @@ button:disabled:active{transform:none;}
 
 
 
+
+
+
+
+
+
+
+
+
 <div class="livery-stripe" data-page-node-id="mtousEj7ZN4Xi2uM9vjLkB"></div>
 
 <header class="topbar" data-page-node-id="nEnHIwBZCdN9arpgAxqVcb">
-  <!-- 2026-09-19 顶栏重排：应用户要求移除「{{AIRLINE}}」logo 与文字，页签成为顶栏主体（品牌保留在登录页/启动封面） -->
+  <!-- 2026-09-19 顶栏重排：应用户要求移除「春秋航空」logo 与文字，页签成为顶栏主体（品牌保留在登录页/启动封面） -->
 
   <nav class="shell-crumb" id="shellCrumb" aria-label="当前位置"><span class="cr-item cr-mod" id="crumbMod">你问我答</span><span class="cr-sep" id="crumbSep2" style="display:none">›</span><span class="cr-item cr-sub" id="crumbSub" style="display:none"></span></nav>
   <nav class="module-tabs" id="moduleTabs" data-page-node-id="BsxJNHUQnwWWkzX8mQ7PdA">
@@ -2002,15 +2011,29 @@ function switchModule(id){
          因此本地模式不能用「读内容」判就绪，改用「load 事件已触发 + iframe 有实际尺寸」。
          非本地模式维持原有内容判据（能读到正文/关键节点才算就绪）。 */
       if(_isFileProto()){
-        // 导航错误页在部分浏览器不触发 load，故以「load 已触发」为主判据，尺寸为辅
+        /* __MODLOADFIX_20261004__ file:// 下 `frame.__fileLoaded` 是**单一可靠信号**，
+           但它只在 switchModule 自己挂的 frame.onload 里赋值 —— 而
+           `_startOnlinePrewarm()` 预加载时会 `f.onload = ...` **覆写掉它**，
+           预加载完成后 _loaded[id] 也被置 true，用户点击走 else 分支不再重挂 onload，
+           于是该标记永远为 false → 就绪判据恒 false → 15s 超时 → 卡片永久停在
+           「正在进入 XXX …」（实测 daily/manual/report/issues/medical 全中）。
+           现改为三重兜底，任一成立即视为就绪：
+             ① 显式 load 标记（正常路径）
+             ② load 事件已触发 (readyState) —— 预加载覆写 onload 时的补位信号
+             ③ 有实际渲染尺寸 + contentWindow 可访问 —— 最后防线
+           注意：file:// 下 contentDocument 恒为 null（Chromium 每个 file:// 文档
+           独立 origin），因此①-③都**不能**依赖「读内容」。 */
         if(frame.__fileLoaded) return true;
+        try{
+          if(frame.contentWindow && frame.contentWindow.document &&
+             frame.contentWindow.document.readyState === 'complete') return true;
+        }catch(e){ /* 跨源读不到 doc 时静默降级到尺寸判据 */ }
         try{
           const r = frame.getBoundingClientRect();
           if(r.width > 0 && r.height > 0 && frame.contentWindow && frame.contentWindow.location !== undefined){
-            // contentWindow 可访问即说明文档已创建（即便 document 读不到）
-            return !!frame.__fileLoaded;
+            return true;
           }
-        }catch(e){ /* 读不到就等load 事件 */ }
+        }catch(e){ /* 读不到就等 load 事件 */ }
         return false;
       }
       try{
@@ -2133,6 +2156,14 @@ window.addEventListener('offline', function(){ _pwAborted = true; });
 function _startOnlinePrewarm(){
   if(_pwOnlineStarted) return;
   _pwOnlineStarted = true;
+  /* __MODLOADFIX_20261004__ file:// 下**禁用后台预取**。
+     原因：预取里 `f.onload = function(){ _loaded[id]=true; ... }` 会覆写
+     switchModule 的 onload（丢 __fileLoaded 标记）。而预取一旦把 _loaded[id]
+     置 true，用户点击该模块时 switchModule 走 else 分支、不再设 src/重挂 onload，
+     就绪判据永远拿不到信号 → 永久停在「正在进入 XXX …」（实测 5 个模块全中）。
+     本地双击场景下模块 HTML 都是本地文件、无网络收益，预取代价远大于收益，
+     直接跳过最稳（点击时按需加载，有 loading 与尺寸兜底）。 */
+  if(_isFileProto()) return;
   var env = _pwEnv();
   if(!env.allow) return;                               // 移动端/弱网：不预取，点击时再加载
   var ids = env.heavy
@@ -2147,11 +2178,21 @@ function _startOnlinePrewarm(){
       var f = document.getElementById('frame-'+id);
       if(!f) continue;
       var timer = setTimeout(next, 10000);   // 单模块 10s 未完成则跳过，避免阻塞队列
-      f.onload = function(){
-        clearTimeout(timer);
-        _loaded[id] = true;
-        setTimeout(next, 80);
-      };
+      /* __MODLOADFIX_20261004__ 预取只用 addEventListener 监听，绝不赋值 f.onload，
+         以免覆写 switchModule 挂的就绪回调（该回调负责 __fileLoaded 与 loader 隐藏）。
+         switchModule 若在建 frame 时用了 frame.onload，多次重新加载会累积监听器 ——
+         用 __ccOnloadHooked 去重，只挂一次。 */
+      if(!f.__ccOnloadHooked){
+        f.__ccOnloadHooked = true;
+        f.addEventListener('load', function(){
+          f.__fileLoaded = true;
+          _loaded[id] = true;                              // 预取完成：正式进入时可跳过加载
+          var ld = document.getElementById('loader-'+id);
+          if(ld){ ld.classList.add('hidden'); ld.onclick = null; ld.style.cursor = ''; }
+          clearTimeout(timer);
+          setTimeout(next, 80);
+        });
+      }
       try{ f.src = modUrl(id); }catch(e){ clearTimeout(timer); next(); }
       return;
     }
@@ -3004,7 +3045,7 @@ function showAuth(){
   authOverlay.innerHTML =
     '<div class="auth-aurora"></div><div class="auth-aurora a2"></div>' +
     '<div class="auth-card" id="authCard">' +
-      '<div class="auth-logo"><div class="al-icon">✈️</div><div class="al-name">客舱小助手</div><div class="al-sub">{{AIRLINE}} · {{BASE}}分队一线工具融合平台</div></div>' +
+      '<div class="auth-logo"><div class="al-icon">✈️</div><div class="al-name">客舱小助手</div><div class="al-sub">春秋航空 · 南昌分队一线工具融合平台</div></div>' +
       '<button class="auth-back" id="authBack" type="button" onclick="shellAuthSetMode(\'login\')">← 返回登录</button>' +
       '<div class="auth-tabs" id="authTabs"><button class="auth-tab on" data-m="login" onclick="shellAuthSetMode(\'login\')">登 录</button><button class="auth-tab" data-m="register" onclick="shellAuthSetMode(\'register\')">注 册</button></div>' +
       '<div id="authBody"></div>' +
@@ -3188,6 +3229,7 @@ window.shellCanMod = function(id){
   return !(ADMIN_ONLY_MODS.indexOf(String(id)) >= 0 && !window.shellIsAdmin());
 };
 function applyPermUI(){
+  window.__permInit = true;  /* __PERMFIX_20261004__ */
   var isAdmin = window.shellIsAdmin();
   try{ document.body.classList.toggle('is-user', !isAdmin); }catch(e){}
   if(!window.__permWrapped && typeof window.switchModule === 'function'){
@@ -3221,6 +3263,8 @@ window.shellLogout = function(){
   authMode = 'login';  /* 登出后复位为登录页（注册/找回后再登出不至于停留在注册页） */
   var pm = el('profileModal');
   if(pm) pm.classList.remove('show');
+  /* __PERMFIX_20261004__：登出后必须复位权限 UI，否则残留管理员视图（入口不隐藏、门禁不拦截） */
+  applyPermUI();
   showAuth();
   console.log('[账号] 已退出登录');
 };
@@ -3339,9 +3383,12 @@ function finishTour(){
 (function init(){
   // 覆盖旧版（quiz 模块）Onboarding 引导：嵌入模式下统一由壳层教程接管，不再单独弹窗
   lsSet('spring_onb_done', '1');
+  /* __PERMFIX_20261004__：权限 UI 必须【无条件】先应用一次——
+     未登录（游客）与会话过期同样按普通用户处理，否则 body 拿不到 .is-user 类、
+     switchModule 也不会被包装，管理员专属板块会暴露。 */
+  applyPermUI();
   if(readSession()){
     updateChip();
-    applyPermUI();
     maybeStartTour();
   } else {
     showAuth();

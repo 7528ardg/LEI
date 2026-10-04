@@ -1147,6 +1147,17 @@ html[data-theme="dark"] .border-slate-200{ border-color:var(--border)!important;
 
 
 
+
+
+
+
+
+
+
+
+
+
+
 <header class="kb-top">
   <div class="kb-logo"><span class="dot">库</span>知识库管理<small>手册数字化工作台</small></div>
   <div class="lib-chips" id="libChips"></div>
@@ -1435,7 +1446,7 @@ async function aiChatOnce(messages, modelOverride){
 }
 async function aiGenCandidate(diff){
   const text = (diff.title||'') + '\n' + (diff.text||'').slice(0, 900);
-  const sys = '你是{{AIRLINE}}客舱业务知识整理助手。严格根据给定手册内容生成一条完整知识问答，只输出一个 JSON 对象，不要任何解释或前后缀。格式：{"q":"问题","t":["标签"],"cat":"分类","a":"答案"}。要求：q 用乘务员口语自然提问；t 取 2-5 个短关键词；cat 沿用手册章节主题做分类；a 依据给定内容分条简明作答（一条一个要点，可用换行分条），严禁虚构手册中没有的内容。示例：{"q":"起飞后多久才可开始客舱服务？","t":["起飞后20分钟","客舱服务","安全带信号灯"],"cat":"客舱安全与旅客管理","a":"平飞或起飞后20分钟且安全带信号灯关闭后，使用机组协同准备会确定的联络方式与驾驶舱再次沟通天气和预知颠簸，随后方可开始客舱服务程序。如起飞后20分钟安全带灯仍未关闭，应主动内话联系飞行机组。"}';
+  const sys = '你是春秋航空客舱业务知识整理助手。严格根据给定手册内容生成一条完整知识问答，只输出一个 JSON 对象，不要任何解释或前后缀。格式：{"q":"问题","t":["标签"],"cat":"分类","a":"答案"}。要求：q 用乘务员口语自然提问；t 取 2-5 个短关键词；cat 沿用手册章节主题做分类；a 依据给定内容分条简明作答（一条一个要点，可用换行分条），严禁虚构手册中没有的内容。示例：{"q":"起飞后多久才可开始客舱服务？","t":["起飞后20分钟","客舱服务","安全带信号灯"],"cat":"客舱安全与旅客管理","a":"平飞或起飞后20分钟且安全带信号灯关闭后，使用机组协同准备会确定的联络方式与驾驶舱再次沟通天气和预知颠簸，随后方可开始客舱服务程序。如起飞后20分钟安全带灯仍未关闭，应主动内话联系飞行机组。"}';
   const user = '章节：' + diff.num + ' ' + diff.title + '\n手册内容：\n' + text;
   const raw = await aiChat([{ role:'system', content: sys }, { role:'user', content: user }]);
   const m = raw.match(/\{[\s\S]*\}/);

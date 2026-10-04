@@ -7,7 +7,7 @@
 <meta http-equiv="Cache-Control" content="no-store, no-cache, must-revalidate, max-age=0">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
-<title>{{AIRLINE}} · {{BASE}} · 风险预警（精简版）</title>
+<title>春秋航空 · 南昌 · 风险预警（精简版）</title>
 <link rel="icon" href="risk/favicon.svg" type="image/svg+xml">
 <script>
 // 系统版本号（每次更新递增）- 用于在UI上确认加载的是最新版本
@@ -1384,7 +1384,7 @@ html[data-theme="dark"] .risk-low{color:#5FE0A6!important;}
 
 <!-- 顶部栏 -->
 <div class="topbar">
-  <div class="logo"><div class="mark">春</div><span>{{BASE}} · 风险预警</span></div>
+  <div class="logo"><div class="mark">春</div><span>南昌 · 风险预警</span></div>
   <span id="appVersionBadge" title="系统构建时间: 2026-08-06 09:15" style="display:inline-block;margin-left:10px;padding:3px 10px;border-radius:100px;background:linear-gradient(135deg,#148453,#148453);color:#fff;font:600 11px/16px 'Inter',sans-serif;letter-spacing:0.3px;box-shadow:0 2px 8px rgba(20,132,83,0.25)">v2026.08.06-v3</span>
   <nav class="breadcrumb" id="breadcrumbNav">
     <a class="active" id="crumbLevel0" onclick="selectBase('','总部全景')">总部</a>
@@ -1470,9 +1470,9 @@ html[data-theme="dark"] .risk-low{color:#5FE0A6!important;}
   <!-- 左侧导航 -->
   <aside class="sidebar">
     <div class="nav-group org-group">
-      <div class="title">当前组织<span class="org-toggle" style="cursor:default;opacity:.45" title="{{BASE}}定制版 · 已精简组织层级">✔</span></div>
+      <div class="title">当前组织<span class="org-toggle" style="cursor:default;opacity:.45" title="南昌定制版 · 已精简组织层级">✔</span></div>
       <div class="org-items">
-      <div class="nav-item active" data-base-id="Z1-CAN"><span class="ico">✈️</span><span>{{BASE}}</span></div>
+      <div class="nav-item active" data-base-id="Z1-CAN"><span class="ico">✈️</span><span>南昌</span></div>
     </div>
     <div class="nav-group">
       <div class="title">风险维度</div>
@@ -1511,7 +1511,7 @@ html[data-theme="dark"] .risk-low{color:#5FE0A6!important;}
   <main class="main">
     <!-- 核心风险纲要 -->
     <div class="section-title">
-      <h2><span class="accent"></span>6 大核心风险·SOP偏离程序纲要 · {{BASE}}</h2>
+      <h2><span class="accent"></span>6 大核心风险·SOP偏离程序纲要 · 南昌</h2>
       <div class="meta">
         2026-07-29 07:00 更新 ·
         <span class="source-tag aviation"><span class="dot"></span>实时气象数据 · WeatherAPI + Open-Meteo · 缓存3小时</span>
@@ -1524,7 +1524,7 @@ html[data-theme="dark"] .risk-low{color:#5FE0A6!important;}
     <!-- 风险维度统计面板（一级基地选中时显示） -->
     <div class="dim-stats-panel" id="dimStatsPanel" style="display:none">
       <div class="head" style="flex-wrap:wrap;gap:8px">
-        <div class="title" style="flex:1;min-width:240px"><span class="accent" style="display:inline-block;width:4px;height:20px;background:var(--color-brand);border-radius:2px;vertical-align:middle;margin-right:8px"></span>六大核心风险·SOP偏离程序案例次数统计 · <span id="dimStatsBaseName">{{BASE}}</span></div>
+        <div class="title" style="flex:1;min-width:240px"><span class="accent" style="display:inline-block;width:4px;height:20px;background:var(--color-brand);border-radius:2px;vertical-align:middle;margin-right:8px"></span>六大核心风险·SOP偏离程序案例次数统计 · <span id="dimStatsBaseName">南昌</span></div>
         <div class="meta" style="font:var(--font-caption);color:var(--color-text-secondary);display:flex;gap:6px;flex-wrap:wrap;align-items:center">
           <span style="margin-right:4px">点击任意维度卡片查看案例详情 · 出港检查单已移至左侧"工具"区</span>
           <button onclick="openComplaintModal()" title="查看旅客投诉数据" style="padding:3px 10px;border-radius:var(--radius-sm);border:1px solid var(--color-warn-data);background:rgba(114,46,209,.1);color:var(--color-warn-data);cursor:pointer;font:var(--font-caption);font-weight:600">📝 旅客投诉</button>
@@ -1536,7 +1536,7 @@ html[data-theme="dark"] .risk-low{color:#5FE0A6!important;}
     <!-- 【功能合并】航线风险看板（Tab 切换：风险评分卡片 + 航线风险提醒列表） -->
     <div class="dim-stats-panel" id="routeAlertsPanel" data-section="riskCardsSection" style="display:none">
       <div class="head" style="flex-wrap:wrap;gap:8px">
-        <div class="title" style="flex:1;min-width:240px"><span class="accent" style="display:inline-block;width:4px;height:20px;background:var(--color-risk-critical);border-radius:2px;vertical-align:middle;margin-right:8px"></span><span id="routeAlertsTitle">🛫 航线风险看板</span> · <span id="routeAlertsBaseName">{{BASE}}</span></div>
+        <div class="title" style="flex:1;min-width:240px"><span class="accent" style="display:inline-block;width:4px;height:20px;background:var(--color-risk-critical);border-radius:2px;vertical-align:middle;margin-right:8px"></span><span id="routeAlertsTitle">🛫 航线风险看板</span> · <span id="routeAlertsBaseName">南昌</span></div>
         <div class="meta" style="display:flex;gap:0;border:1px solid var(--color-border);border-radius:var(--radius-sm);overflow:hidden">
           <button type="button" id="tabRiskScores" onclick="switchRouteRiskTab('scores')" style="padding:6px 14px;border:none;background:var(--color-brand);color:#fff;cursor:pointer;font:var(--font-body);font-weight:600">📋 风险评分</button>
           <button type="button" id="tabRouteAlerts" onclick="switchRouteRiskTab('alerts')" style="padding:6px 14px;border:none;background:var(--color-bg-elevated);color:var(--color-text-secondary);cursor:pointer;font:var(--font-body)">🚨 航线风险提醒</button>
@@ -1561,7 +1561,7 @@ html[data-theme="dark"] .risk-low{color:#5FE0A6!important;}
     <!-- 天气地图 -->
     <div class="map-section" id="mapSection">
       <div class="head">
-        <div class="title">🗺️ 天气地图 · <span id="mapTitleBase">{{BASE}}</span>关联航路</div>
+        <div class="title">🗺️ 天气地图 · <span id="mapTitleBase">南昌</span>关联航路</div>
         <div class="layer-toggle">
           <span class="layer-chip" data-layer="wind" onclick="toggleMapLayer(this,'wind')"><span class="dot" style="background:var(--color-brand)"></span>风场</span>
           <span class="layer-chip active" data-layer="typhoon" onclick="toggleMapLayer(this,'typhoon')"><span class="dot" style="background:#9B59B6"></span>台风</span>
@@ -1643,7 +1643,7 @@ html[data-theme="dark"] .risk-low{color:#5FE0A6!important;}
       </div>
       <!-- 航路详情面板（动态渲染） -->
       <div class="route-detail-panel" id="routeDetailPanel" data-section="routePanel">
-        <div style="font:var(--font-h3);color:var(--color-text-primary);margin-bottom:6px">🛫 <span id="routePanelTitle">{{BASE}}</span>关联航路详情</div>
+        <div style="font:var(--font-h3);color:var(--color-text-primary);margin-bottom:6px">🛫 <span id="routePanelTitle">南昌</span>关联航路详情</div>
         <div id="routeDetailList">加载中...</div>
         <div style="font:var(--font-caption);color:var(--color-text-secondary);margin-top:6px;padding-top:6px;border-top:1px dashed var(--color-border)" id="sigmetAnalysis">
           📌 <strong>SIGMET 影响分析</strong>：请选择基地后查看该基地出港航线的气象与颠簸情况。<br>⚠️ 中度颠簸时：暂停热饮服务、固定餐车、提前10分钟广播通知旅客系好安全带。<br>🔴 严重颠簸时：立即停止所有客舱服务、乘务员就近入座、通过内话确认驾驶舱意图。<br>📡 天气数据通过今日简报右侧的更新面板自动/手动刷新。
@@ -1670,7 +1670,7 @@ html[data-theme="dark"] .risk-low{color:#5FE0A6!important;}
         <button class="banner-close" onclick="document.getElementById('overnightWarningBanner').style.display='none'">×</button>
       </div>
       <div class="head">
-        <div class="title">🛫 航线管理 · <span id="routeToolbarBase">{{BASE}}</span></div>
+        <div class="title">🛫 航线管理 · <span id="routeToolbarBase">南昌</span></div>
         <div class="actions">
           <button class="btn-edit-mode" id="btnRoutePathMode" onclick="toggleRoutePathMode()" title="切换航路显示：单程（仅起降机场）/ 多程（含所有途经点）">🔀 多程显示</button>
           <button class="btn-edit-mode" id="btnEditMode" onclick="toggleEditMode()">✏️ 编辑模式</button>
@@ -1760,15 +1760,15 @@ html[data-theme="dark"] .risk-low{color:#5FE0A6!important;}
       <div class="crew-list" id="crewProfileList"></div>
     </div>
 
-    <!-- 【{{BASE}}定制版】人员资料管理（数据来源：绩效文件导入 · 全员84人） -->
+    <!-- 【南昌定制版】人员资料管理（数据来源：绩效文件导入 · 全员84人） -->
     <div class="crew-profile-panel" id="personnelMgmtPanel" style="display:none">
-      <div class="panel-title">📇 人员资料管理 <span style="font-size:11px;color:var(--color-text-secondary);font-weight:400">{{BASE}} · 数据来源：绩效文件导入</span></div>
+      <div class="panel-title">📇 人员资料管理 <span style="font-size:11px;color:var(--color-text-secondary);font-weight:400">南昌 · 数据来源：绩效文件导入</span></div>
       <div class="crew-toolbar" style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;padding:8px 0;border-bottom:1px solid var(--color-border);margin-bottom:10px">
         <input type="text" id="pmSearchInput" placeholder="🔍 按姓名 / 工号搜索..." oninput="renderPersonnelMgmt()" style="flex:1;min-width:180px;padding:6px 10px;border-radius:var(--radius-sm);border:1px solid var(--color-border);background:var(--color-bg-primary);color:var(--color-text-primary);font:var(--font-body)">
         <select id="pmTeamFilter" onchange="renderPersonnelMgmt()" style="min-width:140px;padding:6px 10px;border-radius:var(--radius-sm);border:1px solid var(--color-border);background:var(--color-bg-primary);color:var(--color-text-primary);font:var(--font-body)">
           <option value="">全部班组</option>
         </select>
-        <button class="btn-key-personnel active" style="cursor:default" title="当前显示">👤 {{BASE}} <span id="pmTotalBadge">84</span> 人</button>
+        <button class="btn-key-personnel active" style="cursor:default" title="当前显示">👤 南昌 <span id="pmTotalBadge">84</span> 人</button>
       </div>
       <div id="personnelMgmtList" class="crew-list">
         <div style="text-align:center;padding:24px;color:var(--color-text-secondary)">加载中...</div>
@@ -1942,6 +1942,27 @@ let _isLoggedIn=false;
 let _inactivityTimer=null;
 const SESSION_TIMEOUT=30*60*1000; // 30分钟
 
+/* ---------- 板块门禁：风险预警仅管理员可用（__PERMGATE_RISK_20261005__，与壳层 index.html 权限体系同源） ---------- */
+function __riskGateAdmin(){
+  try{
+    var s=JSON.parse(localStorage.getItem('cabin_session_v1')||'null');
+    return !!(s && (s.role==='admin' || s['工号']==='028981'));
+  }catch(e){ return false; }
+}
+function __riskGateShowDenied(){
+  try{
+    var ov=document.getElementById('loginOverlay');
+    if(ov){
+      ov.classList.remove('hidden');
+      ov.innerHTML='<div style="position:fixed;inset:0;display:flex;align-items:center;justify-content:center;background:#0f1c2e;z-index:99999">'
+        +'<div style="text-align:center;color:#fff;max-width:420px;padding:0 24px">'
+        +'<div style="font-size:56px;margin-bottom:16px">\uD83D\uDD12</div>'
+        +'<div style="font-size:20px;font-weight:700;margin-bottom:10px">该板块仅管理员可用</div>'
+        +'<div style="font-size:14px;opacity:.75;line-height:1.7">请使用管理员账号在「客舱小助手」登录后，从主界面进入风险预警。</div>'
+        +'</div></div>';
+    }
+  }catch(e){ console.warn('[gate] 遮罩渲染失败：',e.message); }
+}
 function resetInactivityTimer(){
   if(_inactivityTimer) clearTimeout(_inactivityTimer);
   _inactivityTimer=setTimeout(()=>{
@@ -1959,6 +1980,12 @@ async function handleLogin(){
   }
   try{
     const res=await CabinAPI.auth.login({account,password});
+    /* __PERMGATE_RISK_20261005__：登录成功后复核板块门禁——壳层会话非管理员一律拒绝（防止绕过壳层直接登录本板块） */
+    if(!__riskGateAdmin()){
+      errEl.textContent='该板块仅管理员可用';
+      document.getElementById('loginPassword').value='';
+      return;
+    }
     _isLoggedIn=true;
     document.getElementById('loginOverlay').classList.add('hidden');
     errEl.textContent='';
@@ -2110,7 +2137,7 @@ const STATE = {
   selectedRiskId: null, // 当前选中的 risk_id
   routeList: [],        // 航线列表
   editMode: false,      // 航线编辑模式
-  routePathMode: 'multi', // 【{{BASE}}定制版】航路显示：'simple'单程（仅起降）/ 'multi'多程（含途经点）
+  routePathMode: 'multi', // 【南昌定制版】航路显示：'simple'单程（仅起降）/ 'multi'多程（含途经点）
   trendRange: '30',     // 趋势图时间范围
   timeRange: 'this_month',  // 【第10项】全局时间维度：this_month/last_month/this_quarter/last_quarter/this_year/last_year/custom
   timeRangeCustom: { from: '', to: '' }, // 自定义时间范围
@@ -2292,7 +2319,7 @@ const BASE_NAMES = {
   '':'总部全景','SHA':'虹桥基地','PVG':'浦东基地',
   'SHA-D1':'虹一分队','SHA-D2':'虹二分队','SHA-D3':'虹三分队','SHA-D4':'虹四分队','SHA-D5':'虹五分队','SHA-D6':'虹六分队',
   'PVG-D1':'浦一分队','PVG-D2':'浦二分队','PVG-D3':'浦三分队','PVG-D4':'浦四分队','PVG-D5':'浦五分队','PVG-D6':'浦六分队',
-  'Z1':'综一','Z1-NBG':'宁波','Z1-YZH':'扬州','Z1-YTY':'扬州（泰州）','Z1-KHN':'南昌','Z1-SWA':'揭阳','Z1-CAN':'{{BASE}}','Z1-SZX':'深圳',
+  'Z1':'综一','Z1-NBG':'宁波','Z1-YZH':'扬州','Z1-YTY':'扬州（泰州）','Z1-KHN':'南昌','Z1-SWA':'揭阳','Z1-CAN':'南昌','Z1-SZX':'深圳',
   'Z2':'综二','Z2-SHE':'沈阳','Z2-XIY':'西安','Z2-DLC':'大连','Z2-CTU':'成都',
   'LHW':'兰州','LHW-1':'兰州1','LHW-2':'兰州2',
   'HB':'河北(石家庄正定)','HB-1':'石一(石家庄正定)','HB-2':'石二(石家庄正定)','DUO':'双照'
@@ -2301,7 +2328,7 @@ const BASE_NAMES = {
 /**
  * 【新增14项】春秋内部基地/分队ID → 实际出发机场（IATA + 坐标）统一映射
  * 数据来源：
- *   - SJW（石家庄正定国际机场）：百科{{AIRLINE}}石家庄基地 + 企查查石家庄营业部2014成立 + 春运新闻（三条独立证据）
+ *   - SJW（石家庄正定国际机场）：百科春秋航空石家庄基地 + 企查查石家庄营业部2014成立 + 春运新闻（三条独立证据）
  *   - YTY（扬州泰州国际机场）：百科扬州泰州机场 + 三字码查询（双证据，ZSYA=ICAO）
  *   - 其他：航空气象标准 IATA 机场数据
  * 注意：r.dep / r.arr 有时是基地ID（如 HB-1、Z1-YZH），不是 IATA，必须经此函数后才能用于：
@@ -2330,7 +2357,7 @@ const BASE_TO_AIRPORT = {
   'Z1-YTY': { iata:'YTY', lat:32.3923, lon:119.5630, name:'扬州泰州',   isAirport:true },  // 兼容正向 YTY
   'Z1-KHN': { iata:'KHN', lat:28.8649, lon:115.8756, name:'南昌昌北',   isAirport:true },
   'Z1-SWA': { iata:'SWA', lat:23.5535, lon:116.5022, name:'揭阳潮汕',   isAirport:true },
-  'Z1-CAN': { iata:'CAN', lat:23.3924, lon:113.2988, name:'{{BASE}}白云',   isAirport:true },
+  'Z1-CAN': { iata:'CAN', lat:23.3924, lon:113.2988, name:'南昌白云',   isAirport:true },
   'Z1-SZX': { iata:'SZX', lat:22.6394, lon:113.8108, name:'深圳宝安',   isAirport:true },
   // 综二（Z2）下属 4 个外站基地
   'Z2-SHE': { iata:'SHE', lat:41.6398, lon:123.4836, name:'沈阳桃仙',   isAirport:true },
@@ -2341,7 +2368,7 @@ const BASE_TO_AIRPORT = {
   'LHW':    { iata:'LHW', lat:36.5152, lon:103.6195, name:'兰州中川',   isAirport:true },
   'LHW-1':  { iata:'LHW', lat:36.5152, lon:103.6195, name:'兰州中川',   isAirport:true },
   'LHW-2':  { iata:'LHW', lat:36.5152, lon:103.6195, name:'兰州中川',   isAirport:true },
-  // 【修正14项】河北（{{AIRLINE}}石家庄基地）——正定国际机场，不是石家庄市区坐标！
+  // 【修正14项】河北（春秋航空石家庄基地）——正定国际机场，不是石家庄市区坐标！
   // 机场实际坐标 N38.2792° E114.7068°，位于石家庄市区东北约 30km
   'HB':     { iata:'SJW', lat:38.2792, lon:114.7068, name:'石家庄正定', isAirport:true },
   'HB-1':   { iata:'SJW', lat:38.2792, lon:114.7068, name:'石家庄正定', isAirport:true },
@@ -2378,8 +2405,8 @@ const LEVEL1_BASES = ['Z1']; // 【精简版】仅综一基地
 // ============ 总部全景分组配置（动态渲染 7 大一级基地的分队分组信息，避免硬编码 SHA/PVG 遗漏其他基地） ============
 // 每个一级基地配置：用于分组渲染分队占比表、风险聚焦表
 const HQ_BASE_GROUPS = [
-  { root: 'Z1', label: '{{BASE}}', shortLabel: '{{BASE}}', color: 'rgba(82,196,26,.04)', textColor: 'var(--color-risk-low)',
-    children: ['Z1-CAN'], displayName: '{{BASE}}' }
+  { root: 'Z1', label: '南昌', shortLabel: '南昌', color: 'rgba(82,196,26,.04)', textColor: 'var(--color-risk-low)',
+    children: ['Z1-CAN'], displayName: '南昌' }
 ];
 // 工具：将分队base_id映射到一级基地root和短标签
 function mapBaseIdToHQGroup(baseId) {
@@ -2772,19 +2799,24 @@ async function initDashboard(){
 
     // 2. 登录：如果已有 session（从登录页进入），跳过登录；否则自动登录
     if(!_isLoggedIn){
+      /* __PERMGATE_RISK_20261005__：原硬编码自动登录（含管理员明文凭据）与
+         无鉴权备用登录后门已删除。管理员身份由壳层会话（cabin_session_v1）提供，
+         且 DOMContentLoaded 门禁保证只有管理员会话才会走到这里。 */
       try{
-        const login=await CabinAPI.auth.login({account:'028981',password:'LWH'});
-        STATE.user=login.data?login.data.user||login.data:login;
-        _isLoggedIn=true;
-      }catch(loginErr){
-        console.warn('[init] 自动登录失败，尝试用户ID登录：',loginErr.message);
-        try{
-          const login2=await CabinAPI.auth.login({user_id:'dash-manager',user_name:'雷管理',base_id:'SHA'});
-          STATE.user=login2.data.user;
+        var _sh=null;
+        try{ _sh=JSON.parse(localStorage.getItem('cabin_session_v1')||'null'); }catch(_e){}
+        if(_sh && _sh['工号']){
+          STATE.user=STATE.user||{user_name:_sh['姓名']||'管理员',user_id:_sh['工号'],base_id:'Z1',role:'manager'};
           _isLoggedIn=true;
-          toast('已登录：'+STATE.user.user_name,'success');
+        }
+      }catch(_shErr){ console.warn('[init] 壳层会话读取失败：',_shErr.message); }
+      if(!_isLoggedIn){
+        try{
+          const login2=await CabinAPI.auth.login({user_id:'cabin-admin',user_name:'管理员',base_id:'Z1'});
+          STATE.user=login2.data?login2.data.user||login2.data:login2;
+          _isLoggedIn=true;
         }catch(loginErr2){
-          console.warn('[init] 备用登录也失败：',loginErr2.message);
+          console.warn('[init] 后端登录失败（离线模式）：',loginErr2.message);
           // 非阻塞：即使登录失败也继续加载（某些API可能不需要认证）
           STATE.user={user_name:'离线模式',user_id:'offline'};
           toast('离线模式运行（部分功能受限）','warn');
@@ -2811,7 +2843,7 @@ async function initDashboard(){
     // 2.7 加载全量事件列表到 STATE.events（供操作台时间筛选使用）
     await loadAllEventsToState();
 
-    // 3. 【{{BASE}}定制版】组织层级已精简，固定使用{{BASE}}基地（Z1-CAN），不再定位/切换其他基地
+    // 3. 【南昌定制版】组织层级已精简，固定使用南昌基地（Z1-CAN），不再定位/切换其他基地
     const GZ_FIX_BASE='Z1-CAN';
     try{ saveBaseToCache(GZ_FIX_BASE); }catch(e){} // 覆盖历史缓存的旧基地
     const cachedBase=GZ_FIX_BASE;
@@ -2918,14 +2950,14 @@ function showFirstTimeGuide(){
   overlay.innerHTML=`<div style="background:var(--color-bg-surface);border-radius:var(--radius-lg);width:90%;max-width:480px;padding:24px;box-shadow:var(--shadow-overlay);border:1px solid var(--color-border)">
     <div style="display:flex;align-items:center;gap:10px;margin-bottom:14px">
       <span style="font-size:32px">👋</span>
-      <div style="font:var(--font-h2);color:var(--color-text-primary);flex:1">欢迎使用 {{BASE}} · 风险预警（精简版）</div>
+      <div style="font:var(--font-h2);color:var(--color-text-primary);flex:1">欢迎使用 南昌 · 风险预警（精简版）</div>
       <button onclick="closeFirstTimeGuide()" style="background:none;border:none;color:var(--color-text-secondary);cursor:pointer;font-size:22px;line-height:1">×</button>
     </div>
     <div style="font:var(--font-body);color:var(--color-text-secondary);margin-bottom:16px;line-height:1.6">系统已为您加载默认总览数据。请按以下步骤快速开始：</div>
     <div style="display:flex;flex-direction:column;gap:10px;margin-bottom:18px">
       <div style="display:flex;align-items:flex-start;gap:10px;padding:10px;background:var(--color-bg-elevated);border-radius:var(--radius-sm);border-left:3px solid var(--color-brand)">
         <span style="font-size:18px">①</span>
-        <div style="flex:1"><div style="font:var(--font-body);font-weight:600;color:var(--color-text-primary)">当前组织</div><div style="font:var(--font-caption);color:var(--color-text-secondary)">本系统为{{BASE}}定制版，已固定使用「{{BASE}}」视图</div></div>
+        <div style="flex:1"><div style="font:var(--font-body);font-weight:600;color:var(--color-text-primary)">当前组织</div><div style="font:var(--font-caption);color:var(--color-text-secondary)">本系统为南昌定制版，已固定使用「南昌」视图</div></div>
       </div>
       <div style="display:flex;align-items:flex-start;gap:10px;padding:10px;background:var(--color-bg-elevated);border-radius:var(--radius-sm);border-left:3px solid var(--color-info)">
         <span style="font-size:18px">②</span>
@@ -3464,7 +3496,7 @@ function renderRouteTable(){
     return;
   }
   const editMode=STATE.editMode;
-  // 【{{BASE}}定制版】航路显示模式：单程（仅起降）/ 多程（含途经点）
+  // 【南昌定制版】航路显示模式：单程（仅起降）/ 多程（含途经点）
   const displayPath=(r)=> STATE.routePathMode==='multi' ? getRoutePathText(r) : getChineseRouteName(r);
   // 选择删除单元格
   const selCell=(r)=>`<td style="text-align:center"><input type="checkbox" class="route-sel" data-route-id="${r.id}" onchange="onRouteSelChange()" title="选择该航线"></td>`;
@@ -3566,7 +3598,7 @@ async function saveRouteEdit(routeId){
   inputs.forEach(inp=>{
     const field=inp.dataset.field;
     if(field==='waypoints'){
-      // 【{{BASE}}定制版】途经点文本 → 结构化数组
+      // 【南昌定制版】途经点文本 → 结构化数组
       const wps=parseWaypoints(inp.value);
       payload.waypoints=wps?wps:[];
       return;
@@ -3588,7 +3620,7 @@ async function saveRouteEdit(routeId){
   }
 }
 
-// 【{{BASE}}定制版】航路显示模式切换：单程（仅起降）/ 多程（含途经点）
+// 【南昌定制版】航路显示模式切换：单程（仅起降）/ 多程（含途经点）
 function toggleRoutePathMode(){
   STATE.routePathMode = STATE.routePathMode==='multi' ? 'simple' : 'multi';
   const btn=document.getElementById('btnRoutePathMode');
@@ -3600,7 +3632,7 @@ function toggleRoutePathMode(){
   toast(STATE.routePathMode==='multi' ? '已切换为多程显示（含途经点）' : '已切换为单程显示（仅起降）','info');
 }
 
-// ============ 【{{BASE}}定制版】批量删除 / 一键清空 / 多段航路编辑 ============
+// ============ 【南昌定制版】批量删除 / 一键清空 / 多段航路编辑 ============
 // 全选/取消全选
 function toggleRouteSelectAll(el){
   const checked=!!el.checked;
@@ -3963,9 +3995,9 @@ function updateBreadcrumb(baseId){
   // 重置所有层级
   [crumb1,crumb2,crumb3].forEach(el=>{ if(el){ el.classList.remove('active'); el.style.display='none'; el.textContent=''; el.onclick=null; } });
   [sep1,sep2,sep3].forEach(el=>{ if(el) el.style.display='none'; });
-  // 【{{BASE}}定制版】组织层级已精简，面包屑固定显示「{{BASE}}」单级
+  // 【南昌定制版】组织层级已精简，面包屑固定显示「南昌」单级
   crumb0.style.display='';
-  crumb0.textContent='{{BASE}}';
+  crumb0.textContent='南昌';
   crumb0.classList.add('active');
   crumb0.onclick=null;
 }
@@ -5045,7 +5077,7 @@ window.renderDimTopRankPanel = function renderDimTopRankPanel(divBd, baseBd, opt
         <div style="display:flex;align-items:center;gap:8px">
           <span style="font-size:18px">🏆</span>
           <div>
-            <div style="font:var(--font-h3);color:var(--color-text-primary);display:inline-block;font-weight:800">{{BASE}} · 六大核心风险 + 偏离程序 · 触发 Top3 排名</div>
+            <div style="font:var(--font-h3);color:var(--color-text-primary);display:inline-block;font-weight:800">南昌 · 六大核心风险 + 偏离程序 · 触发 Top3 排名</div>
             <div style="font-size:11px;color:var(--color-text-secondary);margin-top:2px;margin-left:2px">按【${_orgLabel}】维度聚合 · 7 大维度并行对比 · 数据同步操作台时间筛选</div>
           </div>
         </div>
@@ -6629,7 +6661,7 @@ window.renderBaseRiskThreeStage = function(divBd, baseBd, opts){
           <span style="font-size:16px;flex-shrink:0">🏆</span>
           <div style="min-width:0;flex:1">
             <div style="font:var(--font-h3);color:var(--color-text-primary);font-weight:700;display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${threeStageTitle}</div>
-            <div style="font:var(--font-caption);color:var(--color-text-secondary);margin-top:2px">① 通栏 7 维度总览 → ② {{BASE}}事件分类 / 分队占比 → ③ 差异化核心风险预警（按一级风险+具体二级问题类型）${scopeLabel?' · 数据范围：'+scopeLabel:''}</div>
+            <div style="font:var(--font-caption);color:var(--color-text-secondary);margin-top:2px">① 通栏 7 维度总览 → ② 南昌事件分类 / 分队占比 → ③ 差异化核心风险预警（按一级风险+具体二级问题类型）${scopeLabel?' · 数据范围：'+scopeLabel:''}</div>
           </div>
         </div>
       </div>
@@ -11531,18 +11563,18 @@ if (typeof window._rebindDimBaseModal !== 'function') window._rebindDimBaseModal
 // ============ 【需求1+2升级】通用【维度/基地】事件明细弹窗 END ============
 // ============ 第7项：辅助函数 END ============
 
-// ============ {{BASE}}：机场天气信息与可能影响（可手动添加/删除机场） ============
+// ============ 南昌：机场天气信息与可能影响（可手动添加/删除机场） ============
 let _weatherRefreshTimer=null;
 const WEATHER_REFRESH_INTERVAL=5*60*1000; // 5分钟自动刷新
 const GZ_AIRPORTS_KEY='gz_managed_airports_v1'; // localStorage 键：自定义机场列表
 
-// 默认机场（{{BASE}}基地）
+// 默认机场（南昌基地）
 function getDefaultAirports(){
   return [
-    {id:'Z1-CAN',name:'{{BASE}}',icao:'ZGGG',lat:23.39,lon:113.31,altCodes:['CAN']}
+    {id:'Z1-CAN',name:'南昌',icao:'ZGGG',lat:23.39,lon:113.31,altCodes:['CAN']}
   ];
 }
-// 读取机场列表（本地存储优先，空则回退默认{{BASE}}）
+// 读取机场列表（本地存储优先，空则回退默认南昌）
 function getManagedAirports(){
   try{
     const raw=localStorage.getItem(GZ_AIRPORTS_KEY);
@@ -11569,7 +11601,7 @@ function openAddAirportModal(){
     </div>
     <div class="body">
       <div class="field-row">
-        <div class="field"><label>机场名称</label><input id="apName" placeholder="如 {{BASE}}"></div>
+        <div class="field"><label>机场名称</label><input id="apName" placeholder="如 南昌"></div>
         <div class="field"><label>ICAO 代码</label><input id="apIcao" placeholder="如 ZGGG"></div>
       </div>
       <div class="field-row">
@@ -11615,7 +11647,7 @@ function submitAddAirport(){
   const wc=document.getElementById('baseAirportWeatherContent');
   if(wc) _renderBaseAirportWeather(wc);
 }
-// 删除机场（本地持久化；全部删除后自动回退默认{{BASE}}机场）
+// 删除机场（本地持久化；全部删除后自动回退默认南昌机场）
 function removeManagedAirport(icao){
   const list=getManagedAirports().slice();
   const idx=list.findIndex(a=>String(a.icao).toUpperCase()===String(icao).toUpperCase());
@@ -11640,8 +11672,8 @@ async function loadBaseAirportWeather(){
     weatherPanel.style.cssText='background:var(--color-bg-elevated);border-radius:var(--radius-sm);padding:12px;margin-top:16px;border:1px solid var(--color-border)';
     content.appendChild(weatherPanel);
   }
-  // 【{{BASE}}定制版】每次加载都刷新面板头部（标题 + 添加/刷新按钮），兼容已存在的旧面板
-  weatherPanel.innerHTML='<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;flex-wrap:wrap;gap:6px"><div style="font:var(--font-h3);color:var(--color-text-primary)">✈️ {{BASE}} · 机场天气信息与可能影响</div><div style="display:flex;gap:6px;align-items:center"><button onclick="openAddAirportModal()" title="添加机场" style="padding:3px 10px;border-radius:var(--radius-sm);border:1px solid rgba(82,196,26,.4);background:rgba(82,196,26,.1);color:#52C41A;cursor:pointer;font:var(--font-caption);font-weight:600">➕ 添加机场</button><button onclick="refreshBaseAirportWeather()" title="刷新天气数据" id="btnRefreshWeather" style="padding:3px 10px;border-radius:var(--radius-sm);border:1px solid var(--color-brand);background:rgba(20,132,83,.1);color:var(--color-brand);cursor:pointer;font:var(--font-caption);font-weight:600">🔄 刷新</button></div></div><div id="baseAirportWeatherContent" style="font:var(--font-caption);color:var(--color-text-secondary)">加载中...</div>';
+  // 【南昌定制版】每次加载都刷新面板头部（标题 + 添加/刷新按钮），兼容已存在的旧面板
+  weatherPanel.innerHTML='<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;flex-wrap:wrap;gap:6px"><div style="font:var(--font-h3);color:var(--color-text-primary)">✈️ 南昌 · 机场天气信息与可能影响</div><div style="display:flex;gap:6px;align-items:center"><button onclick="openAddAirportModal()" title="添加机场" style="padding:3px 10px;border-radius:var(--radius-sm);border:1px solid rgba(82,196,26,.4);background:rgba(82,196,26,.1);color:#52C41A;cursor:pointer;font:var(--font-caption);font-weight:600">➕ 添加机场</button><button onclick="refreshBaseAirportWeather()" title="刷新天气数据" id="btnRefreshWeather" style="padding:3px 10px;border-radius:var(--radius-sm);border:1px solid var(--color-brand);background:rgba(20,132,83,.1);color:var(--color-brand);cursor:pointer;font:var(--font-caption);font-weight:600">🔄 刷新</button></div></div><div id="baseAirportWeatherContent" style="font:var(--font-caption);color:var(--color-text-secondary)">加载中...</div>';
   const weatherContent=document.getElementById('baseAirportWeatherContent');
   if(!weatherContent) return;
   await _renderBaseAirportWeather(weatherContent);
@@ -11665,7 +11697,7 @@ async function refreshBaseAirportWeather(){
 
 async function _renderBaseAirportWeather(weatherContent){
   try{
-    // 【{{BASE}}定制版】机场列表：默认{{BASE}} + 用户手动添加（localStorage 持久化，可增删）
+    // 【南昌定制版】机场列表：默认南昌 + 用户手动添加（localStorage 持久化，可增删）
     const baseAirports=getManagedAirports();
 
     // 【需求2】时间筛选联动：把 STATE.filteredOverview 里的时间范围作为"气象观察期"标签显示
@@ -11815,7 +11847,7 @@ async function _renderBaseAirportWeather(weatherContent){
           'Z2-DLC':['DLC'], 'Z2-CTU':['CTU'], 'DUO':['XIY'],
           // 【台风影响机场分配修复】Z1（综一）≠ SHA（虹桥），Z2（综二）≠ PVG（浦东）
           //   - SHA / PVG 是独立基地（已在下方单独映射）
-          //   - Z1 应覆盖综一下属子基地机场：宁波(NBG)、扬州(YTY)、南昌(KHN)、揭阳(SWA)、{{BASE}}(CAN)、深圳(SZX)
+          //   - Z1 应覆盖综一下属子基地机场：宁波(NBG)、扬州(YTY)、南昌(KHN)、揭阳(SWA)、南昌(CAN)、深圳(SZX)
           //   - Z2 应覆盖综二下属子基地机场：沈阳(SHE)、西安(XIY)、大连(DLC)、成都(CTU)
           'Z1':['NBG','YTY','KHN','SWA','CAN','SZX'],
           'Z2':['SHE','XIY','DLC','CTU'],
@@ -12222,8 +12254,8 @@ function getChineseRouteName(r){
   return `${depCN} → ${arrCN}`;
 }
 
-// ============ 【{{BASE}}定制版】多段航路支持（单程/多程显示切换） ============
-// {{BASE}}基地下拉选项（仅保留 Z1-CAN，隐藏总部/综一/其他基地）
+// ============ 【南昌定制版】多段航路支持（单程/多程显示切换） ============
+// 南昌基地下拉选项（仅保留 Z1-CAN，隐藏总部/综一/其他基地）
 function getGzBaseOptionsHtml(selectedBase){
   if(BASE_NAMES['Z1-CAN']){
     return `<option value="Z1-CAN" ${selectedBase==='Z1-CAN'?'selected':''}>${BASE_NAMES['Z1-CAN']}</option>`;
@@ -12455,7 +12487,7 @@ async function loadBaseMultiDimProfile(baseId){
   }
 }
 
-// 保留{{BASE}}专属面板兼容（委托给通用函数）
+// 保留南昌专属面板兼容（委托给通用函数）
 
 // ============ 一级基地：展示各大安全风险的具体事件 ============
 async function loadBaseRiskEvents(baseId){
@@ -15298,7 +15330,7 @@ const BASE_COORDS_MAP={
   'Z1-YTY':{lat:32.3923,lon:119.5630,name:'扬州泰州',mapX:14,mapY:32},
   'Z1-KHN':{lat:28.8649,lon:115.8756,name:'南昌',mapX:10,mapY:62},
   'Z1-SWA':{lat:23.5535,lon:116.5022,name:'揭阳',mapX:18,mapY:78},
-  'Z1-CAN':{lat:23.3924,lon:113.2988,name:'{{BASE}}',mapX:8,mapY:80},
+  'Z1-CAN':{lat:23.3924,lon:113.2988,name:'南昌',mapX:8,mapY:80},
   'Z1-SZX':{lat:22.6394,lon:113.8108,name:'深圳',mapX:6,mapY:82},
   'Z2':{lat:31.2304,lon:121.4737,name:'综二',mapX:17,mapY:41},
   'Z2-SHE':{lat:41.6398,lon:123.4836,name:'沈阳',mapX:55,mapY:10},
@@ -15328,8 +15360,8 @@ const BASE_COORDS_MAP={
 };
 
 /* ============================================================================
- * 【新增】地理数据配置：20 条主要山脉影响范围 + {{AIRLINE}}主要航点坐标
- * 数据来源：中国主要山脉最高峰及海拔一览表（8264.com）+ {{AIRLINE}} 2025 运营数据公开披露
+ * 【新增】地理数据配置：20 条主要山脉影响范围 + 春秋航空主要航点坐标
+ * 数据来源：中国主要山脉最高峰及海拔一览表（8264.com）+ 春秋航空 2025 运营数据公开披露
  * 用途：天气地图航线分段颠簸指数的地理因子计算（双因子模型）
  * ========================================================================== */
 
@@ -15395,7 +15427,7 @@ const GEO_MOUNTAINS = [
 ];
 
 /**
- * {{AIRLINE}}主要航点坐标（用于地图连线，基地坐标已在 BASE_COORDS_MAP）
+ * 春秋航空主要航点坐标（用于地图连线，基地坐标已在 BASE_COORDS_MAP）
  * 含：商务核心线 + 春秋独飞小众航点
  */
 const DEST_LATLON = (() => {
@@ -15437,7 +15469,7 @@ const DEST_LATLON = (() => {
     LHW: { lat:36.5152, lon:103.6195, name:'兰州中川' },
     XIY: { lat:34.4471, lon:108.7517, name:'西安咸阳' },
     CTU: { lat:30.5785, lon:103.9471, name:'成都双流' },
-    CAN: { lat:23.3924, lon:113.2988, name:'{{BASE}}白云' },
+    CAN: { lat:23.3924, lon:113.2988, name:'南昌白云' },
     SZX: { lat:22.6394, lon:113.8108, name:'深圳宝安' },
     SHA: { lat:31.1979, lon:121.3360, name:'上海虹桥' },
     PVG: { lat:31.1443, lon:121.8083, name:'上海浦东' },
@@ -15936,14 +15968,14 @@ function renderMapOnLeaflet(baseId){
     const destName=(dest.iata?dest.iata+' ':'')+dest.name;
     // 【修正15项】动态分段：将航线等分为 20 段（原 5 段不足），逐段真实计算「天气 + 地理山脉」双因子
     //   双因子模型（ICAO 8896 + FAA AC 00-45H）：T_final = 0.7·T_weather + 0.3·G_geo
-    //   【{{BASE}}定制版】支持多段航路：origin → 途经点 → dest，每段独立 20 等分；并含原路返程（往返线）
+    //   【南昌定制版】支持多段航路：origin → 途经点 → dest，每段独立 20 等分；并含原路返程（往返线）
     const SEG_COUNT=20;
     const stopSeq=[origin];
     (r.waypoints||[]).forEach(w=>{
       if(w && w.lat!=null && w.lon!=null) stopSeq.push({lat:w.lat, lon:w.lon, name:w.name||w.code||'', iata:w.code||''});
     });
     stopSeq.push(dest);
-    // 原路返程（回{{BASE}}）—— 序列整体倒序追加（去掉重复的终点），构成「去程 + 返程」闭环
+    // 原路返程（回南昌）—— 序列整体倒序追加（去掉重复的终点），构成「去程 + 返程」闭环
     const backSeq=stopSeq.slice().reverse().slice(1);
     backSeq.forEach(p=>stopSeq.push(p));
     const segPoints=[];
@@ -16038,7 +16070,7 @@ function renderMapOnLeaflet(baseId){
       });
       STATE.mapRoutesLayer.addLayer(segPoly);
     }
-    // 【{{BASE}}定制版】途中点标记（Leaflet 小圆点）
+    // 【南昌定制版】途中点标记（Leaflet 小圆点）
     (r.waypoints||[]).forEach(w=>{
       if(!w||w.lat==null||w.lon==null) return;
       const wpDot=L.circleMarker([w.lat,w.lon],{radius:4,color:'#148453',fillColor:'#148453',fillOpacity:0.85,weight:1.5})
@@ -16563,10 +16595,10 @@ function populateSubBaseSelect(baseId){
     return;
   }
   bar.style.display='';
-  // 获取该一级基地的所有子基地（{{BASE}}定制版：仅保留{{BASE}} Z1-CAN）
+  // 获取该一级基地的所有子基地（南昌定制版：仅保留南昌 Z1-CAN）
   const subBases=[];
   if(baseId && (baseId==='Z1'||baseId==='Z1-CAN')){
-    if(BASE_NAMES['Z1-CAN']) subBases.push({id:'Z1-CAN', name:BASE_NAMES['Z1-CAN']||'{{BASE}}'});
+    if(BASE_NAMES['Z1-CAN']) subBases.push({id:'Z1-CAN', name:BASE_NAMES['Z1-CAN']||'南昌'});
   } else {
     Object.keys(BASE_NAMES).forEach(id=>{
       if(id.startsWith(baseId+'-') && id!==baseId){
@@ -16601,7 +16633,7 @@ function selectSubBase(subBaseId){
   populateMapRouteSelect();
 }
 
-// 【{{BASE}}定制版】div 画布模式：按点列绘制往返航路段（去程 + 原路返程）
+// 【南昌定制版】div 画布模式：按点列绘制往返航路段（去程 + 原路返程）
 function drawDivRouteSegments(canvas, routeId, pts, startDelay){
   if(!pts||pts.length<2) return;
   // 往返航线：去程 pts，返程 = 倒序（不含首尾重复）
@@ -16678,7 +16710,7 @@ function updateMapLocation(baseId){
     canvas.querySelectorAll('.dyn-route,.dyn-airport,.center-mark,.dyn-route-label,.dyn-route-flow').forEach(el=>el.remove());
     const mapTitle=document.getElementById('mapTitleBase');
     if(mapTitle) mapTitle.textContent='总部全景';
-    // 总部全景：渲染全部基地的全部航线（{{BASE}}定制版：仅显示{{BASE}}基地，且为往返线）
+    // 总部全景：渲染全部基地的全部航线（南昌定制版：仅显示南昌基地，且为往返线）
     const allRoutes=(STATE.routeList||[]).filter(r=>r.base_id==='Z1-CAN');
     const shownDestsHQ=new Set();
     const baseCenters={}; // 各基地中心点
@@ -16734,12 +16766,12 @@ function updateMapLocation(baseId){
   marker.setAttribute('data-code',coord.name+'基地');
   marker.setAttribute('title',coord.name+'基地 · 当前选中');
   canvas.appendChild(marker);
-  // 动态渲染当前基地的航线和目的地机场（仅显示当前选中基地的航线 · {{BASE}}定制为往返线）
+  // 动态渲染当前基地的航线和目的地机场（仅显示当前选中基地的航线 · 南昌定制为往返线）
   const baseRoutes=(STATE.routeList||[]).filter(r=>r.base_id===baseId);
   // 去重目的地（同一目的地只显示一个标记）
   const shownDests=new Set();
   baseRoutes.forEach((r,i)=>{
-    // 【{{BASE}}定制版】使用通用折线渲染：去程 + 原路返程（含途经点）
+    // 【南昌定制版】使用通用折线渲染：去程 + 原路返程（含途经点）
     const pts=getRouteMapPoints(r);
     if(!pts||pts.length<2) return;
     drawDivRouteSegments(canvas, r.id, pts, i*0.5);
@@ -16780,7 +16812,7 @@ function updateMapLocation(baseId){
 // 目的地坐标映射（完整版，覆盖所有航线目的地）
 const DEST_COORDS={
   'BKK':{x:75,y:55,name:'曼谷'},'CTU':{x:3,y:50,name:'成都'},'XMN':{x:12,y:62,name:'厦门'},
-  'URC':{x:5,y:20,name:'乌鲁木齐'},'HRB':{x:62,y:8,name:'哈尔滨'},'CAN':{x:8,y:80,name:'{{BASE}}'},
+  'URC':{x:5,y:20,name:'乌鲁木齐'},'HRB':{x:62,y:8,name:'哈尔滨'},'CAN':{x:8,y:80,name:'南昌'},
   'PVG':{x:20,y:38,name:'浦东'},'SHA':{x:15,y:40,name:'虹桥'},
   'KUL':{x:55,y:75,name:'吉隆坡'},'PEN':{x:48,y:72,name:'槟城'},'HAN':{x:35,y:48,name:'河内'},
   'SIN':{x:50,y:82,name:'新加坡'},'SZX':{x:6,y:82,name:'深圳'}
@@ -18507,7 +18539,12 @@ document.addEventListener('DOMContentLoaded',function(){
     });
   }
 
-  // 启动初始化
+  // 启动初始化（__PERMGATE_RISK_20261005__：板块门禁——仅管理员可用，非管理员显示无权限遮罩并终止初始化）
+  if(!__riskGateAdmin()){
+    __riskGateShowDenied();
+    console.warn('[gate] 非管理员会话，风险预警板块已锁定');
+    return;
+  }
   initLeafletMap(); // 初始化 Leaflet 全景实际地图
   initDashboard();
   // 【抽屉】初始若为收起状态则同步显示"展开因子溯源"标签，避免收起后无法展开
@@ -18536,8 +18573,10 @@ document.addEventListener('DOMContentLoaded',function(){
 
 
 // ============ 壳层单点登录：客舱小助手已登录则自动进入，跳过独立登录页 ============
+// __PERMGATE_RISK_20261005__：仅管理员会话自动进入；普通账号会话由板块门禁统一拦截（显示无权限遮罩）。
 document.addEventListener('DOMContentLoaded',function(){
   try{
+    if(!__riskGateAdmin()) return;
     var _sess=null;
     try{ _sess=JSON.parse(localStorage.getItem('cabin_session_v1')||'null'); }catch(e){}
     if(_sess && (_sess['工号']||_sess.account) && !_isLoggedIn){
@@ -18632,7 +18671,7 @@ function normalizeCrewData(rawCrew){
 // 从API加载乘务员数据
 async function loadCrewData(){
   try{
-    // 【{{BASE}}定制版】一次拉取全部（避免默认 page_size=50 截断名单）
+    // 【南昌定制版】一次拉取全部（避免默认 page_size=50 截断名单）
     const res=await CabinAPI.crew.list({ page_size: 200 });
     let rawData=res.data||res.data?.data||[];
     if(!rawData||rawData.length===0) throw new Error('API返回空数据');
@@ -18644,17 +18683,17 @@ async function loadCrewData(){
 }
 
 function getCrewData(){
-  // 【{{BASE}}定制版】优先 API 数据；API 为空时回退到绩效文件导入的正式名单（84人）
+  // 【南昌定制版】优先 API 数据；API 为空时回退到绩效文件导入的正式名单（84人）
   if(_crewData && Array.isArray(_crewData) && _crewData.length>0) return normalizeCrewData(_crewData);
   return normalizeCrewData(crewPersonnelAsCrewProfiles());
 }
 
-// ============ 【{{BASE}}定制版】人员资料管理（数据来源：绩效文件导入 · 全员84人） ============
+// ============ 【南昌定制版】人员资料管理（数据来源：绩效文件导入 · 全员84人） ============
 const GZ_PERSONNEL_KEY='gz_crew_personnel_v1';        // localStorage 键：人员资料（可编辑，覆盖内置名单）
 const GZ_LEADERS=['黄子健','李凯','庞然','张陆宇','卢鑫','张桃','许裕扬','薛军','李幸宗','张奎宇','刘献波','赫美汇','于宝康','李佳乐','覃文质']; // 乘务长/班组长名单（与绩效文件一致）
-// 内置名单：来自绩效文件（performance.html）「{{BASE}} 84 人」，工号/姓名已按最新资料修正
+// 内置名单：来自绩效文件（performance.html）「南昌 84 人」，工号/姓名已按最新资料修正
 const CREW_PERSONNEL_DATA=[
-{"工号":"017199","姓名":"黄子健","班组":"{{BASE}}黄子健班组"},{"工号":"00753","姓名":"李凯","班组":"{{BASE}}李凯班组"},{"工号":"016064","姓名":"李幸宗","班组":"{{BASE}}李凯班组"},{"工号":"006485","姓名":"张桃","班组":"{{BASE}}张露班组"},{"工号":"007576","姓名":"薛军","班组":"{{BASE}}黄子健班组"},{"工号":"016337","姓名":"许裕扬","班组":"{{BASE}}李凯班组"},{"工号":"011538","姓名":"刘献波","班组":"{{BASE}}张露班组"},{"工号":"005969","姓名":"张陆宇","班组":"{{BASE}}黄子健班组"},{"工号":"024395","姓名":"庞然","班组":"{{BASE}}李凯班组"},{"工号":"019916","姓名":"张奎宇","班组":"{{BASE}}张露班组"},{"工号":"011623","姓名":"卢鑫","班组":"{{BASE}}黄子健班组"},{"工号":"030695","姓名":"程琦淮","班组":"{{BASE}}张露班组"},{"工号":"027957","姓名":"褚春娜","班组":"{{BASE}}黄子健班组"},{"工号":"031207","姓名":"黄恩豪","班组":"{{BASE}}张露班组"},{"工号":"028199","姓名":"范力丹","班组":"{{BASE}}黄子健班组"},{"工号":"028980","姓名":"曹晨","班组":"{{BASE}}李凯班组"},{"工号":"028030","姓名":"方旋","班组":"{{BASE}}张露班组"},{"工号":"027959","姓名":"陈雨晴","班组":"{{BASE}}李凯班组"},{"工号":"028150","姓名":"古欣冉","班组":"{{BASE}}张露班组"},{"工号":"027030","姓名":"熊沁垚","班组":"{{BASE}}黄子健班组"},{"工号":"028215","姓名":"管李阳","班组":"{{BASE}}张露班组"},{"工号":"020733","姓名":"黄艺蕾","班组":"{{BASE}}黄子健班组"},{"工号":"028015","姓名":"冯涵书","班组":"{{BASE}}李凯班组"},{"工号":"030995","姓名":"黎晓亮","班组":"{{BASE}}张露班组"},{"工号":"027031","姓名":"李思颖","班组":"{{BASE}}黄子健班组"},{"工号":"027039","姓名":"葛晓楠","班组":"{{BASE}}李凯班组"},{"工号":"028981","姓名":"雷炜豪","班组":"{{BASE}}张露班组"},{"工号":"027813","姓名":"黎鑫汝","班组":"{{BASE}}黄子健班组"},{"工号":"028989","姓名":"侯鑫淼","班组":"{{BASE}}李凯班组"},{"工号":"027968","姓名":"李梦瑶1","班组":"{{BASE}}张露班组"},{"工号":"028982","姓名":"李贝贝","班组":"{{BASE}}黄子健班组"},{"工号":"027947","姓名":"黄越","班组":"{{BASE}}李凯班组"},{"工号":"028971","姓名":"梁馨怡","班组":"{{BASE}}黄子健班组"},{"工号":"028218","姓名":"江欣","班组":"{{BASE}}李凯班组"},{"工号":"027035","姓名":"李宇晴","班组":"{{BASE}}张露班组"},{"工号":"027952","姓名":"梁园","班组":"{{BASE}}黄子健班组"},{"工号":"027043","姓名":"孔近如","班组":"{{BASE}}李凯班组"},{"工号":"028020","姓名":"卢艺方","班组":"{{BASE}}张露班组"},{"工号":"027958","姓名":"李静雯1","班组":"{{BASE}}李凯班组"},{"工号":"027967","姓名":"骆诚","班组":"{{BASE}}张露班组"},{"工号":"018804","姓名":"吕梦琪","班组":"{{BASE}}黄子健班组"},{"工号":"027099","姓名":"李泽彬","班组":"{{BASE}}李凯班组"},{"工号":"027964","姓名":"田佳鑫","班组":"{{BASE}}张露班组"},{"工号":"027950","姓名":"齐元捷","班组":"{{BASE}}黄子健班组"},{"工号":"027049","姓名":"王鲁明","班组":"{{BASE}}张露班组"},{"工号":"006700","姓名":"雷沁璇","班组":"{{BASE}}黄子健班组"},{"工号":"028966","姓名":"汪世强","班组":"{{BASE}}黄子健班组"},{"工号":"027949","姓名":"柳祥龙","班组":"{{BASE}}李凯班组"},{"工号":"027953","姓名":"杨玉玲","班组":"{{BASE}}张露班组"},{"工号":"017678","姓名":"邓书娟","班组":"{{BASE}}黄子健班组"},{"工号":"028973","姓名":"卢佳妮","班组":"{{BASE}}李凯班组"},{"工号":"028026","姓名":"张俊强","班组":"{{BASE}}张露班组"},{"工号":"028045","姓名":"罗俊","班组":"{{BASE}}李凯班组"},{"工号":"026631","姓名":"张萌1","班组":"{{BASE}}张露班组"},{"工号":"026620","姓名":"王荣","班组":"{{BASE}}黄子健班组"},{"工号":"026628","姓名":"王俊","班组":"{{BASE}}李凯班组"},{"工号":"024747","姓名":"张硕1","班组":"{{BASE}}张露班组"},{"工号":"031060","姓名":"许文祺","班组":"{{BASE}}黄子健班组"},{"工号":"028975","姓名":"王晓璇","班组":"{{BASE}}李凯班组"},{"工号":"027965","姓名":"张天乐","班组":"{{BASE}}张露班组"},{"工号":"023831","姓名":"闫思源","班组":"{{BASE}}黄子健班组"},{"工号":"024318","姓名":"王雪","班组":"{{BASE}}李凯班组"},{"工号":"028212","姓名":"张轩霖","班组":"{{BASE}}张露班组"},{"工号":"028979","姓名":"余浩峰","班组":"{{BASE}}黄子健班组"},{"工号":"028214","姓名":"王晶晶","班组":"{{BASE}}李凯班组"},{"工号":"026624","姓名":"张扬","班组":"{{BASE}}张露班组"},{"工号":"026623","姓名":"苑弘毅","班组":"{{BASE}}黄子健班组"},{"工号":"027966","姓名":"张洋1","班组":"{{BASE}}张露班组"},{"工号":"024022","姓名":"赵怡雨","班组":"{{BASE}}李凯班组"},{"工号":"027951","姓名":"赵雅琳","班组":"{{BASE}}黄子健班组"},{"工号":"024176","姓名":"郑庆妮娜","班组":"{{BASE}}李凯班组"},{"工号":"030714","姓名":"钟梅芝","班组":"{{BASE}}张露班组"},{"工号":"029891","姓名":"赵怡斐","班组":"{{BASE}}黄子健班组"},{"工号":"026632","姓名":"朱希苑","班组":"{{BASE}}李凯班组"},{"工号":"028035","姓名":"周文婷","班组":"{{BASE}}张露班组"},{"工号":"027956","姓名":"周新茹","班组":"{{BASE}}黄子健班组"},{"工号":"027945","姓名":"李雅雯","班组":"{{BASE}}张露班组"},{"工号":"028016","姓名":"周妍蓉","班组":"{{BASE}}黄子健班组"},{"工号":"013178","姓名":"赫美汇","班组":"{{BASE}}张露班组"},{"工号":"017197","姓名":"于宝康","班组":"{{BASE}}张露班组"},{"工号":"023623","姓名":"李佳乐","班组":"{{BASE}}李凯班组"},{"工号":"015159","姓名":"覃文质","班组":"{{BASE}}黄子健班组"}
+{"工号":"017199","姓名":"黄子健","班组":"南昌黄子健班组"},{"工号":"00753","姓名":"李凯","班组":"南昌李凯班组"},{"工号":"016064","姓名":"李幸宗","班组":"南昌李凯班组"},{"工号":"006485","姓名":"张桃","班组":"南昌张露班组"},{"工号":"007576","姓名":"薛军","班组":"南昌黄子健班组"},{"工号":"016337","姓名":"许裕扬","班组":"南昌李凯班组"},{"工号":"011538","姓名":"刘献波","班组":"南昌张露班组"},{"工号":"005969","姓名":"张陆宇","班组":"南昌黄子健班组"},{"工号":"024395","姓名":"庞然","班组":"南昌李凯班组"},{"工号":"019916","姓名":"张奎宇","班组":"南昌张露班组"},{"工号":"011623","姓名":"卢鑫","班组":"南昌黄子健班组"},{"工号":"030695","姓名":"程琦淮","班组":"南昌张露班组"},{"工号":"027957","姓名":"褚春娜","班组":"南昌黄子健班组"},{"工号":"031207","姓名":"黄恩豪","班组":"南昌张露班组"},{"工号":"028199","姓名":"范力丹","班组":"南昌黄子健班组"},{"工号":"028980","姓名":"曹晨","班组":"南昌李凯班组"},{"工号":"028030","姓名":"方旋","班组":"南昌张露班组"},{"工号":"027959","姓名":"陈雨晴","班组":"南昌李凯班组"},{"工号":"028150","姓名":"古欣冉","班组":"南昌张露班组"},{"工号":"027030","姓名":"熊沁垚","班组":"南昌黄子健班组"},{"工号":"028215","姓名":"管李阳","班组":"南昌张露班组"},{"工号":"020733","姓名":"黄艺蕾","班组":"南昌黄子健班组"},{"工号":"028015","姓名":"冯涵书","班组":"南昌李凯班组"},{"工号":"030995","姓名":"黎晓亮","班组":"南昌张露班组"},{"工号":"027031","姓名":"李思颖","班组":"南昌黄子健班组"},{"工号":"027039","姓名":"葛晓楠","班组":"南昌李凯班组"},{"工号":"028981","姓名":"雷炜豪","班组":"南昌张露班组"},{"工号":"027813","姓名":"黎鑫汝","班组":"南昌黄子健班组"},{"工号":"028989","姓名":"侯鑫淼","班组":"南昌李凯班组"},{"工号":"027968","姓名":"李梦瑶1","班组":"南昌张露班组"},{"工号":"028982","姓名":"李贝贝","班组":"南昌黄子健班组"},{"工号":"027947","姓名":"黄越","班组":"南昌李凯班组"},{"工号":"028971","姓名":"梁馨怡","班组":"南昌黄子健班组"},{"工号":"028218","姓名":"江欣","班组":"南昌李凯班组"},{"工号":"027035","姓名":"李宇晴","班组":"南昌张露班组"},{"工号":"027952","姓名":"梁园","班组":"南昌黄子健班组"},{"工号":"027043","姓名":"孔近如","班组":"南昌李凯班组"},{"工号":"028020","姓名":"卢艺方","班组":"南昌张露班组"},{"工号":"027958","姓名":"李静雯1","班组":"南昌李凯班组"},{"工号":"027967","姓名":"骆诚","班组":"南昌张露班组"},{"工号":"018804","姓名":"吕梦琪","班组":"南昌黄子健班组"},{"工号":"027099","姓名":"李泽彬","班组":"南昌李凯班组"},{"工号":"027964","姓名":"田佳鑫","班组":"南昌张露班组"},{"工号":"027950","姓名":"齐元捷","班组":"南昌黄子健班组"},{"工号":"027049","姓名":"王鲁明","班组":"南昌张露班组"},{"工号":"006700","姓名":"雷沁璇","班组":"南昌黄子健班组"},{"工号":"028966","姓名":"汪世强","班组":"南昌黄子健班组"},{"工号":"027949","姓名":"柳祥龙","班组":"南昌李凯班组"},{"工号":"027953","姓名":"杨玉玲","班组":"南昌张露班组"},{"工号":"017678","姓名":"邓书娟","班组":"南昌黄子健班组"},{"工号":"028973","姓名":"卢佳妮","班组":"南昌李凯班组"},{"工号":"028026","姓名":"张俊强","班组":"南昌张露班组"},{"工号":"028045","姓名":"罗俊","班组":"南昌李凯班组"},{"工号":"026631","姓名":"张萌1","班组":"南昌张露班组"},{"工号":"026620","姓名":"王荣","班组":"南昌黄子健班组"},{"工号":"026628","姓名":"王俊","班组":"南昌李凯班组"},{"工号":"024747","姓名":"张硕1","班组":"南昌张露班组"},{"工号":"031060","姓名":"许文祺","班组":"南昌黄子健班组"},{"工号":"028975","姓名":"王晓璇","班组":"南昌李凯班组"},{"工号":"027965","姓名":"张天乐","班组":"南昌张露班组"},{"工号":"023831","姓名":"闫思源","班组":"南昌黄子健班组"},{"工号":"024318","姓名":"王雪","班组":"南昌李凯班组"},{"工号":"028212","姓名":"张轩霖","班组":"南昌张露班组"},{"工号":"028979","姓名":"余浩峰","班组":"南昌黄子健班组"},{"工号":"028214","姓名":"王晶晶","班组":"南昌李凯班组"},{"工号":"026624","姓名":"张扬","班组":"南昌张露班组"},{"工号":"026623","姓名":"苑弘毅","班组":"南昌黄子健班组"},{"工号":"027966","姓名":"张洋1","班组":"南昌张露班组"},{"工号":"024022","姓名":"赵怡雨","班组":"南昌李凯班组"},{"工号":"027951","姓名":"赵雅琳","班组":"南昌黄子健班组"},{"工号":"024176","姓名":"郑庆妮娜","班组":"南昌李凯班组"},{"工号":"030714","姓名":"钟梅芝","班组":"南昌张露班组"},{"工号":"029891","姓名":"赵怡斐","班组":"南昌黄子健班组"},{"工号":"026632","姓名":"朱希苑","班组":"南昌李凯班组"},{"工号":"028035","姓名":"周文婷","班组":"南昌张露班组"},{"工号":"027956","姓名":"周新茹","班组":"南昌黄子健班组"},{"工号":"027945","姓名":"李雅雯","班组":"南昌张露班组"},{"工号":"028016","姓名":"周妍蓉","班组":"南昌黄子健班组"},{"工号":"013178","姓名":"赫美汇","班组":"南昌张露班组"},{"工号":"017197","姓名":"于宝康","班组":"南昌张露班组"},{"工号":"023623","姓名":"李佳乐","班组":"南昌李凯班组"},{"工号":"015159","姓名":"覃文质","班组":"南昌黄子健班组"}
 ];
 
 // 读取人员资料（本地存储优先，其次内置名单）
@@ -18679,8 +18718,8 @@ function crewPersonnelAsCrewProfiles(){
   return _crewPersonnelData().map(p=>({
     id:String(p.工号),
     name:p.姓名,
-    base:(p.班组||'').replace(/^{{BASE}}/,'')||'{{BASE}}',
-    squad:p.班组 || '{{BASE}}',
+    base:(p.班组||'').replace(/^南昌/,'')||'南昌',
+    squad:p.班组 || '南昌',
     is_key:false,
     is_leader: _isLeaderPerson(p.姓名)
   }));
@@ -20193,7 +20232,7 @@ function refreshHistImportPreview(){
                   '扬州':'Z1-YZH','扬州分队':'Z1-YZH','泰州':'Z1-YZH','扬州泰州':'Z1-YZH',
                   '南昌':'Z1-KHN','南昌分队':'Z1-KHN',
                   '揭阳':'Z1-SWA','揭阳分队':'Z1-SWA',
-                  '{{BASE}}':'Z1-CAN','{{BASE}}':'Z1-CAN',
+                  '南昌':'Z1-CAN','南昌':'Z1-CAN',
                   '深圳':'Z1-SZX','深圳分队':'Z1-SZX',
                   '沈阳':'Z2-SHE','沈阳分队':'Z2-SHE',
                   '西安':'Z2-XIY','西安分队':'Z2-XIY',
@@ -20434,12 +20473,12 @@ function refreshHistImportPreview(){
                   /虹[一二三四五六1-6]分队/,/浦[一二三四五六1-6]分队/,
                   /虹桥[一二三四五六1-6]分队/,/浦东[一二三四五六1-6]分队/,
                   /虹桥[1-6]分队/,/浦东[1-6]分队/,/第[一二三四五六1-6]分队/,
-                  /宁波分队|扬州分队|南昌分队|揭阳分队|潮汕分队|{{BASE}}|深圳分队|沈阳分队|西安分队|大连分队|成都分队|兰州[12]分队|石[一二12]分队/,
+                  /宁波分队|扬州分队|南昌分队|揭阳分队|潮汕分队|南昌|深圳分队|沈阳分队|西安分队|大连分队|成都分队|兰州[12]分队|石[一二12]分队/,
                   /(SHA|PVG)(-D[1-6])?/,
                   /Z1-(NBG|YZH|KHN|SWA|CAN|SZX)/,
                   /Z2-(SHE|XIY|DLC|CTU)/,
                   /LHW(-[12])?/,/HB(-[12])?/,
-                  /虹[桥]?|浦[东]?|{{BASE}}|深圳|沈阳|西安|大连|成都|兰州|石家庄|河北|揭阳|潮汕|宁波|扬州|泰州|南昌/
+                  /虹[桥]?|浦[东]?|南昌|深圳|沈阳|西安|大连|成都|兰州|石家庄|河北|揭阳|潮汕|宁波|扬州|泰州|南昌/
                 ];
                 for (const pat of patterns) {
                   const mt = String(f.val).match(pat);
@@ -20611,7 +20650,7 @@ function squadToBase(squad){
     '扬州分队':'Z1-YZH','扬州1':'Z1-YZH','泰州分队':'Z1-YZH',
     '南昌分队':'Z1-KHN','南昌1':'Z1-KHN',
     '揭阳分队':'Z1-SWA','揭阳1':'Z1-SWA','潮汕分队':'Z1-SWA',
-    '{{BASE}}':'Z1-CAN','{{BASE}}1':'Z1-CAN','穗一':'Z1-CAN','穗1':'Z1-CAN',
+    '南昌':'Z1-CAN','南昌1':'Z1-CAN','穗一':'Z1-CAN','穗1':'Z1-CAN',
     '深圳分队':'Z1-SZX','深圳1':'Z1-SZX','深一':'Z1-SZX','深1':'Z1-SZX',
     '沈阳分队':'Z2-SHE','沈阳1':'Z2-SHE',
     '西安分队':'Z2-XIY','西安1':'Z2-XIY',
@@ -20635,7 +20674,7 @@ function squadToBase(squad){
   // 3) 基地级前缀（只知道哪个基地，不知道具体分队 → 返回基地父节点 SHA/PVG）
   if(s.startsWith('虹')||s.includes('虹桥')) return 'SHA';
   if(s.startsWith('浦')||s.includes('浦东')) return 'PVG';
-  if(s.startsWith('穗')||s.startsWith('广')||s.includes('{{BASE}}')) return 'Z1-CAN';
+  if(s.startsWith('穗')||s.startsWith('广')||s.includes('南昌')) return 'Z1-CAN';
   if(s.startsWith('深')||s.includes('深圳')) return 'Z1-SZX';
   if(s.startsWith('沈')||s.includes('沈阳')) return 'Z2-SHE';
   if(s.startsWith('兰')||s.includes('兰州')) return 'LHW';
@@ -20715,7 +20754,7 @@ async function parseHistImportFile(file){
     // 一级基地中文名 → baseId 映射（与后端 CN_BASE_MAP 一致）
     const CN_BASE_MAP={'虹桥基地':'SHA','虹桥':'SHA','浦东基地':'PVG','浦东':'PVG','综一基地':'Z1','综一':'Z1','综二基地':'Z2','综二':'Z2','兰州基地':'LHW','兰州':'LHW','河北基地':'HB','河北':'HB','石家庄':'HB','双照':'DUO'};
     // 中文分队全名 → baseId 映射（与后端 CN_SQUAD_FULL_MAP 一致）
-    const CN_SQUAD_FULL_MAP={'宁波分队':'Z1-NBG','扬州分队':'Z1-YZH','南昌分队':'Z1-KHN','揭阳分队':'Z1-SWA','{{BASE}}':'Z1-CAN','深圳分队':'Z1-SZX','沈阳分队':'Z2-SHE','西安分队':'Z2-XIY','大连分队':'Z2-DLC','成都分队':'Z2-CTU','兰州分队':'LHW','河北分队':'HB','石家庄分队':'HB','双照分队':'DUO','虹桥分队':'SHA','浦东分队':'PVG','综一分队':'Z1','综二分队':'Z2'};
+    const CN_SQUAD_FULL_MAP={'宁波分队':'Z1-NBG','扬州分队':'Z1-YZH','南昌分队':'Z1-KHN','揭阳分队':'Z1-SWA','南昌':'Z1-CAN','深圳分队':'Z1-SZX','沈阳分队':'Z2-SHE','西安分队':'Z2-XIY','大连分队':'Z2-DLC','成都分队':'Z2-CTU','兰州分队':'LHW','河北分队':'HB','石家庄分队':'HB','双照分队':'DUO','虹桥分队':'SHA','浦东分队':'PVG','综一分队':'Z1','综二分队':'Z2'};
     const Z1C={宁波:'Z1-NBG',扬州:'Z1-YZH',南昌:'Z1-KHN',揭阳:'Z1-SWA','{BASE}':'Z1-CAN',深圳:'Z1-SZX'};
     const Z2C={沈阳:'Z2-SHE',西安:'Z2-XIY',大连:'Z2-DLC',成都:'Z2-CTU'};
     // 虹桥/浦东 6分队
@@ -20758,7 +20797,7 @@ async function parseHistImportFile(file){
     const BASE_TO_DEFAULT_DIV_NAME = {
       'DUO': '双照分队',
       'Z1-NBG': '宁波分队', 'Z1-YZH': '扬州分队', 'Z1-KHN': '南昌分队',
-      'Z1-SWA': '揭阳分队', 'Z1-CAN': '{{BASE}}', 'Z1-SZX': '深圳分队',
+      'Z1-SWA': '揭阳分队', 'Z1-CAN': '南昌', 'Z1-SZX': '深圳分队',
       'Z2-SHE': '沈阳分队', 'Z2-XIY': '西安分队', 'Z2-DLC': '大连分队', 'Z2-CTU': '成都分队'
     };
     function resolve(r){
@@ -20948,13 +20987,13 @@ async function parseHistImportFile(file){
                 /浦东[一二三四五六1-6]分队/,   /浦东[一二三四五六1-6]\s*队/,
                 /虹桥[1-6]分队/,              /浦东[1-6]分队/,
                 /第[一二三四五六1-6]分队/,
-                /宁波分队|扬州分队|南昌分队|揭阳分队|潮汕分队|{{BASE}}|深圳分队|沈阳分队|西安分队|大连分队|成都分队|兰州[12]分队|石[一二12]分队/,
+                /宁波分队|扬州分队|南昌分队|揭阳分队|潮汕分队|南昌|深圳分队|沈阳分队|西安分队|大连分队|成都分队|兰州[12]分队|石[一二12]分队/,
                 /(SHA|PVG)(-D[1-6])?/,
                 /Z1-(NBG|YZH|KHN|SWA|CAN|SZX)/,
                 /Z2-(SHE|XIY|DLC|CTU)/,
                 /LHW(-[12])?/,
                 /HB(-[12])?/,
-                /虹[桥]?|浦[东]?|{{BASE}}|深圳|沈阳|西安|大连|成都|兰州|石家庄|河北|揭阳|潮汕|宁波|扬州|泰州|南昌/
+                /虹[桥]?|浦[东]?|南昌|深圳|沈阳|西安|大连|成都|兰州|石家庄|河北|揭阳|潮汕|宁波|扬州|泰州|南昌/
               ];
               for (const pat of patterns) {
                 const mt = f.val.match(pat);

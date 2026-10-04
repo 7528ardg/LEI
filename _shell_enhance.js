@@ -306,10 +306,59 @@ window.shellAuthSubmit = function(){
     finishAuth(found);
   }
 };
+/* ---------- 板块权限：绩效管理/风险预警仅管理员可见可用（__PERM_ENHANCE_20261005__，三壳单一来源） ---------- */
+/* 幂等守卫：若壳层已内置权限块（如 index.html 直改区），不再重复注入第二份 */
+if(!window.shellCanMod){
+  try{
+    var _permStyle = document.createElement('style');
+    _permStyle.id = 'permGateCSS';
+    _permStyle.textContent = '.is-user .mod-tab[data-mod="risk"],.is-user .m-sheet-item[data-mod="risk"],'
+      + '.is-user [data-mod="risk"],.is-user [onclick*="switchModule(\'risk\')"],'
+      + '.is-user [onclick*="mGoMod(\'risk\')"],.is-user [onclick*="mGo(\'risk\')"],'
+      + '.is-user .mod-tab[data-mod="performance"],.is-user .m-tab[data-mod="performance"],'
+      + '.is-user .m-sheet-item[data-mod="performance"],.is-user [data-mod="performance"],'
+      + '.is-user [onclick*="switchModule(\'performance\')"],'
+      + '.is-user [onclick*="mGoMod(\'performance\')"],.is-user [onclick*="mGo(\'performance\')"]'
+      + '{display:none!important}';
+    document.head.appendChild(_permStyle);
+  }catch(e){}
+}
+function sessionRole(){
+  var s = readSession();
+  if(!s) return '';
+  return (s.role === 'admin' || s.工号 === ADMIN.工号) ? 'admin' : 'user';
+}
+window.shellIsAdmin = function(){ return sessionRole() === 'admin'; };
+/* 管理员专属板块：普通账号既看不到入口（CSS .is-user 隐藏），也进不去（switchModule 包装拦截） */
+var ADMIN_ONLY_MODS = ['risk', 'performance'];
+window.shellCanMod = function(id){
+  return !(ADMIN_ONLY_MODS.indexOf(String(id)) >= 0 && !window.shellIsAdmin());
+};
+function applyPermUI(){
+  window.__permInit = true;
+  var isAdmin = window.shellIsAdmin();
+  try{ document.body.classList.toggle('is-user', !isAdmin); }catch(e){}
+  if(!window.__permWrapped && typeof window.switchModule === 'function'){
+    window.__permWrapped = true;
+    var _origMod = window.switchModule;
+    window.switchModule = function(id){
+      if(window.shellCanMod && !window.shellCanMod(id)){
+        var _mn = {risk:'风险预警', performance:'绩效管理'}[String(id)] || '该板块';
+        try{ if(typeof toast === 'function') toast('⚠️ ' + _mn + '仅管理员可用'); }catch(e){}
+        console.warn('[权限] 非管理员访问受限板块被拦截:', id);
+        return;
+      }
+      return _origMod.apply(window, arguments);
+    };
+  }
+}
+
 function finishAuth(user){
-  saveSession({ 工号: user.工号, 姓名: user.姓名, 手机号: user.手机号 || '' });
+  saveSession({ 工号: user.工号, 姓名: user.姓名, 手机号: user.手机号 || '', role: (user.工号 === ADMIN.工号 ? 'admin' : 'user') });
   if(authOverlay){ authOverlay.style.display = 'none'; }
   updateChip();
+  /* __PERM_ENHANCE_20261005__：登录成功立即应用权限 UI（管理员可见绩效/风险，普通账号隐藏） */
+  applyPermUI();
   try{ var t = el('userName'); if(t && t.style) t.style.display = ''; }catch(e){}
   maybeStartTour();
   try{ if(typeof toast === 'function') toast('欢迎回来，' + user.姓名 + ' ✈️'); }catch(e){}
@@ -319,6 +368,8 @@ window.shellLogout = function(){
   saveSession(null);
   var pm = el('profileModal');
   if(pm) pm.classList.remove('show');
+  /* __PERM_ENHANCE_20261005__：登出后必须复位权限 UI，否则残留管理员视图 */
+  applyPermUI();
   showAuth();
   console.log('[账号] 已退出登录');
 };
@@ -434,6 +485,10 @@ function finishTour(){
 (function init(){
   // 覆盖旧版（quiz 模块）Onboarding 引导：嵌入模式下统一由壳层教程接管，不再单独弹窗
   lsSet('spring_onb_done', '1');
+  /* __PERM_ENHANCE_20261005__：权限 UI 必须【无条件】先应用一次——
+     未登录（游客）同样按普通用户处理，否则 body 拿不到 .is-user 类、
+     switchModule 也不会被包装，管理员专属板块会暴露。 */
+  applyPermUI();
   if(readSession()){
     updateChip();
     maybeStartTour();

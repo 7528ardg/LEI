@@ -181,6 +181,23 @@ res.append(("SRC", "beauty.html(抽取超时20s)", "maxTokens: 1200, timeout: 20
 res.append(("SRC", "beauty.html(旧超时45s已清)",
             "maxTokens: 1200, timeout: 45000" not in raw))
 
+# ---- 发布闸（2026-10-05）：品牌占位符反向针 ----
+# 背景：链中段「去品牌」补丁会把源归一为 {{AIRLINE}}/{{BASE}} 占位符，链尾 _brandify 负责注入
+# 真实品牌。若顺序错乱/遗漏，占位符会原样上线（2026-10-04 走查实测线上 800+ 处直接露给用户）。
+# 本闸卡在针检查（构建链最后一环）：上线文件含 {{AIRLINE}}/{{BASE}} 即 FAIL。
+# 注意：{{DUTY_MOBILE}}/{{DUTY_LANDLINE}} 因真实号码未确认暂不纳入（待 _brandify BRAND_MAP 补齐后再加）。
+for rel in ("index.html", "qa.html", "quiz.html", "performance.html", "medical.html",
+            "risk-lite.html", "daily.html", "manual.html", "report.html", "kb-admin.html",
+            "beauty.html", "cc-home.html",
+            "spring-assistant.html", os.path.join("nc", "index.html")):
+    raw = rd(os.path.join(BASE, rel))
+    bad_ph = []
+    for ph in ("{{AIRLINE}}", "{{BASE}}"):
+        if ph in raw:
+            bad_ph.append(ph)
+    res.append(("SRC", rel + u"(品牌占位符已注入)",
+                not bad_ph))
+
 bad = 0
 for kind, name, ok in res:
     if not ok:

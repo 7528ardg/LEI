@@ -1,7 +1,7 @@
 ﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿<!DOCTYPE html>
 <!--
 ================================================================================
-    {{BASE}}乘务管理系统 · 完整版
+    南昌乘务管理系统 · 完整版
     单机自包含版本 (Self-Contained Offline Version)
     
     生成时间: 2026-04-06 04:56:49
@@ -23,7 +23,7 @@
     【归属说明 · 2026-09-21 补充】
     本文件 = 融合版导航中的「📊 绩效管理」模块**本体**（mod-tab / 移动端 Tab /
     巨型菜单 / 模块元数据均引用 performance），不是历史遗留或误入文件，请勿移出。
-    它由「{{BASE}}乘务管理系统」以单机自包含形态整体集成而来，故自带 Bootstrap /
+    它由「南昌乘务管理系统」以单机自包含形态整体集成而来，故自带 Bootstrap /
     Chart.js / SheetJS 等内联库；因体积与维护成本考虑，暂不做 vendor 拆分。
     结构提醒：本文件的 head 闭合标签出现两次 —— 一处在内嵌库的 JS 字符串里，
     真正的文档头在文件末（其后紧随 body 开标签）。任何注入脚本都必须按
@@ -40,7 +40,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=2.0, user-scalable=yes, viewport-fit=cover, interactive-widget=resizes-content">
 <meta name="theme-color" content="#00A650">
-    <title>{{AIRLINE}} · {{BASE}}绩效管理 · 全能助手</title>
+    <title>春秋航空 · 南昌绩效管理 · 全能助手</title>
     <!-- 性能优化：DNS预解析 -->
     <!-- ========== 关键CSS资源（优先加载） ========== -->
     <style>
@@ -2285,7 +2285,7 @@ https://github.com/nodeca/pako/blob/main/LICENSE
 
 </script>
     <style>
-        /* ===== {{AIRLINE}}品牌色变量系统（基于官方VI规范） ===== */
+        /* ===== 春秋航空品牌色变量系统（基于官方VI规范） ===== */
         /* 主色：3S品牌绿 #148453（官方色），辅色：浅绿#67AC91、航空金#e8b54a */
         :root {
             --brand-primary: #148453;
@@ -5871,7 +5871,7 @@ https://github.com/nodeca/pako/blob/main/LICENSE
             }
         }
         
-        /* ========== 登录界面样式 - {{AIRLINE}}品牌设计 ========== */
+        /* ========== 登录界面样式 - 春秋航空品牌设计 ========== */
         .login-container {
             background: linear-gradient(135deg, #0c6b43 0%, #148453 35%, #1a9d63 70%, #22b573 100%);
             display: flex;
@@ -6280,7 +6280,7 @@ https://github.com/nodeca/pako/blob/main/LICENSE
             .login-card { max-width: calc(100% - 32px); }
         }
         
-        /* ========== 登录界面全新设计 · {{AIRLINE}}品牌风格 ========== */
+        /* ========== 登录界面全新设计 · 春秋航空品牌风格 ========== */
         .login-wrapper {
             position: fixed;
             top: 0; left: 0; right: 0; bottom: 0;
@@ -6290,7 +6290,7 @@ https://github.com/nodeca/pako/blob/main/LICENSE
             overflow: hidden;
         }
         
-        /* 左侧品牌展示区 - {{AIRLINE}}官方品牌色 #0C8454 Teal */
+        /* 左侧品牌展示区 - 春秋航空官方品牌色 #0C8454 Teal */
         .login-hero {
             flex: 1.2;
             position: relative;
@@ -6328,7 +6328,7 @@ https://github.com/nodeca/pako/blob/main/LICENSE
                 );
         }
         
-        /* 尾翼装饰（{{AIRLINE}}新涂装风格） */
+        /* 尾翼装饰（春秋航空新涂装风格） */
         .hero-tail-fin {
             position: absolute;
             top: -20px;
@@ -6758,7 +6758,7 @@ https://github.com/nodeca/pako/blob/main/LICENSE
             transform: rotate(45deg);
         }
         
-        /* 主登录按钮 - 使用{{AIRLINE}}官方品牌色 #0C8454 */
+        /* 主登录按钮 - 使用春秋航空官方品牌色 #0C8454 */
         .btn-login-primary {
             width: 100%;
             padding: 14px 24px;
@@ -7056,7 +7056,7 @@ https://github.com/nodeca/pako/blob/main/LICENSE
     </style>
     <style id="designSystemEnhancement">
         :root {
-            /* {{AIRLINE}}官方品牌色系统 */
+            /* 春秋航空官方品牌色系统 */
             --ds-primary: #148453;          /* 春航官方主色·绿 */
             --ds-primary-dark: #0c6b43;     /* 深绿·悬停/按下 */
             --ds-primary-light: #1a9d63;    /* 浅绿·辅助 */
@@ -7533,8 +7533,8 @@ https://github.com/nodeca/pako/blob/main/LICENSE
         }
         .personal-summary-card:hover::after { opacity: 1; }
 
-        /* ========== {{AIRLINE}}品牌系统样式 ========== */
-        /* === {{AIRLINE}} 3S Logo SVG 官方品牌标识 === */
+        /* ========== 春秋航空品牌系统样式 ========== */
+        /* === 春秋航空 3S Logo SVG 官方品牌标识 === */
         .brand-3s-logo {
             display: block;
             width: 100%;
@@ -7611,7 +7611,7 @@ https://github.com/nodeca/pako/blob/main/LICENSE
             opacity: 0.8;
         }
 
-        /* 登录页背景：{{AIRLINE}}品牌绿渐变 + 金色飘带 */
+        /* 登录页背景：春秋航空品牌绿渐变 + 金色飘带 */
         .login-page-brand-bg {
             background:
                 radial-gradient(ellipse at top right, rgba(232,181,74,0.12) 0%, transparent 50%),
@@ -7655,7 +7655,7 @@ https://github.com/nodeca/pako/blob/main/LICENSE
             z-index: 10;
             pointer-events: auto;
         }
-        /* {{AIRLINE}}品牌顶部标识条 */
+        /* 春秋航空品牌顶部标识条 */
         .login-brand-header-bar {
             display: flex;
             align-items: center;
@@ -7686,7 +7686,7 @@ https://github.com/nodeca/pako/blob/main/LICENSE
             font-family: 'Consolas', 'Monaco', monospace;
             letter-spacing: 1px;
         }
-        /* {{AIRLINE}}特色标签条 */
+        /* 春秋航空特色标签条 */
         .login-brand-tags {
             display: flex;
             justify-content: center;
@@ -7714,7 +7714,7 @@ https://github.com/nodeca/pako/blob/main/LICENSE
             background: rgba(49,130,206,0.12);
             color: #2c5282;
         }
-        /* {{AIRLINE}}品牌底部水印 */
+        /* 春秋航空品牌底部水印 */
         .login-brand-watermark {
             display: flex;
             align-items: center;
@@ -8050,7 +8050,7 @@ https://github.com/nodeca/pako/blob/main/LICENSE
 
         
         /* ========================================================================
-           {{AIRLINE}}品牌视觉系统 v2.0 - 全面升级
+           春秋航空品牌视觉系统 v2.0 - 全面升级
            包含：表单组件、按钮系统、卡片设计、状态色、字体层级、动画
            ======================================================================== */
 
@@ -9708,7 +9708,7 @@ button:disabled:active{transform:none;}
         <div style="color:#94a3b8;font-size:13px;margin-top:4px;">正在加载系统资源…</div>
     </div>
 
-    <!-- ========== 登录界面 · {{AIRLINE}}品牌官方设计 ========== -->
+    <!-- ========== 登录界面 · 春秋航空品牌官方设计 ========== -->
     <div class="login-wrapper" id="loginContainer" style="display: flex;">
         <!-- 左侧品牌展示区 -->
         <div class="login-hero">
@@ -9716,7 +9716,7 @@ button:disabled:active{transform:none;}
             <div class="hero-sky-layer hero-sky-2"></div>
             <div class="hero-sky-layer hero-sky-3"></div>
             
-            <!-- 飞机尾翼装饰（{{AIRLINE}}新涂装风格） -->
+            <!-- 飞机尾翼装饰（春秋航空新涂装风格） -->
             <div class="hero-tail-fin" aria-hidden="true">
                 <div class="tail-fin-shape">
                     <div class="tail-stripe stripe-1"></div>
@@ -9744,7 +9744,7 @@ button:disabled:active{transform:none;}
             <!-- 品牌内容 -->
             <div class="hero-content">
                 <div class="hero-brand-row">
-                    <!-- {{AIRLINE}}正版 3S LOGO（参照官方 Airhex 矢量设计） -->
+                    <!-- 春秋航空正版 3S LOGO（参照官方 Airhex 矢量设计） -->
                     <div class="hero-3s-badge">
                         <svg viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg" aria-label="Spring Airlines Official 3S Logo">
                             <circle cx="32" cy="32" r="30" fill="#ffffff"/>
@@ -9757,13 +9757,13 @@ button:disabled:active{transform:none;}
                         </svg>
                     </div>
                     <div class="hero-brand-text">
-                        <h2 class="hero-title">{{AIRLINE}}</h2>
+                        <h2 class="hero-title">春秋航空</h2>
                         <p class="hero-subtitle">SPRING AIRLINES</p>
                     </div>
                 </div>
                 
                 <h1 class="hero-headline">
-                    <span class="headline-main">{{BASE}}</span>
+                    <span class="headline-main">南昌</span>
                     <span class="headline-sub">绩效评定管理系统</span>
                 </h1>
                 
@@ -9876,7 +9876,7 @@ button:disabled:active{transform:none;}
                         <span class="flight-sep">|</span>
                         <span class="flight-year">2026</span>
                     </div>
-                    <p class="copyright">© {{AIRLINE}}{{BASE}} · 绩效评定系统</p>
+                    <p class="copyright">© 春秋航空南昌 · 绩效评定系统</p>
                 </div>
             </div>
         </div>
@@ -9895,7 +9895,7 @@ button:disabled:active{transform:none;}
                     <text x="32" y="58" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-weight="800" font-size="8" fill="#0C8454" letter-spacing="2">3S</text>
                 </svg></span>
                 <span class="brand-text">
-                    <span class="brand-title">{{BASE}}·绩效</span>
+                    <span class="brand-title">南昌·绩效</span>
                     <span class="brand-subtitle">Spring Airlines · GZ</span>
                 </span>
             </a>
@@ -9984,7 +9984,7 @@ button:disabled:active{transform:none;}
             <div class="modal-content" style="background: linear-gradient(135deg, rgba(20,132,83,0.95) 0%, rgba(10,80,55,0.98) 100%); border: none; border-radius: 20px; overflow: hidden;">
                 <div class="modal-header border-0" style="background: rgba(0,0,0,0.20);">
                     <h5 class="modal-title fw-bold text-white" id="logoViewerModalLabel">
-                        <i class="bi bi-image me-2 text-warning"></i>{{AIRLINE}} LOGO · 高清查看
+                        <i class="bi bi-image me-2 text-warning"></i>春秋航空 LOGO · 高清查看
                     </h5>
                     <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
@@ -10003,7 +10003,7 @@ button:disabled:active{transform:none;}
                                 <path d="M45 100 Q100 65 155 100 Q135 118 100 105 Q65 118 45 100Z" fill="#67AC91" opacity="0.9"/>
                                 <path d="M55 128 Q100 100 145 128 Q125 142 100 132 Q75 142 55 128Z" fill="#148453" opacity="0.75"/>
                                 <text x="100" y="175" text-anchor="middle" font-family="Arial,sans-serif" font-weight="800" font-size="22" fill="#148453" letter-spacing="4">SPRING</text>
-                                <text x="100" y="192" text-anchor="middle" font-family="'Microsoft YaHei',sans-serif" font-weight="600" font-size="12" fill="#0b4f32" letter-spacing="3">{{AIRLINE}}</text>
+                                <text x="100" y="192" text-anchor="middle" font-family="'Microsoft YaHei',sans-serif" font-weight="600" font-size="12" fill="#0b4f32" letter-spacing="3">春秋航空</text>
                             </svg>
                             <p style="margin-top:12px;color:#148453;font-weight:600;font-size:14px;">Safety · Smile · Sincerity</p>
                         </div>
@@ -10337,7 +10337,7 @@ button:disabled:active{transform:none;}
         <div class="modal-dialog modal-dialog-centered modal-lg">
             <div class="modal-content border-0 shadow-lg" style="border-radius: 24px;">
                 <div class="modal-header border-0" style="background: linear-gradient(135deg, #0C8454 0%, #1FA56A 100%); border-radius: 24px 24px 0 0;">
-                    <h5 class="modal-title fw-bold text-white" id="welcomeGuideModalLabel"><i class="bi bi-rocket-takeoff me-2"></i>欢迎使用{{BASE}}绩效管理系统</h5>
+                    <h5 class="modal-title fw-bold text-white" id="welcomeGuideModalLabel"><i class="bi bi-rocket-takeoff me-2"></i>欢迎使用南昌绩效管理系统</h5>
                     <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <div class="modal-body p-4">
@@ -11172,7 +11172,7 @@ button:disabled:active{transform:none;}
                             <div class="col-md-3" id="salesQuarterCol" style="display: none;"><label>季度</label><select class="form-select" id="salesQuarterSelect"></select></div>
                             <div class="col-md-3" id="salesYearCol" style="display: none;"><label>年度</label><select class="form-select" id="salesYearSelect"></select></div>
                             <div class="col-md-3" id="salesSAYearCol" style="display: none;"><label>春秋年</label><select class="form-select" id="salesSAYearSelect"></select></div>
-                            <div class="col-md-3"><label>班组</label><select class="form-select" id="salesTeamFilter"><option value="">全部</option><option value="{{BASE}}张露班组">张露班组</option><option value="{{BASE}}黄子健班组">黄子健班组</option><option value="{{BASE}}李凯班组">李凯班组</option></select></div>
+                            <div class="col-md-3"><label>班组</label><select class="form-select" id="salesTeamFilter"><option value="">全部</option><option value="南昌张露班组">张露班组</option><option value="南昌黄子健班组">黄子健班组</option><option value="南昌李凯班组">李凯班组</option></select></div>
                             <div class="col-md-3"><label>职位</label><select class="form-select" id="salesPositionFilter"><option value="乘务员">乘务员</option><option value="乘务长">乘务长</option></select></div>
                             <div class="col-md-3"><label>排序</label><select class="form-select" id="salesSortSelect"><option value="personalSale-desc">个人销售额⬇️</option><option value="personalSale-asc">个人销售额⬆️</option><option value="personalTarget-desc">个人总指标⬇️</option><option value="personalTarget-asc">个人总指标⬆️</option><option value="completionRate-desc">完成率⬇️</option><option value="completionRate-asc">完成率⬆️</option></select></div>
                             <div class="col-md-3"><label>姓名搜索</label><input type="text" class="form-control" id="salesSearchInput" placeholder="姓名/拼音..."></div>
@@ -12326,7 +12326,7 @@ button:disabled:active{transform:none;}
                     <div class="card-header"><h5 class="mb-0 fw-bold"><i class="bi bi-info-circle-fill me-2 text-info"></i>系统规则与说明</h5></div>
                     <div class="card-body">
                         <div class="row">
-                            <div class="col-md-6"><h6><i class="bi bi-check2-circle text-success me-1"></i>绩效规则</h6><p>· 绩效总分=导入文件[合计]列，不再加权计算<br>· 无合计列则绩效为0，绝不编造数据<br>· 全员{{BASE}}83人+自定义人员，无数据者显示0<br>· 合计列=0时忽略该数据</p></div>
+                            <div class="col-md-6"><h6><i class="bi bi-check2-circle text-success me-1"></i>绩效规则</h6><p>· 绩效总分=导入文件[合计]列，不再加权计算<br>· 无合计列则绩效为0，绝不编造数据<br>· 全员南昌83人+自定义人员，无数据者显示0<br>· 合计列=0时忽略该数据</p></div>
                             <div class="col-md-6"><h6><i class="bi bi-database text-primary me-1"></i>数据持久化</h6><p>· IndexedDB存储，合计列绑定绩效<br>· 飞行小时两位小数，完成率基于销售额/指标自计算%两位小数<br>· 销售数字保留两位小数</p></div>
                         </div>
                     </div>
@@ -12513,7 +12513,7 @@ button:disabled:active{transform:none;}
                             <div class="text-center py-5 text-muted">
                                 <i class="bi bi-shield-exclamation fs-1 d-block mb-2 text-muted"></i>
                                 <div class="mb-3">点击右上角"数据错误对比"按钮，对比两期数据错误类型、数量、分布与严重程度</div>
-                                <div class="text-muted small">本模块可识别：数据缺失 / 负数值 / 类型错误 / 异常高值 / 异常低值 / 跨表不一致 / 重名 / 五维不完整 / 环比骤降 / 非{{BASE}} / 全零记录 等 11 类错误</div>
+                                <div class="text-muted small">本模块可识别：数据缺失 / 负数值 / 类型错误 / 异常高值 / 异常低值 / 跨表不一致 / 重名 / 五维不完整 / 环比骤降 / 非南昌 / 全零记录 等 11 类错误</div>
                             </div>
                         </div>
                     </div>
@@ -12732,7 +12732,7 @@ button:disabled:active{transform:none;}
 
     <footer class="fixed-bottom border-top py-2 small text-muted">
         <div class="container-fluid d-flex justify-content-between align-items-center">
-            <span><i class="bi bi-database-check"></i> {{BASE}} · 雷炜豪</span>
+            <span><i class="bi bi-database-check"></i> 南昌 · 雷炜豪</span>
             <span id="dataGuardFooterStatus" class="text-center"><i class="bi bi-hourglass-half text-muted"></i> 初始化中…</span>
             <span><i class="bi bi-shield-check"></i> <span id="dataGuardBackupStatus">备份恢复已增强</span></span>
         </div>
@@ -12742,7 +12742,7 @@ button:disabled:active{transform:none;}
         (function(){
             'use strict';
             // ==================== 全局配置 & 内置行政83人 ====================
-            const CREW_ADMIN_DATA = [{"工号":"017199","姓名":"黄子健","班组":"{{BASE}}黄子健班组"},{"工号":"00753","姓名":"李凯","班组":"{{BASE}}李凯班组"},{"工号":"016064","姓名":"李幸宗","班组":"{{BASE}}李凯班组"},{"工号":"006485","姓名":"张桃","班组":"{{BASE}}张露班组"},{"工号":"007576","姓名":"薛军","班组":"{{BASE}}黄子健班组"},{"工号":"016337","姓名":"许裕扬","班组":"{{BASE}}李凯班组"},{"工号":"011538","姓名":"刘献波","班组":"{{BASE}}张露班组"},{"工号":"005969","姓名":"张陆宇","班组":"{{BASE}}黄子健班组"},{"工号":"024395","姓名":"庞然","班组":"{{BASE}}李凯班组"},{"工号":"019916","姓名":"张奎宇","班组":"{{BASE}}张露班组"},{"工号":"011623","姓名":"卢鑫","班组":"{{BASE}}黄子健班组"},{"工号":"030695","姓名":"程琦淮","班组":"{{BASE}}张露班组"},{"工号":"027957","姓名":"褚春娜","班组":"{{BASE}}黄子健班组"},{"工号":"031207","姓名":"黄恩豪","班组":"{{BASE}}张露班组"},{"工号":"028199","姓名":"范力丹","班组":"{{BASE}}黄子健班组"},{"工号":"028980","姓名":"曹晨","班组":"{{BASE}}李凯班组"},{"工号":"028030","姓名":"方旋","班组":"{{BASE}}张露班组"},{"工号":"027959","姓名":"陈雨晴","班组":"{{BASE}}李凯班组"},{"工号":"028150","姓名":"古欣冉","班组":"{{BASE}}张露班组"},{"工号":"027030","姓名":"熊沁垚","班组":"{{BASE}}黄子健班组"},{"工号":"028215","姓名":"管李阳","班组":"{{BASE}}张露班组"},{"工号":"020733","姓名":"黄艺蕾","班组":"{{BASE}}黄子健班组"},{"工号":"028015","姓名":"冯涵书","班组":"{{BASE}}李凯班组"},{"工号":"030995","姓名":"黎晓亮","班组":"{{BASE}}张露班组"},{"工号":"027031","姓名":"李思颖","班组":"{{BASE}}黄子健班组"},{"工号":"027039","姓名":"葛晓楠","班组":"{{BASE}}李凯班组"},{"工号":"028981","姓名":"雷炜豪","班组":"{{BASE}}张露班组"},{"工号":"027813","姓名":"黎鑫汝","班组":"{{BASE}}黄子健班组"},{"工号":"028989","姓名":"侯鑫淼","班组":"{{BASE}}李凯班组"},{"工号":"027968","姓名":"李梦瑶1","班组":"{{BASE}}张露班组"},{"工号":"028982","姓名":"李贝贝","班组":"{{BASE}}黄子健班组"},{"工号":"027947","姓名":"黄越","班组":"{{BASE}}李凯班组"},{"工号":"028971","姓名":"梁馨怡","班组":"{{BASE}}黄子健班组"},{"工号":"028218","姓名":"江欣","班组":"{{BASE}}李凯班组"},{"工号":"027035","姓名":"李宇晴","班组":"{{BASE}}张露班组"},{"工号":"027952","姓名":"梁园","班组":"{{BASE}}黄子健班组"},{"工号":"027043","姓名":"孔近如","班组":"{{BASE}}李凯班组"},{"工号":"028020","姓名":"卢艺方","班组":"{{BASE}}张露班组"},{"工号":"027958","姓名":"李静雯1","班组":"{{BASE}}李凯班组"},{"工号":"027967","姓名":"骆诚","班组":"{{BASE}}张露班组"},{"工号":"018804","姓名":"吕梦琪","班组":"{{BASE}}黄子健班组"},{"工号":"027099","姓名":"李泽彬","班组":"{{BASE}}李凯班组"},{"工号":"027964","姓名":"田佳鑫","班组":"{{BASE}}张露班组"},{"工号":"027950","姓名":"齐元捷","班组":"{{BASE}}黄子健班组"},{"工号":"027049","姓名":"王鲁明","班组":"{{BASE}}张露班组"},{"工号":"006700","姓名":"雷沁璇","班组":"{{BASE}}黄子健班组"},{"工号":"028966","姓名":"汪世强","班组":"{{BASE}}黄子健班组"},{"工号":"027949","姓名":"柳祥龙","班组":"{{BASE}}李凯班组"},{"工号":"027953","姓名":"杨玉玲","班组":"{{BASE}}张露班组"},{"工号":"017678","姓名":"邓书娟","班组":"{{BASE}}黄子健班组"},{"工号":"028973","姓名":"卢佳妮","班组":"{{BASE}}李凯班组"},{"工号":"028026","姓名":"张俊强","班组":"{{BASE}}张露班组"},{"工号":"028045","姓名":"罗俊","班组":"{{BASE}}李凯班组"},{"工号":"026631","姓名":"张萌1","班组":"{{BASE}}张露班组"},{"工号":"026620","姓名":"王荣","班组":"{{BASE}}黄子健班组"},{"工号":"026628","姓名":"王俊","班组":"{{BASE}}李凯班组"},{"工号":"024747","姓名":"张硕1","班组":"{{BASE}}张露班组"},{"工号":"031060","姓名":"许文祺","班组":"{{BASE}}黄子健班组"},{"工号":"028975","姓名":"王晓璇","班组":"{{BASE}}李凯班组"},{"工号":"027965","姓名":"张天乐","班组":"{{BASE}}张露班组"},{"工号":"023831","姓名":"闫思源","班组":"{{BASE}}黄子健班组"},{"工号":"024318","姓名":"王雪","班组":"{{BASE}}李凯班组"},{"工号":"028212","姓名":"张轩霖","班组":"{{BASE}}张露班组"},{"工号":"028979","姓名":"余浩峰","班组":"{{BASE}}黄子健班组"},{"工号":"028214","姓名":"王晶晶","班组":"{{BASE}}李凯班组"},{"工号":"026624","姓名":"张扬","班组":"{{BASE}}张露班组"},{"工号":"026623","姓名":"苑弘毅","班组":"{{BASE}}黄子健班组"},{"工号":"027966","姓名":"张洋1","班组":"{{BASE}}张露班组"},{"工号":"024022","姓名":"赵怡雨","班组":"{{BASE}}李凯班组"},{"工号":"027951","姓名":"赵雅琳","班组":"{{BASE}}黄子健班组"},{"工号":"024176","姓名":"郑庆妮娜","班组":"{{BASE}}李凯班组"},{"工号":"030714","姓名":"钟梅芝","班组":"{{BASE}}张露班组"},{"工号":"029891","姓名":"赵怡斐","班组":"{{BASE}}黄子健班组"},{"工号":"026632","姓名":"朱希苑","班组":"{{BASE}}李凯班组"},{"工号":"028035","姓名":"周文婷","班组":"{{BASE}}张露班组"},{"工号":"027956","姓名":"周新茹","班组":"{{BASE}}黄子健班组"},{"工号":"027945","姓名":"李雅雯","班组":"{{BASE}}张露班组"},{"工号":"028016","姓名":"周妍蓉","班组":"{{BASE}}黄子健班组"},{"工号":"013178","姓名":"赫美汇","班组":"{{BASE}}张露班组"},{"工号":"017197","姓名":"于宝康","班组":"{{BASE}}张露班组"},{"工号":"023623","姓名":"李佳乐","班组":"{{BASE}}李凯班组"},{"工号":"015159","姓名":"覃文质","班组":"{{BASE}}黄子健班组"}];
+            const CREW_ADMIN_DATA = [{"工号":"017199","姓名":"黄子健","班组":"南昌黄子健班组"},{"工号":"00753","姓名":"李凯","班组":"南昌李凯班组"},{"工号":"016064","姓名":"李幸宗","班组":"南昌李凯班组"},{"工号":"006485","姓名":"张桃","班组":"南昌张露班组"},{"工号":"007576","姓名":"薛军","班组":"南昌黄子健班组"},{"工号":"016337","姓名":"许裕扬","班组":"南昌李凯班组"},{"工号":"011538","姓名":"刘献波","班组":"南昌张露班组"},{"工号":"005969","姓名":"张陆宇","班组":"南昌黄子健班组"},{"工号":"024395","姓名":"庞然","班组":"南昌李凯班组"},{"工号":"019916","姓名":"张奎宇","班组":"南昌张露班组"},{"工号":"011623","姓名":"卢鑫","班组":"南昌黄子健班组"},{"工号":"030695","姓名":"程琦淮","班组":"南昌张露班组"},{"工号":"027957","姓名":"褚春娜","班组":"南昌黄子健班组"},{"工号":"031207","姓名":"黄恩豪","班组":"南昌张露班组"},{"工号":"028199","姓名":"范力丹","班组":"南昌黄子健班组"},{"工号":"028980","姓名":"曹晨","班组":"南昌李凯班组"},{"工号":"028030","姓名":"方旋","班组":"南昌张露班组"},{"工号":"027959","姓名":"陈雨晴","班组":"南昌李凯班组"},{"工号":"028150","姓名":"古欣冉","班组":"南昌张露班组"},{"工号":"027030","姓名":"熊沁垚","班组":"南昌黄子健班组"},{"工号":"028215","姓名":"管李阳","班组":"南昌张露班组"},{"工号":"020733","姓名":"黄艺蕾","班组":"南昌黄子健班组"},{"工号":"028015","姓名":"冯涵书","班组":"南昌李凯班组"},{"工号":"030995","姓名":"黎晓亮","班组":"南昌张露班组"},{"工号":"027031","姓名":"李思颖","班组":"南昌黄子健班组"},{"工号":"027039","姓名":"葛晓楠","班组":"南昌李凯班组"},{"工号":"028981","姓名":"雷炜豪","班组":"南昌张露班组"},{"工号":"027813","姓名":"黎鑫汝","班组":"南昌黄子健班组"},{"工号":"028989","姓名":"侯鑫淼","班组":"南昌李凯班组"},{"工号":"027968","姓名":"李梦瑶1","班组":"南昌张露班组"},{"工号":"028982","姓名":"李贝贝","班组":"南昌黄子健班组"},{"工号":"027947","姓名":"黄越","班组":"南昌李凯班组"},{"工号":"028971","姓名":"梁馨怡","班组":"南昌黄子健班组"},{"工号":"028218","姓名":"江欣","班组":"南昌李凯班组"},{"工号":"027035","姓名":"李宇晴","班组":"南昌张露班组"},{"工号":"027952","姓名":"梁园","班组":"南昌黄子健班组"},{"工号":"027043","姓名":"孔近如","班组":"南昌李凯班组"},{"工号":"028020","姓名":"卢艺方","班组":"南昌张露班组"},{"工号":"027958","姓名":"李静雯1","班组":"南昌李凯班组"},{"工号":"027967","姓名":"骆诚","班组":"南昌张露班组"},{"工号":"018804","姓名":"吕梦琪","班组":"南昌黄子健班组"},{"工号":"027099","姓名":"李泽彬","班组":"南昌李凯班组"},{"工号":"027964","姓名":"田佳鑫","班组":"南昌张露班组"},{"工号":"027950","姓名":"齐元捷","班组":"南昌黄子健班组"},{"工号":"027049","姓名":"王鲁明","班组":"南昌张露班组"},{"工号":"006700","姓名":"雷沁璇","班组":"南昌黄子健班组"},{"工号":"028966","姓名":"汪世强","班组":"南昌黄子健班组"},{"工号":"027949","姓名":"柳祥龙","班组":"南昌李凯班组"},{"工号":"027953","姓名":"杨玉玲","班组":"南昌张露班组"},{"工号":"017678","姓名":"邓书娟","班组":"南昌黄子健班组"},{"工号":"028973","姓名":"卢佳妮","班组":"南昌李凯班组"},{"工号":"028026","姓名":"张俊强","班组":"南昌张露班组"},{"工号":"028045","姓名":"罗俊","班组":"南昌李凯班组"},{"工号":"026631","姓名":"张萌1","班组":"南昌张露班组"},{"工号":"026620","姓名":"王荣","班组":"南昌黄子健班组"},{"工号":"026628","姓名":"王俊","班组":"南昌李凯班组"},{"工号":"024747","姓名":"张硕1","班组":"南昌张露班组"},{"工号":"031060","姓名":"许文祺","班组":"南昌黄子健班组"},{"工号":"028975","姓名":"王晓璇","班组":"南昌李凯班组"},{"工号":"027965","姓名":"张天乐","班组":"南昌张露班组"},{"工号":"023831","姓名":"闫思源","班组":"南昌黄子健班组"},{"工号":"024318","姓名":"王雪","班组":"南昌李凯班组"},{"工号":"028212","姓名":"张轩霖","班组":"南昌张露班组"},{"工号":"028979","姓名":"余浩峰","班组":"南昌黄子健班组"},{"工号":"028214","姓名":"王晶晶","班组":"南昌李凯班组"},{"工号":"026624","姓名":"张扬","班组":"南昌张露班组"},{"工号":"026623","姓名":"苑弘毅","班组":"南昌黄子健班组"},{"工号":"027966","姓名":"张洋1","班组":"南昌张露班组"},{"工号":"024022","姓名":"赵怡雨","班组":"南昌李凯班组"},{"工号":"027951","姓名":"赵雅琳","班组":"南昌黄子健班组"},{"工号":"024176","姓名":"郑庆妮娜","班组":"南昌李凯班组"},{"工号":"030714","姓名":"钟梅芝","班组":"南昌张露班组"},{"工号":"029891","姓名":"赵怡斐","班组":"南昌黄子健班组"},{"工号":"026632","姓名":"朱希苑","班组":"南昌李凯班组"},{"工号":"028035","姓名":"周文婷","班组":"南昌张露班组"},{"工号":"027956","姓名":"周新茹","班组":"南昌黄子健班组"},{"工号":"027945","姓名":"李雅雯","班组":"南昌张露班组"},{"工号":"028016","姓名":"周妍蓉","班组":"南昌黄子健班组"},{"工号":"013178","姓名":"赫美汇","班组":"南昌张露班组"},{"工号":"017197","姓名":"于宝康","班组":"南昌张露班组"},{"工号":"023623","姓名":"李佳乐","班组":"南昌李凯班组"},{"工号":"015159","姓名":"覃文质","班组":"南昌黄子健班组"}];
             
             const RATING_CONFIG = {
                 excellent: 102.51,
@@ -15117,9 +15117,9 @@ async clearAll() {
                 try {
                     const templateData = [
                         ['姓名', '班组', '职位', '安全质量', '运行品质', '业务得分', '综合能力', '工作评定', '飞行小时', '绩效总分'],
-                        ['张三', '{{BASE}}张露班组', '乘务长', 100, 100, 100, 100, 100, 80, 100],
-                        ['李四', '{{BASE}}黄子健班组', '乘务员', 95, 90, 88, 92, 85, 75, 90],
-                        ['王五', '{{BASE}}李凯班组', '乘务员', 88, 85, 90, 87, 80, 70, 86]
+                        ['张三', '南昌张露班组', '乘务长', 100, 100, 100, 100, 100, 80, 100],
+                        ['李四', '南昌黄子健班组', '乘务员', 95, 90, 88, 92, 85, 75, 90],
+                        ['王五', '南昌李凯班组', '乘务员', 88, 85, 90, 87, 80, 70, 86]
                     ];
                     
                     const ws = XLSX.utils.aoa_to_sheet(templateData);
@@ -15135,8 +15135,8 @@ async clearAll() {
                     // 添加销售模板
                     const salesTemplate = [
                         ['姓名', '班组', '职位', '个人销售额', '个人总指标', '完成率'],
-                        ['张三', '{{BASE}}张露班组', '乘务长', 5000, 4000, '125%'],
-                        ['李四', '{{BASE}}黄子健班组', '乘务员', 3000, 3500, '85.7%']
+                        ['张三', '南昌张露班组', '乘务长', 5000, 4000, '125%'],
+                        ['李四', '南昌黄子健班组', '乘务员', 3000, 3500, '85.7%']
                     ];
                     const wsSales = XLSX.utils.aoa_to_sheet(salesTemplate);
                     wsSales['!cols'] = [
@@ -15175,7 +15175,7 @@ async clearAll() {
                         const surnames = ['王','李','张','刘','陈','杨','赵','黄','周','吴','徐','孙','马','胡','朱','郭','何','罗','高','林','郑','梁','谢','宋','唐','许','韩','冯','邓','曹','彭','曾','萧','田','董','袁','潘','于','蒋','蔡','余','杜','叶','程','苏','魏','吕','丁','任','沈','姚','卢','姜','崔','钟','谭','陆','汪','范','金','石','廖','贾','夏','韦','傅','方','白','邹','孟','熊','秦','邱','江','尹','薛','闫','段','雷','侯'];
                         const givenNames = ['伟','芳','娜','敏','静','丽','强','磊','军','洋','勇','艳','杰','娟','涛','明','超','秀英','霞','平','刚','桂英','华','玲','飞','玉兰','萍','红','建华','建国','建军','海燕','志强','慧','婷','浩','雪梅','文','佳','琳','思远','子涵','梓萱','雨桐','欣怡','梦琪','紫涵','宇轩','皓轩','浩然','天翔','博文','嘉怡','雅琳','诗涵','若曦','晨阳','晓峰','思琪','婉清','俊熙','泽宇','语嫣','芷若','凌风','墨染','清歌','念薇','知夏','安冉','初瑶','星河','云舒','暮烟','青禾','锦年','南栀'];
 
-                        const teamPrefixes = ['{{BASE}}','{{BASE}}','{{BASE}}','{{BASE}}'];
+                        const teamPrefixes = ['南昌','南昌','南昌','南昌'];
                         const teamSuffixes = ['张露班组','黄子健班组','李凯班组','王浩班组','赵鹏班组','陈静班组','周婷班组','刘洋班组','郑伟班组','孙悦班组','吴磊班组','马超班组','韩冰班组','冯军班组','邓欣班组','曹宇班组','彭飞班组','曾辉班组','萧然班组','田甜班组'];
 
                         const teamCount = seededRandInt(3, 5);
@@ -21636,7 +21636,7 @@ async clearAll() {
                         Renderer._lastPortraitData = data;
                         Renderer._lastPortraitName = name;
                         if (!data) {
-                            content.innerHTML = '<div class="text-center py-5 text-warning"><i class="bi bi-exclamation-triangle fs-1 d-block mb-2"></i><div>未找到该人员在当前周期内的数据</div><div class="small text-muted mt-2">请确认：1）该人员有导入的月度数据 2）当前选择的周期范围内存在数据 3）该人员属于{{BASE}}区域班组</div></div>';
+                            content.innerHTML = '<div class="text-center py-5 text-warning"><i class="bi bi-exclamation-triangle fs-1 d-block mb-2"></i><div>未找到该人员在当前周期内的数据</div><div class="small text-muted mt-2">请确认：1）该人员有导入的月度数据 2）当前选择的周期范围内存在数据 3）该人员属于南昌区域班组</div></div>';
                             return;
                         }
                         content.innerHTML = PortraitEngine.render(data);
@@ -22083,7 +22083,7 @@ async clearAll() {
                         }
 
                         // 仅分析有实际数据的人员（performance > 0 或 flightHours > 0 或 salesScore > 0）
-                        // 修复：必须同时是{{BASE}}区域人员，滤除非{{BASE}}数据（南昌等）
+                        // 修复：必须同时是南昌区域人员，滤除非南昌数据（南昌等）
                         const isGZFn = (typeof DataCleanser !== 'undefined' && DataCleanser.isGuangzhou)
                             ? DataCleanser.isGuangzhou.bind(DataCleanser)
                             : (p) => true;
@@ -22472,7 +22472,7 @@ async clearAll() {
                             <i class="bi bi-shield-check"></i>
                             <span>
                                 本页所有预警均基于 <strong>已导入的原始月度数据</strong>（<code>monthData.summary</code> + <code>monthData.sales.detailRows</code>），
-                                已自动排除 <strong>非{{BASE}}区域</strong> 人员（如南昌等），阈值按 <strong>均值 ± k·标准差</strong> 动态计算。
+                                已自动排除 <strong>非南昌区域</strong> 人员（如南昌等），阈值按 <strong>均值 ± k·标准差</strong> 动态计算。
                             </span>
                         </div>
                         <div class="row g-2 mb-3">
@@ -24159,7 +24159,7 @@ async clearAll() {
              */
             // ========== Excel人员同步 ==========
             async function syncPersonnelFromExcel() {
-                const excelPath = '{{BASE}}人员清单.xlsx';
+                const excelPath = '南昌人员清单.xlsx';
                 try {
                     let workbook;
                     if (typeof XLSX === 'undefined') {
@@ -24293,10 +24293,10 @@ async clearAll() {
                     
                     // 额外添加4人
                     const extraMembers = [
-                        { name: '赫美汇', team: '{{BASE}}张露班组', position: '乘务长' },
-                        { name: '于宝康', team: '{{BASE}}张露班组', position: '乘务长' },
-                        { name: '李佳乐', team: '{{BASE}}李凯班组', position: '乘务长' },
-                        { name: '覃文质', team: '{{BASE}}黄子健班组', position: '乘务长' }
+                        { name: '赫美汇', team: '南昌张露班组', position: '乘务长' },
+                        { name: '于宝康', team: '南昌张露班组', position: '乘务长' },
+                        { name: '李佳乐', team: '南昌李凯班组', position: '乘务长' },
+                        { name: '覃文质', team: '南昌黄子健班组', position: '乘务长' }
                     ];
                     let extraAdded = 0;
                     for (const member of extraMembers) {
@@ -24821,7 +24821,7 @@ async clearAll() {
                             if (!saleVal && typeof rec.salesScore === 'number') {
                                 saleVal = rec.salesScore;
                             }
-                            // {{BASE}}区域过滤（仅警告不过滤，确保数据可用）
+                            // 南昌区域过滤（仅警告不过滤，确保数据可用）
                             if (!isGZFn2(rec)) {
                                 filteredByGZ++;
                             }
@@ -24844,7 +24844,7 @@ async clearAll() {
                         });
 
                         if (filteredByGZ > 0) {
-                            console.warn(`[PortraitEngine] ${filteredByGZ} 条记录未通过{{BASE}}区域过滤，但仍保留用于画像生成`);
+                            console.warn(`[PortraitEngine] ${filteredByGZ} 条记录未通过南昌区域过滤，但仍保留用于画像生成`);
                         }
 
                         if (!personInfo || records.length === 0) {
@@ -25315,12 +25315,12 @@ async clearAll() {
                         return summaryEntry[fallbackKey] || 0;
                     };
 
-                    // 修复：{{BASE}}过滤函数（防御性，避免非{{BASE}}数据混入）
+                    // 修复：南昌过滤函数（防御性，避免非南昌数据混入）
                     const isGZFn3 = (typeof DataCleanser !== 'undefined' && DataCleanser.isGuangzhou)
                         ? DataCleanser.isGuangzhou.bind(DataCleanser)
                         : (p) => true;
 
-                    // 仅保留有实际数据的人员（按姓名查找），并只保留{{BASE}}区域人员
+                    // 仅保留有实际数据的人员（按姓名查找），并只保留南昌区域人员
                     const hasData = p => p && !SPECIAL_PERSONNEL.includes(p.name) && isGZFn3(p) &&
                         ((p.performance || 0) > 0 || (p.flightHours || 0) > 0 || (p.salesScore || 0) > 0 ||
                          salesA.has(p.name) || salesB.has(p.name));
@@ -25653,7 +25653,7 @@ async clearAll() {
 
                 /**
                  * 从全量月度数据中提取样本
-                 * 仅包含有实际数据的人员（performance > 0 等），并应用{{BASE}}过滤
+                 * 仅包含有实际数据的人员（performance > 0 等），并应用南昌过滤
                  */
                 async _collectSamples() {
                     const months = (await Storage.getAllMonths()).sort();
@@ -25940,7 +25940,7 @@ async clearAll() {
                     DUPLICATE_NAME:  { code: 'DUPLICATE_NAME',  label: '重名',       severity: 'high' },
                     INCOMPLETE_DETAIL: { code: 'INCOMPLETE_DETAIL', label: '五维不完整', severity: 'medium' },
                     SUSPICIOUS_DROP: { code: 'SUSPICIOUS_DROP', label: '环比骤降',   severity: 'medium' },
-                    NON_GZ:          { code: 'NON_GZ',          label: '非{{BASE}}数据', severity: 'low' },
+                    NON_GZ:          { code: 'NON_GZ',          label: '非南昌数据', severity: 'low' },
                     ZERO_ALL:        { code: 'ZERO_ALL',        label: '全零记录',   severity: 'low' }
                 },
 
@@ -26106,9 +26106,9 @@ async clearAll() {
                                 recordErrors.push(this._mkErr('DUPLICATE_NAME', monthKey, p, 'name', `姓名 "${p.name}" 出现 ${nameCount[p.name]} 次`));
                             }
 
-                            // 8) 非{{BASE}}数据
+                            // 8) 非南昌数据
                             if (typeof DataCleanser !== 'undefined' && !DataCleanser.isGuangzhou(p)) {
-                                recordErrors.push(this._mkErr('NON_GZ', monthKey, p, 'team', `班组 "${team}" 不属于{{BASE}}区域`));
+                                recordErrors.push(this._mkErr('NON_GZ', monthKey, p, 'team', `班组 "${team}" 不属于南昌区域`));
                             }
 
                             // 完整性统计
@@ -26312,10 +26312,10 @@ async clearAll() {
                     if (dup && dup.countA > 0) {
                         list.push({ priority: 'medium', text: `存在 ${dup.countA} 条"重名"问题，建议统一姓名格式或合并重复人员。` });
                     }
-                    // 非{{BASE}}
+                    // 非南昌
                     const nonGZ = typeComparison.find(t => t.type === 'NON_GZ');
                     if (nonGZ && nonGZ.countA > 0) {
-                        list.push({ priority: 'low', text: `仍存在 ${nonGZ.countA} 条"非{{BASE}}数据"，可运行"数据清洗"工具一键清除。` });
+                        list.push({ priority: 'low', text: `仍存在 ${nonGZ.countA} 条"非南昌数据"，可运行"数据清洗"工具一键清除。` });
                     }
                     // 五维不完整
                     const inc = typeComparison.find(t => t.type === 'INCOMPLETE_DETAIL');
@@ -26618,12 +26618,12 @@ async clearAll() {
             };
             window.DataErrorDetector = DataErrorDetector;
 
-            // ========== 数据清洗工具：清除非{{BASE}}数据 ==========
+            // ========== 数据清洗工具：清除非南昌数据 ==========
             const DataCleanser = {
                 /**
-                 * 判断一个班组/人员是否属于{{BASE}}区域
+                 * 判断一个班组/人员是否属于南昌区域
                  * 规则：
-                 *   1) 班组名以"{{BASE}}"开头
+                 *   1) 班组名以"南昌"开头
                  *   2) 班组名在 DEFAULT_TEAMS 中
                  *   3) 姓名在 DEFAULT_LEADERS 中（班组长）
                  *   4) 姓名在 CREW_ADMIN_DATA 中（基础人员）
@@ -26631,7 +26631,7 @@ async clearAll() {
                 isGuangzhou(person) {
                     if (!person || !person.name) return false;
                     const team = (person.team || '').trim();
-                    if (team.startsWith('{{BASE}}')) return true;
+                    if (team.startsWith('南昌')) return true;
                     if (typeof DEFAULT_TEAMS !== 'undefined' && DEFAULT_TEAMS.includes(team)) return true;
                     if (typeof DEFAULT_LEADERS !== 'undefined' && DEFAULT_LEADERS.includes(person.name)) return true;
                     if (typeof CREW_ADMIN_DATA !== 'undefined' &&
@@ -26640,7 +26640,7 @@ async clearAll() {
                 },
 
                 /**
-                 * 扫描所有月份数据，返回非{{BASE}}数据报告（不修改）
+                 * 扫描所有月份数据，返回非南昌数据报告（不修改）
                  */
                 async scan() {
                     const months = await Storage.getAllMonths();
@@ -26688,7 +26688,7 @@ async clearAll() {
                 },
 
                 /**
-                 * 清洗所有月份数据，移除非{{BASE}}人员
+                 * 清洗所有月份数据，移除非南昌人员
                  * @param {Object} options
                  *   - dryRun: true 仅返回报告，false 实际修改
                  *   - backup: true 清洗前先备份
@@ -26817,7 +26817,7 @@ async clearAll() {
                             issues.push({
                                 level: 'warning',
                                 month: m,
-                                msg: `仍有 ${nonGZ.length} 条非{{BASE}}数据`,
+                                msg: `仍有 ${nonGZ.length} 条非南昌数据`,
                                 persons: nonGZ.map(p => `${p.name}(${p.team || '未分配'})`)
                             });
                         }
@@ -27506,7 +27506,7 @@ async clearAll() {
 
                     // 2) 数据清洗器接口
                     try {
-                        const testPersonGZ = { name: '测试人', team: '{{BASE}}一分部' };
+                        const testPersonGZ = { name: '测试人', team: '南昌一分部' };
                         const testPersonNonGZ = { name: '测试人2', team: '长沙分部' };
                         const isGZ = DataCleanser.isGuangzhou(testPersonGZ);
                         const isNonGZ = DataCleanser.isGuangzhou(testPersonNonGZ);
@@ -28675,7 +28675,7 @@ async clearAll() {
 
                     let salesTeamFilter = document.getElementById('salesTeamFilter');
                     if (salesTeamFilter) {
-                        salesTeamFilter.innerHTML = '<option value="">全部</option><option value="{{BASE}}张露班组">张露班组</option><option value="{{BASE}}黄子健班组">黄子健班组</option><option value="{{BASE}}李凯班组">李凯班组</option>';
+                        salesTeamFilter.innerHTML = '<option value="">全部</option><option value="南昌张露班组">张露班组</option><option value="南昌黄子健班组">黄子健班组</option><option value="南昌李凯班组">李凯班组</option>';
                     }
 
                     /* 串行渲染 + 让步，避免并发渲染阻塞主线程 */
@@ -28895,7 +28895,7 @@ async clearAll() {
                         const saHeader = saBaseHeader.concat(salesHeader, ['全年完成率', '销售排名']);
                         // 第一遍：构建行数据（同时计算每个人的全年完成率）
                         const saRows = list.map(p => {
-                            const squad = '{{BASE}}';
+                            const squad = '南昌';
                             const eventRecords = (p._meta && p._meta.eventRecords) || [];
                             const rawRecords = (p._meta && p._meta.rawDataRecords) || [];
                             // 全年事件累加
@@ -28982,7 +28982,7 @@ async clearAll() {
                         const monthLabel = m.split('-')[1] ? monthNames[parseInt(m.split('-')[1]) - 1] : m;
                         const monthHeader = ['姓名', '工号', '班组', '分队', '技术等级', '飞行小时', '月度绩效', '安全', '业务', '运行', '综合', '工作评定', '安全35%', '业务25%', '运行15%', '综合10%', '工作评定15%', '销售'];
                         const monthRows = list.map(p => {
-                            const squad = '{{BASE}}';
+                            const squad = '南昌';
                             // 【五大板块事件扣分】仅来自安全/业务/运行/综合/工作评定五大板块sheet，不包含其他附件（如航班生产积分等）的事件分数
                             // eventRecords数据来源严格限定，各板块分数独立计算，无跨板块合并
                             const eventRecords = (p._meta && p._meta.eventRecords) || [];
@@ -29042,7 +29042,7 @@ async clearAll() {
                     // 月度导出：工号、姓名、分队、班组、技术等级、飞行小时、安全、业务、运行、综合、工作评定、安全35%、业务25%、运行15%、综合10%、工作评定15%、销售、月度绩效
                     headers = ['姓名', '工号', '班组', '分队', '技术等级', '飞行小时', '月度绩效', '安全', '业务', '运行', '综合', '工作评定', '安全35%', '业务25%', '运行15%', '综合10%', '工作评定15%', '销售'];
                     exportData = list.map((p, idx) => {
-                        const squad = '{{BASE}}';
+                        const squad = '南昌';
                         const flightTotal = p.flightHours || 0;
                         const flightHours = Math.floor(flightTotal);
                         const flightMinutes = Math.round((flightTotal - flightHours) * 60);
@@ -29238,7 +29238,7 @@ async clearAll() {
                         });
                         const yearCompletion = totalTarget > 0 ? (Math.round((totalSale / totalTarget) * 100) / 100).toFixed(2) : '-';
                         return { _sortKey: totalTarget > 0 ? (totalSale / totalTarget) : -1, row: {
-                            '姓名': p.name, '工号': p.工号 || p.id || '-', '班组': p.team || '-', '分队': '{{BASE}}',
+                            '姓名': p.name, '工号': p.工号 || p.id || '-', '班组': p.team || '-', '分队': '南昌',
                             '技术等级': p.position || '普通乘务员',
                             '飞行小时(年总)': `${fh}:${fm.toString().padStart(2, '0')}`,
                             '月度绩效(年均)': Utils.formatNum(avgPerf),
@@ -29285,7 +29285,7 @@ async clearAll() {
                             const fh = Math.floor(flightHoursRaw); const fm = Math.round((flightHoursRaw - fh) * 60);
                             const monthPerf = p.monthlyPerformances && p.monthlyPerformances[m];
                             return {
-                                '姓名': p.name, '工号': p.工号 || p.id || '-', '班组': p.team || '-', '分队': '{{BASE}}',
+                                '姓名': p.name, '工号': p.工号 || p.id || '-', '班组': p.team || '-', '分队': '南昌',
                                 '技术等级': p.position || '普通乘务员',
                                 '飞行小时': `${fh}:${fm.toString().padStart(2, '0')}`,
                                 '月度绩效': monthPerf !== undefined ? Utils.formatNum(monthPerf) : '-',
@@ -29306,7 +29306,7 @@ async clearAll() {
                 updateProgress('导出完成！', 100);
             }
 
-            // 模式二：季度绩效汇总格式（与"{{BASE}}季度绩效"工作表完全一致）
+            // 模式二：季度绩效汇总格式（与"南昌季度绩效"工作表完全一致）
             async function exportQuarterlyFormat(list, months, period, updateProgress) {
                 updateProgress('正在生成季度绩效格式...', 70);
                 // 确定季度范围
@@ -29364,7 +29364,7 @@ async clearAll() {
                     return {
                         name: p.name,
                         position: p.position || '普通乘务员',
-                        base: p.team === '宁波' ? '宁波' : p.team === '揭阳' ? '揭阳' : '{{BASE}}',
+                        base: p.team === '宁波' ? '宁波' : p.team === '揭阳' ? '揭阳' : '南昌',
                         monthlyPerfs,
                         avgPerf: avgPerf !== null ? Utils.formatNum(avgPerf) : '-',
                         flightStr,
@@ -29385,7 +29385,7 @@ async clearAll() {
                 // 生成AOA数组（与Excel排版完全一致）
                 const aoa = [];
                 // 行1: 标题行（合并A1:J1）
-                aoa.push([`{{BASE}}${yearOfQuarter}年第${quarterNum}季度绩效`, '', '', '', '', '', '', '', '', '']);
+                aoa.push([`南昌${yearOfQuarter}年第${quarterNum}季度绩效`, '', '', '', '', '', '', '', '', '']);
                 // 行2: 乘务长表头
                 aoa.push(['排名', '姓名', '资质', '基地', ...quarterMonthLabels, '季度平均绩效', '季度飞行时间', '备注']);
                 // 乘务长数据行
@@ -29444,8 +29444,8 @@ async clearAll() {
                     }
                 }
 
-                XLSX.utils.book_append_sheet(wb, ws, '{{BASE}}第' + quarterNum + '季度绩效');
-                XLSX.writeFile(wb, `{{BASE}}${yearOfQuarter}年第${quarterNum}季度绩效.xlsx`);
+                XLSX.utils.book_append_sheet(wb, ws, '南昌第' + quarterNum + '季度绩效');
+                XLSX.writeFile(wb, `南昌${yearOfQuarter}年第${quarterNum}季度绩效.xlsx`);
                 updateProgress('导出完成！', 100);
             }
             
@@ -29917,7 +29917,7 @@ async clearAll() {
                     const blob = new Blob([payload], { type: 'application/json' });
                     const url = URL.createObjectURL(blob);
                     const a = document.createElement('a');
-                    const filename = `{{BASE}}乘务绩效备份_${new Date().toISOString().slice(0,10)}_${Utils.genId().slice(0,6)}${ext}`;
+                    const filename = `南昌乘务绩效备份_${new Date().toISOString().slice(0,10)}_${Utils.genId().slice(0,6)}${ext}`;
                     a.href = url;
                     a.download = filename;
                     a.click();
@@ -30148,8 +30148,8 @@ async clearAll() {
                                     </div>
                                     <div class="mb-3">
                                         <label class="form-label"><i class="bi bi-tag-fill me-1"></i>班组名称 <span class="text-danger">*</span></label>
-                                        <input type="text" class="form-control" id="newTeamName" placeholder="例如：{{BASE}}张露班组" maxlength="50">
-                                        <div class="form-text">建议格式：{{BASE}} + 姓名 + 班组，长度2-50字符</div>
+                                        <input type="text" class="form-control" id="newTeamName" placeholder="例如：南昌张露班组" maxlength="50">
+                                        <div class="form-text">建议格式：南昌 + 姓名 + 班组，长度2-50字符</div>
                                     </div>
                                     <div class="mb-3">
                                         <label class="form-label"><i class="bi bi-person-badge me-1"></i>班组长姓名</label>
@@ -30180,7 +30180,7 @@ async clearAll() {
                 const nameInput = document.getElementById('newTeamName');
                 const leaderInput = document.getElementById('newTeamLeader');
                 if (!nameInput) {
-                    let newTeam = window.prompt('请输入新班组名称', '{{BASE}}新班组');
+                    let newTeam = window.prompt('请输入新班组名称', '南昌新班组');
                     if (!newTeam || newTeam.trim() === '') {
                         showNotification('班组名称不能为空', 'warning');
                         return;
@@ -30266,7 +30266,7 @@ async clearAll() {
                 }
                 id = id.trim();
                 
-                let team = window.prompt('输入班组', AppState.teams[0] || '{{BASE}}张露班组');
+                let team = window.prompt('输入班组', AppState.teams[0] || '南昌张露班组');
                 if (!team || !team.trim()) {
                     showNotification('班组不能为空', 'warning');
                     return;
@@ -32866,8 +32866,8 @@ async clearAll() {
                 
                 // 添加江欣(李凯班组)和梁馨怡(黄子健班组)到自定义人员列表
                 const newMembers = [
-                    { name: '江欣', team: '{{BASE}}李凯班组', isLeader: false, id: 'auto_' + Date.now(), deletedAt: '' },
-                    { name: '梁馨怡', team: '{{BASE}}黄子健班组', isLeader: false, id: 'auto_' + (Date.now() + 1), deletedAt: '' }
+                    { name: '江欣', team: '南昌李凯班组', isLeader: false, id: 'auto_' + Date.now(), deletedAt: '' },
+                    { name: '梁馨怡', team: '南昌黄子健班组', isLeader: false, id: 'auto_' + (Date.now() + 1), deletedAt: '' }
                 ];
                 let needSave = false;
                 newMembers.forEach(m => {
@@ -32891,7 +32891,7 @@ async clearAll() {
                 
                 // 清除已移除人员的所有数据
                 await _purgeRemovedPersonnel();
-                // Excel人员同步（默认关闭：避免启动时对不存在的【{{BASE}}人员清单.xlsx】发起请求而产生网络错误）
+                // Excel人员同步（默认关闭：避免启动时对不存在的【南昌人员清单.xlsx】发起请求而产生网络错误）
                 // 如需启用自动同步，在页面运行前执行 window.AUTO_SYNC_PERSONNEL = true
                 if (typeof window.AUTO_SYNC_PERSONNEL !== 'undefined' && window.AUTO_SYNC_PERSONNEL) {
                     try { await syncPersonnelFromExcel(); } catch(e) { console.warn('[initApp] 人员同步失败:', e); }
