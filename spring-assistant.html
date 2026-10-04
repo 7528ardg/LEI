@@ -1876,6 +1876,22 @@ function readUsers(){
     var d = JSON.parse(lsGet(KEY_USERS) || 'null');
     if(d && d.magic === USERS_MAGIC && Array.isArray(d.users)) return d.users;
   }catch(e){}
+  /* 内置种子账号（ADMIN / 002191）由应用托管：始终合并进现有用户库，
+     确保老设备也能拿到最新种子账号与口令，无需清数据重装 */
+  if(d && d.magic === USERS_MAGIC && Array.isArray(d.users)){
+    var SEEDS = [ADMIN, SEED_USER_002191];
+    var changed = false;
+    SEEDS.forEach(function(seed){
+      var hit = null, i;
+      for(i=0;i<d.users.length;i++){ if(d.users[i].工号 === seed.工号){ hit = d.users[i]; break; } }
+      if(!hit){ d.users.push(seed); changed = true; }
+      else if(hit.密码哈希 !== seed.密码哈希 || hit.盐 !== seed.盐){
+        hit.盐 = seed.盐; hit.密码哈希 = seed.密码哈希; changed = true;
+      }
+    });
+    if(changed) saveUsers(d.users);
+    return d.users;
+  }
   var users = [ADMIN].concat([SEED_USER_002191]);
   lsSet(KEY_USERS, JSON.stringify({ magic: USERS_MAGIC, users: users }));
   return users;
