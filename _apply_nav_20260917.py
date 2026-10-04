@@ -347,7 +347,7 @@ function navJumpTo(mod, view){
     tries++;
     var f = null; try{ f = document.getElementById('frame-' + mod); }catch(e){}
     if(f && f.contentWindow){
-      var _tgt='*'; try{ var _u=new URL(f.src||'', location.href); if(_u.origin && _u.origin!=='null') _tgt=_u.origin; }catch(e){}
+      var _tgt='*'; try{ var _u=new URL(f.src||'', location.href); if(/^https?:$/.test(_u.protocol) && _u.origin && _u.origin!=='null') _tgt=_u.origin; }catch(e){}
       try{ f.contentWindow.postMessage({type:'cc:nav-jump', view:view, mod:mod}, _tgt); }catch(e){}
       if(tries < 3) setTimeout(fire, 500);   /* 模块脚本可能晚就绪，补发 */
     } else if(tries < 20){ setTimeout(fire, 400); }

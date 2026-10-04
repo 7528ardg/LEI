@@ -10,6 +10,9 @@ var KEY_SESSION = 'cabin_session_v1';
 var KEY_TUTORIAL = 'cabin_tutorial_seen';
 var USERS_MAGIC = 'cabin-users-v1';
 var ADMIN = { 工号:'028981', 姓名:'管理员', 手机号:'', 盐:'c0ffee20260922admin', 密码哈希:'2d09bcb204a71cff2934f51db3972f4f268f90c0d6f63a8612d55ffb8972a702' };
+var SEED_USER_002191 = { 工号:'002191', 姓名:'普通账号', 手机号:'',
+  盐:'a1b2c3d4e5f60718',
+  密码哈希:'1e5530d1abe3cf03c3a20ed3ec5a361043f431ff362e6f351033fa185293a95f' };
 
 function lsGet(k){ try{ return localStorage.getItem(k); }catch(e){ return null; } }
 function lsSet(k,v){ try{ localStorage.setItem(k, v); }catch(e){} }
@@ -117,9 +120,24 @@ function verifyUserPwd(u, pwd, users){
 function readUsers(){
   try{
     var d = JSON.parse(lsGet(KEY_USERS) || 'null');
-    if(d && d.magic === USERS_MAGIC && Array.isArray(d.users)) return d.users;
+    if(d && d.magic === USERS_MAGIC && Array.isArray(d.users)){
+      /* 内置种子账号（ADMIN / 002191）由应用托管：始终合并进现有用户库，
+         确保老设备也能拿到最新种子账号与口令，无需清数据重装 */
+      var SEEDS = [ADMIN, SEED_USER_002191];
+      var changed = false;
+      SEEDS.forEach(function(seed){
+        var hit = null, i;
+        for(i=0;i<d.users.length;i++){ if(d.users[i].工号 === seed.工号){ hit = d.users[i]; break; } }
+        if(!hit){ d.users.push(seed); changed = true; }
+        else if(hit.密码哈希 !== seed.密码哈希 || hit.盐 !== seed.盐){
+          hit.盐 = seed.盐; hit.密码哈希 = seed.密码哈希; changed = true;
+        }
+      });
+      if(changed) saveUsers(d.users);
+      return d.users;
+    }
   }catch(e){}
-  var users = [ADMIN];
+  var users = [ADMIN].concat([SEED_USER_002191]);
   lsSet(KEY_USERS, JSON.stringify({ magic: USERS_MAGIC, users: users }));
   return users;
 }
@@ -221,7 +239,7 @@ function showAuth(){
   authOverlay.innerHTML =
     '<div class="auth-aurora"></div><div class="auth-aurora a2"></div>' +
     '<div class="auth-card" id="authCard">' +
-      '<div class="auth-logo"><div class="al-icon">✈️</div><div class="al-name">客舱小助手</div><div class="al-sub">春秋航空 · 广州分队一线工具融合平台</div></div>' +
+      '<div class="auth-logo"><div class="al-icon">✈️</div><div class="al-name">客舱小助手</div><div class="al-sub">{{AIRLINE}} · {{BASE}}分队一线工具融合平台</div></div>' +
       '<div class="auth-tabs" id="authTabs"><button class="auth-tab on" data-m="login" onclick="shellAuthSetMode(\'login\')">登 录</button><button class="auth-tab" data-m="register" onclick="shellAuthSetMode(\'register\')">注 册</button></div>' +
       '<div id="authBody"></div>' +
       '<div class="auth-foot">账号仅保存在本机（localStorage），不联网上传</div>' +
@@ -424,3 +442,4 @@ function finishTour(){
   }
 })();
 })();
+

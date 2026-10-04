@@ -11509,8 +11509,11 @@ window.addEventListener('message', function(e){
 function ccParentOrigin(){
   try{
     if(document.referrer){
-      var o = new URL(document.referrer).origin;
-      if(o && o !== 'null') return o;
+      var u = new URL(document.referrer);
+      var o = u.origin;
+      /* file:// 下 Chromium 的 origin 字面量是 'file://'（不是 'null'），
+         必须只放行真 http(s) origin，否则 postMessage 会因 targetOrigin 非法而报错 */
+      if(o && o !== 'null' && /^https?:$/.test(u.protocol)) return o;
     }
   }catch(err){}
   return '*';
