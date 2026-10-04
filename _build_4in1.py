@@ -30,11 +30,11 @@ TEMPLATE = u'''<!DOCTYPE html>
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="客舱小助手">
 <meta name="mobile-web-app-capable" content="yes">
-<meta name="application-name" content="春秋航空广州分队客舱小助手">
-<meta name="description" content="春秋航空广州分队客舱小助手（离线完整版）- 你问我答·培训考核·绩效管理·美妆话术·医疗急救·风险预警·日常问题·手册奖惩·事件报告 九大模块单文件离线版">
+<meta name="application-name" content="{{AIRLINE}}{{BASE}}分队客舱小助手">
+<meta name="description" content="{{AIRLINE}}{{BASE}}分队客舱小助手（离线完整版）- 你问我答·培训考核·绩效管理·美妆话术·医疗急救·风险预警·日常问题·手册奖惩·事件报告 九大模块单文件离线版">
 <meta name="format-detection" content="telephone=no">
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
-<title>春秋航空 · 广州分队客舱小助手</title>
+<title>{{AIRLINE}} · {{BASE}}分队客舱小助手</title>
 <style>
 :root{
   --font-sans:-apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei",sans-serif;
@@ -706,7 +706,7 @@ button:disabled:active{transform:none;}
       <path d="M11 26 Q16 12 20 20 Q24 12 29 26" fill="none" stroke="url(#lg)" stroke-width="2.5" stroke-linecap="round" opacity=".7"/>
     </svg>
     <div>
-      <div class="brand-name"><span class="brand-main">春秋航空</span> <span class="brand-sub">客舱小助手</span></div>
+      <div class="brand-name"><span class="brand-main">{{AIRLINE}}</span> <span class="brand-sub">客舱小助手</span></div>
     </div>
   </div>
 
