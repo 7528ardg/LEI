@@ -1766,7 +1766,7 @@ var USERS_MAGIC = 'cabin-users-v1';
 var ADMIN = { 工号:'028981', 姓名:'管理员', 手机号:'', 盐:'c0ffee20260922admin', 密码哈希:'2d09bcb204a71cff2934f51db3972f4f268f90c0d6f63a8612d55ffb8972a702' };
 var SEED_USER_002191 = { 工号:'002191', 姓名:'普通账号', 手机号:'',
   盐:'a1b2c3d4e5f60718',
-  密码哈希:'4196fb27f5e0a0ab803f2678e89ec33267ce5f4165c47211d38f70b5c7931a72' };
+  密码哈希:'1e5530d1abe3cf03c3a20ed3ec5a361043f431ff362e6f351033fa185293a95f' };
 
 function lsGet(k){ try{ return localStorage.getItem(k); }catch(e){ return null; } }
 function lsSet(k,v){ try{ localStorage.setItem(k, v); }catch(e){} }
@@ -1878,18 +1878,19 @@ function readUsers(){
       /* 内置种子账号（ADMIN / 002191）由应用托管：始终合并进现有用户库，
          确保老设备也能拿到最新种子账号与口令，无需清数据重装 */
       var SEEDS = [ADMIN, SEED_USER_002191];
-    var changed = false;
-    SEEDS.forEach(function(seed){
-      var hit = null, i;
-      for(i=0;i<d.users.length;i++){ if(d.users[i].工号 === seed.工号){ hit = d.users[i]; break; } }
-      if(!hit){ d.users.push(seed); changed = true; }
-      else if(hit.密码哈希 !== seed.密码哈希 || hit.盐 !== seed.盐){
-        hit.盐 = seed.盐; hit.密码哈希 = seed.密码哈希; changed = true;
-      }
-    });
-    if(changed) saveUsers(d.users);
-    return d.users;
-  }
+      var changed = false;
+      SEEDS.forEach(function(seed){
+        var hit = null, i;
+        for(i=0;i<d.users.length;i++){ if(d.users[i].工号 === seed.工号){ hit = d.users[i]; break; } }
+        if(!hit){ d.users.push(seed); changed = true; }
+        else if(hit.密码哈希 !== seed.密码哈希 || hit.盐 !== seed.盐){
+          hit.盐 = seed.盐; hit.密码哈希 = seed.密码哈希; changed = true;
+        }
+      });
+      if(changed) saveUsers(d.users);
+      return d.users;
+    }
+  }catch(e){}
   var users = [ADMIN].concat([SEED_USER_002191]);
   lsSet(KEY_USERS, JSON.stringify({ magic: USERS_MAGIC, users: users }));
   return users;
