@@ -12,7 +12,7 @@
 <meta name="description" content="春秋航空乘务员刷题系统，完全离线可用">
 <meta name="format-detection" content="telephone=no">
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
-<title>春秋航空 · 南昌刷题系统 · 全能助手</title>
+<title>春秋航空刷题系统 · 全能助手</title>
 <style>
 /* ============================================
    设计系统：3 套主题方案
@@ -13081,7 +13081,7 @@ function renderDache(){
   document.getElementById('mainContent').innerHTML = `
   <div class="dc-wrap">
     <div class="dc-hero">
-      <span class="dc-hero-kicker">✈️ 春秋航空南昌分队 · 客舱小助手</span>
+      <span class="dc-hero-kicker">✈️ 春秋航空 · 客舱小助手</span>
       <h2>🚨 大撤应急 · 场景库</h2>
       <p>${heroDesc}全部考点已<strong>归纳为 ${cats.length} 大场景专题</strong>（含<strong>撤离程序</strong>五张可点击流程卡），每专题附<strong>一句话总结 + 速记要点</strong>，底部另有<strong>关键数字速记卡</strong>。<br>💬 在「你问我答」输入 <b>/大撤 关键词</b> 或点 <b>🚨 大撤专项</b> 库可随时提问。</p>
       <div class="dc-hero-stats">
@@ -13596,7 +13596,7 @@ function renderSettings(){
       <h3>ℹ️ 关于</h3>
       <div class="settings-row">
         <div>
-          <div class="sr-label">春秋航空 · 南昌刷题系统</div>
+          <div class="sr-label">春秋航空刷题系统</div>
           <div class="sr-desc">FLY WITH SMILE ✈️ 版本 2.0 · 支持离线使用</div>
         </div>
       </div>
@@ -14074,7 +14074,7 @@ function emptyState({icon, title, lead, tip, ctas=[], steps=[], variant='default
    Onboarding Tour · 首次使用引导
    ============================================ */
 const ONB_STEPS = [
-  {title:'欢迎登机，春秋乘务员！',desc:'这是「春秋航空 · 南昌刷题系统」客舱。我是您的引导员，将用 4 步带您熟悉整个系统。',selector:null, position:'center'},
+  {title:'欢迎登机，春秋乘务员！',desc:'这是「春秋航空刷题系统」客舱。我是您的引导员，将用 4 步带您熟悉整个系统。',selector:null, position:'center'},
   {title:'切换视觉风格',desc:'点击右下角的方案按钮，可在「经典航空」「现代极简」「商务高端」三种设计风格间自由切换，找到最舒适的视觉体验。',selector:'#styleSwitcher', position:'top-left'},
   {title:'上传你的题库',desc:'点击中间的虚线框，上传 CSV 或 Excel 格式的题目文件，即可开始刷题之旅。支持离线使用。',selector:'#uploadZone', position:'bottom-right'},
   {title:'解锁乘务成就',desc:'每次训练都能解锁成就徽章。从实习乘务一路晋升到钻石乘务长，与春秋航空一起 FLY WITH SMILE！',selector:'#homeRecentBadges', position:'bottom-left'},
@@ -14778,7 +14778,7 @@ if('serviceWorker' in navigator && location.protocol.startsWith('http')){
   // PWA Manifest（Blob URL 形式，避免外链）
   try{
     const manifest = {
-      name:'春秋航空 · 南昌刷题系统',
+      name:'春秋航空刷题系统',
       short_name:'春秋刷题',
       description:'春秋航空乘务员刷题系统，完全离线可用',
       start_url:'.',
