@@ -106,3 +106,4 @@ _recycle/
 __e2e_out/
 __synchk/
 _verify_all_out.txt
+_misused_*/
