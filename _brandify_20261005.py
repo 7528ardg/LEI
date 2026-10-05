@@ -104,6 +104,11 @@ FILES = [
     os.path.join(u'APK封装', u'CabinAssistant', u'assets', u'www', u'medical.html'),
     os.path.join(u'APK封装', u'CabinAssistant', u'assets', u'www', u'issues.html'),
     os.path.join(u'APK封装', u'CabinAssistant', u'assets', u'www', u'spring-assistant.html'),
+    # 2026-10-05 补P0-1：离线完整版由 _build_4in1.py 生成（其 TEMPLATE 头部是占位符），
+    # 此前不在本清单内 → brandify 跳过它 → {{AIRLINE}}/{{BASE}} 直接露给用户（实测 title
+    # 字面显示「{{AIRLINE}} · {{BASE}}分队客舱小助手」）。--check 也因此误报 PASS。
+    # 构建链顺序无需调整：_build_4in1(L100) 早于本脚本(L114)，本脚本在链尾能覆盖到产物。
+    u'客舱小助手（离线完整版）.html',
 ]
 
 

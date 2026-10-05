@@ -189,7 +189,10 @@ res.append(("SRC", "beauty.html(旧超时45s已清)",
 for rel in ("index.html", "qa.html", "quiz.html", "performance.html", "medical.html",
             "risk-lite.html", "daily.html", "manual.html", "report.html", "kb-admin.html",
             "beauty.html", "cc-home.html",
-            "spring-assistant.html", os.path.join("nc", "index.html")):
+            "spring-assistant.html", os.path.join("nc", "index.html"),
+            # 2026-10-05 补 P0-2：离线完整版也是上线交付物（_build_4in1.py 生成），
+            # 此前漏检 → 闸 56 项全绿却仍漏掉P0-1。**闸的清单必须覆盖全部交付形态**。
+            u"客舱小助手（离线完整版）.html"):
     raw = rd(os.path.join(BASE, rel))
     bad_ph = []
     for ph in ("{{AIRLINE}}", "{{BASE}}"):

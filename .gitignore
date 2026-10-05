@@ -100,3 +100,9 @@ docs/dache_img/
 压力测试报告_*
 *压力测试报告*
 docs/日期匹配引擎说明.md
+# 本地回收/暂存区（不入库）
+.trash_cleanup_*/
+_recycle/
+__e2e_out/
+__synchk/
+_verify_all_out.txt
