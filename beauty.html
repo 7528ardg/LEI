@@ -1,4 +1,4 @@
-﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿<!DOCTYPE html>
+﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿<!DOCTYPE html>
 <html lang="zh-CN">
 <head>
 <!-- __EMBED_SELF_20261009__ 自嵌入检测：被壳层 iframe 载入时隐藏本模块自带顶栏 （此前该行是裸文本，会被浏览器渲染成可见文字，已改为正式注释） -->
@@ -9,19 +9,46 @@
    故只能由模块自检；window.self !== window.top 不涉及跨源属性读取，可用。 */
 (function(){
   try{
-    if(window.self !== window.top){
+    var embedded = window.self !== window.top;
+    if(embedded){
       var d = document.documentElement;
       d.setAttribute('data-embed','1');
       /* 顶栏高度归零：模块内部大量 calc(100vh - var(--topbar-h)) 会自动修正，
          避免隐藏顶栏后仍预留空白（内容整体上移不完整）。 */
       d.style.setProperty('--topbar-h','0px');
     }
+    /* __GHOST_TEXT_FIX__ body/#app 里块级节点之间的纯空白文本节点会生成带
+       strut 的匿名行盒（16px×1.5=24px/iPad standalone 下叠加安全区后更宽），
+       header/nav 被隐藏后它仍独占一行 → iframe 顶部大空隙。
+       仅删除 body/#app 的【直属】纯空白文本节点（块间排版空白），
+       不深入段落/行内结构，不影响行内文字空格。 */
+    function stripGhost(root){
+      if(!root) return;
+      var ns = root.childNodes;
+      for(var i=ns.length-1;i>=0;i--){
+        var n = ns[i];
+        if(n.nodeType===3 && !n.nodeValue.replace(/\s+/g,'')) root.removeChild(n);
+      }
+    }
+    function boot(){
+      stripGhost(document.body);
+      var app = document.getElementById('app');
+      if(app){
+        stripGhost(app);
+        /* render() 每次用 innerHTML 重建 #app，会重新带入模板换行空白，持续清理 */
+        new MutationObserver(function(){ stripGhost(app); }).observe(app,{childList:true});
+      }
+    }
+    if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',boot);
+    else boot();
   }catch(e){}
 })();
 </script>
 <style>
+/* 仅隐藏品牌头；功能导航（产品浏览/需求推荐/话术生成/AI对话等入口）保留并置顶 */
 html[data-embed="1"] header[class*="bg-gradient-to-r"]{display:none!important}
-html[data-embed="1"] nav[class*="bg-white/80"]{display:none!important}
+html[data-embed="1"] body nav[class*="bg-white/80"]{display:block!important;top:0!important}
+html[data-embed="1"] body div[class*="top-[120px]"]{top:52px!important}
 html[data-embed="1"][style*="--topbar-h"]{--topbar-h:0px!important}
 </style>
 
@@ -34416,7 +34443,11 @@ button:active,[onclick]:active,a:active,summary:active,[role=button]:active{filt
     else{el.style.paddingBottom='calc('+px(cs.paddingBottom)+'px + env(safe-area-inset-bottom,0px))';}
   }
   function walk(){
-    var vw=innerWidth,vh=innerHeight,gotTop=false,gotBot=false;
+    /* 嵌入壳层 iframe 时顶部安全区由外壳顶栏统一承担：模块内不再做任何顶部
+       env(safe-area-inset-top) 补偿，否则双重补偿 → iframe 顶部大空隙（iPad standalone）。
+       底部补偿保留（iframe 底边贴屏幕边）。 */
+    var embedded=document.documentElement.getAttribute('data-embed')==='1';
+    var vw=innerWidth,vh=innerHeight,gotTop=embedded,gotBot=false;
     var els=document.querySelectorAll('body *');
     for(var i=0;i<els.length;i++){
       var el=els[i];if(el.dataset.msa)continue;el.dataset.msa='1';
@@ -34429,11 +34460,11 @@ button:active,[onclick]:active,a:active,summary:active,[role=button]:active{filt
       if(!wide)continue;
       if(pos==='fixed'){
         var t=px(cs.top),b=px(cs.bottom);
-        if(t>=0&&t<=6){patchOne(el,'top');gotTop=true;}
+        if(!embedded&&t>=0&&t<=6){patchOne(el,'top');gotTop=true;}
         else if(b>=0&&b<=2){patchOne(el,'bot');gotBot=true;}
       }else{
         var st=px(cs.top),sb=px(cs.bottom);
-        if(cs.top!=='auto'&&st<=6){patchOne(el,'top');gotTop=true;}
+        if(!embedded&&cs.top!=='auto'&&st<=6){patchOne(el,'top');gotTop=true;}
         else if(cs.bottom!=='auto'&&sb<=2){patchOne(el,'bot');gotBot=true;}
       }
     }

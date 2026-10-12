@@ -288,6 +288,26 @@ html[data-theme="dark"] .mega-panel{box-shadow:0 24px 64px rgba(0,0,0,.55);}
 .mega-foot{padding:12px 4px 8px;display:flex;justify-content:center;}
 /*__NAV_DESIGN_20260917_CSS__END*/
 
+/*__STANDALONE_SAFEAREA_20261012__ iPad/iPhone「添加到主屏幕」后 black-translucent
+   使 WebView 铺满物理屏，状态栏/刘海区域直接压在页面上。顶部安全区【仅由外壳承担】：
+   顶栏浮岛与 iframe 内容区整体下移 env(safe-area-inset-top)，左右避让刘海；
+   模块 iframe 内的 mobile-native-js 已在 data-embed 时跳过顶部补偿，避免双重空隙。 */
+@media (display-mode: standalone){
+  .topbar{top:calc(10px + env(safe-area-inset-top,0px));
+    left:calc(12px + env(safe-area-inset-left,0px));
+    right:calc(12px + env(safe-area-inset-right,0px));}
+  html.nav-scrolled .topbar{top:calc(6px + env(safe-area-inset-top,0px));}
+  .sys-area{top:calc(var(--topbar-h) + 16px + env(safe-area-inset-top,0px));}
+  .mega-panel{top:calc(var(--topbar-h) + 26px + env(safe-area-inset-top,0px));}
+}
+@media (display-mode: standalone) and (max-width:720px){
+  .topbar{top:calc(6px + env(safe-area-inset-top,0px));
+    left:calc(6px + env(safe-area-inset-left,0px));
+    right:calc(6px + env(safe-area-inset-right,0px));}
+  .sys-area{top:calc(var(--topbar-h) + 10px + env(safe-area-inset-top,0px));}
+}
+/*__STANDALONE_SAFEAREA_20261012_END__*/
+
 /*__SHELL_SYNC_20260919_CSS__BEGIN —— 顶栏收敛 3 板块 + 右侧三层重排（源 index.html，勿直接改产物）*/
 /* 2026-09-19 设计审核 P0-A/P0-B 修复：
    · 对比度：.sc-date / .uc-role / .uc-caret 原用 --text3(#B5C2BC)，实测对白仅 1.84:1（远低于 AA 4.5:1）。
@@ -2093,7 +2113,7 @@ const EMBED_CSS = {
   qa: '.livery-stripe,header.topbar{display:none!important}',
   quiz: '.livery-stripe,.topbar{display:none!important}.sidebar{top:0!important;height:100vh!important}.main{margin-top:0!important}',
   performance: '.livery-stripe{display:none!important}.module-nav{position:static!important;z-index:auto!important}.module-nav .navbar-brand{display:none!important}.module-nav .navbar-toggler{display:none!important}.module-nav .navbar-collapse{display:flex!important;flex-basis:auto!important;flex-grow:1!important}.module-nav .navbar-nav{flex-wrap:wrap!important}.module-content{margin-top:0!important;padding-top:12px!important}',
-  daily: '.livery-stripe,header.topbar{display:none!important}',
+  daily: '.livery-stripe{display:none!important}header.topbar{display:flex!important;top:0!important}',
   manual: 'header.top{display:none!important}',
   report: '.top{display:none!important}',
   beauty: 'header[class*="bg-gradient-to-r"]{display:none!important}nav[class*="bg-white/80"]{top:0!important}div[class*="top-[120px]"]{top:52px!important}',
@@ -4047,7 +4067,11 @@ button:active,[onclick]:active,a:active,summary:active,[role=button]:active{filt
     else{el.style.paddingBottom='calc('+px(cs.paddingBottom)+'px + env(safe-area-inset-bottom,0px))';}
   }
   function walk(){
-    var vw=innerWidth,vh=innerHeight,gotTop=false,gotBot=false;
+    /* standalone（添加到主屏幕）下顶部安全区由 @media(display-mode:standalone)
+       的 top/left/right 偏移统一承担，不再用 padding 补偿（固定高度内 padding 只会
+       挤压内容）；浏览器普通模式维持原逻辑。底部小白条补偿始终保留。 */
+    var standalone=window.matchMedia&&matchMedia('(display-mode: standalone)').matches;
+    var vw=innerWidth,vh=innerHeight,gotTop=standalone,gotBot=false;
     var els=document.querySelectorAll('body *');
     for(var i=0;i<els.length;i++){
       var el=els[i];if(el.dataset.msa)continue;el.dataset.msa='1';
@@ -4060,11 +4084,11 @@ button:active,[onclick]:active,a:active,summary:active,[role=button]:active{filt
       if(!wide)continue;
       if(pos==='fixed'){
         var t=px(cs.top),b=px(cs.bottom);
-        if(t>=0&&t<=6){patchOne(el,'top');gotTop=true;}
+        if(!standalone&&t>=0&&t<=6){patchOne(el,'top');gotTop=true;}
         else if(b>=0&&b<=2){patchOne(el,'bot');gotBot=true;}
       }else{
         var st=px(cs.top),sb=px(cs.bottom);
-        if(cs.top!=='auto'&&st<=6){patchOne(el,'top');gotTop=true;}
+        if(!standalone&&cs.top!=='auto'&&st<=6){patchOne(el,'top');gotTop=true;}
         else if(cs.bottom!=='auto'&&sb<=2){patchOne(el,'bot');gotBot=true;}
       }
     }
