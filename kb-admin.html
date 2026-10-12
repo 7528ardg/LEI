@@ -49,7 +49,8 @@
 </script>
 <style>
 html[data-embed="1"] header.kb-top{display:none!important}
-html[data-embed="1"] .kb-tabs{display:none!important}
+/* 功能标签（库管理/上传解析/覆盖率/差异审核/体检/覆盖层/数据包）保留贴顶 */
+html[data-embed="1"] .kb-tabs{display:flex!important;top:0!important}
 html[data-embed="1"][style*="--topbar-h"]{--topbar-h:0px!important}
 </style>
 

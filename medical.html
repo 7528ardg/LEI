@@ -48,7 +48,9 @@
 })();
 </script>
 <style>
-html[data-embed="1"] .headbar{display:none!important}
+/* 保留机型切换（A320/A321 设备差异），只隐藏标题；切换钮靠右 */
+html[data-embed="1"] .headbar .title{display:none!important}
+html[data-embed="1"] .headbar .machine-switch{margin-left:auto!important}
 html[data-embed="1"][style*="--topbar-h"]{--topbar-h:0px!important}
 </style>
 

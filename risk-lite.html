@@ -48,7 +48,14 @@
 })();
 </script>
 <style>
-html[data-embed="1"] .topbar{display:none!important}
+/* 保留面包屑（层级回退）与今日简报/天气/主题/聚焦操作，
+   隐藏与外壳重复的品牌、用户、版本徽标、刷新、备份、退出（与壳层注入规则一致） */
+html[data-embed="1"] .topbar .logo,
+html[data-embed="1"] .topbar .user-chip,
+html[data-embed="1"] #appVersionBadge,
+html[data-embed="1"] #btnBackup,
+html[data-embed="1"] #btnGlobalRefresh,
+html[data-embed="1"] #btnLogout{display:none!important}
 html[data-embed="1"][style*="--topbar-h"]{--topbar-h:0px!important}
 </style>
 
@@ -2479,7 +2486,7 @@ html[data-theme="dark"] .risk-low{color:#5FE0A6!important;}
     <button class="icon-btn" id="bellBtn" onclick="scrollToFocusBanner()" title="本月事件聚焦分队（已替换旧风险通知）">🔔</button>
     <div class="user-chip"><div class="avatar">雷</div><span>雷管理</span></div>
     <button onclick="openBackupPanel()" id="btnBackup" title="导出/导入本地数据备份（localStorage 数据，防清缓存丢失）" style="background:var(--color-bg-elevated);border:1px solid var(--color-border);color:var(--color-text-primary);padding: 4px 10px;border-radius:var(--radius-sm);cursor:pointer;font:var(--font-caption);transition:all .2s">💾 备份</button>
-    <button onclick="logout()" title="退出登录" style="background:var(--color-bg-elevated);border:1px solid var(--color-border);color:var(--color-text-secondary);padding: 4px 10px;border-radius:var(--radius-sm);cursor:pointer;font:var(--font-caption);transition:all .2s">🚪 退出</button>
+    <button id="btnLogout" onclick="logout()" title="退出登录" style="background:var(--color-bg-elevated);border:1px solid var(--color-border);color:var(--color-text-secondary);padding: 4px 10px;border-radius:var(--radius-sm);cursor:pointer;font:var(--font-caption);transition:all .2s">🚪 退出</button>
   </div>
 </div>
 

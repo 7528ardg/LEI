@@ -1,4 +1,4 @@
-﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿<!DOCTYPE html>
+﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿<!DOCTYPE html>
 <!--
 ================================================================================
     乘务管理系统 · 完整版
@@ -85,7 +85,14 @@
 </script>
 <style>
 html[data-embed="1"] .livery-stripe{display:none!important}
-html[data-embed="1"] .module-nav{display:none!important}
+/* 模块功能导航（综合分析/汇总/绩效/飞行小时/…/规则）必须保留：
+   只隐藏品牌与汉堡钮，导航条改为静态流式排列，与壳层注入规则保持一致 */
+html[data-embed="1"] .module-nav{position:static!important;z-index:auto!important}
+html[data-embed="1"] .module-nav .navbar-brand{display:none!important}
+html[data-embed="1"] .module-nav .navbar-toggler{display:none!important}
+html[data-embed="1"] .module-nav .navbar-collapse{display:flex!important;flex-basis:auto!important;flex-grow:1!important}
+html[data-embed="1"] .module-nav .navbar-nav{flex-wrap:wrap!important}
+html[data-embed="1"] .module-content{margin-top:0!important;padding-top:12px!important}
 html[data-embed="1"][style*="--topbar-h"]{--topbar-h:0px!important}
 </style>
 

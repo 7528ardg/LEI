@@ -2110,16 +2110,16 @@ function modUrl(id){
 
 // ===== 内嵌模式样式：隐藏各模块自带顶栏/侧栏，避免"双导航栏"（模块单独打开时仍保留自己的导航） =====
 const EMBED_CSS = {
-  qa: '.livery-stripe,header.topbar{display:none!important}',
+  qa: '.livery-stripe{display:none!important}header.topbar .logo{display:none!important}',
   quiz: '.livery-stripe,.topbar{display:none!important}.sidebar{top:0!important;height:100vh!important}.main{margin-top:0!important}',
   performance: '.livery-stripe{display:none!important}.module-nav{position:static!important;z-index:auto!important}.module-nav .navbar-brand{display:none!important}.module-nav .navbar-toggler{display:none!important}.module-nav .navbar-collapse{display:flex!important;flex-basis:auto!important;flex-grow:1!important}.module-nav .navbar-nav{flex-wrap:wrap!important}.module-content{margin-top:0!important;padding-top:12px!important}',
   daily: '.livery-stripe{display:none!important}header.topbar{display:flex!important;top:0!important}',
-  manual: 'header.top{display:none!important}',
-  report: '.top{display:none!important}',
+  manual: 'header.top .t-top{display:none!important}',
+  report: '.top .t-title{display:none!important}',
   beauty: 'header[class*="bg-gradient-to-r"]{display:none!important}nav[class*="bg-white/80"]{top:0!important}div[class*="top-[120px]"]{top:52px!important}',
-  medical: '.headbar{display:none!important}',
-  risk: '.topbar .logo,.topbar .user-chip,#appVersionBadge,#btnBackup,#btnGlobalRefresh,button[onclick="logout()"]{display:none!important}.topbar .breadcrumb{flex:1!important;min-width:0!important}',
-  kbadmin: 'header.kb-top{display:none!important}.kb-tabs{top:0!important}',
+  medical: '.headbar .title{display:none!important}.headbar .machine-switch{margin-left:auto!important}',
+  risk: '.topbar .logo,.topbar .user-chip,#appVersionBadge,#btnBackup,#btnGlobalRefresh,#btnLogout{display:none!important}.topbar .breadcrumb{flex:1!important;min-width:0!important}',
+  kbadmin: 'header.kb-top{display:none!important}.kb-tabs{display:flex!important;top:0!important}',
   drill: '.livery-stripe,header.topbar{display:none!important}',
   issues: '.livery-stripe,header.topbar{display:none!important}',
 };

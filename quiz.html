@@ -51,6 +51,18 @@
 html[data-embed="1"] .livery-stripe{display:none!important}
 html[data-embed="1"] .topbar{display:none!important}
 html[data-embed="1"][style*="--topbar-h"]{--topbar-h:0px!important}
+/* ≤768px 侧栏变为抽屉：父顶栏 display:none 时子按钮（即使 fixed）也不渲染，
+   故嵌入窄屏下让顶栏变成只含汉堡钮的迷你条，其余子项全隐藏 */
+@media(max-width:768px){
+  html[data-embed="1"] .topbar{display:flex!important;align-items:center;
+    position:fixed!important;top:0;left:0;right:0;height:52px;padding:0 10px!important;
+    background:var(--bg-card);border-bottom:1px solid var(--border);z-index:120;box-shadow:none!important;border-radius:0!important;}
+  html[data-embed="1"] .topbar>*:not(.hamburger){display:none!important}
+  html[data-embed="1"] .hamburger{display:flex!important;align-items:center;justify-content:center;
+    position:static!important;width:38px;height:38px;background:none;border:none;box-shadow:none;
+    font-size:1.4rem;color:var(--text);}
+  html[data-embed="1"] .main{padding-top:calc(52px + env(safe-area-inset-top,0px))!important}
+}
 </style>
 
 <meta charset="UTF-8">
