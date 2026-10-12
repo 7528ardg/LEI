@@ -1,0 +1,1256 @@
+<!DOCTYPE html>
+<html lang="zh-CN" data-theme="light">
+<head>
+<script>
+/* __DRILL_20261012__ 场景演练 · 机上事件特殊演练（导演台 + 转盘定岗 + 旅客任务）
+   双模式：
+   · 导演模式（默认）：导演台 / 转盘定岗 / 事件看板 / 旅客卡包 / 剧本库；
+     检测到本地同步服务（exam_system 的 /api/drill/*）时为「联机模式」，
+     学员手机经 ?room=房码 加入，实时同步；无服务时自动降级「单机模式」。
+   · 学员模式（URL 带 ?room=）：乘务员转盘定岗 / 旅客任务卡（模糊揭示）/ 事件看板。 */
+(function(){
+  /* 自嵌入检测：被壳层 iframe 载入时隐藏本模块自带顶栏（防顶栏先渲染再消失的闪烁） */
+  try{
+    if(window.self !== window.top){
+      document.documentElement.setAttribute('data-embed','1');
+      document.documentElement.style.setProperty('--topbar-h','0px');
+    }
+  }catch(e){}
+  /* 板块权限守卫（仅导演模式）：fail-closed。
+     · 管理员：与 issues.html 同款判定（role==='admin' 或 工号 100000）；
+     · 班组长：__DRILL_LEADER_20261012__ 开放给班组长当导演 —— 壳层在考试系统
+       登录时会把 is_manager/is_super 同步为 role='admin'（见 index.html SSO 块），
+       这里再兜底读 exam_user_v1 的真实角色，覆盖「会话未同步但考试身份在」的情形。
+     学员模式（?room=）不拦截 —— 房码即入场券，学员不是管理员。 */
+  var isPlayer = false;
+  try{ isPlayer = new URLSearchParams(location.search).has('room'); }catch(e){}
+  if(isPlayer) return;
+  var admin = false;
+  try{
+    var raw = localStorage.getItem('cabin_session_v1');
+    if(raw){
+      var s = JSON.parse(raw);
+      if(s && (!s.exp || Date.now() <= s.exp) && (s.role === 'admin' || s['\u5de5\u53f7'] === '028981')) admin = true;
+    }
+  }catch(e){ admin = false; }
+  if(!admin){
+    try{
+      var eu = JSON.parse(localStorage.getItem('exam_user_v1') || 'null');
+      if(eu && (eu.is_manager || eu.is_super)) admin = true;
+    }catch(e){}
+  }
+  if(admin) return;
+  try{
+    var n='<!DOCTYPE html><html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>板块完善中</title></head><body style="margin:0"><div style="position:fixed;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px;background:#fff;color:#0F2A1F;font-family:system-ui,-apple-system,\'PingFang SC\',\'Microsoft YaHei\',sans-serif;text-align:center;padding:24px"><div style="font-size:2.6rem">🎭</div><div style="font-size:1.18rem;font-weight:800">场景演练板块正在完善，敬请期待</div><div style="font-size:.85rem;color:#5b6b63;max-width:300px;line-height:1.7">本板块由管理员（导演）统一开放；参训学员请使用导演屏幕给出的带房码链接加入。</div></div></body></html>';
+    document.open();document.write(n);document.close();
+  }catch(e){}
+  try{ window.stop(); }catch(e){}
+})();
+</script>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover, interactive-widget=resizes-content">
+<meta name="theme-color" content="#00A650">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="场景演练">
+<meta name="format-detection" content="telephone=no">
+<title>场景演练 · 客舱小助手</title>
+<style>
+:root{
+  --font-sans:-apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei",sans-serif;
+  --primary:#148453;--primary-dark:#0C5F3A;--primary-light:#67AC91;
+  --primary-soft:#E8F3EE;--primary-mist:#F4F9F6;
+  --gold:#F5B800;--gold-soft:#FEF6DC;--gold-dark:#8A5A0B;
+  --danger:#C62828;--danger-soft:#FDE7E7;
+  --info:#2563eb;--info-soft:#E3ECFD;
+  --grad-primary:linear-gradient(135deg,#148453 0%,#1FA56A 100%);
+  --bg:#F5F8F6;--bg-card:#fff;--text:#0F2A1F;--text2:#5A6F65;--text3:#9DB0A6;
+  --border:#E5EDE9;--shadow:0 4px 14px rgba(20,132,83,.10);--shadow-lg:0 12px 32px rgba(20,132,83,.14);
+}
+html[data-theme="dark"]{
+  --bg:#0F1A14;--bg-card:#162420;--text:#E8F3EE;--text2:#8FA89C;--text3:#4A6358;--border:#1E3A2C;
+  --primary-soft:#1A3D2A;--primary-mist:#142E22;--danger-soft:#2A1616;--gold-soft:#2A2410;--info-soft:#16283F;
+  --shadow:0 4px 14px rgba(0,0,0,.35);--shadow-lg:0 12px 32px rgba(0,0,0,.45);
+}
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+body{font-family:var(--font-sans);background:var(--bg);color:var(--text);min-height:100vh;transition:background .3s,color .3s;}
+button{font-family:var(--font-sans);cursor:pointer;}
+.livery-stripe{height:3px;background:linear-gradient(90deg,#148453 0%,#4FA86C 18%,#8FC85C 35%,#C9D745 52%,#F5B800 68%,#F08A00 85%,#E64A19 100%);}
+.topbar{position:sticky;top:0;z-index:50;background:var(--bg-card);border-bottom:1px solid var(--border);display:flex;align-items:center;padding:12px 18px;gap:10px;backdrop-filter:blur(16px);}
+.t-title{font-size:1.08rem;font-weight:800;color:var(--primary);display:flex;align-items:center;gap:8px;}
+.t-sub{font-size:.72rem;color:var(--text2);margin-left:auto;}
+html[data-embed="1"] .livery-stripe{display:none!important}
+html[data-embed="1"] header.topbar{display:none!important}
+/* 副状态条：嵌入模式下仍然可见（模式/房码/连接状态） */
+.subbar{max-width:1060px;margin:0 auto;padding:10px 14px 0;display:flex;gap:8px;align-items:center;flex-wrap:wrap;}
+.badge{font-size:.72rem;font-weight:700;padding:4px 11px;border-radius:20px;background:var(--primary-soft);color:var(--primary);border:1px solid var(--primary-light);}
+.badge.gold{background:var(--gold-soft);color:var(--gold-dark);border-color:#F0D98A;}
+.badge.gray{background:var(--bg);color:var(--text2);border-color:var(--border);}
+.badge.red{background:var(--danger-soft);color:var(--danger);border-color:#F2B8B8;}
+.subbar .sp{flex:1;}
+.wrap{max-width:1060px;margin:0 auto;padding:14px 14px 60px;}
+.main-scroll-container{display:block;}
+/* ---- 页签 ---- */
+.tabbar{display:flex;gap:6px;margin-bottom:14px;overflow-x:auto;scrollbar-width:none;padding-bottom:2px;}
+.tabbar::-webkit-scrollbar{display:none;}
+.tab{flex-shrink:0;text-align:center;padding:9px 15px;border-radius:12px;border:1px solid var(--border);background:var(--bg-card);color:var(--text2);font-size:.86rem;font-weight:700;transition:all .2s;}
+.tab.active{background:var(--grad-primary);color:#fff;border-color:transparent;box-shadow:var(--shadow);}
+.view{display:none;}
+.view.active{display:block;animation:fadeIn .22s ease;}
+@keyframes fadeIn{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+/* ---- 卡片 ---- */
+.card{background:var(--bg-card);border:1px solid var(--border);border-radius:14px;padding:16px 18px;margin-bottom:14px;box-shadow:var(--shadow);}
+.card-title{font-size:.95rem;font-weight:800;margin-bottom:12px;display:flex;align-items:center;gap:8px;padding-bottom:10px;border-bottom:1px dashed var(--border);}
+.card-title .hint{font-size:.7rem;font-weight:600;color:var(--text3);margin-left:auto;}
+.sub{font-size:.76rem;color:var(--text2);line-height:1.7;}
+/* ---- 转盘 ---- */
+.wheel-zone{display:flex;gap:22px;align-items:flex-start;flex-wrap:wrap;}
+.wheel-box{position:relative;width:340px;height:340px;flex-shrink:0;margin:0 auto;}
+.wheel-svg{width:100%;height:100%;display:block;}
+.wheel-pointer{position:absolute;top:-6px;left:50%;transform:translateX(-50%);z-index:3;font-size:1.5rem;line-height:1;color:var(--danger);text-shadow:0 2px 6px rgba(0,0,0,.18);}
+.wheel-center{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);z-index:2;width:86px;height:86px;border-radius:50%;border:none;background:var(--grad-primary);color:#fff;font-size:1.05rem;font-weight:800;box-shadow:0 6px 18px rgba(20,132,83,.4);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;}
+.wheel-center:disabled{filter:grayscale(.5);opacity:.6;}
+.wheel-center small{font-size:.62rem;font-weight:600;opacity:.85;}
+.wheel-side{flex:1;min-width:260px;}
+/* ---- 表单元素 ---- */
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;padding:10px 16px;border-radius:11px;border:1px solid var(--border);background:var(--bg-card);color:var(--text);font-size:.84rem;font-weight:700;transition:all .18s;}
+.btn:hover{border-color:var(--primary-light);color:var(--primary);}
+.btn.primary{background:var(--grad-primary);color:#fff;border-color:transparent;box-shadow:var(--shadow);}
+.btn.primary:active{transform:scale(.97);}
+.btn.warn{background:var(--gold-soft);color:var(--gold-dark);border-color:#F0D98A;}
+.btn.danger{background:var(--danger-soft);color:var(--danger);border-color:#F2B8B8;}
+.btn.sm{padding:6px 11px;font-size:.76rem;border-radius:9px;}
+.btn.block{width:100%;}
+.btn:disabled{opacity:.45;pointer-events:none;}
+.field{margin-bottom:12px;}
+.field label{display:block;font-size:.76rem;color:var(--text2);margin-bottom:6px;font-weight:700;}
+.field input,.field select,.field textarea{width:100%;padding:10px 12px;border-radius:10px;border:1px solid var(--border);background:var(--bg);color:var(--text);font-size:.88rem;outline:none;font-family:var(--font-sans);}
+.field input:focus,.field select:focus,.field textarea:focus{border-color:var(--primary);box-shadow:0 0 0 3px var(--primary-soft);}
+.field textarea{min-height:72px;resize:vertical;line-height:1.6;}
+.chips{display:flex;gap:6px;flex-wrap:wrap;}
+.chip{padding:7px 13px;border-radius:20px;border:1px solid var(--border);background:var(--bg-card);color:var(--text2);font-size:.8rem;font-weight:700;transition:all .15s;}
+.chip.on{background:var(--primary-soft);color:var(--primary);border-color:var(--primary-light);}
+.chip:disabled{opacity:.4;}
+.stepper{display:inline-flex;align-items:center;gap:0;border:1px solid var(--border);border-radius:10px;overflow:hidden;background:var(--bg);}
+.stepper button{border:none;background:transparent;color:var(--primary);font-size:1rem;font-weight:800;width:34px;height:34px;}
+.stepper b{min-width:44px;text-align:center;font-size:.92rem;}
+/* ---- 号位/角色 ---- */
+.pos-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:10px;}
+.pos-card{border:1px solid var(--border);border-radius:12px;padding:12px 14px;background:var(--bg);}
+.pos-card .no{font-size:1.15rem;font-weight:800;color:var(--primary);}
+.pos-card .who{font-size:.82rem;font-weight:700;margin-top:2px;}
+.pos-card .duty{font-size:.7rem;color:var(--text2);margin-top:5px;line-height:1.6;}
+.pos-card.empty{border-style:dashed;color:var(--text3);}
+/* ---- 阶段条 ---- */
+.phase-strip{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:10px;}
+.phase-chip{padding:7px 12px;border-radius:10px;border:1px solid var(--border);background:var(--bg-card);font-size:.76rem;font-weight:700;color:var(--text2);text-align:left;line-height:1.35;}
+.phase-chip.on{background:var(--grad-primary);color:#fff;border-color:transparent;}
+.phase-chip.past{opacity:.55;}
+.phase-chip small{display:block;font-size:.64rem;font-weight:600;opacity:.8;}
+.clock-big{font-size:2.2rem;font-weight:800;color:var(--primary);font-variant-numeric:tabular-nums;letter-spacing:.5px;}
+/* ---- 事件看板 ---- */
+.ev{border:1px solid var(--border);border-radius:12px;padding:12px 14px;margin-bottom:10px;background:var(--bg-card);box-shadow:var(--shadow);}
+.ev-head{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-bottom:6px;}
+.ev-t{font-size:.74rem;font-weight:700;color:var(--gold-dark);background:var(--gold-soft);border-radius:20px;padding:2px 10px;}
+.ev-title{font-size:.9rem;font-weight:800;}
+.ev-body{font-size:.8rem;color:var(--text2);line-height:1.7;white-space:pre-wrap;}
+.ev.phase{border-color:var(--primary-light);background:var(--primary-mist);}
+.tag{font-size:.68rem;font-weight:700;padding:2px 9px;border-radius:20px;background:var(--primary-soft);color:var(--primary);white-space:nowrap;}
+.tag.bcast{background:var(--info-soft);color:var(--info);}
+.tag.pax{background:var(--gold-soft);color:var(--gold-dark);}
+.tag.crew{background:var(--primary-soft);color:var(--primary);}
+/* ---- 旅客任务卡（模糊揭示） ---- */
+.task{border:1px solid var(--border);border-radius:12px;padding:12px 14px;margin-bottom:10px;background:var(--bg-card);box-shadow:var(--shadow);}
+.task-head{display:flex;align-items:center;gap:8px;flex-wrap:wrap;}
+.task-title{font-size:.88rem;font-weight:800;}
+.task-body{font-size:.8rem;color:var(--text2);line-height:1.75;margin-top:8px;white-space:pre-wrap;}
+.task.masked .task-body{filter:blur(9px);user-select:none;pointer-events:none;}
+.task .sev{font-size:.66rem;font-weight:800;border-radius:20px;padding:2px 9px;}
+.sev1{background:var(--primary-soft);color:var(--primary);}
+.sev2{background:var(--gold-soft);color:var(--gold-dark);}
+.sev3{background:var(--danger-soft);color:var(--danger);}
+.empty-slot{border:1px dashed var(--border);border-radius:12px;padding:16px;text-align:center;color:var(--text3);font-size:.78rem;margin-bottom:10px;}
+/* ---- 日志 ---- */
+.log-list{max-height:300px;overflow-y:auto;font-size:.76rem;line-height:1.9;color:var(--text2);}
+.log-list b{color:var(--gold-dark);font-variant-numeric:tabular-nums;margin-right:6px;}
+/* ---- 转盘结果弹层 ---- */
+.mask{position:fixed;inset:0;background:rgba(10,30,20,.55);z-index:400;display:none;align-items:center;justify-content:center;padding:20px;backdrop-filter:blur(3px);}
+.mask.show{display:flex;animation:fadeIn .2s ease;}
+.reveal-card{background:var(--bg-card);border-radius:20px;max-width:430px;width:100%;padding:28px 26px;text-align:center;box-shadow:var(--shadow-lg);border:1px solid var(--border);}
+.reveal-card .big{font-size:3.2rem;font-weight:900;color:var(--primary);line-height:1.15;margin:8px 0 4px;}
+.reveal-card .who{font-size:1rem;font-weight:800;}
+.reveal-card .duty{font-size:.8rem;color:var(--text2);line-height:1.8;margin-top:12px;text-align:left;background:var(--primary-mist);border:1px dashed var(--primary-light);border-radius:12px;padding:12px 14px;}
+/* ---- 房间面板 ---- */
+.room-code{font-size:2.6rem;font-weight:900;letter-spacing:10px;color:var(--gold-dark);background:var(--gold-soft);border:2px dashed #E8C96A;border-radius:14px;padding:10px 18px;display:inline-block;}
+.join-url{font-size:.86rem;font-weight:700;color:var(--info);word-break:break-all;user-select:all;background:var(--info-soft);border-radius:10px;padding:10px 12px;line-height:1.6;}
+/* ---- Toast ---- */
+#toastBox{position:fixed;left:50%;bottom:34px;transform:translateX(-50%);z-index:600;display:flex;flex-direction:column;gap:8px;align-items:center;pointer-events:none;}
+.toast{background:rgba(15,42,31,.92);color:#fff;font-size:.8rem;font-weight:600;padding:10px 18px;border-radius:22px;box-shadow:0 8px 24px rgba(0,0,0,.25);animation:tIn .25s ease;}
+@keyframes tIn{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
+/* ---- 学员端 ---- */
+.player-wrap{max-width:560px;margin:0 auto;}
+.my-pos{background:var(--grad-primary);border-radius:16px;padding:22px 20px;color:#fff;text-align:center;margin-bottom:14px;box-shadow:var(--shadow);}
+.my-pos .n{font-size:2.4rem;font-weight:900;line-height:1.1;}
+.my-pos .w{font-size:.85rem;opacity:.92;margin-top:4px;}
+.my-pos .d{font-size:.72rem;opacity:.85;margin-top:10px;line-height:1.7;text-align:left;background:rgba(255,255,255,.14);border-radius:10px;padding:10px 12px;}
+.center-note{text-align:center;color:var(--text3);font-size:.82rem;line-height:1.9;padding:26px 10px;}
+.spin-wait{font-size:.9rem;font-weight:800;color:var(--gold-dark);background:var(--gold-soft);border:1px dashed #E8C96A;border-radius:12px;padding:14px;text-align:center;animation:pulse 1.6s ease infinite;}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.6}}
+pre.code{background:var(--bg);border:1px solid var(--border);border-radius:10px;padding:12px;font-size:.7rem;line-height:1.7;overflow-x:auto;color:var(--text2);font-family:Consolas,monospace;}
+.goal-li{font-size:.8rem;color:var(--text2);line-height:1.9;padding-left:1.4em;position:relative;}
+.goal-li:before{content:"✓";position:absolute;left:0;color:var(--primary);font-weight:800;}
+@media(max-width:640px){
+  .wrap{padding:12px 10px 60px;}
+  .wheel-box{width:280px;height:280px;}
+  .card{padding:14px;}
+  .clock-big{font-size:1.8rem;}
+}
+</style>
+</head>
+<body>
+<div class="livery-stripe"></div>
+<header class="topbar">
+  <div class="t-title">🎭 场景演练</div>
+  <div class="t-sub" id="hdScn">机上事件 · 特殊演练</div>
+</header>
+
+<div class="subbar" id="subbar"></div>
+
+<main class="main-scroll-container">
+  <!-- ================= 导演端 ================= -->
+  <div class="wrap" id="dirRoot" style="display:none">
+    <!-- ① 转盘定岗 -->
+    <section class="view active" id="viewWheel">
+      <div class="card" id="roomCard"></div>
+      <div class="card">
+        <div class="card-title">🎛️ 演练设置 <span class="hint">默认 1-4 号位；联机模式下学员扫码/输网址加入后在线转盘</span></div>
+        <div class="wheel-zone">
+          <div class="wheel-box">
+            <div class="wheel-pointer">▼</div>
+            <svg class="wheel-svg" id="wheelSvg" viewBox="0 0 340 340"></svg>
+            <button class="wheel-center" id="btnSpin" onclick="onSpinTap()">转动<br><small>定岗</small></button>
+          </div>
+          <div class="wheel-side">
+            <div class="field">
+              <label>乘务号位数（1-8，默认 4）</label>
+              <div class="chips" id="posChips"></div>
+              <div style="margin-top:8px"><button class="btn sm" onclick="randomPos()">🎲 随机号位数</button></div>
+            </div>
+            <div class="field">
+              <label>旅客人数（若干，0-8）</label>
+              <div class="stepper"><button onclick="stepPax(-1)">−</button><b id="paxN">4</b><button onclick="stepPax(1)">＋</button></div>
+            </div>
+            <div class="field">
+              <label>演练场景</label>
+              <select id="selScn" onchange="onScenarioChange()"></select>
+            </div>
+            <div class="field">
+              <label>乘务员名单（可选，每行一人；上场顺序即名单顺序）</label>
+              <textarea id="crewNames" placeholder="张三&#10;李四&#10;王五&#10;赵六"></textarea>
+            </div>
+            <div style="display:flex;gap:8px;flex-wrap:wrap">
+              <button class="btn primary" id="btnBegin" onclick="onBeginTap()">🎬 开始定岗</button>
+              <button class="btn" onclick="onResetTap()">♻️ 重置</button>
+            </div>
+            <div class="sub" style="margin-top:10px" id="assignSummary"></div>
+          </div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-title">🧑‍✈️ 号位名册</div>
+        <div class="pos-grid" id="posGrid"></div>
+      </div>
+    </section>
+
+    <!-- ② 导演台 -->
+    <section class="view" id="viewDirector">
+      <div class="card">
+        <div class="card-title">⏱️ 演练时钟与阶段 <span class="hint">时间与场景变化全部由导演主导</span></div>
+        <div style="display:flex;gap:16px;align-items:center;flex-wrap:wrap;margin-bottom:12px">
+          <div class="clock-big" id="simClock">--:--</div>
+          <div style="display:flex;gap:6px;flex-wrap:wrap">
+            <button class="btn sm" onclick="onClockTap(5)">+5 min</button>
+            <button class="btn sm" onclick="onClockTap(10)">+10 min</button>
+            <button class="btn sm" onclick="onClockTap(30)">+30 min</button>
+          </div>
+          <button class="btn primary sm" id="btnNextPhase" onclick="onNextPhaseTap()">推进到下一阶段 ▶</button>
+        </div>
+        <div class="phase-strip" id="phaseStrip"></div>
+        <div class="sub" id="phaseTip"></div>
+      </div>
+      <div class="card">
+        <div class="card-title">📣 注入事件 / 广播 <span class="hint">推送到全体或指定号位、旅客</span></div>
+        <div class="field">
+          <label>事件库（点击填入）</label>
+          <div class="chips" id="injectLib"></div>
+        </div>
+        <div style="display:flex;gap:10px;flex-wrap:wrap">
+          <div class="field" style="flex:1;min-width:200px"><label>标题</label><input id="injTitle" placeholder="例：机长通知：继续等待，时间待定"></div>
+          <div class="field" style="width:170px"><label>送达对象</label>
+            <select id="injTarget"><option value="all">全体</option><option value="crew">乘务组</option><option value="bcast">广播（全体）</option></select>
+          </div>
+        </div>
+        <div class="field"><label>内容（可选，可写演员指示/剧本台词）</label><textarea id="injBody" placeholder="由导演现场输入，或先在上方事件库中点选"></textarea></div>
+        <div style="display:flex;gap:8px;flex-wrap:wrap">
+          <button class="btn primary" onclick="onInjectTap()">📨 下发事件</button>
+          <select id="injPos" style="display:none;width:auto;padding:8px 10px;border-radius:10px;border:1px solid var(--border);background:var(--bg);color:var(--text);font-size:.82rem"></select>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-title">🎒 旅客任务下发 <span class="hint">旅客的场景完全由导演指派；学员端模糊卡面揭示</span></div>
+        <div class="field"><label>指派给</label><div class="chips" id="paxChips"></div></div>
+        <div class="field"><label>任务卡库（点击下发）</label><div id="taskLib"></div></div>
+        <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:flex-end">
+          <div class="field" style="flex:1;min-width:180px"><label>自定义任务标题</label><input id="ctTitle" placeholder="例：你突然觉得头晕"></div>
+          <div class="field" style="flex:2;min-width:220px"><label>任务内容</label><input id="ctBody" placeholder="表演要求 / 台词提示"></div>
+          <button class="btn primary" onclick="onCustomTaskTap()">下发</button>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-title">📢 广播话术速发 <span class="hint">一键推送到事件看板供全组对照</span></div>
+        <div id="bcLib"></div>
+      </div>
+      <div class="card">
+        <div class="card-title">📝 演练记录 <span class="hint" id="logCount"></span></div>
+        <div class="log-list" id="logList"></div>
+        <div style="display:flex;gap:8px;margin-top:10px;flex-wrap:wrap">
+          <input id="noteInput" placeholder="导演批注：记录讲评要点…" style="flex:1;min-width:180px;padding:9px 12px;border-radius:10px;border:1px solid var(--border);background:var(--bg);color:var(--text);font-size:.82rem;outline:none">
+          <button class="btn sm" onclick="onNoteTap()">记一笔</button>
+          <button class="btn sm" onclick="exportLog()">⬇️ 导出记录</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- ③ 事件看板 -->
+    <section class="view" id="viewBoard">
+      <div class="card" style="background:var(--primary-mist)">
+        <div class="card-title">🎬 当前阶段：<span id="bdPhase"></span></div>
+        <div class="sub" id="bdPhaseBg"></div>
+      </div>
+      <div id="bdList"></div>
+    </section>
+
+    <!-- ④ 旅客卡包 -->
+    <section class="view" id="viewPax">
+      <div class="card">
+        <div class="card-title">🎒 旅客卡包 <span class="hint">导演可见全文；单机模式点卡揭示（防大屏围观）</span></div>
+        <div id="paxCards"></div>
+      </div>
+    </section>
+
+    <!-- ⑤ 剧本库 -->
+    <section class="view" id="viewScript"></section>
+  </div>
+
+  <!-- ================= 学员端（?room=） ================= -->
+  <div class="wrap player-wrap" id="plyRoot" style="display:none"></div>
+</main>
+
+<div class="mask" id="revealMask" onclick="if(event.target===this)closeReveal()">
+  <div class="reveal-card" id="revealCard"></div>
+</div>
+<div id="toastBox"></div>
+
+<script>
+/* ============================================================
+   场景剧本库（框架）：新增场景 = 往 SCENARIOS 里加一个对象。
+   字段说明：
+   · phases[]   阶段：name 名称 / sim 阶段基准时刻(HH:MM) / diff 难度 /
+                bg 阶段背景(全员可见) / director 导演引导要点(仅导演) /
+                injects[] 该阶段建议注入事件
+   · crewDuties 乘务号位职责（1-8；default 为扩展位兜底）
+   · passengerTasks[] 旅客任务卡池（sev 1-3 难度；hint 下发时机建议）
+   · injects[]  随时可用事件池；broadcasts[] 广播话术
+   ============================================================ */
+const SCENARIOS = [{
+  id:'delay01',
+  name:'延误风波',
+  tag:'航班延误 · 关舱后机上长时间等待',
+  diff:'★★★',
+  baseTime:'14:10',
+  brief:'9C8817 南昌 → 上海虹桥，计划 14:10 起飞。旅客登机完毕、舱门关闭后，机组接到空中流量控制指令，机坪等待。等待中预计时间一再延长，客舱内焦虑情绪蔓延，各类旅客问题接连出现。',
+  goals:[
+    '延误信息传达：口径统一、留有余地，不承诺、不猜测、不传谣',
+    '特殊旅客识别与主动关注：转机 / 母婴 / 老人 / 情绪旅客',
+    '冲突降级：乘务长介入时机、号位联动、人机安全优先',
+    '服务补偿边界：知道「能做什么、不能承诺什么」',
+    '恢复善后：起飞前安全检查不走过场，重点旅客起飞后回访'
+  ],
+  phases:[
+    {name:'关舱待命', sim:'14:10', diff:'★',
+     bg:'廊桥撤离、舱门关闭，客舱进入正常起飞前程序。此时一切如常，旅客各就各位。',
+     director:'先让客舱「正常运转」2-3 分钟，不注入任何事件，观察谁的岗位意识最稳。之后可用事件库投一枚「常旅客按铃」，试探号位响应速度。'},
+    {name:'延误宣布', sim:'14:25', diff:'★',
+     bg:'机组接到塔台指令：因上海虹桥流量控制，预计机坪等待约 40 分钟。机长广播已发出，客舱出现轻微骚动。',
+     director:'听乘务长/指定号位的补充广播是否标准（时间留余地、致歉、服务指引三要素）。可注入「转机旅客按铃」。观察各号位是否主动递水、安抚周边旅客。'},
+    {name:'焦躁升温', sim:'14:50', diff:'★★',
+     bg:'等待已超 25 分钟，机长通知等待延长、时间待定。客舱内议论声渐起，呼唤铃声此起彼伏。',
+     director:'本阶段是「多线并行」训练核心：依次派发 T3 情绪激动、T5 拍视频、T2 婴儿妈妈、T7 座椅纠纷（按参训人数取舍）。重点观察：号位是否主动巡舱、信息口径是否统一、乘务长是否有人工统筹。'},
+    {name:'冲突处置', sim:'15:05', diff:'★★★',
+     bg:'一名旅客情绪失控，大声指责并要求立即下机，周边旅客附和；同时后舱一名老年旅客面色不佳。客舱秩序面临失控风险。',
+     director:'高难阶段。观察：谁第一时间报告乘务长、乘务长介入话术、是否隔离现场（把冲突引离公共区域）、医疗事件与冲突处置的优先级排序（人机安全 > 服务）。必要时注入「寻医广播」话术考核。'},
+    {name:'恢复善后', sim:'15:20', diff:'★★',
+     bg:'塔台给出放行指令，航班预计 10 分钟后起飞。客舱需要尽快恢复秩序、完成起飞前安全检查。',
+     director:'观察：安全检查是否到位（尤其刚才冲突区域、装睡旅客）、老人与婴儿是否复查、是否有起飞后回访安排。讲评时对照五项训练目标逐条复盘。'}
+  ],
+  crewDuties:{
+    1:'乘务长：全局指挥；与机组信息同步；对外广播；冲突介入与定性；事件记录与上报',
+    2:'后舱：后舱区域管控与后厨房服务；后出口通道监督；支援中舱',
+    3:'中舱：中舱监控；特殊旅客识别与关注；翼上出口管理',
+    4:'前舱：前舱区域管控；配合乘务长处置前舱事件；信息传递与递送',
+    default:'机动位：区域支援；行李架与客舱秩序管控；广播辅助（职责可由导演在剧本中自定义）'
+  },
+  passengerTasks:[
+    {id:'t1', title:'赶转机的陈先生', sev:2, hint:'建议阶段二后下发',
+     body:'你 16:30 要在浦东转国际航班，时间非常紧。延误宣布后开始反复按服务铃，要求乘务员「给个准话」。若对方回答含糊（如「快了」「再等等」），你要表现出更强烈的焦虑，并扬言投诉。若乘务员给出帮助动作（记录你的转机信息、承诺向机组反映、告知最晚决策时间），你可逐渐平静。'},
+    {id:'t2', title:'带婴儿的年轻妈妈', sev:1, hint:'建议阶段三下发',
+     body:'怀里的婴儿一直哭闹。你需要：① 热水冲奶粉；② 希望换到人少的排；③ 周边旅客投来的白眼让你压力很大。若 10 分钟内没有人主动提供帮助，你就当众抱怨「到底有没有人管」。若有人持续关照你，则配合转为平静。'},
+    {id:'t3', title:'情绪激动的王先生', sev:3, hint:'建议阶段三下发，阶段四升级',
+     body:'你认定航空公司「故意骗人」，名义流量控制其实是管理问题。表演要求：大声抱怨、拍打行李架、号召周围旅客「一起下机」。乘务员若只是空洞安抚（「您别激动」）则继续升级；若有人给出实质信息（原因、等待时长的不确定性说明、可提供的帮助）则缓和一档。阶段四听导演口令再升级为「要求立即下机」。'},
+    {id:'t4', title:'身体不适的刘大爷', sev:2, hint:'阶段三潜伏，阶段四发作',
+     body:'你感觉胸闷、面色不好，但一开始不吭声（老年人不想麻烦别人）。阶段三只演出「皱眉、扶额头」。听到导演口令后症状加重：出虚汗、抓着扶手。你的唤人铃坏了——需要邻座旅客替你呼叫，考验乘务组能否发现「沉默的病人」。'},
+    {id:'t5', title:'拍视频的赵小姐', sev:2, hint:'建议阶段三下发',
+     body:'你全程举着手机录像，扬言「发抖音、找媒体」。核心考题：反复要求乘务员「把你刚才的话再说一遍，我录着呢」。乘务员面对镜头的话术是否严谨、是否有「过度承诺」被抓拍的风险。若对方表现得体，你改口「那我把这段删了」。'},
+    {id:'t6', title:'冷面商务客孙总', sev:1, hint:'任意阶段可用',
+     body:'你是铂金卡常旅客，见过世面、语气冷。每隔几分钟按一次铃要「最新起飞时间」，并对比「别的航司早就起飞了」。你不说脏话不发火，只用沉默和皱眉施压。考验乘务员对高价值旅客的耐心与信息管理。'},
+    {id:'t7', title:'座椅纠纷的两侧', sev:2, hint:'建议阶段三下发',
+     body:'你（和同伴）前排的椅背放得很低，你双方发生争执、声音越来越大，要求乘务员「来评理」「给我们换座」。若乘务员处置得当（先隔离情绪、再调座位/调椅背、不当众判对错），你接受结果。'},
+    {id:'t8', title:'装睡的年轻人', sev:1, hint:'恢复阶段考核',
+     body:'安全广播响起时你戴上耳机闭眼装睡，安全带检查时也不配合（手臂压着安全带）。乘务员需要依规二次提醒、必要时报告乘务长。起飞前最后一刻你才扣上——看对方是否守住程序底线。'}
+  ],
+  injects:[
+    {id:'i1', title:'有旅客按服务铃', body:'就近号位须在 30 秒内响应（导演计时）。', hint:'任意阶段 · 试探响应速度'},
+    {id:'i2', title:'机长通知：等待延长，时间待定', body:'客舱议论声渐起。考验补充广播与主动巡舱。', hint:'阶段三'},
+    {id:'i3', title:'地面通知：可提供饮用水补给', body:'考验乘务组是否主动组织服务、是否按号位分工。', hint:'阶段二/三'},
+    {id:'i4', title:'旅客传言：「听说今天全部航班都飞不了」', body:'有旅客来向你求证。考验信息口径：不猜测、不附和、引导等待官方通知。', hint:'阶段三'},
+    {id:'i5', title:'邻座两名旅客因椅背发生口角', body:'尽快隔离处置，防止围观升级。', hint:'阶段三/四'},
+    {id:'i6', title:'老人呼唤铃声响起', body:'后舱按铃。结合旅客任务卡 T4 使用。', hint:'阶段四'},
+    {id:'i7', title:'机长通知：已收到放行指令', body:'准备 10 分钟后起飞。触发恢复善后阶段动作。', hint:'阶段五'},
+    {id:'i8', title:'有旅客提出要下机取行李', body:'已关闭舱门，须依规解释并安抚。', hint:'阶段四备用'}
+  ],
+  broadcasts:[
+    {id:'b1', title:'标准延误广播（乘务长）', body:'女士们、先生们：很抱歉地通知您，由于空中流量控制，本次航班需要在地面上短暂等待，预计等待时间约 40 分钟。请您在座位上休息，如需帮助，请按呼唤铃或与乘务员联系。感谢您的理解与配合。'},
+    {id:'b2', title:'延长等待广播（乘务长）', body:'女士们、先生们：由于流量控制仍在持续，我们的航班还需继续等待，具体的起飞时间我们将第一时间通知您。客舱内为您准备了饮用水，如需帮助请与乘务员联系。再次为您的等待表示歉意，感谢您的理解。'},
+    {id:'b3', title:'恢复起飞广播（乘务长）', body:'女士们、先生们：塔台已给出放行时间，我们的航班预计 10 分钟后起飞。请您回到座位坐好，系好安全带，调直座椅靠背，打开遮光板，收起小桌板。我们将尽快送您到达目的地，感谢您的耐心等待。'},
+    {id:'b4', title:'寻找医护旅客广播', body:'女士们、先生们：本次航班上如有医务工作者，请您与乘务员联系。谢谢您的帮助。'}
+  ]
+}];
+
+/* ============================================================
+   基础工具
+   ============================================================ */
+function $(id){ return document.getElementById(id); }
+function esc(s){ return String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+function toast(msg){
+  var c=$('toastBox'), t=document.createElement('div');
+  t.className='toast'; t.textContent=msg; c.appendChild(t);
+  setTimeout(function(){ t.style.opacity='0'; t.style.transition='opacity .3s'; setTimeout(function(){t.remove();},320); }, 2400);
+}
+function fmtClock(base, offset){
+  var m = /^(\d{1,2}):(\d{2})$/.exec(base||'14:10');
+  var baseMin = m ? (parseInt(m[1],10)*60 + parseInt(m[2],10)) : 850;
+  var t = ((baseMin + (offset||0)) % 1440 + 1440) % 1440;
+  var hh = String(Math.floor(t/60)).padStart(2,'0'), mm = String(t%60).padStart(2,'0');
+  return hh + ':' + mm;
+}
+function scn(){ return SCENARIOS.find(function(s){ return s.id === cfg().scenarioId; }) || SCENARIOS[0]; }
+function cfg(){ return (S && S.config) || {posCount:4,paxCount:4,scenarioId:'delay01',crewNames:[]}; }
+
+/* ============================================================
+   同步引擎：联机（/api/drill/*）优先，无服务自动降级单机
+   ============================================================ */
+var MODE = 'director';
+var URL_ROOM = '';
+try{
+  var _rq = new URLSearchParams(location.search);
+  if(_rq.has('room')){ MODE = 'player'; URL_ROOM = (_rq.get('room')||'').toUpperCase(); }
+}catch(e){}
+
+var Sync = { online:false, base:'', room:null, token:null, pid:null, rev:-1, timer:null, busy:false };
+var S = null;                       // 当前状态视图（联机=服务端下发；单机=本地 reducer）
+var revealedLocal = {};             // 单机模式的揭示状态 {taskId:true}
+var spinning = false;               // 转盘动画锁
+
+function lsGet(k,d){ try{ var v=localStorage.getItem(k); return v?JSON.parse(v):d; }catch(e){ return d; } }
+function lsSet(k,v){ try{ localStorage.setItem(k, JSON.stringify(v)); }catch(e){} }
+
+async function findServer(){
+  /* 返回 {online, base}：同源时 base 为 ''（注意不能用 !!base 判断在线） */
+  var cands = [];
+  try{ if(/^https?:$/.test(location.protocol)) cands.push(''); }catch(e){}
+  var hosts = ['127.0.0.1'];
+  try{ if(location.hostname && hosts.indexOf(location.hostname)<0) hosts.push(location.hostname); }catch(e){}
+  hosts.forEach(function(h){ for(var p=8000;p<=8008;p++) cands.push('http://'+h+':'+p); });
+  for(var i=0;i<cands.length;i++){
+    try{
+      var r = await fetch(cands[i]+'/api/drill/ping', {cache:'no-store'});
+      if(r.ok){ var d = await r.json(); if(d && d.service==='drill-sync') return {online:true, base:cands[i]}; }
+    }catch(e){}
+  }
+  return {online:false, base:''};
+}
+function api(path, opts){
+  return fetch(Sync.base + path, Object.assign({cache:'no-store'}, opts||{}))
+    .then(function(r){ return r.json().catch(function(){ return {ok:false,error:'响应异常'}; }); });
+}
+function apiAction(action, payload){
+  return api('/api/drill/room/'+Sync.room+'/action', {
+    method:'POST', headers:{'Content-Type':'application/json'},
+    body: JSON.stringify({token:Sync.token, action:action, payload:payload||{}})
+  });
+}
+function pollOnce(){
+  if(!Sync.online || !Sync.room || Sync.busy) return Promise.resolve();
+  return api('/api/drill/room/'+Sync.room+'?rev='+Sync.rev+'&token='+(Sync.token||''))
+    .then(function(d){
+      if(d && d.changed && d.ok){ Sync.rev = d.rev; S = d; renderAll(); }
+    }).catch(function(){});
+}
+function startPoll(){
+  if(Sync.timer) clearInterval(Sync.timer);
+  Sync.timer = setInterval(pollOnce, 1200);
+}
+
+/* ---------------- 单机模式 reducer ---------------- */
+function freshLocal(){
+  return { code:'LOCAL', isDirector:true, rev:0,
+    config:{posCount:4, paxCount:4, scenarioId:'delay01', baseTime:'14:10', crewNames:[]},
+    players:[],
+    state:{ status:'lobby', phaseIdx:0, baseTime:'14:10', clockMin:0,
+      pool:[1,2,3,4], assignments:[], spinner:null, events:[], paxTasks:[], log:[], seq:0 } };
+}
+function applyLocal(action, p){
+  p = p||{};
+  var st = S.state, cfgO = S.config;
+  var log = function(text){ st.log.push({t:st.clockMin, text:text}); };
+  var ev = function(title,body,target){ st.seq++; st.events.push({id:'e'+st.seq, t:st.clockMin, title:title, body:body||'', target:target||'all'}); };
+  if(action==='setup'){
+    cfgO.posCount = Math.max(1, Math.min(8, p.posCount|0 || cfgO.posCount));
+    cfgO.paxCount = Math.max(0, Math.min(8, p.paxCount|0));
+    if(p.scenarioId) cfgO.scenarioId = p.scenarioId;
+    st.pool = []; for(var i=1;i<=cfgO.posCount;i++) if(!st.assignments.some(function(a){return a.pos===i;})) st.pool.push(i);
+    if(st.status==='ended') st.status='lobby';
+    log('导演调整编制：'+cfgO.posCount+' 个乘务号位 / '+cfgO.paxCount+' 名旅客');
+  }
+  else if(action==='begin'){ st.status='assigning'; log('定岗开始：请乘务组成员依次上场转动转盘'); }
+  else if(action==='spin'){
+    var idx = st.pool.indexOf(p.pos);
+    if(idx<0) return false;
+    st.pool.splice(idx,1);
+    st.assignments.push({pos:p.pos, name:p.name||'乘务员'});
+    st.assignments.sort(function(a,b){return a.pos-b.pos;});
+    log((p.name||'乘务员')+' 转中 '+p.pos+' 号位');
+    if(!st.pool.length){ st.status='running'; log('定岗完成，演练就绪'); }
+  }
+  else if(action==='phase'){ st.phaseIdx = p.idx|0; if(p.clockMin!=null) st.clockMin = p.clockMin|0; log('场景推进到阶段 '+(st.phaseIdx+1)); }
+  else if(action==='clock'){ st.clockMin = Math.max(-600, Math.min(1440, st.clockMin + (p.delta|0))); log('演练时钟 '+(p.delta>=0?'+':'')+(p.delta|0)+' 分钟'); }
+  else if(action==='inject'){ ev(p.title, p.body, p.target); log('注入事件：'+p.title); }
+  else if(action==='task'){ st.seq++; st.paxTasks.push({id:'e'+st.seq, pax:p.pax|0, title:p.title, body:p.body||'', hint:p.hint||'', revealed:false, at:st.clockMin}); log('向旅客 P'+(p.pax|0)+' 下发任务：'+p.title); }
+  else if(action==='note'){ log('导演批注：'+(p.text||'')); }
+  else if(action==='endRound'){ st.status='ended'; log('演练结束'); }
+  else if(action==='reset'){
+    var keep = S.config;
+    S = freshLocal(); S.config = keep;
+    S.state.pool = []; for(var j=1;j<=keep.posCount;j++) S.state.pool.push(j);
+    S.state.log.push({t:0, text:'新一轮演练已重置'});
+  }
+  else return false;
+  lsSet('cc_drill_local_v1', S);
+  return true;
+}
+
+/* ---------------- 动作统一入口（双模式） ---------------- */
+function act(action, payload, cb){
+  if(MODE==='player' && Sync.online){ apiAction(action,payload).then(function(r){ cb&&cb(r); }); return; }
+  if(Sync.online){
+    Sync.busy = true;
+    apiAction(action,payload).then(function(r){
+      Sync.busy=false;
+      if(!r || r.ok===false){ toast((r&&r.error)||'操作失败'); }
+      pollOnce();
+      cb&&cb(r);
+    });
+    return;
+  }
+  var ok = applyLocal(action,payload);
+  if(!ok) toast('操作失败');
+  renderAll();
+  cb&&cb({ok:ok});
+}
+
+/* ============================================================
+   转盘
+   ============================================================ */
+var PALETTE = ['#148453','#1FA56A','#67AC91','#F5B800','#F08A00','#E64A19','#2563eb','#7C5CBF'];
+var wheelRot = 0;
+function segPath(cx,cy,r1,r2,a0,a1){
+  var pt = function(r,a){ return (cx+r*Math.cos(a)).toFixed(1)+','+(cy+r*Math.sin(a)).toFixed(1); };
+  var large = (a1-a0) > Math.PI ? 1 : 0;
+  return 'M'+pt(r2,a0)+' A'+r2+','+r2+' 0 '+large+' 1 '+pt(r2,a1)
+       + ' L'+pt(r1,a1)+' A'+r1+','+r1+' 0 '+large+' 0 '+pt(r1,a0)+' Z';
+}
+function renderWheel(svgId){
+  var svg = $(svgId||'wheelSvg'); if(!svg) return;
+  var pool = (S && S.state && S.state.pool) || [];
+  var n = pool.length, cx=170, cy=170, r2=163, r1=52;
+  var seg = Math.PI*2/Math.max(n,1);
+  var h = [];
+  if(!n){
+    h.push('<circle cx="170" cy="170" r="163" fill="var(--bg)" stroke="var(--border)" stroke-width="2"/>');
+    h.push('<text x="170" y="176" text-anchor="middle" font-size="15" fill="var(--text3)">号位已定完</text>');
+  }
+  for(var i=0;i<n;i++){
+    var a0 = -Math.PI/2 + i*seg, a1 = a0+seg, mid = (a0+a1)/2;
+    var color = PALETTE[(pool[i]-1) % PALETTE.length];
+    h.push('<path d="'+segPath(cx,cy,r1,r2,a0,a1)+'" fill="'+color+'" stroke="#fff" stroke-width="2"/>');
+    var tr = (r1+r2)/2 + 2;
+    var tx = cx + tr*Math.cos(mid), ty = cy + tr*Math.sin(mid);
+    var deg = mid*180/Math.PI + 90;
+    if(deg>90 && deg<270){ deg += 180; tr = (r1+r2)/2 - 2; tx = cx + tr*Math.cos(mid); ty = cy + tr*Math.sin(mid); }
+    h.push('<text x="'+tx.toFixed(1)+'" y="'+ty.toFixed(1)+'" text-anchor="middle" dominant-baseline="middle" font-size="21" font-weight="800" fill="#fff" transform="rotate('+deg.toFixed(1)+' '+tx.toFixed(1)+' '+ty.toFixed(1)+')">'+pool[i]+'号位</text>');
+  }
+  h.push('<circle cx="170" cy="170" r="49" fill="var(--bg-card)" stroke="var(--border)" stroke-width="3"/>');
+  svg.innerHTML = h.join('');
+}
+function animateTo(pos, poolBefore, done, svgId){
+  var svg = $(svgId||'wheelSvg'); if(!svg){ done&&done(); return; }
+  var idx = poolBefore.indexOf(pos);
+  var n = poolBefore.length || 1;
+  var segDeg = 360/n;
+  /* 指针在顶部：转盘转 R 度后，第 i 段落到指针下需 R ≡ -(i*seg + seg/2) (mod 360) */
+  var jitter = (Math.random()-0.5) * segDeg * 0.7;
+  var targetMod = ((360 - (idx*segDeg + segDeg/2 + jitter)) % 360 + 360) % 360;
+  var from = wheelRot % 360;
+  var target = wheelRot + (360*5) + ((targetMod - from) % 360 + 360) % 360;
+  var t0 = performance.now(), dur = 4200;
+  spinning = true;
+  (function step(t){
+    var k = Math.min(1, (t-t0)/dur);
+    var e = 1 - Math.pow(1-k, 4);            // easeOutQuart
+    var r = from + (target-from)*e;
+    svg.style.transform = 'rotate('+r+'deg)';
+    if(k<1) requestAnimationFrame(step);
+    else { wheelRot = target; spinning = false; done&&done(); }
+  })(t0);
+}
+
+/* ============================================================
+   渲染
+   ============================================================ */
+var curTab = 'wheel';
+function switchTab(t){
+  curTab = t;
+  document.querySelectorAll('#dirRoot .view').forEach(function(v){ v.classList.remove('active'); });
+  var el = $('view'+t.charAt(0).toUpperCase()+t.slice(1));
+  if(el) el.classList.add('active');
+  document.querySelectorAll('#dirTabs .tab').forEach(function(b){ b.classList.toggle('active', b.dataset.t===t); });
+}
+function renderSubbar(){
+  var b = $('subbar');
+  var html = '';
+  if(MODE==='player'){
+    html += '<span class="badge gold">📱 学员端</span>';
+    if(Sync.room) html += '<span class="badge">房间 '+esc(Sync.room)+'</span>';
+    html += Sync.online ? '<span class="badge">● 已连接</span>' : '<span class="badge red">● 未连接</span>';
+  }else{
+    html += '<span class="badge gold">🎬 导演台</span>';
+    if(Sync.online && Sync.room) html += '<span class="badge">联机房间 '+esc(Sync.room)+'</span>';
+    else if(Sync.online) html += '<span class="badge gray">单机待联机（可创建房间）</span>';
+    else html += '<span class="badge gray">单机模式（未检测到同步服务）</span>';
+    html += '<span class="sp"></span>';
+    html += '<span class="badge '+(S&&S.state&&S.state.status==='running'?'':'gray')+'">'+
+      ({lobby:'未开始',assigning:'定岗中',running:'演练中',ended:'已结束'}[(S&&S.state&&S.state.status)||'lobby']||'')+'</span>';
+  }
+  b.innerHTML = html;
+}
+function renderTabs(){
+  var bar = $('dirTabs');
+  if(!bar){
+    bar = document.createElement('div'); bar.className='tabbar'; bar.id='dirTabs';
+    bar.innerHTML = [['wheel','🎡 转盘定岗'],['director','🎬 导演台'],['board','📣 事件看板'],['pax','🎒 旅客卡包'],['script','📜 剧本库']]
+      .map(function(x){ return '<button class="tab'+(x[0]==='wheel'?' active':'')+'" data-t="'+x[0]+'" onclick="switchTab(\''+x[0]+'\')">'+x[1]+'</button>'; }).join('');
+    $('dirRoot').insertBefore(bar, $('dirRoot').firstChild);
+  }
+}
+function renderSetup(){
+  renderRoomCard();
+  var c = cfg();
+  var chips = '';
+  for(var i=1;i<=8;i++) chips += '<button class="chip'+(i===c.posCount?' on':'')+'" onclick="setPos('+i+')">'+i+'</button>';
+  $('posChips').innerHTML = chips;
+  $('paxN').textContent = c.paxCount;
+  var sel = $('selScn');
+  if(!sel.options.length) sel.innerHTML = SCENARIOS.map(function(s){ return '<option value="'+s.id+'">'+s.name+'（'+s.tag+'）</option>'; }).join('');
+  sel.value = c.scenarioId;
+  if(document.activeElement !== $('crewNames')) $('crewNames').value = (c.crewNames||[]).join('\n');
+  $('btnSpin').disabled = !(S && S.state.status==='assigning' && S.state.pool.length) || spinning;
+  $('btnBegin').disabled = S && (S.state.status==='assigning'||S.state.status==='running');
+  var asg = (S && S.state.assignments) || [];
+  $('assignSummary').innerHTML = '已定岗 <b>'+asg.length+'</b> / '+c.posCount+'　旅客任务已下发 <b>'+
+    ((S&&S.state.paxTasks)||[]).length+'</b> 张';
+}
+/* ---------------- 联机房间面板 ---------------- */
+var joinUrl = '';
+function renderRoomCard(){
+  var el = $('roomCard'); if(!el) return;
+  if(!Sync.online){
+    el.innerHTML = '<div class="card-title">📡 联机同步 <span class="hint">未检测到同步服务</span></div>'+
+      '<div class="sub">当前为<b>单机模式</b>：转盘、导演台、事件、任务都在本机可用（适合大屏/投影由导演一人操作）。'+
+      '如需学员手机实时参与（转盘自转、任务卡到各自手机），请在导演电脑上双击 <b>exam_system\\启动培训考核系统.bat</b> 启动本地服务，然后刷新本页。</div>';
+    return;
+  }
+  var players = (S && S.players) || [];
+  var h = '<div class="card-title">📡 联机同步 <span class="hint">学员手机加入后实时同步</span></div>';
+  if(!Sync.room){
+    h += '<div class="sub" style="margin-bottom:10px">创建演练房间后，学员用手机浏览器打开生成的链接即可加入（同一 Wi-Fi）。</div>'+
+      '<button class="btn primary" onclick="createRoom()">🏠 创建演练房间</button>';
+  }else{
+    h += '<div style="display:flex;gap:14px;align-items:center;flex-wrap:wrap;margin-bottom:10px">'+
+      '<span class="room-code">'+esc(Sync.room)+'</span>'+
+      '<div style="flex:1;min-width:220px"><div class="sub" style="margin-bottom:4px">学员加入链接（可发到微信群）：</div>'+
+      '<div class="join-url" id="joinUrl">'+esc(joinUrl||'…')+'</div></div>'+
+      '<button class="btn sm" onclick="copyJoin()">📋 复制链接</button></div>';
+    h += '<div class="sub" style="margin-bottom:6px"><b>已加入（'+players.length+'）：</b>'+
+      (players.length ? players.map(function(p){
+        return esc(p.name)+'（'+(p.side==='pax' ? '旅客 P'+p.pax : '乘务组'+(p.crew?'#'+p.crew:''))+'）';
+      }).join('、') : '等待学员加入…')+'</div>';
+    h += '<div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:10px">'+
+      '<button class="btn sm" onclick="onBeginTap()">🎬 开始定岗</button>'+
+      '<button class="btn sm warn" onclick="onEndTap()">🏁 结束演练</button>'+
+      '<button class="btn sm danger" onclick="onDisbandTap()">🗑 解散房间</button></div>';
+  }
+  el.innerHTML = h;
+}
+async function createRoom(){
+  if(!Sync.online){ toast('未检测到同步服务，无法联机'); return; }
+  var c = cfg();
+  var names = ($('crewNames').value||'').split('\n').map(function(s){return s.trim();}).filter(Boolean);
+  try{
+    var r = await api('/api/drill/room', {method:'POST', headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({config:{posCount:c.posCount, paxCount:c.paxCount, scenarioId:c.scenarioId, baseTime:scn().baseTime, crewNames:names}})});
+    if(r && r.ok){
+      Sync.room = r.code; Sync.token = r.token;
+      Sync.rev = -1;                       // 强制下一拍全量拉取（建房响应的 rev 已是最新，直接用会导致轮询误判「无变更」不渲染）
+      lsSet('cc_drill_dir_v1', {room:r.code, token:r.token});
+      /* 学员手机访问不了 127.0.0.1 —— 用服务端报的局域网地址拼加入链接 */
+      joinUrl = '';
+      try{
+        var ni = await api('/api/netinfo');
+        if(ni && ni.ok && ni.urls && ni.urls.length){
+          joinUrl = ni.urls[0].replace(/\/$/,'') + '/drill.html?room=' + r.code;
+          if(ni.port && Sync.base && Sync.base.indexOf(':'+ni.port)<0){ /* 端口不一致时仍以 netinfo 为准 */ }
+        }
+      }catch(e){}
+      if(!joinUrl) joinUrl = (Sync.base || location.origin) + '/drill.html?room=' + r.code;
+      pollOnce(); toast('房间已创建：'+r.code);
+    }else toast((r&&r.error)||'创建失败');
+  }catch(e){ toast('创建失败：'+e); }
+}
+function copyJoin(){
+  var t = joinUrl || '';
+  if(!t){ toast('链接尚未生成'); return; }
+  if(navigator.clipboard && navigator.clipboard.writeText){
+    navigator.clipboard.writeText(t).then(function(){ toast('已复制'); }, function(){ toast('复制失败，请长按链接手动复制'); });
+  }else toast('请长按链接手动复制');
+}
+function onEndTap(){
+  if(!confirm('确认结束本次演练？（记录可在导演台导出）')) return;
+  act('endRound',{},function(){ toast('演练已结束'); });
+}
+function onDisbandTap(){
+  if(!confirm('解散房间将断开所有学员（服务端房间 12 小时后自动清除），确定？')) return;
+  try{ localStorage.removeItem('cc_drill_dir_v1'); }catch(e){}
+  Sync.room = null; Sync.token = null; Sync.rev = -1;
+  toast('已解散（本机已退出房间）');
+  renderAll();
+}
+
+function renderPosGrid(){
+  var c = cfg(), st = S.state;
+  var h = '';
+  for(var i=1;i<=c.posCount;i++){
+    var a = st.assignments.find(function(x){ return x.pos===i; });
+    if(a){
+      h += '<div class="pos-card"><div class="no">'+i+' 号位</div><div class="who">'+esc(a.name)+'</div>'+
+           '<div class="duty">'+esc(scn().crewDuties[i]||scn().crewDuties['default']||'')+'</div></div>';
+    }else{
+      h += '<div class="pos-card empty"><div class="no" style="color:var(--text3)">'+i+' 号位</div><div class="who" style="color:var(--text3)">待定岗</div></div>';
+    }
+  }
+  $('posGrid').innerHTML = h;
+}
+function renderDirector(){
+  var st = S.state, sc = scn();
+  $('simClock').textContent = fmtClock(st.baseTime, st.clockMin);
+  var ph = '';
+  sc.phases.forEach(function(p,i){
+    ph += '<button class="phase-chip'+(i===st.phaseIdx?' on':'')+(i<st.phaseIdx?' past':'')+'" onclick="onPhaseTap('+i+')">'+(i+1)+'. '+esc(p.name)+
+      '<small>'+esc(p.sim)+' · '+p.diff+'</small></button>';
+  });
+  $('phaseStrip').innerHTML = ph;
+  var cur = sc.phases[st.phaseIdx] || sc.phases[0];
+  $('phaseTip').innerHTML = '<b>导演引导要点：</b>'+esc(cur.director||'');
+  $('btnNextPhase').disabled = st.phaseIdx >= sc.phases.length-1;
+  /* 事件库 */
+  if(!$('injectLib').dataset.done || $('injectLib').dataset.scn!==sc.id){
+    $('injectLib').dataset.done='1'; $('injectLib').dataset.scn=sc.id;
+    $('injectLib').innerHTML = sc.injects.map(function(iv){
+      return '<button class="chip" onclick="pickInject(\''+iv.id+'\')" title="'+esc(iv.body)+'">'+esc(iv.title)+'</button>';
+    }).join('');
+  }
+  var tgt = $('injTarget');
+  var posSel = $('injPos');
+  if(tgt.value==='pos'){
+    posSel.style.display='';
+    if(posSel.options.length !== cfg().posCount){
+      posSel.innerHTML = Array.from({length:cfg().posCount}, function(_,i){ return '<option value="pos:'+(i+1)+'">'+(i+1)+' 号位</option>'; }).join('');
+    }
+  } else posSel.style.display='none';
+  /* 旅客任务 */
+  var pc = '';
+  for(var i=1;i<=cfg().paxCount;i++){
+    var taken = st.paxTasks.some(function(t){ return t.pax===i; });
+    pc += '<button class="chip'+(window._selPax===i?' on':'')+'" onclick="selectPax('+i+')">旅客 P'+i+(taken?' ✉️':'')+'</button>';
+  }
+  $('paxChips').innerHTML = pc || '<span class="sub">旅客人数为 0，可在「转盘定岗」页调整</span>';
+  /* 旅客任务卡库：每次重建（下发状态/按钮可用性随 _selPax 变化） */
+  {
+    $('taskLib').dataset.done='1'; $('taskLib').dataset.scn=sc.id;
+    $('taskLib').innerHTML = sc.passengerTasks.map(function(t){
+      var sent = st.paxTasks.some(function(x){ return x.title===t.title; });
+      return '<div class="task" style="margin-bottom:8px"><div class="task-head"><span class="sev sev'+t.sev+'">'+(['','★','★★','★★★'][t.sev]||'★')+'</span>'+
+        '<span class="task-title">'+esc(t.title)+'</span><span style="flex:1"></span>'+
+        '<button class="btn sm '+(sent?'':'primary')+'" '+(window._selPax?'':'disabled')+' onclick="sendTask(\''+t.id+'\')">'+(sent?'再次下发':'下发')+'</button></div>'+
+        '<div class="sub" style="margin-top:6px">'+esc(t.hint)+'</div></div>';
+    }).join('');
+  }
+  /* 广播 */
+  if(!$('bcLib').dataset.done || $('bcLib').dataset.scn!==sc.id){
+    $('bcLib').dataset.done='1'; $('bcLib').dataset.scn=sc.id;
+    $('bcLib').innerHTML = sc.broadcasts.map(function(b){
+      return '<div class="task" style="margin-bottom:8px"><div class="task-head"><span class="tag bcast">广播</span><span class="task-title">'+esc(b.title)+'</span>'+
+        '<span style="flex:1"></span><button class="btn sm" onclick="sendBc(\''+b.id+'\')">速发</button></div>'+
+        '<div class="task-body" style="margin-top:6px">'+esc(b.body)+'</div></div>';
+    }).join('');
+  }
+  /* 日志 */
+  $('logCount').textContent = '共 '+st.log.length+' 条';
+  $('logList').innerHTML = st.log.slice().reverse().map(function(l){
+    return '<div><b>'+esc(fmtClock(st.baseTime,l.t))+'</b>'+esc(l.text)+'</div>';
+  }).join('') || '<span class="sub">暂无记录</span>';
+}
+function renderBoard(){
+  var st = S.state, sc = scn();
+  var cur = sc.phases[st.phaseIdx] || sc.phases[0];
+  $('bdPhase').textContent = (st.phaseIdx+1)+'. '+cur.name;
+  $('bdPhaseBg').textContent = cur.bg;
+  var h = '';
+  st.events.slice().reverse().forEach(function(e){
+    var tg = e.target||'all';
+    var tagHtml = tg==='bcast' ? '<span class="tag bcast">广播</span>' :
+      tg==='crew' ? '<span class="tag crew">乘务组</span>' :
+      tg.indexOf('pax:')===0 ? '<span class="tag pax">'+esc(tg.replace('pax:','旅客 '))+'</span>' :
+      tg.indexOf('pos:')===0 ? '<span class="tag crew">'+esc(tg.replace('pos:',''))+'</span>' : '';
+    h += '<div class="ev'+(tg==='bcast'?'':'')+'"><div class="ev-head"><span class="ev-t">'+esc(fmtClock(st.baseTime,e.t))+'</span>'+tagHtml+
+      '<span class="ev-title">'+esc(e.title)+'</span></div>'+(e.body?'<div class="ev-body">'+esc(e.body)+'</div>':'')+'</div>';
+  });
+  $('bdList').innerHTML = h || '<div class="center-note">暂无事件<br>导演在「导演台」下发事件后，这里会实时更新</div>';
+}
+function renderPax(){
+  var st = S.state, isDir = !MODE || MODE==='director';
+  var h = '';
+  if(!cfg().paxCount){ $('paxCards').innerHTML = '<div class="center-note">本次演练未设置旅客</div>'; return; }
+  for(var i=1;i<=cfg().paxCount;i++){
+    var list = st.paxTasks.filter(function(t){ return t.pax===i; });
+    if(!list.length){ h += '<div class="empty-slot">旅客 P'+i+' · 暂无任务</div>'; continue; }
+    list.forEach(function(t){
+      var masked = !isDir && !t.revealed && !revealedLocal[t.id];
+      h += '<div class="task'+(masked?' masked':'')+'"><div class="task-head"><span class="tag pax">旅客 P'+t.pax+'</span>'+
+        '<span class="task-title">'+esc(t.title)+'</span><span style="flex:1"></span>'+
+        (isDir ? '<span class="sub">'+(t.revealed?'已揭示':'未揭示')+'</span>' :
+          '<button class="btn sm" onclick="toggleReveal(\''+t.id+'\')">'+(masked?'👁 揭示任务':'🙈 隐藏任务')+'</button>')+
+        '</div><div class="task-body">'+esc(t.body||'（无正文）')+'</div>'+
+        (t.hint?'<div class="sub" style="margin-top:6px">💡 '+esc(t.hint)+'</div>':'')+'</div>';
+    });
+  }
+  $('paxCards').innerHTML = h;
+}
+function renderScript(){
+  var sc = scn(), st = S.state;
+  var h = '';
+  h += '<div class="card"><div class="card-title">📜 '+esc(sc.name)+' <span class="hint">难度 '+sc.diff+'</span></div>'+
+    '<div class="sub">'+esc(sc.tag)+'<br><b>背景：</b>'+esc(sc.brief)+'<br><b>阶段基准时刻：</b>'+esc(sc.baseTime)+'（导演可在演练中自由拨动时钟）</div></div>';
+  h += '<div class="card"><div class="card-title">🎯 训练目标</div>'+sc.goals.map(function(g){ return '<div class="goal-li">'+esc(g)+'</div>'; }).join('')+'</div>';
+  h += '<div class="card"><div class="card-title">🎬 阶段剧本</div>';
+  sc.phases.forEach(function(p,i){
+    h += '<div class="ev'+(i===st.phaseIdx?' phase':'')+'"><div class="ev-head"><span class="ev-t">阶段 '+(i+1)+'</span>'+
+      '<span class="ev-title">'+esc(p.name)+'</span><span class="tag">'+esc(p.sim)+'</span><span class="sev sev3" style="background:var(--gold-soft);color:var(--gold-dark)">'+p.diff+'</span></div>'+
+      '<div class="ev-body"><b>背景：</b>'+esc(p.bg)+'</div>'+
+      '<div class="ev-body" style="margin-top:6px"><b>导演引导要点：</b>'+esc(p.director||'')+'</div>'+
+      (p.injects&&p.injects.length?'<div class="ev-body" style="margin-top:6px"><b>建议注入：</b>'+p.injects.map(function(iv){return esc(iv.title);}).join('；')+'</div>':'')+
+      '</div>';
+  });
+  h += '</div>';
+  h += '<div class="card"><div class="card-title">🧑‍✈️ 乘务号位职责</div><div class="pos-grid">';
+  for(var i=1;i<=Math.max(4,cfg().posCount);i++){
+    var d = sc.crewDuties[i] || sc.crewDuties['default'];
+    h += '<div class="pos-card"><div class="no">'+i+' 号位</div><div class="duty">'+esc(d)+'</div></div>';
+  }
+  h += '</div></div>';
+  h += '<div class="card"><div class="card-title">🎒 旅客任务卡池（'+sc.passengerTasks.length+' 张）</div>'+
+    sc.passengerTasks.map(function(t){
+      return '<div class="task"><div class="task-head"><span class="sev sev'+t.sev+'">'+(['','★','★★','★★★'][t.sev]||'★')+'</span>'+
+        '<span class="task-title">'+esc(t.title)+'</span><span class="sub">'+esc(t.hint)+'</span></div>'+
+        '<div class="task-body">'+esc(t.body)+'</div></div>';
+    }).join('')+'</div>';
+  h += '<div class="card"><div class="card-title">📢 广播话术参考</div>'+
+    sc.broadcasts.map(function(b){ return '<div class="task" style="margin-bottom:8px"><div class="task-head"><span class="tag bcast">广播</span><span class="task-title">'+esc(b.title)+'</span></div><div class="task-body">'+esc(b.body)+'</div></div>'; }).join('')+'</div>';
+  h += '<div class="card"><div class="card-title">🧩 如何新增场景（框架说明）</div>'+
+    '<div class="sub">后续把新剧本告诉我即可直接追加；数据结构如下，加进本文件 <b>SCENARIOS</b> 数组就会自动出现在场景下拉里：</div>'+
+    '<pre class="code">{\n  id:\'sc-xx\', name:\'场景名\', tag:\'一句话标签\', diff:\'★★★\', baseTime:\'14:10\',\n  brief:\'背景描述…\',\n  goals:[\'目标1\', \'目标2\'],\n  phases:[ { name:\'阶段名\', sim:\'14:25\', diff:\'★\', bg:\'全员可见背景\', director:\'导演引导要点\', injects:[{title:\'...\', body:\'...\'}] } ],\n  crewDuties:{ 1:\'乘务长：...\', 2:\'...\', default:\'机动位：...\' },\n  passengerTasks:[ { id:\'t1\', title:\'旅客角色\', sev:2, hint:\'下发时机\', body:\'表演要求/台词提示\' } ],\n  injects:[ { id:\'i1\', title:\'事件\', body:\'说明\' } ],\n  broadcasts:[ { id:\'b1\', title:\'广播名\', body:\'话术全文\' } ]\n}</pre></div>';
+  $('viewScript').innerHTML = h;
+}
+function renderAll(){
+  renderSubbar();
+  if(MODE==='player'){ renderPlayer(); return; }
+  if(!S) return;
+  renderTabs();
+  renderSetup();
+  if(!spinning) renderWheel();
+  renderPosGrid();
+  renderDirector();
+  renderBoard();
+  renderPax();
+  renderScript();
+}
+
+/* ============================================================
+   导演端交互
+   ============================================================ */
+function setPos(n){
+  if(Sync.online && Sync.room){ act('setup',{config:{posCount:n}}); return; }
+  applyLocal('setup',{posCount:n}); renderAll();
+}
+function stepPax(d){
+  var n = Math.max(0, Math.min(8, cfg().paxCount + d));
+  if(Sync.online && Sync.room){ act('setup',{config:{paxCount:n}}); return; }
+  applyLocal('setup',{paxCount:n}); renderAll();
+}
+function onScenarioChange(){
+  var id = $('selScn').value;
+  var sc = SCENARIOS.find(function(x){ return x.id===id; });
+  if(Sync.online && Sync.room){ act('setup',{config:{scenarioId:id}}); }
+  else { applyLocal('setup',{scenarioId:id}); }
+  toast('场景已切换：'+(sc?sc.name:id));
+}
+function randomPos(){
+  var n = 3 + Math.floor(Math.random()*6);   // 3-8
+  if(n===cfg().posCount) n = n%8+1;
+  setPos(n); toast('🎲 随机号位数：'+n);
+}
+function onBeginTap(){
+  act('begin',{},function(){
+    if(Sync.online && Sync.room) act('callSpin',{});
+    switchTab('wheel'); toast('定岗开始，请第一位上场');
+  });
+}
+function onResetTap(){
+  if(!confirm('重置将清空定岗、事件与任务（保留编制与成员），确定？')) return;
+  act('reset',{},function(){ revealedLocal={}; toast('已重置'); });
+}
+function localNextName(){
+  var names = ($('crewNames').value||'').split('\n').map(function(s){return s.trim();}).filter(Boolean);
+  var done = S.state.assignments.length;
+  if(names.length) return names[done % names.length] + (done >= names.length ? '（补位）' : '');
+  return '乘务员 ' + (done+1);
+}
+function onSpinTap(){
+  if(spinning) return;
+  /* ---- 联机模式（导演代转 / 学员本人转）：结果由服务端权威产生 ---- */
+  if(Sync.online && Sync.room && S){
+    var poolBefore = (S.state.pool||[]).slice();
+    var svgId = (MODE==='player') ? 'plyWheelSvg' : 'wheelSvg';
+    apiAction('spin',{}).then(function(r){
+      if(r && r.ok){ spinResult(r.pos, poolBefore, svgId); return; }
+      /* 导演代转但还没点名 → 自动点名下一位未定岗学员再转一次 */
+      if(MODE==='director' && r && /还没轮到你/.test(r.error||'')){
+        apiAction('callSpin',{}).then(function(){
+          apiAction('spin',{}).then(function(r2){
+            if(r2 && r2.ok) spinResult(r2.pos, poolBefore, svgId);
+            else toast((r2 && r2.error) || '转动失败');
+          });
+        });
+        return;
+      }
+      toast((r && r.error) || '转动失败');
+    });
+    return;
+  }
+  /* ---- 单机模式：本地随机 ---- */
+  if(!S || S.state.status!=='assigning'){ toast('请先「开始定岗」'); return; }
+  if(!S.state.pool.length){ toast('号位已全部定完'); return; }
+  var poolLocal = S.state.pool.slice();
+  var pos = poolLocal[Math.floor(Math.random()*poolLocal.length)];
+  var name = localNextName();
+  applyLocal('spin',{pos:pos, name:name});
+  spinResult(pos, poolLocal, 'wheelSvg');
+}
+function spinResult(pos, poolBefore, svgId){
+  if(!poolBefore || poolBefore.indexOf(pos)<0){
+    poolBefore = (S.state.pool||[]).concat([pos]).sort(function(a,b){return a-b;});
+  }
+  animateTo(pos, poolBefore, function(){
+    renderAll();
+    var a = (S.state.assignments||[]).find(function(x){ return x.pos===pos; });
+    showReveal(pos, a ? a.name : '');
+  }, svgId);
+}
+function onPhaseTap(i){
+  var sc = scn(), cur = sc.phases[i];
+  var pm = /^(\d{1,2}):(\d{2})$/.exec(cur.sim);
+  var phaseMin = pm ? (parseInt(pm[1],10)*60+parseInt(pm[2],10)) : 0;
+  var bm = /^(\d{1,2}):(\d{2})$/.exec(scn().baseTime);
+  var baseMin = bm ? (parseInt(bm[1],10)*60+parseInt(bm[2],10)) : 850;
+  act('phase',{idx:i, clockMin: phaseMin-baseMin}, function(){
+    act('inject',{title:'场景推进 · 第'+(i+1)+'阶段：'+cur.name, body:cur.bg, target:'all'});
+    toast('已推进：'+cur.name);
+  });
+}
+function onNextPhaseTap(){
+  var i = Math.min(scn().phases.length-1, S.state.phaseIdx+1);
+  onPhaseTap(i);
+}
+function onClockTap(d){ act('clock',{delta:d}); }
+function pickInject(id){
+  var iv = scn().injects.find(function(x){ return x.id===id; });
+  if(!iv) return;
+  $('injTitle').value = iv.title;
+  $('injBody').value = iv.body;
+  toast('已填入，可直接下发');
+}
+function onInjectTap(){
+  var title = ($('injTitle').value||'').trim();
+  if(!title){ toast('请填写事件标题'); return; }
+  var t = $('injTarget').value;
+  if(t==='pos') t = $('injPos').value || 'crew';
+  act('inject',{title:title, body:$('injBody').value, target:t}, function(){
+    $('injTitle').value=''; $('injBody').value='';
+    toast('事件已下发');
+  });
+}
+function selectPax(i){ window._selPax = (window._selPax===i?null:i); renderAll(); }
+function sendTask(tid){
+  if(!window._selPax){ toast('请先选择旅客 P 几'); return; }
+  var t = scn().passengerTasks.find(function(x){ return x.id===tid; });
+  if(!t) return;
+  act('task',{pax:window._selPax, title:t.title, body:t.body, hint:t.hint}, function(){
+    toast('已下发给旅客 P'+window._selPax+'：'+t.title);
+  });
+}
+function onCustomTaskTap(){
+  var title = ($('ctTitle').value||'').trim();
+  if(!window._selPax){ toast('请先选择旅客 P 几'); return; }
+  if(!title){ toast('请填写任务标题'); return; }
+  act('task',{pax:window._selPax, title:title, body:$('ctBody').value, hint:'导演现场定制'}, function(){
+    $('ctTitle').value=''; $('ctBody').value='';
+    toast('自定义任务已下发');
+  });
+}
+function sendBc(id){
+  var b = scn().broadcasts.find(function(x){ return x.id===id; });
+  if(!b) return;
+  act('inject',{title:'📢 '+b.title, body:b.body, target:'bcast'}, function(){ toast('广播已推送'); });
+}
+function onNoteTap(){
+  var v = ($('noteInput').value||'').trim();
+  if(!v) return;
+  act('note',{text:v}, function(){ $('noteInput').value=''; toast('已记录'); });
+}
+function exportLog(){
+  var st = S.state, sc = scn();
+  var lines = ['# 场景演练记录 · '+sc.name, '', '- 房间/模式：'+(Sync.online?('联机 '+Sync.room):'单机'), '- 导出时间：'+new Date().toLocaleString(), ''];
+  st.log.forEach(function(l){ lines.push('- **'+fmtClock(st.baseTime,l.t)+'** '+l.text); });
+  lines.push('', '## 定岗结果', '');
+  st.assignments.forEach(function(a){ lines.push('- '+a.pos+' 号位：'+a.name); });
+  lines.push('', '## 旅客任务', '');
+  st.paxTasks.forEach(function(t){ lines.push('- 旅客 P'+t.pax+'：'+t.title); });
+  var blob = new Blob([lines.join('\n')], {type:'text/markdown;charset=utf-8'});
+  var a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = '演练记录_'+sc.name+'_'+Date.now()+'.md';
+  a.click(); URL.revokeObjectURL(a.href);
+}
+function showReveal(pos, name){
+  var sc = scn();
+  $('revealCard').innerHTML = '<div style="font-size:1.9rem">🎯</div>'+
+    '<div class="who">'+esc(name||'恭喜')+'，你是——</div>'+
+    '<div class="big">'+pos+' 号位</div>'+
+    '<div class="duty">'+esc(sc.crewDuties[pos]||sc.crewDuties['default']||'')+'</div>'+
+    '<button class="btn primary block" style="margin-top:16px" onclick="closeReveal()">记住了，开始演练</button>';
+  $('revealMask').classList.add('show');
+}
+function closeReveal(){ $('revealMask').classList.remove('show'); }
+function toggleReveal(tid){
+  var t = (S.state.paxTasks||[]).find(function(x){ return x.id===tid; });
+  var target = t ? !t.revealed : true;
+  if(Sync.online){ apiAction('reveal',{taskId:tid, state:target}).then(function(){ pollOnce(); }); }
+  else { revealedLocal[tid] = target; renderAll(); }
+}
+
+/* ============================================================
+   学员端（?room=）
+   ============================================================ */
+var PLY = { pid:null, token:null, name:'', side:'', pax:null, crew:null };
+function renderPlayer(){
+  var root = $('plyRoot');
+  if(!Sync.online){
+    root.innerHTML = '<div class="card center-note">📡 未检测到演练同步服务<br>请确认导演电脑已启动本地服务，且手机与导演电脑连同一个 Wi-Fi。<br><br>加入地址应形如：<b>http://导演电脑IP:8000/drill.html?room=房码</b></div>';
+    return;
+  }
+  if(!PLY.token){
+    root.innerHTML = joinFormHtml();
+    return;
+  }
+  var st = S && S.state;
+  if(!st){ root.innerHTML = '<div class="center-note">正在同步演练状态…</div>'; return; }
+  var h = '';
+  if(PLY.side==='crew'){
+    var mine = st.assignments.find(function(a){ return a.pid===PLY.pid; });
+    var isMyTurn = st.spinner && st.spinner.pid===PLY.pid;
+    if(mine){
+      h += '<div class="my-pos"><div class="w">'+esc(PLY.name)+' · 你的号位</div><div class="n">'+mine.pos+' 号位</div>'+
+        '<div class="d">'+esc(scn().crewDuties[mine.pos]||scn().crewDuties['default']||'')+'</div></div>';
+    }else if(isMyTurn){
+      h += '<div class="card"><div class="spin-wait">轮到你上场了！<br>点击下方按钮转动转盘定岗</div>'+
+        '<div class="wheel-box" style="width:280px;height:280px;margin:16px auto 8px"><div class="wheel-pointer">▼</div>'+
+        '<svg class="wheel-svg" id="wheelSvg" viewBox="0 0 340 340"></svg></div>'+
+        '<button class="btn primary block" style="font-size:1.05rem;padding:14px" onclick="onSpinTap()">🎲 转动转盘</button></div>';
+    }else{
+      h += '<div class="card center-note">'+(st.status==='assigning'?'等待导演点名…<br>保持放松，上场时你不会知道自己几号位':'请等待演练开始')+'</div>';
+    }
+  }else{
+    var mine = st.paxTasks.filter(function(t){ return t.pid===PLY.pid; });
+    h += '<div class="my-pos"><div class="w">'+esc(PLY.name)+' · 旅客 P'+(PLY.pax||'-')+'</div>'+
+      '<div class="n" style="font-size:1.3rem">'+(mine.length?('已接到 '+mine.length+' 个任务'):'等待导演指派任务')+'</div>'+
+      '<div class="d">你的场景完全由导演指派。任务卡默认模糊，点击「揭示任务」查看表演要求，演完可再隐藏。</div></div>';
+    mine.forEach(function(t){
+      var masked = !t.revealed;
+      h += '<div class="task'+(masked?' masked':'')+'"><div class="task-head"><span class="tag pax">任务 · '+esc(fmtClock(st.baseTime,t.at))+'</span>'+
+        '<span class="task-title">'+esc(t.title)+'</span></div>'+
+        '<div class="task-body">'+esc(t.body||'')+'</div>'+
+        '<button class="btn sm" style="margin-top:8px" onclick="toggleReveal(\''+t.id+'\')">'+(masked?'👁 揭示任务':'🙈 隐藏任务')+'</button></div>';
+    });
+  }
+  /* 全员：事件看板（按对象过滤） */
+  var evs = st.events.filter(function(e){ return evVisibleToMe(e); }).slice().reverse();
+  h += '<div class="card"><div class="card-title">📣 事件看板</div>'+
+    (evs.length ? evs.map(evCardHtml).join('') : '<div class="sub">暂无事件</div>')+'</div>';
+  var cur = scn().phases[st.phaseIdx];
+  if(cur && st.status!=='lobby') h += '<div class="sub" style="text-align:center">当前阶段：'+(st.phaseIdx+1)+'. '+esc(cur.name)+'</div>';
+  root.innerHTML = h;
+  if(!spinning && PLY.side==='crew' && isMyTurnSafe(st)) renderWheel('plyWheelSvg');
+}
+function isMyTurnSafe(st){ return !!(st && st.spinner && st.spinner.pid===PLY.pid); }
+function evVisibleToMe(e){
+  var t = e.target||'all';
+  if(t==='all'||t==='bcast') return true;
+  if(t==='crew'&&PLY.side==='crew') return true;
+  if(t==='pos:'+((S.state.assignments.find(function(a){return a.pid===PLY.pid;})||{}).pos) && PLY.side==='crew') return true;
+  if(t==='pax:'+PLY.pax && PLY.side==='pax') return true;
+  return false;
+}
+function evCardHtml(e){
+  var tg = e.target||'all';
+  var tagHtml = tg==='bcast' ? '<span class="tag bcast">广播</span>' :
+    tg==='crew' ? '<span class="tag crew">乘务组</span>' :
+    tg.indexOf('pax:')===0 ? '<span class="tag pax">只给你</span>' :
+    tg.indexOf('pos:')===0 ? '<span class="tag crew">给你的号位</span>' : '';
+  return '<div class="ev"><div class="ev-head"><span class="ev-t">'+esc(fmtClock(S.state.baseTime,e.t))+'</span>'+tagHtml+
+    '<span class="ev-title">'+esc(e.title)+'</span></div>'+(e.body?'<div class="ev-body">'+esc(e.body)+'</div>':'')+'</div>';
+}
+function joinFormHtml(){
+  var pre = Sync.room || '';
+  return '<div class="card" style="margin-top:20px"><div class="card-title">🎫 加入演练</div>'+
+    '<div class="sub" style="margin-bottom:12px">房间码由导演屏幕给出（4 位）</div>'+
+    '<div class="field"><label>房间码</label><input id="jRoom" maxlength="4" style="text-transform:uppercase;letter-spacing:6px;font-size:1.3rem;font-weight:800;text-align:center" value="'+esc(pre)+'" placeholder="如 A7K2"></div>'+
+    '<div class="field"><label>你的姓名</label><input id="jName" maxlength="12" placeholder="登机牌上的姓名"></div>'+
+    '<div class="field"><label>我的角色</label><div class="chips">'+
+      '<button class="chip on" id="sideCrew" onclick="pickSide(\'crew\')">🧑‍✈️ 乘务组</button>'+
+      '<button class="chip" id="sidePax" onclick="pickSide(\'pax\')">🧳 旅客</button></div></div>'+
+    '<div class="sub" style="margin:6px 0 12px" id="sideTip">乘务组：上场后转转盘随机定岗，事先不知道自己几号位。</div>'+
+    '<button class="btn primary block" onclick="doJoin()">进入演练</button></div>';
+}
+window._plySide = 'crew';
+function pickSide(s){
+  window._plySide = s;
+  var a=$('sideCrew'), b=$('sidePax');
+  if(a&&b){ a.classList.toggle('on', s==='crew'); b.classList.toggle('on', s==='pax'); }
+  var tip=$('sideTip');
+  if(tip) tip.textContent = s==='crew' ? '乘务组：上场后转转盘随机定岗，事先不知道自己几号位。'
+                                       : '旅客：你的场景完全由导演指派，任务卡模糊下发、自己点击揭示。';
+}
+function doJoin(){
+  var code = ($('jRoom').value||'').trim().toUpperCase();
+  var name = ($('jName').value||'').trim();
+  if(!/^[A-Z2-9]{4}$/.test(code)){ toast('请填写 4 位房间码'); return; }
+  if(!name){ toast('请填写姓名'); return; }
+  api('/api/drill/room/'+code+'/action', {method:'POST', headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({action:'join', payload:{name:name, side:window._plySide}})})
+    .then(function(r){
+      if(!r || r.ok===false){ toast((r&&r.error)||'加入失败'); return; }
+      PLY = {pid:r.playerId, token:r.token, name:name, side:window._plySide, pax:r.pax, crew:r.crew};
+      Sync.room = code; Sync.token = r.token; Sync.rev = -1;
+      lsSet('cc_drill_ply_v1', {room:code, pid:PLY.pid, token:PLY.token, name:name, side:PLY.side});
+      toast('加入成功，欢迎 '+name);
+      pollOnce();
+    });
+}
+
+/* ============================================================
+   启动
+   ============================================================ */
+async function boot(){
+  var _srv = await findServer();
+  Sync.base = _srv.base;
+  Sync.online = _srv.online;
+  if(MODE==='player'){
+    $('plyRoot').style.display='';
+    var saved = lsGet('cc_drill_ply_v1', null);
+    Sync.room = URL_ROOM || (saved ? saved.room : null);
+    if(Sync.online){
+      if(saved && saved.token && saved.room === URL_ROOM){
+        /* 断线重连：先探一次状态确认身份仍有效 */
+        Sync.room = saved.room; Sync.token = saved.token; PLY = saved;
+        try{
+          var d = await api('/api/drill/room/'+saved.room+'?rev=-1&token='+encodeURIComponent(saved.token));
+          if(d && d.ok){ Sync.rev = d.rev; S = d; }
+          else { PLY = {pid:null,token:null,name:'',side:'',pax:null,crew:null}; Sync.token=null; Sync.room=saved.room; }
+        }catch(e){}
+      }
+      startPoll();
+    }
+    renderAll();
+    return;
+  }
+  /* 导演模式 */
+  $('dirRoot').style.display='';
+  if(Sync.online){
+    var saved = lsGet('cc_drill_dir_v1', null);
+    if(saved && saved.room && saved.token){
+      try{
+        var d2 = await api('/api/drill/room/'+saved.room+'?rev=-1&token='+encodeURIComponent(saved.token));
+        if(d2 && d2.ok){
+          Sync.room = saved.room; Sync.token = saved.token; Sync.rev = d2.rev; S = d2;
+        }
+      }catch(e){}
+    }
+  }
+  if(!S){
+    S = lsGet('cc_drill_local_v1', null) || freshLocal();
+  }
+  startPoll();
+  renderAll();
+}
+boot();
+</script>
+</body>
+</html>

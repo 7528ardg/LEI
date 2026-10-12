@@ -1,0 +1,600 @@
+<!DOCTYPE html><html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>局域网服务公网暴露 · 完整落地方案</title><style>
+:root{--bg:#f6f8fa;--card:#fff;--tx:#1f2328;--tx2:#57606a;--bd:#d0d7de;--acc:#0969da;--ok:#1a7f37;--bad:#cf222e;--warn:#9a6700}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--tx);font:15px/1.72 -apple-system,"Segoe UI","Microsoft YaHei",sans-serif}
+.wrap{max-width:1180px;margin:0 auto;padding:32px 26px 80px}
+h1{font-size:1.7rem;border-bottom:2px solid var(--bd);padding-bottom:12px;margin-top:8px}
+h2{font-size:1.32rem;margin-top:40px;border-left:4px solid var(--acc);padding-left:12px;scroll-margin-top:20px}
+h3{font-size:1.08rem;margin-top:28px;color:var(--tx2);scroll-margin-top:20px}
+p,li{color:var(--tx)}
+code{background:#eef1f4;border:1px solid var(--bd);border-radius:5px;padding:1px 5px;font:13px/1.5 "Cascadia Mono",Consolas,monospace;color:#7a2e0e}
+pre{background:#0d1117;color:#e6edf3;padding:14px 16px;border-radius:10px;overflow:auto}
+pre code{background:none;border:none;color:#e6edf3;padding:0;font-size:12.5px}
+.tw{overflow-x:auto;margin:14px 0}
+table{border-collapse:collapse;width:100%;background:var(--card);font-size:13.5px}
+th,td{border:1px solid var(--bd);padding:7px 10px;text-align:left;vertical-align:top}
+th{background:#eaeef2;font-weight:700;white-space:nowrap}
+tbody tr:nth-child(even){background:#fafbfc}
+blockquote{margin:14px 0;padding:10px 16px;background:#fff8e6;border-left:4px solid #d4a72c;color:#5c4a12}
+blockquote p{margin:6px 0}
+h1+h2{margin-top:22px}
+ul,ol{padding-left:26px}
+li{margin:4px 0}
+hr{border:none;border-top:1px solid var(--bd);margin:30px 0}
+@media print{body{background:#fff}.wrap{max-width:none}}
+</style></head><body><div class="wrap"><h1>局域网服务公网暴露 · 完整落地方案</h1>
+<blockquote>
+<p>目标服务：客舱小助手 + 培训考核系统（单端口同源，Flask，<code>exam_system/app/app.py</code>）</p>
+<p>编写日期：2026-10-12　适用场景：家用／小型办公网络、个人自建服务</p>
+</blockquote>
+<hr>
+<h2>0. 先看环境实测结论（决定了选型，不是猜测）</h2>
+<div class="tw"><table><thead><tr><th>项目</th><th>实测值</th><th>说明</th></tr></thead><tbody>
+<tr><td>本机内网地址</td><td><code>10.20.30.40/24</code></td><td>网卡 示例有线网卡 + Wi-Fi</td></tr>
+<tr><td>默认网关</td><td><code>10.20.30.1</code>，另有 IPv6 链路本地网关 <code>fe80::1%14</code></td><td>单位/园区网关，<strong>路由器不在你手里</strong></td></tr>
+<tr><td>出口公网 IP（IPv4）</td><td><code>203.0.113.55</code>，AS64500（示例运营商）</td><td><strong>与另外成千上万用户共享</strong> → 典型 CGNAT</td></tr>
+<tr><td>出口 IPv6</td><td><code>2408:8256:…</code>（联通）</td><td>有 IPv6，但单位通常防火墙默认拦入站</td></tr>
+<tr><td>服务监听</td><td><code>0.0.0.0:8000</code> LISTENING（PID 16460）</td><td>已满足「监听全部网卡」，无需改</td></tr>
+<tr><td>本机可用隧道工具</td><td>仅 <code>ssh</code>（无 frpc / cloudflared / ngrok）</td><td>走 SSH 隧道 or 先装工具</td></tr>
+</tbody></table></div>
+<p><strong>由此得出的硬结论：</strong></p>
+<ol>
+<li><strong>本机没有独立公网 IPv4</strong>。<code>203.0.113.55</code> 是运营商级 NAT 出口，你在路由器上做端口映射也没有用——外网根本到不了你的路由器。</li>
+<li><strong>路由器管理权限不在你手上</strong>。网关是单位设备（DNS 搜索域 <code>smartont.net</code>），即使有公网 IP 也改不了映射规则。</li>
+<li>因此，<strong>方案 ①「公网 IP + 端口映射」在本机不可行</strong>，唯一出路是<strong>主动向外建立隧道</strong>（由内向外拨号，绕过 CGNAT 的入站限制）。</li>
+</ol>
+<blockquote>
+<p>若这台机器换到<strong>你自己控制的家用路由器</strong>（电信/联通拨号、光猫桥接、路由器可登录）后面，且拿到独立公网 IP，方案 ① 才成立——本文档一并给出该分支的配置。</p>
+</blockquote>
+<hr>
+<h1>第一部分 · 配置项清单</h1>
+<h2>1.1 方案对比（选型依据）</h2>
+<div class="tw"><table><thead><tr><th>方案</th><th>原理</th><th>适用场景</th><th>成本</th><th>优点</th><th>缺点</th><th>本机可用性</th></tr></thead><tbody>
+<tr><td><strong>① 公网 IP + 端口映射</strong></td><td>路由器把公网 <code>:8000</code> 转发到 <code>192.168.x.x:8000</code></td><td>有独立公网 IP + 路由器后台可登录</td><td>0 元</td><td>直连、最快、无第三方依赖</td><td><strong>CGNAT 下完全失效</strong>；80/443 常被运营商封；家宽 IP 常年变动</td><td>✗ CGNAT，路由器非我方</td></tr>
+<tr><td><strong>② 内网穿透客户端</strong>（frp / 花生壳 / 向日葵远控）</td><td>客户端主动连公网中转服务器，由中转反向回连本机端口</td><td>无公网 IP、要求「一条命令搞定」</td><td>免费～百元/年</td><td>部署快、固定公网入口</td><td>第三方服务器需信任；免费版常限速限流；花生壳等强制走已备案域名</td><td>✓ 推荐（需先下载客户端）</td></tr>
+<tr><td><strong>③ SSH 反向隧道</strong>（<code>ssh -R</code>）</td><td>本机 ssh 到 VPS，主动在 VPS 上开一个监听端口映射回本机</td><td>有 22 端口可达的 VPS、愿意维护两台机器</td><td>VPS ¥30-100/月</td><td>依赖极低（本机已装 <code>ssh</code>）；通道加密；无需装第三方客户端</td><td>需自己管 VPS；断线需守护重启；不自带 HTTPS</td><td>✓ <strong>本机当前唯一现成可用</strong></td></tr>
+<tr><td><strong>④ 云服务器反向代理</strong></td><td>VPS 上跑 Nginx/Caddy，做 TLS 终止 + 限流 + 反向代理回本机</td><td>长期对外服务、要 HTTPS + 限流 + 日志审计</td><td>VPS ¥30-100/月 + 域名 ¥50/年</td><td>能力最强：真证书、强制跳转、IP 白名单、限流、访问日志；本机零改动</td><td>需 VPS 与域名（大陆需备案）；链路多一跳</td><td>✓ <strong>综合最优</strong></td></tr>
+<tr><td><strong>⑤ Cloudflare Tunnel / Tailscale 等 SaaS 隧道</strong></td><td>客户端出站连 SaaS，由其边缘反向代理</td><td>图省事、可接受 SaaS 依赖</td><td>免费～$5/月</td><td>零配置、固定 <code>*.trycloudflare.com</code> 域名、自带边缘 TLS</td><td>国内访问质量不稳定；断线频繁；非正式场景不建议</td><td>△ 备选</td></tr>
+<tr><td><strong>⑥ 直接把文件传云端</strong></td><td>不做隧道，把整个 <code>exam_system</code> 部署到 VPS</td><td>想彻底摆脱本机在线依赖</td><td>VPS + 数据迁移</td><td>本机关机也能用；链路最短</td><td>需迁移数据库、解决 Windows→Linux 差异、备份责任上云</td><td>✗ 本次不做</td></tr>
+</tbody></table></div>
+<h3>推荐选择</h3>
+<p><strong>主选：方案 ④「云服务器反向代理 + 方案 ③ SSH 反向隧道」组合。</strong></p>
+<ul>
+<li>架构：家外用户 → <code>https://你的域名</code> → VPS 上的 Nginx（TLS + 限流 + 白名单）→ SSH 反向隧道 → <code>127.0.0.1:8000</code> → Flask</li>
+<li>理由：</li>
+</ul>
+<ol>
+<li>本机在 CGNAT 后且无路由器权限，①②④中的隧道类方案是唯一可行族；</li>
+<li>本机已装 <code>ssh</code>，<strong>不需要在本机安装任何新软件</strong>就能建立通道，落地阻力最小；</li>
+<li>HTTPS 证书、强制跳转、限流、IP 白名单、访问日志全部收敛在 VPS 一处，<strong>本机代码零改动</strong>，符合「先审后改」原则；</li>
+<li>后续如需换成 frp，只需替换隧道段，上层不动。</li>
+</ol>
+<p><strong>降级选择（无 VPS 时）：方案 ② frp 客户端 + 一个便宜的国内穿透服务商。</strong> 适合先跑通、后加固。</p>
+<p><strong>明确不推荐：方案 ①（在本机物理上不可能）。</strong></p>
+<hr>
+<h2>1.2 VPS 侧配置项（反向代理层）</h2>
+<div class="tw"><table><thead><tr><th>配置名称</th><th>取值 / 示例值</th><th>作用</th><th>适用方案</th></tr></thead><tbody>
+<tr><td>VPS 规格</td><td>2 vCPU / 1-2 GB / 5 Mbps 带宽 / Ubuntu 22.04</td><td>跑 Nginx + 隧道监听足够</td><td>④</td></tr>
+<tr><td>VPS 公网 IP</td><td>自动分配即可（无需 Elastic IP）</td><td>对外唯一入口</td><td>④</td></tr>
+<tr><td>安全组入方向</td><td><code>22/tcp</code> 限源 IP、<code>80/tcp</code> 全开、<code>443/tcp</code> 全开、<code>127.0.0.1:18000</code> 不开放</td><td>云厂商第一层防火墙</td><td>④</td></tr>
+<tr><td><code>ufw</code> 规则</td><td>同上，另 <code>ufw default deny incoming</code></td><td>主机第二层防火墙</td><td>④</td></tr>
+<tr><td>域名</td><td><code>exam.example.com</code></td><td>家外用户的固定入口</td><td>②④⑤</td></tr>
+<tr><td>域名解析 A 记录</td><td>指向 VPS 公网 IP</td><td>DNS 生效后即可访问</td><td>④</td></tr>
+<tr><td>备案</td><td><strong>必须</strong>。中国大陆 VPS 用 80/443 绑定域名需 ICP 备案</td><td>不备案只能用非标准端口或被拦</td><td>④（大陆节点）</td></tr>
+<tr><td>反代监听端口</td><td><code>127.0.0.1:18000</code>（<strong>仅本地</strong>）</td><td>SSH 隧道 <code>-R</code> 目标端口，绝不可对外</td><td>③+④</td></tr>
+<tr><td>隧道 sshd 配置</td><td><code>GatewayPorts clientspecified</code>（若需对外）</td><td>决定 <code>-R</code> 端口能否绑 0.0.0.0；本方案绑 127.0.0.1 就不需要</td><td>③</td></tr>
+<tr><td>Nginx <code>server_name</code></td><td><code>exam.example.com</code></td><td>唯一虚拟主机</td><td>④</td></tr>
+<tr><td>Nginx 证书路径</td><td><code>/etc/letsencrypt/live/exam.example.com/fullchain.pem</code> + <code>privkey.pem</code></td><td>TLS 终止</td><td>④</td></tr>
+<tr><td>证书签发方式</td><td><code>certbot --nginx -d exam.example.com</code>（Let's Encrypt HTTP-01）</td><td>免费、90 天、自动续期</td><td>④</td></tr>
+<tr><td>自动续期定时器</td><td><code>certbot renew --timer</code>（systemd timer）</td><td>免手工续</td><td>④</td></tr>
+<tr><td>强制 HTTP→HTTPS</td><td><code>return 301 https://$host$request_uri;</code></td><td>防明文提交密码/令牌</td><td>④</td></tr>
+<tr><td>HSTS</td><td><code>add_header Strict-Transport-Security "max-age=31536000" always;</code></td><td>降级攻击防护</td><td>④</td></tr>
+<tr><td>反代上游</td><td><code>proxy_pass http://127.0.0.1:18000;</code></td><td>回源到隧道监听</td><td>③+④</td></tr>
+<tr><td>上游连接超时</td><td><code>proxy_connect_timeout 10s;</code></td><td>隧道断开时快速失败而非挂死</td><td>④</td></tr>
+<tr><td>读超时</td><td><code>proxy_read_timeout 120s;</code>（考试心跳/交卷请求较长）</td><td>避免长请求被掐</td><td>④</td></tr>
+<tr><td>客户端最大体</td><td><code>client_max_body_size 4m;</code></td><td>大于 Flask <code>MAX_CONTENT_LENGTH=2MB</code></td><td>④</td></tr>
+<tr><td>真实 IP 透传</td><td><code>proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;</code>&lt;br&gt;<code>proxy_set_header X-Real-IP $remote_addr;</code>&lt;br&gt;<code>proxy_set_header X-Forwarded-Proto $scheme;</code></td><td><strong>必配</strong>。<code>app.py</code> 的 <code>client_ip()</code> 读 <code>X-Forwarded-For</code>，不配则所有审计日志 IP 都变成 <code>127.0.0.1</code></td><td>④</td></tr>
+<tr><td>反代层限流（登录）</td><td><code>limit_req_zone $binary_remote_addr zone=login:10m rate=10r/m;</code>&lt;br&gt;在 <code>location = /api/auth/login</code> 上 <code>limit_req zone=login burst=5 nodelay;</code></td><td>补应用层「仅按账号限流」的缺口（防止换个账号无限试）</td><td>④</td></tr>
+<tr><td>反代层限流（全站）</td><td><code>zone=global:10m rate=60r/s;</code> + <code>limit_conn_zone $binary_remote_addr zone=conn:10m;</code>&lt;br&gt;<code>limit_conn conn 20;</code></td><td>防刷静态大文件（<code>qa.html</code> 22MB、<code>cc-home.html</code> 32MB）耗带宽</td><td>④</td></tr>
+<tr><td>来源 IP 白名单</td><td><code>allow 1.2.3.4; deny all;</code>（放在最前）</td><td>若只有少量家外固定 IP</td><td>④</td></tr>
+<tr><td>Basic Auth 兜底</td><td><code>auth_basic "Restricted"; auth_basic_user_file /etc/nginx/.htpasswd;</code></td><td>应用鉴权之外的第二道门</td><td>④</td></tr>
+<tr><td>访问日志</td><td><code>access_log /var/log/nginx/exam.access.log combined;</code>&lt;br&gt;<code>log_format</code> 加 <code>$request_time</code> <code>$upstream_response_time</code></td><td>审计、定位慢请求</td><td>④</td></tr>
+<tr><td>日志轮转</td><td><code>/etc/logrotate.d/nginx</code> 默认已配</td><td>防磁盘写满</td><td>④</td></tr>
+<tr><td>兜底监控</td><td><code>caddy</code>/<code>uptime-kuma</code> 每分钟探 <code>https://…/api/health</code></td><td>通道断了要有人知道</td><td>④</td></tr>
+</tbody></table></div>
+<h2>1.3 本机服务侧配置项</h2>
+<div class="tw"><table><thead><tr><th>配置名称</th><th>取值 / 示例值</th><th>作用</th><th>适用方案</th></tr></thead><tbody>
+<tr><td><code>EXAM_HOST</code></td><td><code>0.0.0.0</code>（<strong>已是默认值</strong>，<code>app.py</code> 第 112 行）</td><td>监听全部网卡；已满足要求</td><td>全部</td></tr>
+<tr><td><code>EXAM_PORT</code></td><td><code>8000</code>（已是默认值）</td><td>服务端口；<code>logs/port.txt</code> 已记录 8000</td><td>全部</td></tr>
+<tr><td><strong>服务实际绑定</strong></td><td>建议改为 <strong><code>127.0.0.1:8000</code></strong>（<code>EXAM_HOST=127.0.0.1</code>）</td><td><strong>公网化后强烈建议收紧</strong>：SSH 隧道是本机发起，回连目标是 <code>127.0.0.1:8000</code>，无需对外监听；这样即使有人扫到内网也连不上</td><td>③+④</td></tr>
+<tr><td>Windows 防火墙入站</td><td><code>netsh advfirewall firewall add rule name="Exam8000" dir=in action=block protocol=TCP localport=8000</code></td><td>若维持 <code>0.0.0.0</code> 监听，至少用防火墙规则<strong>仅放行局域网网段</strong>：<code>remoteip=10.20.30.0/24,fe80::/10</code></td><td>①②④</td></tr>
+<tr><td><code>EXAM_SSL_CERT</code> / <code>EXAM_SSL_KEY</code></td><td><strong>公网化时留空</strong></td><td>TLS 在 VPS 的 Nginx 终止。本机保持 HTTP，隧道本身已加密</td><td>③+④</td></tr>
+<tr><td>自签证书</td><td><code>python scripts/_make_cert.py</code></td><td>仅当不用 VPS、纯方案②且希望加密时用</td><td>②</td></tr>
+<tr><td><code>EXAM_SECRET</code> 或 <code>data\.secret_key</code></td><td>已实现三级取用（env → 持久化文件 → 进程随机），<strong>无弱默认值</strong></td><td>会话 Cookie 签名密钥；公网前确认 <code>/api/health</code> 的 <code>secret_source</code> 不是 <code>default</code></td><td>全部</td></tr>
+<tr><td><code>EXAM_FRAME_ANCESTORS</code></td><td>公网化后设为 <code>'self' https://exam.example.com</code></td><td>CSP <code>frame-ancestors</code> 白名单；<strong>默认值只含 127.0.0.1/localhost/局域网 IP</strong>，换成域名访问时若父页不同源会白屏</td><td>④</td></tr>
+<tr><td><code>EXAM_ALLOW_FILE_PARENT</code></td><td>保持 <code>0</code></td><td>保持 <code>1</code> 会给 CSP 追加 <code>*</code>，<strong>任何站点可 iframe 嵌入 → 点击劫持</strong>，公网绝不能开</td><td>全部</td></tr>
+<tr><td><code>EXAM_THREADS</code></td><td><code>16</code></td><td>waitress 线程数（仅纯 HTTP 走 waitress 时生效）</td><td>全部</td></tr>
+<tr><td><code>EXAM_TOKEN_TTL_DAYS</code></td><td><code>7</code> → 公网建议 <code>2</code></td><td>令牌有效期；公网暴露面大，缩短窗口</td><td>②④</td></tr>
+<tr><td>CORS <code>Access-Control-Allow-Origin: *</code></td><td><strong>建议按域名收紧为 <code>https://exam.example.com</code></strong></td><td>当前 <code>/api/*</code> 全开 <code>*</code>（<code>app.py</code> 786-790 行）。虽有令牌鉴权保护，但配合 <code>file://</code> 兼容是内网时代的权宜之计；公网下等于允许任意站点读接口响应</td><td>④</td></tr>
+<tr><td>静态文件暴露面</td><td>已做扩展名白名单 + 拒绝 <code>.</code>/<code>_</code> 开头 + 拒绝 <code>exam_system/</code></td><td><code>.db/.py/.bat/.log</code> 一律 404，<strong>公网前务必回归验证一次</strong></td><td>全部</td></tr>
+<tr><td><code>/api/health</code> 对外返回</td><td>公网化后建议隐藏 <code>db.path</code>（泄露 <code>C:\Users\Admin\...</code> 绝对路径）</td><td>信息泄露</td><td>④</td></tr>
+<tr><td><code>/api/netinfo</code></td><td>公网化后<strong>建议关闭或加白名单</strong></td><td>会把本机所有局域网 IP 与端口回显给公网访客</td><td>④</td></tr>
+<tr><td>启动自启</td><td><code>%APPDATA%\Microsoft\Windows\Start Menu\Programs\Startup\培训考核系统_自启.cmd</code>（已存在，<strong>零权限方案</strong>）</td><td>服务器重启后自动拉起；<code>schtasks</code> 已被本机安全策略禁用</td><td>全部</td></tr>
+</tbody></table></div>
+<h2>1.4 隧道配置项（SSH 反向隧道）</h2>
+<div class="tw"><table><thead><tr><th>配置名称</th><th>取值 / 示例值</th><th>作用</th></tr></thead><tbody>
+<tr><td>VPS 上的 sshd</td><td><code>GatewayPorts clientspecified</code>、<code>AllowTcpForwarding yes</code></td><td>允许 <code>-R</code> 建监听</td></tr>
+<tr><td>隧道命令</td><td><code>ssh -NT -o ServerAliveInterval=30 -o ServerAliveCountMax=3 -o ExitOnForwardFailure=yes -R 18000:127.0.0.1:8000 examer@VPS_IP</code></td><td>建立 <code>VPS:18000 → 本机:8000</code></td></tr>
+<tr><td><code>-N -T</code></td><td>不执行远程命令、不分配终端</td><td>纯转发</td></tr>
+<tr><td><code>ServerAliveInterval=30</code></td><td>30 秒心跳</td><td>NAT 超时前保活</td></tr>
+<tr><td><code>ServerAliveCountMax=3</code></td><td>连续 3 次无响应即断</td><td>快速发现死链</td></tr>
+<tr><td><code>ExitOnForwardFailure=yes</code></td><td>端口占用时直接失败退出</td><td>让守护脚本能感知并重试</td></tr>
+<tr><td>守护方式</td><td>Windows：<strong>任务计划程序</strong>（<code>ONLOGON</code> 或 <code>ONSTART</code>，需本机策略允许；本机 <code>schtasks</code> 曾被禁用 → 改用 <code>启动文件夹</code> 放一个 <code>.cmd</code> 循环重连脚本）</td><td>断线自动重连</td></tr>
+<tr><td>隧道专用账号</td><td><code>examer</code>，<strong>只给 shell=nologin</strong>，<code>authorized_keys</code> 限定 <code>command="echo tunnel"</code> 与 <code>permitopen</code>/<code>permitlisten="127.0.0.1:18000"</code></td><td>防止隧道账号被拿去干别的</td></tr>
+<tr><td><code>authorized_keys</code> 选项</td><td><code>restrict,port-forwarding,permitlisten="127.0.0.1:18000" ssh-ed25519 AAAA…</code></td><td>即使密钥泄露也只能开这一个本地端口</td></tr>
+<tr><td>若改用 frp</td><td><code>frpc.toml</code>：<code>serverAddr=VPS</code>、<code>serverPort=7000</code>、<code>auth.token=…</code>、<code>[[proxies]] type="tcp" localIP="127.0.0.1" localPort=8000 remotePort=18000</code></td><td>功能等价，换成 frp 时的对应配置</td></tr>
+</tbody></table></div>
+<h2>1.5 客户端（家外用户）侧</h2>
+<div class="tw"><table><thead><tr><th>配置名称</th><th>取值 / 示例值</th><th>作用</th></tr></thead><tbody>
+<tr><td>访问地址</td><td><code>https://exam.example.com/</code></td><td>唯一入口；不暴露端口号（80/443 已被占用）</td></tr>
+<tr><td>证书</td><td>Let's Encrypt DV 证书，浏览器信任</td><td>无需「点继续访问」的自签警告</td></tr>
+<tr><td>强跳转</td><td>已开（HTTPS 强制）</td><td>明文 HTTP 直接 301</td></tr>
+<tr><td>会话</td><td>Cookie <code>Secure</code> + <code>SameSite=None</code>（有 HTTPS 后可正常下发）</td><td>跨场景可用</td></tr>
+<tr><td>首次使用</td><td>强提醒改密（当前初始密码是姓名拼音首字母，如 <code>LWH</code>，<strong>公网下等于无密码</strong>）</td><td>见下文「安全注意事项」第 1 条</td></tr>
+</tbody></table></div>
+<hr>
+<h1>第二部分 · 实施步骤</h1>
+<blockquote>
+<p>每步标注前提条件与验证方式。<strong>建议先在 VPS 上全部打通、再切本机监听。</strong></p>
+</blockquote>
+<h2>阶段 A · 云端准备（前提：有一个能登录的 VPS + 一个域名）</h2>
+<h3>第 1 步　确认网络前提</h3>
+<ul>
+<li><strong>前提</strong>：你能 SSH 登录 VPS。</li>
+<li><strong>操作</strong>：</li>
+</ul>
+<pre><code>
+  # 1) 确认出口是否为 CGNAT（在本机执行）
+  curl -s ipinfo.io/json | grep -E &#x27;&quot;ip&quot;|&quot;org&quot;&#x27;
+  # 2) 确认本机是否有独立公网 IPv4：对比「路由器 WAN 口 IP」与「上面查到的出口 IP」
+  #    不一致 → CGNAT，方案①直接放弃
+</code></pre>
+<ul>
+<li><strong>验证</strong>：能连上 VPS；本机内网 IP 为 <code>10.20.30.40</code>。</li>
+</ul>
+<h3>第 2 步　VPS 基础加固</h3>
+<ul>
+<li><strong>前提</strong>：第 1 步通过。</li>
+<li><strong>操作</strong>：</li>
+</ul>
+<pre><code>
+  adduser examer                       # 隧道专用账号
+  ufw default deny incoming
+  ufw allow 22/tcp
+  ufw allow 80,443/tcp
+  ufw enable
+</code></pre>
+<p>同时在<strong>云厂商安全组</strong>同步放行 <code>22/80/443</code>（两道都要做）。</p>
+<ul>
+<li><strong>验证</strong>：</li>
+</ul>
+<pre><code>
+  ufw status verbose
+  ss -lntp            # 确认只有 22/80/443 在监听 0.0.0.0
+  curl -I http://127.0.0.1            # 应无响应（还没起服务）
+</code></pre>
+<p>从<strong>家外手机 4G</strong>（不是同一 Wi-Fi）访问 <code>http://VPS_IP</code>：80 应超时或关闭（说明没意外裸奔）。</p>
+<h3>第 3 步　配置 SSH 反向隧道端口</h3>
+<ul>
+<li><strong>前提</strong>：第 2 步通过。</li>
+<li><strong>操作</strong>：编辑 <code>/etc/ssh/sshd_config</code>，确保：</li>
+</ul>
+<pre><code>
+  GatewayPorts clientspecified
+  AllowTcpForwarding yes
+</code></pre>
+<pre><code>
+  systemctl restart ssh
+</code></pre>
+<ul>
+<li><strong>验证</strong>：</li>
+</ul>
+<pre><code>
+  ssh -NT -R 18000:127.0.0.1:8000 examer@VPS_IP &amp;
+  ss -lntp | grep 18000     # 应显示 127.0.0.1:18000
+  curl -s http://127.0.0.1:18000/api/health | head -c 200
+</code></pre>
+<p>期望看到 <code>{"ok":true,"service":"exam-system",…}</code>。</p>
+<h3>第 4 步　签发证书 + 写 Nginx 反代</h3>
+<ul>
+<li><strong>前提</strong>：第 3 步通过；域名 A 记录已指向 VPS；<strong>大陆 VPS 已完成 ICP 备案</strong>。</li>
+<li><strong>操作</strong>：</li>
+</ul>
+<pre><code>
+  apt install -y nginx certbot python3-certbot-nginx
+  certbot --nginx -d exam.example.com --agree-tos -m you@example.com --no-eff-email
+</code></pre>
+<p>写入 <code>/etc/nginx/sites-available/exam.conf</code>：</p>
+<pre><code>
+  # ---- 限流区 ----
+  limit_req_zone $binary_remote_addr zone=login:10m rate=10r/m;
+  limit_req_zone $binary_remote_addr zone=global:10m rate=60r/s;
+  limit_conn_zone $binary_remote_addr zone=conn:10m;
+
+  server {
+      listen 80;
+      server_name exam.example.com;
+      return 301 https://$host$request_uri;
+  }
+
+  server {
+      listen 443 ssl http2;
+      server_name exam.example.com;
+
+      ssl_certificate     /etc/letsencrypt/live/exam.example.com/fullchain.pem;
+      ssl_certificate_key /etc/letsencrypt/live/exam.example.com/privkey.pem;
+      ssl_protocols TLSv1.2 TLSv1.3;
+      ssl_session_cache shared:SSL:10m;
+
+      add_header Strict-Transport-Security &quot;max-age=31536000&quot; always;
+      add_header X-Content-Type-Options nosniff always;
+      server_tokens off;
+      client_max_body_size 4m;
+
+      # ---- 可选：来源 IP 白名单（放在最前，命中即放行）----
+      # allow 1.2.3.4; deny all;
+
+      # ---- 可选：应用层之外的第二道门 ----
+      # auth_basic &quot;Restricted&quot;;
+      # auth_basic_user_file /etc/nginx/.htpasswd;
+
+      access_log /var/log/nginx/exam.access.log combined buffer=32k flush=5s;
+      error_log  /var/log/nginx/exam.error.log warn;
+
+      location / {
+          limit_req zone=global burst=120 nodelay;
+          limit_conn conn 20;
+
+          proxy_pass http://127.0.0.1:18000;
+          proxy_http_version 1.1;
+          proxy_set_header Host              $host;
+          proxy_set_header X-Real-IP         $remote_addr;
+          proxy_set_header X-Forwarded-For   $proxy_add_x_forwarded_for;
+          proxy_set_header X-Forwarded-Proto $scheme;
+          proxy_set_header Connection        &quot;&quot;;
+          proxy_connect_timeout 10s;
+          proxy_send_timeout    60s;
+          proxy_read_timeout    120s;
+      }
+
+      location = /api/auth/login {
+          limit_req zone=login burst=5 nodelay;
+          proxy_pass http://127.0.0.1:18000;
+          proxy_set_header Host              $host;
+          proxy_set_header X-Real-IP         $remote_addr;
+          proxy_set_header X-Forwarded-For   $proxy_add_x_forwarded_for;
+          proxy_set_header X-Forwarded-Proto $scheme;
+      }
+  }
+</code></pre>
+<pre><code>
+  ln -s /etc/nginx/sites-available/exam.conf /etc/nginx/sites-enabled/
+  nginx -t &amp;&amp; systemctl reload nginx
+</code></pre>
+<ul>
+<li><strong>验证</strong>：</li>
+</ul>
+<pre><code>
+  curl -I http://exam.example.com/            # 301 到 https
+  curl -s https://exam.example.com/api/health | head -c 300
+  # 证书链与域名核对
+  echo | openssl s_client -connect exam.example.com:443 -servername exam.example.com 2&gt;/dev/null \
+    | openssl x509 -noout -issuer -dates
+  # 确认自动续期定时器在
+  systemctl list-timers | grep certbot
+</code></pre>
+<h3>第 5 步　确认审计日志拿到真实 IP（关键验证）</h3>
+<ul>
+<li><strong>前提</strong>：第 4 步通过。</li>
+<li><strong>操作</strong>：在家外手机 4G 上登录一次（工号 <code>100000</code>，密码 <code>LWH</code>），然后：</li>
+</ul>
+<pre><code>
+  sqlite3 /path/to/exam.db &quot;SELECT 工号,result,ip,时间 FROM login_log ORDER BY id DESC LIMIT 3;&quot;
+</code></pre>
+<ul>
+<li><strong>验证</strong>：<code>ip</code> 列应是<strong>手机的公网出口 IP</strong>，绝不是 <code>127.0.0.1</code>。若看到 <code>127.0.0.1</code>，说明 Nginx 的 <code>X-Forwarded-For</code> 头没生效，<code>app.py:336</code> 的 <code>client_ip()</code> 拿不到真实 IP——此时<strong>审计链断裂</strong>，必须修 Nginx 头配置后再上线。</li>
+</ul>
+<h2>阶段 B · 本机服务侧收紧（前提：阶段 A 第 4 步已验证能通）</h2>
+<h3>第 6 步　全量备份（改任何东西之前）</h3>
+<ul>
+<li><strong>前提</strong>：无。</li>
+<li><strong>操作</strong>：</li>
+</ul>
+<pre><code>
+  cd C:\Users\Admin\Desktop\南昌基地特化\exam_system
+  mkdir ..\_bak_20261012_pubnet
+  robocopy data ..\_bak_20261012_pubnet\data /E
+  copy /Y &quot;启动培训考核系统.bat&quot; &quot;..\_bak_20261012_pubnet\&quot;
+  copy /Y app\app.py &quot;..\_bak_20261012_pubnet\app.py&quot;
+</code></pre>
+<ul>
+<li><strong>验证</strong>：备份目录存在且 <code>exam.db</code> 大小与源一致。</li>
+</ul>
+<h3>第 7 步　回归验证「敏感文件不外泄」后再对外</h3>
+<ul>
+<li><strong>前提</strong>：第 6 步完成。<strong>这一步是公网化的红线。</strong></li>
+<li><strong>操作</strong>：用现有安全边界逻辑，逐一探测：</li>
+</ul>
+<pre><code>
+  for p in /exam_system/data/exam.db /app/app.py /data/.secret_key /_bak_20261009_embed/index.html /.workbuddy/memory/MEMORY.md /logs/server.log; do
+    printf &quot;%-45s %s\n&quot; &quot;$p&quot; &quot;$(curl -s -o /dev/null -w &#x27;%{http_code}&#x27; https://exam.example.com$p)&quot;
+  done
+</code></pre>
+<ul>
+<li><strong>验证</strong>：<strong>全部必须是 404</strong>。任何一项返回 200，立即停止公网化，先修静态白名单。</li>
+</ul>
+<h3>第 8 步　收紧监听与 CORS/CSP（改动脚本化，可回滚）</h3>
+<ul>
+<li><strong>前提</strong>：第 7 步全 404。</li>
+<li><strong>操作</strong>：改本机启动器（或启动用的 <code>.cmd</code>）注入环境变量：</li>
+</ul>
+<pre><code>
+  set &quot;EXAM_HOST=127.0.0.1&quot;
+  set &quot;EXAM_PORT=8000&quot;
+  set &quot;EXAM_SSL_CERT=&quot;
+  set &quot;EXAM_SSL_KEY=&quot;
+  set &quot;EXAM_ALLOW_FILE_PARENT=0&quot;
+  set &quot;EXAM_FRAME_ANCESTORS=&#x27;self&#x27; https://exam.example.com&quot;
+  set &quot;EXAM_TOKEN_TTL_DAYS=2&quot;
+</code></pre>
+<blockquote>
+<p>⚠️ <code>启动培训考核系统.bat</code> 是 <strong>GBK/ANSI 编码 + chcp 936</strong>，改写必须以 GBK 读写，否则中文乱码会让启动器彻底不可用。改前先备份（已在第 6 步做了）。</p>
+<p>⚠️ 若还要保留「局域网手机访问」的老用法，就<strong>不要</strong>把 <code>EXAM_HOST</code> 改成 <code>127.0.0.1</code>，改为保留 <code>0.0.0.0</code> + Windows 防火墙规则仅放行 <code>10.20.30.0/24</code>。二选一，别同时要。</p>
+</blockquote>
+<p>CORS 收紧（<code>app.py</code> 786-790 行，<code>_CORS_API_20261009__</code> 段）——把固定的 <code>*</code> 改为读环境变量：</p>
+<pre><code>
+  _cors_origin = os.environ.get(&#x27;EXAM_CORS_ORIGIN&#x27;, &#x27;*&#x27;)   # 公网设为 https://exam.example.com
+  resp.headers[&#x27;Access-Control-Allow-Origin&#x27;] = _cors_origin
+</code></pre>
+<ul>
+<li><strong>验证</strong>：</li>
+</ul>
+<pre><code>
+  # 本机
+  curl -s http://127.0.0.1:8000/api/health | head -c 200          # 服务正常
+  curl -sI http://127.0.0.1:8000/ | grep -i content-security     # frame-ancestors 含 https://exam.example.com
+  # 公网侧
+  curl -sI https://exam.example.com/api/health | grep -i access-control-allow-origin   # 应为你的域名，不是 *
+</code></pre>
+<p>再跑回归：<code>python app/smoke_test.py</code>（基线 109 项）、<code>python app/assign_test.py</code>（基线 72 项），<strong>必须不低于基线</strong>。</p>
+<h3>第 9 步　隧道守护（开机自启 + 断线重连）</h3>
+<ul>
+<li><strong>前提</strong>：第 8 步通过。</li>
+<li><strong>操作</strong>：</li>
+</ul>
+<ol>
+<li>VPS 上为 <code>examer</code> 配密钥认证并收紧 <code>authorized_keys</code>：</li>
+</ol>
+<pre><code>
+     # ~examer/.ssh/authorized_keys（VPS 侧）
+     restrict,port-forwarding,permitlisten=&quot;127.0.0.1:18000&quot; ssh-ed25519 AAAA...本机公钥
+</code></pre>
+<p>并设 <code>examer</code> 的 shell 为 <code>/usr/sbin/nologin</code>（配合 <code>restrict</code>）。</p>
+<ol>
+<li>本机用<strong>密钥</strong>而不是密码：</li>
+</ol>
+<pre><code>
+     ssh-keygen -t ed25519 -f %USERPROFILE%\.ssh\exam_tunnel -N &quot;&quot;
+     ssh-copy-id -i %USERPROFILE%\.ssh\exam_tunnel.pub examer@VPS_IP
+</code></pre>
+<ol>
+<li>写重连脚本 <code>%APPDATA%\...\Startup\exam_tunnel.cmd</code>（<code>schtasks</code> 在本机已被安全策略禁用，用启动文件夹）：</li>
+</ol>
+<pre><code>
+     @echo off
+     :loop
+     ssh -NT -i &quot;%USERPROFILE%\.ssh\exam_tunnel&quot; ^
+         -o ServerAliveInterval=30 -o ServerAliveCountMax=3 ^
+         -o ExitOnForwardFailure=yes -o StrictHostKeyChecking=yes ^
+         -R 18000:127.0.0.1:8000 examer@VPS_IP
+     timeout /t 10 /nobreak &gt;nul
+     goto loop
+</code></pre>
+<ol>
+<li>同样把服务的自启脚本放启动文件夹（已有 <code>培训考核系统_自启.cmd</code>，确认它存在且路径正确）。</li>
+</ol>
+<ul>
+<li><strong>验证</strong>：</li>
+</ul>
+<pre><code>
+  # 杀掉隧道进程，10 秒后应自动重建
+  ps aux | grep &quot;[s]sh -NT&quot;
+  # 模拟服务重启：停服务 → 隧道应因 ExitOnForwardFailure 退出 → 10s 后重连
+</code></pre>
+<p>重启 Windows 后，从 4G 访问 <code>https://exam.example.com/api/health</code>，<strong>不登录本机也应直接 200</strong>。</p>
+<h3>第 10 步　端到端验收（用真实家外网络，不用同一 Wi-Fi）</h3>
+<ul>
+<li><strong>前提</strong>：第 9 步通过。</li>
+<li><strong>操作</strong>：手机关掉 Wi-Fi，用 4G/5G：</li>
+</ul>
+<ol>
+<li>打开 <code>https://exam.example.com/</code> → 应见绿锁、无证书警告；</li>
+<li>超管 <code>100000</code> / <code>LWH</code> 登录 → 13 个板块齐全；</li>
+<li>普通账号 <code>100004</code> / <code>ZXJ</code> 登录 → 只出现「我的试卷 / 我的成绩」；</li>
+<li>开考 → 答题 → 交卷 → 立即出分；</li>
+<li>管理员「成绩管理」看到该条记录，<strong>IP 列为手机公网 IP</strong>；</li>
+<li>断网 10 秒再恢复 → 心跳应恢复，不应被判切屏作废。</li>
+</ol>
+<ul>
+<li><strong>验证</strong>：以上 6 项全过；<code>sqlite3</code> 查 <code>login_log</code> 与 <code>audit_log</code> 的 IP 均为真实外网 IP。</li>
+</ul>
+<h3>第 11 步　回滚预案（随时可用）</h3>
+<ul>
+<li><strong>触发条件</strong>：任一验证不过，或上线后发现异常。</li>
+<li><strong>操作</strong>：</li>
+</ul>
+<pre><code>
+  # 1) VPS：停反代（入口立即消失，家外无法访问）
+  nginx -s stop  或  rm /etc/nginx/sites-enabled/exam.conf &amp;&amp; systemctl reload nginx
+  # 2) 本机：停隧道
+  taskkill /F /IM ssh.exe
+  # 3) 本机：服务恢复局域网用法
+  set &quot;EXAM_HOST=0.0.0.0&quot;   &amp;&amp; 重新运行启动器
+</code></pre>
+<ul>
+<li><strong>验证</strong>：<code>curl https://exam.example.com/api/health</code> 失败，但 <code>http://10.20.30.40:8000/</code> 在局域网内仍正常。</li>
+</ul>
+<hr>
+<h1>第三部分 · 安全注意事项</h1>
+<h2>A. 认证与会话</h2>
+<ol>
+<li><strong>初始密码形同虚设 —— 这是本方案最大的单点风险。</strong></li>
+</ol>
+<p>当前全员初始密码 = <strong>姓名逐字拼音首字母</strong>（孙皓宇→<code>LWH</code>、周晓静→<code>ZXJ</code>），且 2026-10-09 后 <code>must_change=0</code>，登录即可用。</p>
+<p>这在局域网是可接受的便利；<strong>放到公网 = 系统对全网敞开</strong>。攻击者拿到名册（或用工号规律）就能逐个撞库。</p>
+<p><strong>必须做</strong>：公网上线前，<code>python app/init_db.py --reset-pwd</code> 重置全员工号密码并置 <code>must_change=1</code>，或通过管理员后台「首登强制改密」开启；首登新密码 ≥8 位、字母+数字。</p>
+<p><strong>验证</strong>：随机抽 3 个账号用初始密码在公网入口登录 → 应被强制跳转改密页。</p>
+<ol>
+<li><strong>单点登录（SSO）与「家外多设备」冲突。</strong></li>
+</ol>
+<p>系统已实现「新登录挤掉旧登录」，且正在考试中的考生会被豁免。公网后家外用户更可能在手机+电脑之间切换，<strong>被挤下线会引发误操作丢分</strong>。</p>
+<p><strong>建议</strong>：公网场景考虑放宽为「同时 2 个会话」，或在登录响应 <code>kicked_old_session</code> 时给前端明确提示。</p>
+<ol>
+<li><strong>应用层限流只按账号，不按 IP。</strong></li>
+</ol>
+<p><code>app.py</code> 的 <code>_fail_key = account|ip</code> 与 <code>recent_fail_count</code>（<strong>刻意只按账号</strong>）——设计目的是避免 NAT 下同事被连坐。</p>
+<p>但公网暴露后，攻击者可以<strong>一个 IP 轮换 53 个工号</strong>，每个账号各试 5 次 = 265 次尝试，完全不触发锁定。</p>
+<p><strong>必须做</strong>：在 Nginx 加 <code>limit_req</code> 按 IP 限流（第 1.2 节已配 <code>zone=login rate=10r/m</code>）。</p>
+<ol>
+<li><strong>令牌有效期</strong>：<code>EXAM_TOKEN_TTL_DAYS</code> 默认 7 天。公网建议改 2 天，降低令牌泄露后的可用窗口。</li>
+</ol>
+<ol>
+<li><strong>会话 Cookie 属性</strong>：有 HTTPS 后应确认 <code>Secure</code> + <code>HttpOnly</code> + 合适的 <code>SameSite</code>。当前 <code>SameSite</code> 在 http 下会退化为 <code>Lax</code>（代码注释已说明），走 HTTPS 后才能正确下发 <code>None</code>。</li>
+</ol>
+<h2>B. 网络与传输</h2>
+<ol>
+<li><strong>只让 VPS 能访问本机端口。</strong></li>
+</ol>
+<p>若保留 <code>EXAM_HOST=0.0.0.0</code>（为了局域网手机访问），务必加 Windows 防火墙规则限制来源网段：</p>
+<pre><code>
+   netsh advfirewall firewall add rule name=&quot;Exam8000-LAN&quot; dir=in action=allow protocol=TCP localport=8000 remoteip=10.20.30.0/24,fe80::/10
+</code></pre>
+<p>更稳妥的是改 <code>EXAM_HOST=127.0.0.1</code>，让隧道从内部回连，<strong>根本不监听网卡</strong>。</p>
+<ol>
+<li><strong>VPS 的 <code>18000</code> 端口绝不能对外。</strong></li>
+</ol>
+<p><code>GatewayPorts clientspecified</code> 一旦配错（写成 <code>yes</code>），<code>18000</code> 会绑到 <code>0.0.0.0</code>，等于在 VPS 上开了一个<strong>无 TLS、无鉴权</strong>的后门端口——任何人都能绕过 Nginx 直接读接口。</p>
+<p><strong>检查</strong>：<code>ss -lntp | grep 18000</code> 必须显示 <code>127.0.0.1:18000</code>。这是每次改配置后都要复验的项。</p>
+<ol>
+<li><strong>强制 HTTPS + HSTS。</strong></li>
+</ol>
+<p>明文下 Bearer 令牌与工号密码等同裸奔。Nginx 的 301 与 HSTS 头都要有；HSTS 上线后<strong>无法在浏览器端撤回</strong>，确认域名长期可用再设。</p>
+<ol>
+<li><strong><code>X-Forwarded-For</code> 必须正确透传。</strong></li>
+</ol>
+<p>不配的后果不只是日志难看：<code>app.py</code> 的 <code>client_ip()</code> 会把所有请求记成 <code>127.0.0.1</code>，<strong>登录爆破的溯源、限流的 IP 维度、切屏日志的证据链全部失效</strong>——而 <code>focus_events</code> 的 IP 是考试违规取证的关键字段。</p>
+<p><strong>另外</strong>：<code>X-Forwarded-For</code> 可被客户端伪造。Nginx 用 <code>$proxy_add_x_forwarded_for</code>（追加而非覆盖）是正确做法，但若要在应用层做 IP 白名单，必须改为 <code>$remote_addr</code> 或在 Nginx 层先清空该头再设置。</p>
+<ol>
+<li><strong>协议与端口</strong>：</li>
+</ol>
+<ul>
+<li>本方案全是 <strong>TCP</strong>，无 UDP 需求；</li>
+<li>反代侧 <code>proxy_http_version 1.1</code> + <code>Connection ""</code> 以启用 keepalive（否则每请求重建连接，隧道带宽浪费）；</li>
+<li><code>client_max_body_size 4m</code> 必须 <strong>大于</strong> Flask 的 <code>MAX_CONTENT_LENGTH = 2MB</code>，否则大上传会被反代先拒（表现为 413 而非应用层提示）。</li>
+</ul>
+<h2>C. 应用与数据</h2>
+<ol>
+<li><strong>静态文件暴露面必须逐项回归。</strong></li>
+</ol>
+<p>系统已实现扩展名白名单 + 拒绝 <code>.</code>/<code>_</code> 开头 + 拒绝 <code>exam_system/</code> 前缀。这是<strong>内网时代的安全边界，公网时代是生死线</strong>——一旦漏了 <code>.db</code>，53 人的成绩、题库（含正确答案）、<code>.secret_key</code> 会直接公开。</p>
+<p><strong>每次改动静态路由后都要重跑第 7 步的探测清单。</strong></p>
+<ol>
+<li>**CORS <code>Access-Control-Allow-Origin: *</code> 应按域收紧。**</li>
+</ol>
+<p>当前 <code>/api/*</code> 全开 <code>*</code>（<code>app.py</code> 786-790 行），是为兼容「前端 <code>file://</code> + 后端局域网 IP」的权宜之计。公网下这等于<strong>允许任意网站的脚本读取你接口的响应</strong>。虽有 Bearer 令牌兜底，但 <code>/api/health</code> 是免鉴权的——会泄露数据库绝对路径、用户数、题库数、版本号、<code>secret_source</code>。</p>
+<p><strong>建议</strong>：改为 <code>EXAM_CORS_ORIGIN=https://exam.example.com</code>，同时 <code>/api/health</code> 对外隐藏 <code>db.path</code>，<code>/api/netinfo</code> 加白名单或直接关闭（它会回显本机所有内网 IP）。</p>
+<ol>
+<li><strong>CSP <code>frame-ancestors</code> 要跟着域名走。</strong></li>
+</ol>
+<p>默认白名单是 <code>'self' http://127.0.0.1:* http://localhost:* http://[::1]:*</code> + 本机局域网 IP。<strong>换成域名访问时若父页不同源，会直接白屏</strong>。上线后必须设 <code>EXAM_FRAME_ANCESTORS='self' https://exam.example.com</code>。</p>
+<p><strong>绝对不要</strong>设 <code>EXAM_ALLOW_FILE_PARENT=1</code>——它会在 CSP 末尾追加 <code>*</code>，让<strong>任意站点</strong>都能 iframe 嵌入本系统，是教科书级的点击劫持配置（历史上正是这个值留下的 P1 缺陷）。</p>
+<ol>
+<li><strong>数据备份与可恢复性。</strong></li>
+</ol>
+<p>SQLite 单文件，<code>backups/</code> 目录 + <code>manage.bat</code> 已有备份能力。公网后建议：</p>
+<ul>
+<li>每日自动备份到<strong>另一台机器或对象存储</strong>，不要只留在本机同一磁盘；</li>
+<li>恢复演练要真做过一次（把备份还原到干净目录跑起来），否则备份只是安慰剂。</li>
+</ul>
+<ol>
+<li><strong>合规与单位规定（这条比技术更重要）。</strong></li>
+</ol>
+<p>当前出口 IP 属中国联通广州、网关搜索域 <code>smartont.net</code>——<strong>这是单位网络</strong>。把承载真实人员信息的考核系统暴露到公网，很可能违反：</p>
+<ul>
+<li>单位网络与信息安全规定（未报批的内网服务外联）；</li>
+<li>《个人信息保护法》（姓名、工号、成绩、班组属个人信息，跨网络提供需告知与授权）；</li>
+<li>公司对员工数据的存储边界要求。</li>
+</ul>
+<p><strong>强烈建议</strong>：先向 IT/信息化部门报批，或至少改用<strong>最小暴露面</strong>的方案（例如只在家外用户确有需要时开 VPN/专线接入，而不是开公网 Web）。</p>
+<p>这不是技术问题，是<strong>你的职业风险</strong>。</p>
+<h2>D. 攻击面与运营</h2>
+<ol>
+<li><strong>端口扫描暴露</strong>：VPS 的 80/443 必然被全网扫描（Shodan、 Censys 几分钟内收录）。<strong>不要用非标准端口指望「隐身」</strong>——扫的是全端口且现在已无成本。真正的防线是：TLS + 限流 + 鉴权 + 隐藏版本信息（<code>server_tokens off</code>）。</li>
+</ol>
+<ol>
+<li><strong>DDoS 与带宽滥用</strong>：家庭上行带宽通常 30-100 Mbps，且是<strong>上传/下行不对称</strong>——被刷时是你的上传被打满，家里所有人同时掉线。VPS 侧限流 + 云厂商的流量包/带宽封顶是唯一有效防线。<strong>不要</strong>把 VPS 的 22 端口密码登录对全网开放。</li>
+</ol>
+<ol>
+<li><strong>隧道断线的静默风险</strong>：SSH 隧道断掉后，家外用户看到的是 502 而不是明确提示。必须配监控：VPS 上每分钟探测 <code>https://exam.example.com/api/health</code>，不通就告警（Uptime Kuma / 自建 cron + 邮件/企业微信）。<strong>「服务静默死亡」比「服务明确报错」危险得多。</strong></li>
+</ol>
+<ol>
+<li><strong>日志审计</strong>：</li>
+</ol>
+<ul>
+<li>Nginx <code>access_log</code> + <code>logrotate</code>（防写满磁盘导致服务异常）；</li>
+<li>已有 <code>login_log</code> / <code>audit_log</code> / <code>focus_events</code> 三张表是优势，<strong>公网后要定期看</strong>：异常 IP、异地登录、凌晨的密集失败；</li>
+<li>考试系统的 <code>focus_events</code>（切屏日志）是违规取证依据，IP 字段必须真实（见第 9 条）。</li>
+</ul>
+<ol>
+<li><strong>凭据管理</strong>：</li>
+</ol>
+<ul>
+<li><code>data/.secret_key</code> 权限 0600，且<strong>不在任何 Git 仓库里</strong>；</li>
+<li>SSH 隧道用<strong>密钥</strong>不用密码，<code>authorized_keys</code> 用 <code>restrict</code> + <code>permitlisten</code> 限定它只能开 <code>127.0.0.1:18000</code>；</li>
+<li>frp 的 <code>auth.token</code> 若使用，强度 ≥32 字符随机；</li>
+<li>所有凭据<strong>不要</strong>写进本方案文档或提交到仓库——本清单里的域名/IP/账号请按你实际情况替换。</li>
+</ul>
+<ol>
+<li><strong>更新与依赖</strong>：</li>
+</ol>
+<ul>
+<li>Flask 会提示「内置服务器非生产环境」——本方案已通过 Nginx 隔离，且可选 waitress（<code>EXAM_THREADS</code>），可接受；</li>
+<li><code>requirements.txt</code> 里的包保持可离线安装（项目已有 <code>wheels/</code> 目录，这是好设计，别破坏）；</li>
+<li>定期 <code>pip list --outdated</code> 看安全补丁，但<strong>升级前必跑 <code>smoke_test.py</code> + <code>assign_test.py</code> 全量回归</strong>（基线 109 + 72）。</li>
+</ul>
+<ol>
+<li><strong>优雅停机与灰度</strong>：先只对 1-2 个家外用户开放（IP 白名单），观察一周（登录失败率、切屏误判率、带宽占用）后再放开。反向代理的 <code>location /</code> 前面加一行 <code>allow</code> 就能秒切范围。</li>
+</ol>
+<hr>
+<h2>附：方案速查（TL;DR）</h2>
+<pre><code>
+家外用户浏览器
+      │ https://exam.example.com   （Let&#x27;s Encrypt 证书 · 绿锁）
+      ▼
+VPS（公网 IP · ICP 备案）
+  ├─ 云安全组 + ufw：只开 22/80/443
+  ├─ Nginx :443  ── TLS 终止 · 301 跳转 · HSTS
+  │              ── limit_req 登录 10r/m · 全站 60r/s · limit_conn 20
+  │              ── X-Forwarded-For 透传（审计链的关键）
+  └─ 127.0.0.1:18000  ← 仅本地监听，绝不对外
+      ▲
+      │  ssh -NT -R 18000:127.0.0.1:8000（ServerAlive 30s · 断线 10s 重连）
+      │
+本机（10.20.30.40，CGNAT 出口 203.0.113.55，无公网 IPv4）
+  └─ exam_system  EXAM_HOST=127.0.0.1  EXAM_PORT=8000  明文 HTTP（隧道已加密）
+     └─ /api/* 鉴权 + CSRF + 登录锁定(5次/10min→锁15min)
+</code></pre>
+<p><strong>三句话说清为什么这么选</strong>：</p>
+<p>CGNAT 让「端口映射」物理上不可能 → 必须由内向外主动建隧道；</p>
+<p>本机已装 <code>ssh</code> → 用反向隧道零安装成本；</p>
+<p>HTTPS/限流/白名单/日志全部收敛到 VPS → <strong>本机业务代码几乎不用改</strong>，改动面最小、可回滚。</p></div></body></html>
