@@ -2505,9 +2505,9 @@ function _startOnlinePrewarm(){
 /* ===================== 主题 ===================== */
 let hostTheme = 'light';
 /* __EXAMSYS_20261009__ 加入 examsys 是为了让主题切换能同步到该模块 iframe。
-   2026-10-09 修订：examsys 现在**已进入菜单渲染源（MODS）**——管理员可在
+   2026-10-09 修订：examsys 现在**已进入菜单渲染源（MODS）**——所有角色均可在
    顶栏页签 / 全部应用 / 移动端抽屉三处看到「🎯 考试管理」入口；
-   普通账号由 body.is-user 的 CSS 隐藏入口 + shellCanMod 门禁拦截。 */
+   2026-10-13 起普通账号入口保留并标注「开发中」，由 shellCanMod 门禁拦截进入。 */
 const ALL_MODS = ['qa','home','quiz','performance','beauty','risk','medical','daily','manual','report','drill','kbadmin','issues','examsys'];
 function applyTheme(t){
   hostTheme = t;
@@ -3321,11 +3321,17 @@ var css = [
 '.mod-tab:active,.bk-btn:active,.theme-btn:active{transform:scale(.96);}',
 '.logout-btn{margin-left:auto;padding:9px 14px;border:1px solid var(--danger,#E64A19);background:transparent;color:var(--danger,#E64A19);border-radius:12px;font-weight:700;font-size:.84rem;cursor:pointer;transition:all .2s;font-family:var(--font-sans);}',
 '.logout-btn:hover{background:var(--danger-soft,#FEE7DE);}',
-/* 2026-10-12 板块权限：非管理员（普通 / 注册 / 游客）仅保留「美妆话术」「日常问题」。
-   覆盖所有导航档位（3 页签 / nav-all 全展开 / 移动端底部栏 / 更多抽屉 / 巨型菜单）。
-   选择器特异性(0,4,0)高于 .module-tabs.nav-all .mod-tab(0,3,0)，不会被全展开档位压过。 */
-'.is-user .mod-tab:not([data-mod="beauty"]):not([data-mod="daily"]),.is-user .m-tab:not([data-mod="beauty"]):not([data-mod="daily"]):not([data-mod="more"]),.is-user .m-sheet-item:not([data-mod="beauty"]):not([data-mod="daily"]),.is-user .mega-card:not([data-mod="beauty"]):not([data-mod="daily"]){display:none!important}',
-'.is-user #moduleTabs .mod-tab:not([data-mod="beauty"]):not([data-mod="daily"]){display:none!important}',
+/* 2026-10-13 板块权限策略调整（用户要求）：非管理员（普通 / 注册 / 游客）【可见全部板块入口】，
+   受限板块不再隐藏，入口保留并由 syncDevTags() 打 data-locked 属性、CSS 渲染「开发中」徽标；
+   点击后由 shellCanMod 门禁拦截并提示「正在开发，敬请期待」，iframe 不赋 src、不预取，内容不落地。
+   用属性而非子元素：wrapTabLabels 会重建页签 innerHTML，属性不会丢失。
+   覆盖所有导航档位（顶栏页签 / nav-all 全展开 / 移动端底部栏 / 更多抽屉 / 巨型菜单）。 */
+'.dev-tag{display:inline-block;padding:1px 7px;border-radius:999px;font-size:.6rem;font-weight:800;line-height:1.6;letter-spacing:.02em;background:rgba(214,158,46,.13);color:#9A7418;border:1px solid rgba(214,158,46,.38);white-space:nowrap;flex-shrink:0;}',
+'#moduleTabs .mod-tab[data-locked]::after,#mSheet .m-sheet-item[data-locked]::after{content:"开发中";display:inline-block;padding:1px 7px;border-radius:999px;font-size:.6rem;font-weight:800;line-height:1.6;letter-spacing:.02em;background:rgba(214,158,46,.13);color:#9A7418;border:1px solid rgba(214,158,46,.38);white-space:nowrap;flex-shrink:0;}',
+'.mega-card[data-locked] .mc-top::after{content:"开发中";display:inline-block;margin-left:2px;padding:1px 7px;border-radius:999px;font-size:.6rem;font-weight:800;line-height:1.6;background:rgba(214,158,46,.13);color:#9A7418;border:1px solid rgba(214,158,46,.38);white-space:nowrap;}',
+'.m-tab[data-locked]{position:relative;}',
+'.m-tab[data-locked]::after{content:"开发";position:absolute;top:0;right:2px;padding:0 4px;border-radius:999px;font-size:.52rem;font-weight:800;line-height:1.5;background:rgba(214,158,46,.13);color:#9A7418;border:1px solid rgba(214,158,46,.38);}',
+'#moduleTabs.module-tabs.nav-all.nav-compact.nav-mini .mod-tab[data-locked]::after{content:none;}',
 '@media(max-width:720px){.auth-card{padding:24px 20px 20px}.tour-card{padding:22px 18px 18px}}'
 ].join('\n');
 
@@ -3621,10 +3627,11 @@ function sessionRole(){
   if(!s) return '';
   return (s.role === 'admin' || s.工号 === ADMIN.工号) ? 'admin' : 'user';
 }
-/* 2026-10-12 板块权限重构（按「角色层级」生效）：
+/* 2026-10-13 板块权限策略（按「角色层级」生效）：
    · 管理员及以上（role==='admin'，含超管 / 班组长经考试系统同步为 admin）→ 全部板块可用；
-   · 普通账号 / 注册账号 / 未登录游客 → 仅可使用「美妆话术」「日常问题」；
-   · 其余所有板块对其屏蔽，仅展示「该板块正在完善，敬请期待」公告，不可进入或查看内容。 */
+   · 普通账号 / 注册账号 / 未登录游客 → 可使用「美妆话术」「日常问题」；
+   · 其余板块入口【全部可见】并标注「开发中」，点击提示「正在开发，敬请期待」，
+     不可进入或查看内容（iframe 不赋 src、不预取、深跳/消息通道一律拦截）。 */
 var ROLE_RANK = { admin: 90, user: 10, '': 0 };   // '' = 未登录 / 游客
 var ADMIN_RANK = 90;
 /* 当前会话角色层级：读不到有效会话 → 0（游客）；admin / 工号 100000 → 90；其余 → 10 */
@@ -3687,9 +3694,8 @@ function showPermToast(name){
   ic.style.cssText = 'font-size:1.2rem;line-height:1.4;flex-shrink:0';
   var tx = document.createElement('div');
   tx.style.flex = '1';
-  tx.innerHTML = '<b>「' + (name || '该板块') + '」正在完善，敬请期待</b><br>'
-    + '当前账号暂无访问权限，内容暂不开放。<br>'
-    + '<span style="opacity:.82">该板块仅向管理员及以上角色开放。</span>';
+  tx.innerHTML = '<b>「' + (name || '该板块') + '」正在开发，敬请期待</b><br>'
+    + '<span style="opacity:.82">新板块正在加紧筹备中，上线后将第一时间开放，感谢耐心等待。</span>';
   var cls = document.createElement('button');
   cls.textContent = '知道了';
   cls.style.cssText = 'flex-shrink:0;border:1px solid #E0C97A;background:#fff;color:#8A6A00;'
@@ -3705,10 +3711,37 @@ function showPermToast(name){
     });
   }, 60);
 }
+/* 2026-10-13 受限板块「开发中」标记同步：
+   非管理员时给所有受限入口打 data-locked="1"（幂等），管理员 / 登出后移除；
+   徽标由 CSS ::after 渲染（用属性而非子元素，避免被 wrapTabLabels 重建页签内容时清掉）。
+   只做视觉标记，不改变点击行为——内容门禁仍在 shellCanMod + switchModule 包装层。
+   覆盖：顶栏页签、手机底部栏、静态「更多」抽屉、巨型菜单；CCSheet 抽屉在 openMoreSheet 内随构建注入。 */
+function syncDevTags(){
+  try{
+    var isAdmin = !!(window.shellIsAdmin && window.shellIsAdmin());
+    var lockedOf = function(id){
+      return !!id && id !== 'more' && (!isAdmin) && !!window.shellCanMod && !window.shellCanMod(id);
+    };
+    var syncOne = function(b){
+      var id = b.getAttribute && b.getAttribute('data-mod');
+      if(lockedOf(id)) b.setAttribute('data-locked', '1');
+      else b.removeAttribute('data-locked');
+    };
+    var sels = document.querySelectorAll('#moduleTabs .mod-tab, #mTabbar .m-tab, #mSheet .m-sheet-item');
+    for(var i=0;i<sels.length;i++){ syncOne(sels[i]); }
+    var mp = document.getElementById('megaPanel');
+    if(mp){
+      var cards = mp.querySelectorAll('.mega-card');
+      for(var j=0;j<cards.length;j++){ syncOne(cards[j]); }
+    }
+  }catch(e){}
+}
+window.syncDevTags = syncDevTags;   /* 巨型菜单构建器可能位于另一脚本闭包，显式暴露 */
 function applyPermUI(){
   window.__permInit = true;  /* __PERMFIX_20261004__ */
   var isAdmin = window.shellIsAdmin();
   try{ document.body.classList.toggle('is-user', !isAdmin); }catch(e){}
+  try{ syncDevTags(); }catch(e){}
   if(!window.__permWrapped && typeof window.switchModule === 'function'){
     window.__permWrapped = true;
     var _origMod = window.switchModule;
@@ -3717,7 +3750,7 @@ function applyPermUI(){
         var _mn = MOD_CN_NAME[String(id)] || '该板块';
         try{
           if(typeof toast === 'function'){
-            toast('🚧 ' + _mn + ' 正在完善，敬请期待');
+            toast('🚧 ' + _mn + ' 正在开发，敬请期待');
           }
         }catch(e){}
         console.warn('[权限] 非管理员访问受限板块被拦截:', id);
@@ -3891,6 +3924,9 @@ function finishTour(){
      未登录（游客）与会话过期同样按普通用户处理，否则 body 拿不到 .is-user 类、
      switchModule 也不会被包装，管理员专属板块会暴露。 */
   applyPermUI();
+  if(document.readyState === 'loading'){
+    document.addEventListener('DOMContentLoaded', function(){ try{ syncDevTags(); }catch(e){} });
+  }
   if(readSession()){
     updateChip();
     maybeStartTour();
@@ -3963,13 +3999,17 @@ function openMoreSheet(){
       { key:'kbadmin',  icon:'📇', label:'库管理' },
       { key:'issues',   icon:'🐞', label:'问题反馈' }
     ];
-    /* 2026-10-12 按角色权限过滤：非管理员仅见「日常问题」（公开板块），其余不进入抽屉 */
-    const items = _moreAll.filter(function(it){
-      return !window.shellCanMod || window.shellCanMod(it.key);
-    }).map(function(it){
-      it.variant = (it.key === currentMod) ? 'primary' : '';
-      it.onClick = function(){ setTimeout(function(){ mGoMod(it.key); }, 60); };
-      return it;
+    /* 2026-10-13 权限策略：板块入口全员可见，受限板块带「开发中」标记，
+       点击经 switchModule 门禁提示「正在开发，敬请期待」（不加载内容）。 */
+    const items = _moreAll.map(function(it){
+      const _locked = !!(window.shellCanMod && !window.shellCanMod(it.key));
+      return {
+        key: it.key,
+        icon: it.icon,
+        variant: (it.key === currentMod) ? 'primary' : '',
+        label: it.label + (_locked ? ' <span class="dev-tag">开发中</span>' : ''),
+        onClick: function(){ setTimeout(function(){ mGoMod(it.key); }, 60); }
+      };
     });
     const tb = document.getElementById('mTabbar');
     let ox = null;
@@ -5038,24 +5078,23 @@ function buildMega(){
   megaPanel.className = 'mega-panel'; megaPanel.id = 'megaPanel';
   megaPanel.setAttribute('role', 'dialog'); megaPanel.setAttribute('aria-label', '全部应用');
   var cm = curMod();
-  /* 计数按「当前角色可见」统计：普通账号看不到 examsys 卡片，标题数目与所见一致 */
+  /* 2026-10-13 全员可见全部板块入口：计数 / 分组不再按角色过滤；
+     受限卡片由 syncDevTags() 打「开发中」标记，点击被门禁拦截。 */
   var _visCount = 0;
-  for(var _k in MODS){ if(window.shellCanMod && !window.shellCanMod(_k)) continue; _visCount++; }
+  for(var _k in MODS){ _visCount++; }
   var h = '<div class="mega-head"><div class="mega-title">🧰 工具区 · 全部板块与设置（' + _visCount + ' 个模块 / ' + GROUPS.length + ' 组）</div>';
   h += '<button class="modal-x" id="megaCloseX" title="关闭" aria-label="关闭">✕</button></div>';
   for(var g=0; g<GROUPS.length; g++){
     var grp = GROUPS[g];
-    /* __STUDENT_ONLY_20261010__ 跳过当前角色无可见卡片的分组（普通学员只见考试系统，不露空组名） */
-    var _grpHas = false;
-    for(var _gk in MODS){ if(MODS[_gk].group === grp && (!window.shellCanMod || window.shellCanMod(_gk))) { _grpHas = true; break; } }
-    if(!_grpHas) continue;
     h += '<div class="mega-group-label">' + grp + '</div><div class="mega-grid">';
     for(var id in MODS){
       var m = MODS[id]; if(m.group !== grp) continue;
       h += '<div class="mega-card' + (id === cm ? ' active' : '') + '" data-mod="' + id + '">';
       h += '<div class="mc-top"><span class="mc-ic">' + m.icon + '</span>' + m.name + '</div>';
       h += '<div class="mc-desc">' + m.desc + '</div>';
-      if(m.subs && m.subs.length){
+      /* 受限板块的深跳子入口对非管理员不渲染（整卡点击即门禁，避免旁路） */
+      var _canSub = !window.shellCanMod || window.shellCanMod(id);
+      if(_canSub && m.subs && m.subs.length){
         h += '<div class="mega-subs">';
         for(var i=0;i<m.subs.length;i++){
           h += '<button class="mega-sub" data-mod="' + id + '" data-view="' + m.subs[i].k + '">' + m.subs[i].label + '</button>';
@@ -5070,6 +5109,7 @@ function buildMega(){
   megaPanel.innerHTML = h;
   document.body.appendChild(megaMask);
   document.body.appendChild(megaPanel);
+  try{ if(window.syncDevTags) window.syncDevTags(); }catch(e){}   /* 为受限卡片补「开发中」标记 */
   /* 关闭三路径：标题栏 ✕ + 遮罩点按 + 底部「收起面板」（另支持 Esc） */
   var x = document.getElementById('megaCloseX'); if(x) x.addEventListener('click', closeMegaMenu);
   var ft = document.getElementById('megaCloseFoot'); if(ft) ft.addEventListener('click', closeMegaMenu);
@@ -5221,7 +5261,7 @@ window.addEventListener('message', function(e){
     if(e.source && e.origin && e.origin !== location.origin) return;
     if(window.shellCanMod && !window.shellCanMod(id)){
       var _mn = MOD_CN_NAME[String(id)] || '该板块';
-      try{ if(typeof toast === 'function') toast('🚧 ' + _mn + ' 正在完善，敬请期待'); }catch(_){}
+      try{ if(typeof toast === 'function') toast('🚧 ' + _mn + ' 正在开发，敬请期待'); }catch(_){}
       console.warn('[权限] 子页请求跳转受限板块被拦截:', id);
       return;
     }
